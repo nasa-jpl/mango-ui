@@ -2,7 +2,7 @@ import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import { useEffect, useState } from "react";
 import "./App.css";
-import Navbar from "./components/app/Navbar";
+import { Sidebar } from "./components/ui/Sidebar/Sidebar";
 import { DateRange } from "./types/time";
 import { getData } from "./utils/api";
 
@@ -15,10 +15,10 @@ import {
   Progress,
 } from "@nasa-jpl/react-stellar";
 import GridLayout, { WidthProvider } from "react-grid-layout";
-import Stats from "stats.js";
 import Map from "./Map";
 import Table, { TableData } from "./Table";
 import { Metadata, QueryMetadata, TelemetryMap } from "./types/data";
+import { View } from "./types/view";
 import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
 
@@ -57,6 +57,7 @@ function getEntityName(id: number | string, metadata: Metadata | undefined) {
 let cancelHandles: (() => void)[] = [];
 
 function App() {
+  const [view, setView] = useState<View>();
   const [loadingMetadata, setLoadingMetadata] = useState<boolean>(true);
   const [metadata, setMetadata] = useState<Metadata>();
   const [selectedField, setSelectedField] = useState<OptionType | null>(null);
@@ -70,24 +71,32 @@ function App() {
   const [queryMetadata, setQueryMetadata] = useState<QueryMetadata>();
   const [telemetry, setTelemetry] = useState<TelemetryMap>();
 
-  useEffect(() => {
-    const stats = new Stats();
-    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    if (document.getElementById("stats")?.childElementCount !== 0) return;
-    document.getElementById("stats")?.appendChild(stats.dom);
+  // useEffect(() => {
+  //   const stats = new Stats();
+  //   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+  //   if (document.getElementById("stats")?.childElementCount !== 0) return;
+  //   document.getElementById("stats")?.appendChild(stats.dom);
 
-    function animate() {
-      stats.begin();
-      // monitored code goes here
-      stats.end();
-      requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-  });
+  //   function animate() {
+  //     stats.begin();
+  //     // monitored code goes here
+  //     stats.end();
+  //     requestAnimationFrame(animate);
+  //   }
+  //   requestAnimationFrame(animate);
+  // });
 
   useEffect(() => {
+    fetchView();
     fetchInitialFields();
   }, []);
+
+  const fetchView = async () => {
+    const data = await fetch("/default-view.json");
+    const view = (await data.json()) as View;
+    setView(view);
+    console.log("view :>> ", view);
+  };
 
   const fetchInitialFields = async () => {
     // const metadata = await getMetadata("GRACEFO-1A");
@@ -301,11 +310,11 @@ function App() {
     });
     progress = (totalReceived / (totalSize || 1)) * 100;
   }
-
+  console.log("view,???? :>> ", view, "????");
   return (
-    <>
+    <div className="app">
       <div className="app-runtime-stats" id="stats" />
-      <Navbar />
+      <Sidebar view={view} title={import.meta.env.VITE_APP_TITLE} />
       {loadingMetadata && (
         <div className="app-initial-loading st-typography-label">
           Loading...
@@ -432,7 +441,7 @@ function App() {
           </ResponsiveGridLayout>
         </>
       )}
-    </>
+    </div>
   );
 }
 

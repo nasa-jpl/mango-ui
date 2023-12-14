@@ -1,0 +1,46 @@
+{
+  "home": [],
+  "pageGroups": [
+    {
+      "id": "123",
+      "title": "Group 1",
+      "url": "/group1",
+      "pages": [
+        {
+          "id": "abc",
+          "title": "Page 1",
+          "entities": [
+            {
+              "id": "xyz",
+              "type": "section",
+              "entities": [
+                {
+                  "id": "123",
+                  "type": "chart",
+                  "yAxes": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "def",
+          "title": "Page 2",
+          "entities": [
+            {
+              "id": "xyz",
+              "type": "section",
+              "entities": [
+                {
+                  "id": "123",
+                  "type": "chart",
+                  "yAxes": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -8,5 +8,4 @@ export const config = {
   endpoints: {
     data: "http://0.0.0.0:5464",
   },
-  view: {},
 };
