@@ -1,4 +1,3 @@
-import "./Navbar.css";
 import {
   Avatar,
   Button,
@@ -15,6 +14,7 @@ import {
   NavbarMobileMenu,
   Navbar as StellarNavbar,
 } from "@nasa-jpl/react-stellar";
+import "./Navbar.css";
 
 export declare type NavbarProps = {};
 
@@ -22,7 +22,10 @@ export const Navbar = ({}: NavbarProps) => {
   return (
     <StellarNavbar mobileBreakpoint={800}>
       <NavbarBreakpoint min={800}>
-        <NavbarBrand title="Gravity Missions Analysis Tool" version="0.0.1" />
+        <NavbarBrand
+          title={import.meta.env.VITE_APP_TITLE}
+          version={APP_VERSION}
+        />
         {/* <NavbarLink href="#">Page 1</NavbarLink> */}
         <NavbarContent align="right" full>
           <div

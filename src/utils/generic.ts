@@ -6,7 +6,7 @@ export default function fetchWithProgress(url: string) {
   let controller: AbortController | null = null;
   const target = new EventTarget();
 
-  const json = async (options: RequestInit) => {
+  const json = async (options: RequestInit = {}) => {
     _resetLocals();
     const signal = controller?.signal;
     loading = true;
@@ -35,7 +35,7 @@ export default function fetchWithProgress(url: string) {
       return;
     }
     const reader = response.body.getReader();
-    const length = +response.headers.get("content-length");
+    const length = +(response.headers.get("content-length") || 0);
     let received = 0;
 
     // Loop through the response stream and extract data chunks

@@ -3,7 +3,7 @@ import "./App.css";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import Navbar from "./components/navbar/Navbar";
-import { getAvailableDataFields, getData } from "./utils/api";
+import { getData, getMetadata } from "./utils/api";
 import { DateRange } from "./types/time";
 
 import {
@@ -14,12 +14,13 @@ import {
   OptionType,
   Progress,
 } from "@nasa-jpl/react-stellar";
-import { Telemetry } from "./types/data";
+import { Metadata, QueryMetadata, Telemetry, TelemetryMap } from "./types/data";
 import Stats from "stats.js";
 import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
 import GridLayout, { WidthProvider } from "react-grid-layout";
 import Map from "./Map";
+import Table, { TableData } from "./Table";
 
 const ResponsiveGridLayout = WidthProvider(GridLayout);
 
@@ -45,22 +46,29 @@ function formatBytes(bytes: number, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-let cancelHandle: (() => void) | null = null;
+function getEntityName(id: number | string, metadata: Metadata | undefined) {
+  return (
+    metadata?.available_streams.find(
+      (stream) => stream.id.toString() === id.toString()
+    )?.name || `Satellite ID: ${id}`
+  );
+}
+
+let cancelHandles: (() => void)[] = [];
 
 function App() {
-  const [loadingFields, setLoadingFields] = useState<boolean>(true);
-  const [fields, setFields] = useState<string[]>([]);
+  const [loadingMetadata, setLoadingMetadata] = useState<boolean>(true);
+  const [metadata, setMetadata] = useState<Metadata>();
   const [selectedField, setSelectedField] = useState<OptionType | null>(null);
+  const [selectedDecimation, setSelectedDecimation] =
+    useState<OptionType | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
     start: "2022-12-01T12:00:00",
-    end: "2022-12-01T12:00:01",
+    end: "2022-12-01T13:00:00",
   });
   const [loadingPlot, setLoadingPlot] = useState(false);
-  const [queryDuration, setQueryDuration] = useState<number>(0);
-  const [querySize, setQuerySize] = useState<number>(0);
-  const [progress, setLoadingProgress] = useState<number>(0);
-  const [telemetry, setTelemetry] = useState<Telemetry[]>([]);
-  const [requestID, setRequestID] = useState<number>(0);
+  const [queryMetadata, setQueryMetadata] = useState<QueryMetadata>();
+  const [telemetry, setTelemetry] = useState<TelemetryMap>();
 
   useEffect(() => {
     const stats = new Stats();
@@ -82,87 +90,153 @@ function App() {
   }, []);
 
   const fetchInitialFields = async () => {
-    const initialFields = await getAvailableDataFields("GRACEFO-1A");
-    setFields(initialFields);
-    setLoadingFields(false);
+    const metadata = await getMetadata("GRACEFO-1A");
+    setMetadata(metadata);
+    if (metadata) {
+      const firstDecimationRatio = metadata.available_decimation_ratios[0];
+      setSelectedDecimation({
+        value: firstDecimationRatio,
+        label: `1:${firstDecimationRatio}`,
+      });
+    }
+    setLoadingMetadata(false);
   };
 
   const loadPlot = async () => {
     try {
-      await plotData(dateRange);
+      await plotData();
     } catch (err) {
       console.log("err :>> ", err);
     }
   };
 
-  const fetchData = async () => {
-    if (cancelHandle) cancelHandle();
+  const fetchData = async (): Promise<TelemetryMap> => {
+    if (cancelHandles) cancelHandles.forEach((cancelHandle) => cancelHandle());
+    cancelHandles = [];
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
       setLoadingPlot(true);
-      setLoadingProgress(0);
-      setQueryDuration(0);
-      setQuerySize(0);
-      setRequestID(requestID + 1);
-      const { json, target, cancel } = getData("GRACEFO-1A", dateRange);
-      cancelHandle = cancel;
-      json({}).then(({ result, error }) => {
-        if (error && error.name === "AbortError") {
-          reject();
-        } else {
-          setLoadingPlot(false);
-          setQueryDuration(Date.now() - startTime);
-          resolve(result);
-        }
-      });
-      target.addEventListener("progress", (event: CustomEventInit) => {
-        const { length, received } = event.detail;
-        const percent = (received / length) * 100;
-        setLoadingProgress(percent);
-        setQuerySize(length);
-      });
+      // setRequestID(requestID + 1);
+      const streamIds = [1, 2];
+      let newQueryMetadata: QueryMetadata = streamIds.reduce(
+        (acc: QueryMetadata, id) => {
+          acc[id] = { duration: 0, length: 0, received: 0 };
+          return acc;
+        },
+        {}
+      );
+      setQueryMetadata(newQueryMetadata);
+      const promises = streamIds.map((id) => {
+        return new Promise((res, rej) => {
+          const { json, target, cancel } = getData(
+            // "GRACEFO-1A",
+            "GRACEFO-ACC1A-LTTB",
+            id,
+            dateRange,
+            selectedDecimation?.value
+          );
+          cancelHandles.push(cancel);
 
-      target.addEventListener("failure", (event: Event) => {
-        setLoadingPlot(false);
-        reject();
+          json().then(({ result, error }) => {
+            if (error) {
+              if (error.name === "AbortError") {
+                rej("AbortError");
+              } else {
+                rej(error);
+              }
+            } else {
+              newQueryMetadata = {
+                ...newQueryMetadata,
+                [id]: {
+                  ...newQueryMetadata[id],
+                  duration: Date.now() - startTime,
+                },
+              };
+              setQueryMetadata(newQueryMetadata);
+              res({ streamId: id, result: result.data });
+            }
+          });
+          target.addEventListener("progress", (event: CustomEventInit) => {
+            const { length, received } = event.detail;
+            newQueryMetadata = {
+              ...newQueryMetadata,
+              [id]: {
+                ...newQueryMetadata[id],
+                length,
+                received,
+              },
+            };
+
+            setQueryMetadata(newQueryMetadata);
+          });
+
+          target.addEventListener("failure", (event: Event) => {
+            // setLoadingPlot(false);
+            rej(event);
+          });
+        });
       });
+      return Promise.all(promises)
+        .then((results) => {
+          const telemetryMap = results.reduce((acc, result) => {
+            acc[result.streamId] = result.result;
+            return acc;
+          }, {});
+          setLoadingPlot(false);
+          resolve(telemetryMap as TelemetryMap);
+        })
+        .catch((err) => {
+          console.log("err :>> ", err);
+          reject([]);
+        });
     });
   };
 
-  const plotData = async (dateRange: DateRange) => {
-    // Data is very hand wavy right now so this endpoint represents two spacecraft?
-    const { data: newTelemetry } = await fetchData();
+  const plotData = async () => {
+    const newTelemetry = await fetchData();
     setTelemetry(newTelemetry);
 
-    // Gather traces based off satellite ID
-    const telemetryBySatellite: Record<
-      string,
-      { times: Date[]; values: number[] }
-    > = {};
-    (newTelemetry as Telemetry[]).forEach((entry) => {
-      const satellite_id = entry["satellite_id"] as number;
-      if (!(satellite_id in telemetryBySatellite)) {
-        telemetryBySatellite[satellite_id] = { times: [], values: [] };
-      }
-      telemetryBySatellite[satellite_id].times.push(
-        new Date(entry["rcv_timestamp"])
-      );
-      telemetryBySatellite[satellite_id].values.push(
-        entry[selectedField?.value] as number
-      );
-    });
-
-    const data: Data[] = Object.entries(telemetryBySatellite).map(
-      ([key, value]) => ({
-        x: value.times,
-        y: value.values,
+    const data: Data[] = Object.entries(newTelemetry).map(([key, values]) => {
+      const entityName = getEntityName(key, metadata);
+      const newValues = [];
+      console.log(values, `${selectedField?.value}_max` in values[0]);
+      values.forEach((v) => {
+        if (`${selectedField?.value}_max` in v) {
+          console.log("WOW");
+          newValues.push({
+            x: new Date(v.timestamp),
+            y: v[`${selectedField?.value}_min`],
+          });
+          newValues.push({
+            x: new Date(v.timestamp),
+            y: v[`${selectedField?.value}_max`],
+          });
+        } else {
+          newValues.push({
+            x: new Date(v.timestamp),
+            y: v[selectedField?.value],
+          });
+        }
+      });
+      console.log(newValues);
+      return {
+        // x: newValues.map((v) => new Date(v.timestamp)),
+        x: newValues.map((v) => v.x),
+        y: newValues.map((v) => v.y),
+        // y: newValues.map((v) => {
+        //   const value =
+        //     selectedField?.value in v
+        //       ? v[selectedField?.value]
+        //       : v[`${selectedField?.value}_max`];
+        //   return value as number;
+        // }),
         type: "scattergl",
-        name: `Satellite ID: ${key}`,
+        name: entityName,
         line: {
           width: 1,
         },
-      })
-    );
+      };
+    });
 
     const layout: Partial<Layout> = {
       title: `${selectedField?.value}`,
@@ -202,22 +276,42 @@ function App() {
       const yAxisAutorange = event["yaxis.autorange"];
       // const yAxisRange0 = event["yaxis.range[0]"];
       // const yAxisRange1 = event["yaxis.range[1]"];
-      if (xAxisAutorange || yAxisAutorange) {
-      } else if (xAxisRange0 || xAxisRange1) {
-      }
+      // if (xAxisAutorange || yAxisAutorange) {
+      // } else if (xAxisRange0 || xAxisRange1) {
+      // }
     });
   };
+  const tableData: TableData[] = Object.values(telemetry || {})
+    .flat()
+    .map((entry) => {
+      return {
+        timestamp: entry.timestamp as string,
+        satellite_id: entry.satellite_id as number,
+        value: entry[selectedField?.value] as number,
+      };
+    });
+
+  let progress = 0;
+  if (loadingPlot && queryMetadata) {
+    let totalSize = 0;
+    let totalReceived = 0;
+    Object.values(queryMetadata).forEach(({ length, received }) => {
+      totalSize += length;
+      totalReceived += received;
+    });
+    progress = (totalReceived / (totalSize || 1)) * 100;
+  }
 
   return (
     <>
       <div className="app-runtime-stats" id="stats" />
       <Navbar />
-      {loadingFields && (
+      {loadingMetadata && (
         <div className="app-initial-loading st-typography-label">
-          Loading fields...
+          Loading...
         </div>
       )}
-      {!loadingFields && (
+      {!loadingMetadata && (
         <>
           <div className="app-top-row">
             <Dropdown
@@ -225,7 +319,26 @@ function App() {
               label="Field"
               labelPosition="left"
               onChange={(newValue) => setSelectedField(newValue as OptionType)}
-              options={fields.map((field) => ({ label: field, value: field }))}
+              options={(metadata?.available_fields || []).map((field) => ({
+                label: field,
+                value: field,
+              }))}
+            />
+
+            <Dropdown
+              className="dropdown"
+              value={selectedDecimation}
+              label="Decimation Level"
+              labelPosition="left"
+              onChange={(newValue) =>
+                setSelectedDecimation(newValue as OptionType)
+              }
+              options={(metadata?.available_decimation_ratios || []).map(
+                (level) => ({
+                  label: `1:${level}`,
+                  value: level,
+                })
+              )}
             />
 
             <label className="st-typography-label" htmlFor="start">
@@ -256,7 +369,10 @@ function App() {
                 });
               }}
             />
-            <Button disabled={!selectedField} onClick={() => loadPlot()}>
+            <Button
+              disabled={!selectedField || !selectedDecimation}
+              onClick={() => loadPlot()}
+            >
               Plot
             </Button>
             {loadingPlot && (
@@ -267,12 +383,25 @@ function App() {
             )}
           </div>
 
-          {!loadingFields && !loadingPlot && !!telemetry.length && (
-            <div className="app-query-stats st-typography-label">
-              Query Duration: {queryDuration / 1000}s, Data Points:{" "}
-              {telemetry.length}, Size: {formatBytes(querySize)}
-            </div>
-          )}
+          {!loadingMetadata &&
+            !loadingPlot &&
+            telemetry &&
+            Object.entries(telemetry).map(([key, values]) => {
+              const queryDuration = queryMetadata
+                ? queryMetadata[key].duration / 1000
+                : 0;
+              const queryBytes = queryMetadata ? queryMetadata[key].length : 0;
+              return (
+                <div key={key} className="app-query-stats st-typography-label">
+                  <b style={{ marginRight: "8px" }}>
+                    {getEntityName(key, metadata)}:
+                  </b>
+                  Query Duration: {queryDuration}s, Data Points: {values.length}
+                  , Size: {formatBytes(queryBytes)}
+                </div>
+              );
+            })}
+
           <ResponsiveGridLayout
             className="app-grid"
             cols={2}
@@ -292,7 +421,7 @@ function App() {
             </div>
             <div key="c" data-grid={{ x: 0, y: 2, w: 1, h: 8, minH: 8 }}>
               <IconMove className="handle" />
-              Table
+              <Table data={tableData} />
             </div>
             <div key="d" data-grid={{ x: 2, y: 2, w: 1, h: 8, minH: 8 }}>
               <IconMove className="handle" />
