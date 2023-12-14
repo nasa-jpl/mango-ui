@@ -1,39 +1,49 @@
 {
-  "name": "mc-prototype",
+  "name": "gmat-ui",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=18.12.0",
+    "npm": ">=8.19.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@nasa-jpl/react-stellar": "^1.1.2",
-    "@types/leaflet": "^1.9.3",
+    "@nasa-jpl/react-stellar": "^1.1.5",
+    "@playwright/test": "^1.40.1",
+    "@tanstack/react-table": "^8.9.8",
+    "@tanstack/react-virtual": "^3.0.0-alpha.0",
+    "@types/leaflet": "^1.9.8",
+    "@types/node": "^20.10.4",
     "@types/plotly.js-dist-min": "^2.3.1",
-    "@types/react": "^18.0.37",
-    "@types/react-dom": "^18.0.11",
-    "@types/react-grid-layout": "^1.3.2",
-    "@types/react-resizable": "^3.0.4",
-    "@types/stats.js": "^0.17.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.0",
-    "@typescript-eslint/parser": "^5.59.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.38.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.17",
+    "@types/react-grid-layout": "^1.3.5",
+    "@types/react-resizable": "^3.0.7",
+    "@types/stats.js": "^0.17.3",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.3.4",
+    "eslint-plugin-react-refresh": "^0.4.5",
     "leaflet": "^1.9.4",
     "plotly.js-dist-min": "^2.24.2",
-    "react-grid-layout": "^1.3.4",
+    "react-grid-layout": "^1.4.4",
     "react-resizable": "^3.0.5",
     "stats.js": "^0.17.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.3.9"
+    "typescript": "^5.3.3",
+    "vite": "^5.0.9",
+    "vitest": "^1.0.4"
   }
 }

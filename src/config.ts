@@ -1,11 +1,12 @@
 export const config = {
-  endpoints: {
-    data: "http://0.0.0.0:5463",
-  },
   api: {
     data: {
-      metadata: "/datasets/{SPACECRAFT}/fields",
-      data: "/datasets/{SPACECRAFT}/data",
+      data: "/datasets/{SPACECRAFT}/streams/{STREAM_ID}/data",
+      metadata: "/datasets/{SPACECRAFT}/",
     },
   },
+  endpoints: {
+    data: "http://0.0.0.0:5464",
+  },
+  view: {},
 };
