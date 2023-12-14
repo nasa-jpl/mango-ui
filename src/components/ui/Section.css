@@ -1,0 +1,25 @@
+.section {
+  border: 1px solid var(--st-gray-20);
+}
+
+.section .st-button {
+  padding: 8px 12px;
+  height: 40px;
+  border-radius: 0px;
+  gap: 4px;
+  width: 100%;
+  justify-content: flex-start;
+  border-bottom: 1px solid transparent;
+}
+
+.section-content {
+  padding: 16px;
+  background: var(--st-gray-15);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section--open .st-button {
+  border-bottom-color: var(--st-gray-20);
+}

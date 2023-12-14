@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import "./App.css";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
-import Navbar from "./components/navbar/Navbar";
-import { getData, getMetadata } from "./utils/api";
+import { useEffect, useState } from "react";
+import "./App.css";
+import Navbar from "./components/app/Navbar";
 import { DateRange } from "./types/time";
+import { getData } from "./utils/api";
 
 import {
   Button,
@@ -14,13 +14,13 @@ import {
   OptionType,
   Progress,
 } from "@nasa-jpl/react-stellar";
-import { Metadata, QueryMetadata, Telemetry, TelemetryMap } from "./types/data";
-import Stats from "stats.js";
-import "/node_modules/react-grid-layout/css/styles.css";
-import "/node_modules/react-resizable/css/styles.css";
 import GridLayout, { WidthProvider } from "react-grid-layout";
+import Stats from "stats.js";
 import Map from "./Map";
 import Table, { TableData } from "./Table";
+import { Metadata, QueryMetadata, TelemetryMap } from "./types/data";
+import "/node_modules/react-grid-layout/css/styles.css";
+import "/node_modules/react-resizable/css/styles.css";
 
 const ResponsiveGridLayout = WidthProvider(GridLayout);
 
@@ -90,15 +90,15 @@ function App() {
   }, []);
 
   const fetchInitialFields = async () => {
-    const metadata = await getMetadata("GRACEFO-1A");
-    setMetadata(metadata);
-    if (metadata) {
-      const firstDecimationRatio = metadata.available_decimation_ratios[0];
-      setSelectedDecimation({
-        value: firstDecimationRatio,
-        label: `1:${firstDecimationRatio}`,
-      });
-    }
+    // const metadata = await getMetadata("GRACEFO-1A");
+    // setMetadata(metadata);
+    // if (metadata) {
+    //   const firstDecimationRatio = metadata.available_decimation_ratios[0];
+    //   setSelectedDecimation({
+    //     value: firstDecimationRatio,
+    //     label: `1:${firstDecimationRatio}`,
+    //   });
+    // }
     setLoadingMetadata(false);
   };
 
@@ -253,7 +253,7 @@ function App() {
       responsive: true,
     });
 
-    /* 
+    /*
         Pretty BS events..
         // plotly_relayout update: Cartesian
         //// Upon resizing plot:
