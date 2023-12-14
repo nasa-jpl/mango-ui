@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState } from "react";
 
 function Map() {
   const [mapInitialized, setMapInitialized] = useState(false);
