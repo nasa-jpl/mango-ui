@@ -2,6 +2,7 @@ import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import { useEffect, useState } from "react";
 import "./App.css";
+import "./Variables.css";
 import { Sidebar } from "./components/ui/Sidebar/Sidebar";
 import { DateRange } from "./types/time";
 import { getData } from "./utils/api";
@@ -315,132 +316,141 @@ function App() {
     <div className="app">
       <div className="app-runtime-stats" id="stats" />
       <Sidebar view={view} title={import.meta.env.VITE_APP_TITLE} />
-      {loadingMetadata && (
-        <div className="app-initial-loading st-typography-label">
-          Loading...
-        </div>
-      )}
-      {!loadingMetadata && (
-        <>
-          <div className="app-top-row">
-            <Dropdown
-              value={selectedField}
-              label="Field"
-              labelPosition="left"
-              onChange={(newValue) => setSelectedField(newValue as OptionType)}
-              options={(metadata?.available_fields || []).map((field) => ({
-                label: field,
-                value: field,
-              }))}
-            />
-
-            <Dropdown
-              className="dropdown"
-              value={selectedDecimation}
-              label="Decimation Level"
-              labelPosition="left"
-              onChange={(newValue) =>
-                setSelectedDecimation(newValue as OptionType)
-              }
-              options={(metadata?.available_decimation_ratios || []).map(
-                (level) => ({
-                  label: `1:${level}`,
-                  value: level,
-                })
-              )}
-            />
-
-            <label className="st-typography-label" htmlFor="start">
-              Start
-            </label>
-            <Input
-              name="start"
-              type="text"
-              value={dateRange.start}
-              onChange={async (event) => {
-                setDateRange({
-                  start: event.currentTarget.value,
-                  end: dateRange.end,
-                });
-              }}
-            />
-            <label className="st-typography-label" htmlFor="end">
-              End
-            </label>
-            <Input
-              name="end"
-              type="text"
-              value={dateRange.end}
-              onChange={async (event) => {
-                setDateRange({
-                  start: dateRange.start,
-                  end: event.currentTarget.value,
-                });
-              }}
-            />
-            <Button
-              disabled={!selectedField || !selectedDecimation}
-              onClick={() => loadPlot()}
-            >
-              Plot
-            </Button>
-            {loadingPlot && (
-              <div className="app-loading st-typography-label">
-                Loading plot
-                <Progress progress={progress} />
-              </div>
-            )}
+      <div>
+        {loadingMetadata && (
+          <div className="app-initial-loading st-typography-label">
+            Loading...
           </div>
+        )}
+        {!loadingMetadata && (
+          <>
+            <div className="app-top-row">
+              <Dropdown
+                value={selectedField}
+                label="Field"
+                labelPosition="left"
+                onChange={(newValue) =>
+                  setSelectedField(newValue as OptionType)
+                }
+                options={(metadata?.available_fields || []).map((field) => ({
+                  label: field,
+                  value: field,
+                }))}
+              />
 
-          {!loadingMetadata &&
-            !loadingPlot &&
-            telemetry &&
-            Object.entries(telemetry).map(([key, values]) => {
-              const queryDuration = queryMetadata
-                ? queryMetadata[key].duration / 1000
-                : 0;
-              const queryBytes = queryMetadata ? queryMetadata[key].length : 0;
-              return (
-                <div key={key} className="app-query-stats st-typography-label">
-                  <b style={{ marginRight: "8px" }}>
-                    {getEntityName(key, metadata)}:
-                  </b>
-                  Query Duration: {queryDuration}s, Data Points: {values.length}
-                  , Size: {formatBytes(queryBytes)}
+              <Dropdown
+                className="dropdown"
+                value={selectedDecimation}
+                label="Decimation Level"
+                labelPosition="left"
+                onChange={(newValue) =>
+                  setSelectedDecimation(newValue as OptionType)
+                }
+                options={(metadata?.available_decimation_ratios || []).map(
+                  (level) => ({
+                    label: `1:${level}`,
+                    value: level,
+                  })
+                )}
+              />
+
+              <label className="st-typography-label" htmlFor="start">
+                Start
+              </label>
+              <Input
+                name="start"
+                type="text"
+                value={dateRange.start}
+                onChange={async (event) => {
+                  setDateRange({
+                    start: event.currentTarget.value,
+                    end: dateRange.end,
+                  });
+                }}
+              />
+              <label className="st-typography-label" htmlFor="end">
+                End
+              </label>
+              <Input
+                name="end"
+                type="text"
+                value={dateRange.end}
+                onChange={async (event) => {
+                  setDateRange({
+                    start: dateRange.start,
+                    end: event.currentTarget.value,
+                  });
+                }}
+              />
+              <Button
+                disabled={!selectedField || !selectedDecimation}
+                onClick={() => loadPlot()}
+              >
+                Plot
+              </Button>
+              {loadingPlot && (
+                <div className="app-loading st-typography-label">
+                  Loading plot
+                  <Progress progress={progress} />
                 </div>
-              );
-            })}
+              )}
+            </div>
 
-          <ResponsiveGridLayout
-            className="app-grid"
-            cols={2}
-            rowHeight={40}
-            width={1200}
-            draggableHandle=".handle"
-          >
-            <div key="a" data-grid={{ x: 0, y: 0, w: 1, h: 8, minH: 8 }}>
-              <IconMove className="handle" />
-              <div id="myDiv" style={{ width: "100%", height: "100%" }}>
+            {!loadingMetadata &&
+              !loadingPlot &&
+              telemetry &&
+              Object.entries(telemetry).map(([key, values]) => {
+                const queryDuration = queryMetadata
+                  ? queryMetadata[key].duration / 1000
+                  : 0;
+                const queryBytes = queryMetadata
+                  ? queryMetadata[key].length
+                  : 0;
+                return (
+                  <div
+                    key={key}
+                    className="app-query-stats st-typography-label"
+                  >
+                    <b style={{ marginRight: "8px" }}>
+                      {getEntityName(key, metadata)}:
+                    </b>
+                    Query Duration: {queryDuration}s, Data Points:{" "}
+                    {values.length}, Size: {formatBytes(queryBytes)}
+                  </div>
+                );
+              })}
+
+            <ResponsiveGridLayout
+              className="app-grid"
+              cols={2}
+              rowHeight={40}
+              width={1200}
+              draggableHandle=".handle"
+            >
+              <div key="a" data-grid={{ x: 0, y: 0, w: 1, h: 8, minH: 8 }}>
+                <IconMove className="handle" />
+                <div id="myDiv" style={{ width: "100%", height: "100%" }}>
+                  Chart
+                </div>
+              </div>
+              <div key="b" data-grid={{ x: 2, y: 0, w: 1, h: 8, minH: 8 }}>
+                <IconMove className="handle" />
                 Chart
               </div>
-            </div>
-            <div key="b" data-grid={{ x: 2, y: 0, w: 1, h: 8, minH: 8 }}>
-              <IconMove className="handle" />
-              Chart
-            </div>
-            <div key="c" data-grid={{ x: 0, y: 2, w: 1, h: 8, minH: 8 }}>
-              <IconMove className="handle" />
-              <Table data={tableData} />
-            </div>
-            <div key="d" data-grid={{ x: 2, y: 2, w: 1, h: 8, minH: 8 }}>
-              <IconMove className="handle" />
-              <div style={{ height: "inherit", width: "inherit" }}>
-                <Map />
+              <div key="c" data-grid={{ x: 0, y: 2, w: 1, h: 8, minH: 8 }}>
+                <IconMove className="handle" />
+                <Table data={tableData} />
               </div>
-            </div>
-          </ResponsiveGridLayout>
-        </>
-      )}
+              <div key="d" data-grid={{ x: 2, y: 2, w: 1, h: 8, minH: 8 }}>
+                <IconMove className="handle" />
+                <div style={{ height: "inherit", width: "inherit" }}>
+                  <Map />
+                </div>
+              </div>
+            </ResponsiveGridLayout>
+          </>
+        )}
+      </div>
     </div>
   );
 }

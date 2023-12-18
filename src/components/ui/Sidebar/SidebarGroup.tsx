@@ -16,7 +16,11 @@ export const SidebarGroup = ({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="sidebar-group">
-      <Button variant="tertiary" onClick={() => setOpen(!open)}>
+      <Button
+        className="sidebar-group-button st-typography-bold"
+        variant="tertiary"
+        onClick={() => setOpen(!open)}
+      >
         {open ? <IconCaretDown /> : <IconCaretRight />}
         {title}
       </Button>

@@ -4,6 +4,7 @@ import {
   IconExternalLink,
   IconHelp,
   IconHome,
+  IconSatellite,
   IconSettings,
 } from "@nasa-jpl/react-stellar";
 import { View } from "../../../types/view";
@@ -14,34 +15,46 @@ import SidebarLink from "./SidebarLink";
 export declare type SidebarProps = {
   view?: View;
   title?: string;
-  logo?: React.ReactNode;
 };
 
 export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
   return (
-    <SidebarContainer title={title}>
-      <div>
-        <SidebarLink title="Home" icon={<IconHome />} />
-        <SidebarLink title="Datasets" icon={<IconDatabase />} />
-        <SidebarLink title="Sandbox" icon={<IconBeaker />} />
+    <SidebarContainer title={title} logo={<IconSatellite />}>
+      <div className="sidebar-padded-content">
+        <SidebarLink title="Home" icon={<IconHome />} variant="primary-link" />
+        <SidebarLink
+          title="Datasets"
+          icon={<IconDatabase />}
+          variant="primary-link"
+        />
+        <SidebarLink
+          title="Sandbox"
+          icon={<IconBeaker />}
+          variant="primary-link"
+        />
       </div>
       {!view ? (
         <div>Loading</div>
       ) : (
-        view?.pageGroups.map((pageGroup) => {
+        view.pageGroups.map((pageGroup) => {
           return (
-            <SidebarGroup key={pageGroup.id} title={pageGroup.title}>
-              {pageGroup.pages.map((page) => (
-                <SidebarLink title={page.title} key={page.id} />
-              ))}
-            </SidebarGroup>
+            <div className="sidebar-padded-content">
+              <SidebarGroup key={pageGroup.id} title={pageGroup.title}>
+                {pageGroup.pages.map((page) => (
+                  <SidebarLink title={page.title} key={page.id} />
+                ))}
+              </SidebarGroup>
+            </div>
           );
         })
       )}
-      <div>
-        <SidebarLink title="Settings" icon={<IconSettings />} />
-        <SidebarLink title="Help" icon={<IconHelp />} />
-        <SidebarLink title="Sign Out" icon={<IconExternalLink />} />
+      <div className="sidebar-bottom-content">
+        <div className="sidebar-divider" />
+        <div className="sidebar-padded-content">
+          <SidebarLink title="Settings" icon={<IconSettings />} />
+          <SidebarLink title="Help" icon={<IconHelp />} />
+          <SidebarLink title="Sign Out" icon={<IconExternalLink />} />
+        </div>
       </div>
     </SidebarContainer>
   );

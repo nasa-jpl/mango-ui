@@ -5,7 +5,7 @@ const meta = {
   component: Sidebar,
   render: (args, { loaded: { view } }) => <Sidebar {...args} view={view} />,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
 } satisfies Meta<typeof Sidebar>;
 

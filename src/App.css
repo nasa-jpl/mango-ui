@@ -16,6 +16,12 @@ body,
   transition: none;
 }
 
+.app {
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
 .app-top-row {
   display: flex;
   align-items: center;
@@ -108,7 +114,6 @@ td {
   overflow: auto;
 }
 /* React-table-end */
-
 
 .dropdown label {
   flex-shrink: 0;
