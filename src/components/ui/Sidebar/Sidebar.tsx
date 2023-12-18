@@ -7,7 +7,9 @@ import {
   IconSatellite,
   IconSettings,
 } from "@nasa-jpl/react-stellar";
+import { NavLink } from "react-router-dom";
 import { View } from "../../../types/view";
+import "./Sidebar.css";
 import SidebarContainer from "./SidebarContainer";
 import SidebarGroup from "./SidebarGroup";
 import SidebarLink from "./SidebarLink";
@@ -17,31 +19,61 @@ export declare type SidebarProps = {
   title?: string;
 };
 
+const getNavLinkClass = ({
+  isActive,
+  isPending,
+}: {
+  isActive: boolean;
+  isPending: boolean;
+}) => {
+  return isActive
+    ? "sidebar-link--active"
+    : isPending
+    ? "sidebar-link--pending"
+    : "";
+};
+
 export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
   return (
     <SidebarContainer title={title} logo={<IconSatellite />}>
       <div className="sidebar-padded-content">
-        <SidebarLink title="Home" icon={<IconHome />} variant="primary-link" />
-        <SidebarLink
-          title="Datasets"
-          icon={<IconDatabase />}
-          variant="primary-link"
-        />
-        <SidebarLink
-          title="Sandbox"
-          icon={<IconBeaker />}
-          variant="primary-link"
-        />
+        <NavLink className={getNavLinkClass} to="/">
+          <SidebarLink
+            title="Home"
+            icon={<IconHome />}
+            variant="primary-link"
+          />
+        </NavLink>
+        <NavLink className={getNavLinkClass} to="/datasets">
+          <SidebarLink
+            title="Datasets"
+            icon={<IconDatabase />}
+            variant="primary-link"
+          />
+        </NavLink>
+        <NavLink className={getNavLinkClass} to="/sandbox">
+          <SidebarLink
+            title="Sandbox"
+            icon={<IconBeaker />}
+            variant="primary-link"
+          />
+        </NavLink>
       </div>
       {!view ? (
         <div>Loading</div>
       ) : (
         view.pageGroups.map((pageGroup) => {
           return (
-            <div className="sidebar-padded-content">
-              <SidebarGroup key={pageGroup.id} title={pageGroup.title}>
+            <div key={pageGroup.id} className="sidebar-padded-content">
+              <SidebarGroup title={pageGroup.title}>
                 {pageGroup.pages.map((page) => (
-                  <SidebarLink title={page.title} key={page.id} />
+                  <NavLink
+                    className={getNavLinkClass}
+                    to={`view/${pageGroup.url}/${page.url}`}
+                    key={page.id}
+                  >
+                    <SidebarLink title={page.title} />
+                  </NavLink>
                 ))}
               </SidebarGroup>
             </div>

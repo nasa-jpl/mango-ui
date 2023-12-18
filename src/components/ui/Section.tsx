@@ -7,7 +7,7 @@ import classNames from "classnames";
 import { useState } from "react";
 import "./Section.css";
 
-export declare type NavbarProps = {
+export declare type SectionProps = {
   title?: string;
   defaultOpen?: boolean;
   children?: React.ReactNode;
@@ -17,7 +17,7 @@ export const Section = ({
   title = "",
   defaultOpen = false,
   children,
-}: NavbarProps) => {
+}: SectionProps) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={classNames("section", { "section--open": open })}>
@@ -25,7 +25,7 @@ export const Section = ({
         {open ? <IconCaretDown /> : <IconCaretRight />}
         {title}
       </Button>
-      {open && <div className="section-content">{children}</div>}
+      <div className="section-content">{children}</div>
     </div>
   );
 };

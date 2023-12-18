@@ -1,23 +1,48 @@
 {
-  "home": [],
+  "home": {
+    "title": "Home",
+    "entities": [
+      {
+        "id": "xyz",
+        "type": "section",
+        "title": "Section 1",
+        "entities": [
+          {
+            "id": "789",
+            "type": "chart",
+            "title": "Entity 1",
+            "yAxes": []
+          }
+        ]
+      }
+    ]
+  },
   "pageGroups": [
     {
       "id": "123",
+      "url": "group1",
       "title": "Group 1",
-      "url": "/group1",
       "pages": [
         {
           "id": "abc",
+          "url": "page1",
           "title": "Page 1",
           "entities": [
             {
-              "id": "xyz",
+              "id": "789",
               "type": "section",
+              "title": "Section 1",
               "entities": [
                 {
                   "id": "123",
                   "type": "chart",
+                  "title": "Entity 1",
                   "yAxes": []
+                },
+                {
+                  "id": "456",
+                  "type": "map",
+                  "title": "Entity 2"
                 }
               ]
             }
@@ -25,15 +50,18 @@
         },
         {
           "id": "def",
+          "url": "page2",
           "title": "Page 2",
           "entities": [
             {
-              "id": "xyz",
+              "id": "789",
               "type": "section",
+              "title": "Section 1",
               "entities": [
                 {
                   "id": "123",
                   "type": "chart",
+                  "title": "Entity 2",
                   "yAxes": []
                 }
               ]
@@ -44,20 +72,23 @@
     },
     {
       "id": "456",
+      "url": "group2",
       "title": "Group 2",
-      "url": "/group1",
       "pages": [
         {
           "id": "abc",
+          "url": "page1",
           "title": "Page 1",
           "entities": [
             {
-              "id": "xyz",
+              "id": "789",
               "type": "section",
+              "title": "Section 1",
               "entities": [
                 {
                   "id": "123",
                   "type": "chart",
+                  "title": "Entity 1",
                   "yAxes": []
                 }
               ]
@@ -66,15 +97,18 @@
         },
         {
           "id": "def",
+          "url": "page2",
           "title": "Page 2",
           "entities": [
             {
-              "id": "xyz",
+              "id": "789",
               "type": "section",
+              "title": "Section 1",
               "entities": [
                 {
                   "id": "123",
                   "type": "chart",
+                  "title": "Entity 1",
                   "yAxes": []
                 }
               ]

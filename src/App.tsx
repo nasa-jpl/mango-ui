@@ -1,8 +1,6 @@
-import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import { useEffect, useState } from "react";
 import "./App.css";
-import "./Variables.css";
 import { Sidebar } from "./components/ui/Sidebar/Sidebar";
 import { DateRange } from "./types/time";
 import { getData } from "./utils/api";
@@ -16,8 +14,8 @@ import {
   Progress,
 } from "@nasa-jpl/react-stellar";
 import GridLayout, { WidthProvider } from "react-grid-layout";
-import Map from "./Map";
-import Table, { TableData } from "./Table";
+import Map from "./components/entities/chart/Map";
+import Table, { TableData } from "./components/entities/chart/Table";
 import { Metadata, QueryMetadata, TelemetryMap } from "./types/data";
 import { View } from "./types/view";
 import "/node_modules/react-grid-layout/css/styles.css";
@@ -312,6 +310,7 @@ function App() {
     progress = (totalReceived / (totalSize || 1)) * 100;
   }
   console.log("view,???? :>> ", view, "????");
+  console.log("object :>> ", object);
   return (
     <div className="app">
       <div className="app-runtime-stats" id="stats" />

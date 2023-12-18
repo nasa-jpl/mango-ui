@@ -1,5 +1,5 @@
 export type View = {
-  home: Entity[];
+  home: Page;
   pageGroups: PageGroup[];
 };
 
@@ -13,6 +13,7 @@ export type PageGroup = {
 export type Page = {
   id: string;
   title: string;
+  url: string;
   entities: Entity[];
 };
 
@@ -24,11 +25,15 @@ export type Entity = {
   type: EntityType;
 };
 
-export interface Section extends Entity {
+export interface SectionEntity extends Entity {
   entities: Entity[];
 }
 
-export interface Chart extends Entity {
+export interface ChartEntity extends Entity {
   yAxes: any;
+  // etc
+}
+
+export interface MapEntity extends Entity {
   // etc
 }
