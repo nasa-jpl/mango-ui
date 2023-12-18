@@ -54,6 +54,7 @@
     "plotly.js-dist-min": "^2.24.2",
     "react-grid-layout": "^1.4.4",
     "react-resizable": "^3.0.5",
+    "react-router-dom": "^6.21.0",
     "stats.js": "^0.17.0",
     "storybook": "^7.6.4",
     "typescript": "^5.3.3",
