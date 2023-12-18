@@ -34,21 +34,3 @@
 /* TODO should do better with BEM to differentiate between
    component and a part of a component
 */
-.sidebar-padded-content {
-  padding: 0px 8px;
-}
-
-.sidebar-divider {
-  width: 100%;
-  border-top: 1px solid var(--st-gray-20);
-  flex-shrink: 0;
-  padding: 4px 0px;
-}
-
-.sidebar-bottom-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding-bottom: 8px;
-}

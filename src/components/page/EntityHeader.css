@@ -1,0 +1,13 @@
+.entity-header {
+  display: flex;
+  background: var(--st-gray-10);
+  justify-content: space-between;
+  border-bottom: var(--app-border);
+  padding: 8px 10px;
+}
+
+.entity-header-title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

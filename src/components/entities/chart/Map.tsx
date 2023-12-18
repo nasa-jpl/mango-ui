@@ -1,15 +1,21 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
+import { MapEntity } from "../../../types/view";
+import EntityHeader from "../../page/EntityHeader";
+import "./Map.css";
 
-function Map() {
+export declare type ChartProps = {
+  mapEntity: MapEntity;
+};
+
+export const Map = ({ mapEntity }: ChartProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (mapRef.current && !mapInitialized) {
       setMapInitialized(true);
-      // Strict mode BS
       if (mapRef.current.childElementCount === 0) {
         const map = L.map(mapRef.current).setView([0, 0], 2);
         L.tileLayer(
@@ -22,7 +28,12 @@ function Map() {
     }
   }, [mapRef, mapInitialized]);
 
-  return <div ref={mapRef} id="map" />;
-}
+  return (
+    <div className="map">
+      <EntityHeader title={mapEntity.title} />
+      <div ref={mapRef} id="map" />
+    </div>
+  );
+};
 
 export default Map;

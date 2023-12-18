@@ -1,0 +1,22 @@
+.page {
+  display: flex;
+  background: var(--st-gray-15);
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-top-content {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  background: var(--st-white);
+}
+
+.page-title {
+  font-size: 18px;
+}
+
+.page-body {
+  flex-wrap: wrap;
+  display: flex;
+}

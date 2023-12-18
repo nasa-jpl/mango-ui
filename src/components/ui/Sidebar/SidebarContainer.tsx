@@ -12,6 +12,7 @@ export const SidebarContainer = ({
   children,
 }: SidebarContainerProps) => {
   return (
+    /* TODO merge with Sidebar.tsx */
     <div className="sidebar">
       <div className="sidebar-branding">
         {logo && <div className="sidebar-logo">{logo}</div>}
