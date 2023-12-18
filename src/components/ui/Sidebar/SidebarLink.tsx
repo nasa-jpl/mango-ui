@@ -1,20 +1,29 @@
 import { Button } from "@nasa-jpl/react-stellar";
+import classNames from "classnames";
 import "./SidebarLink.css";
 
 export declare type SidebarLinkProps = {
   title?: string;
   icon?: React.ReactNode;
+  variant?: "primary-link" | "secondary-link";
 };
 
-export const SidebarLink = ({ title = "", icon }: SidebarLinkProps) => {
+export const SidebarLink = ({
+  title = "",
+  icon,
+  variant = "secondary-link",
+}: SidebarLinkProps) => {
   return (
-    <div className="sidebar-link">
+    <Button
+      variant="tertiary"
+      className={classNames("sidebar-link", {
+        "sidebar-link--primary": variant === "primary-link",
+      })}
+    >
       {/* TODO integrate react-router */}
-      <Button variant="tertiary">
-        {icon && <div>{icon}</div>}
-        {title}
-      </Button>
-    </div>
+      {icon}
+      {title}
+    </Button>
   );
 };
 

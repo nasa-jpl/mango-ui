@@ -1,5 +1,6 @@
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import type { Preview } from "@storybook/react";
+import "../src/Variables.css";
 
 const preview: Preview = {
   parameters: {

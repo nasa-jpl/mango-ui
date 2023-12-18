@@ -1,3 +1,14 @@
-.sidebar-link {
-  font-size: 18px;
+.sidebar-link.st-button {
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  color: var(--st-gray-60);
+  height: 30px;
+  border-radius: 4px;
+}
+
+.sidebar-link--primary {
+  font-weight: 600;
 }
