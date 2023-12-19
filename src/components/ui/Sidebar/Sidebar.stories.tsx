@@ -3,7 +3,10 @@ import Sidebar from "./Sidebar";
 
 const meta = {
   component: Sidebar,
-  render: (args, { loaded: { view } }) => <Sidebar {...args} view={view} />,
+  render: (args, { loaded: { view } }) => {
+    console.log("view :>> ", view);
+    return <Sidebar {...args} view={view} />;
+  },
   parameters: {
     layout: "fullscreen",
   },

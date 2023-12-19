@@ -14,8 +14,8 @@ import {
   Progress,
 } from "@nasa-jpl/react-stellar";
 import GridLayout, { WidthProvider } from "react-grid-layout";
-import Map from "./components/entities/chart/Map";
 import Table, { TableData } from "./components/entities/chart/Table";
+import Map from "./components/entities/map/Map";
 import { Metadata, QueryMetadata, TelemetryMap } from "./types/data";
 import { View } from "./types/view";
 import "/node_modules/react-grid-layout/css/styles.css";

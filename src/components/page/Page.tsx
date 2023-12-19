@@ -4,11 +4,14 @@ import Entity from "./Entity";
 import "./Page.css";
 
 export declare type PageProps = {
-  page: PageType;
+  page?: PageType;
   onPageChange: (page: PageType) => void;
 };
 
 export const Page = ({ page, onPageChange }: PageProps) => {
+  if (!page) {
+    return;
+  }
   return (
     <div className="page">
       <div className="page-top-content">

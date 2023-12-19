@@ -1,51 +1,30 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import Section from "./Page";
+import Page from "./Page";
 
 const meta = {
-  component: Section,
-  parameters: {
-    layout: "padded",
+  component: Page,
+  render: (args, { loaded: { view } }) => {
+    console.log("view :>> ", view);
+    if (view.pageGroups.length === 0 || view.pageGroups[0].pages.length === 0) {
+      return <div>Error</div>;
+    }
+    return <Page {...args} page={view.pageGroups[0].pages[0]} />;
   },
-} satisfies Meta<typeof Section>;
+  parameters: {
+    layout: "fullscreen",
+  },
+} satisfies Meta<typeof Page>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const child = (width: number = 100, height: number = 100) => (
-  <div
-    className="st-typography-label"
-    style={{
-      border: "1px solid var(--st-gray-30)",
-      background: "white",
-      borderRadius: "4px",
-      width: `${width}px`,
-      height: `${height}px`,
-      padding: "8px",
-    }}
-  >
-    Content
-  </div>
-);
-
 export const Default: Story = {
   args: {
-    title: "Section",
-    children: [
-      child(),
-      child(100, 150),
-      child(100, 150),
-      child(500, 200),
-      child(),
-      child(),
-      child(400),
-      child(),
-    ],
+    onPageChange: () => {},
   },
-};
-
-export const DefaultOpen: Story = {
-  args: {
-    ...Default.args,
-    defaultOpen: true,
-  },
+  loaders: [
+    async () => ({
+      view: await (await fetch("/default-view.json")).json(),
+    }),
+  ],
 };
