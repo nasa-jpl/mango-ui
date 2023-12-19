@@ -2,10 +2,10 @@ import {
   ChartEntity,
   Entity as EntityType,
   MapEntity,
-  Section as SectionType,
+  SectionEntity,
 } from "../../types/view";
 import Chart from "../entities/chart/Chart";
-import Map from "../entities/chart/Map";
+import Map from "../entities/map/Map";
 import Section from "../ui/Section";
 import "./Entity.css";
 
@@ -15,12 +15,12 @@ export declare type EntityProps = {
 
 export const Entity = ({ entity }: EntityProps) => {
   if (entity.type === "section") {
-    const section = entity as SectionType;
+    const section = entity as SectionEntity;
     return (
       <Section title={entity.title} key={entity.id}>
         {section.entities.length === 0 && <div>No entities</div>}
         {section.entities.map((e) => (
-          <Entity entity={e} />
+          <Entity key={e.id} entity={e} />
         ))}
       </Section>
     );

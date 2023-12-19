@@ -11,8 +11,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const child = (width: number = 100, height: number = 100) => (
+const child = (key: number, width: number = 100, height: number = 100) => (
   <div
+    key={key}
     className="st-typography-label"
     style={{
       border: "1px solid var(--st-gray-30)",
@@ -31,14 +32,14 @@ export const Default: Story = {
   args: {
     title: "Section",
     children: [
-      child(),
-      child(100, 150),
-      child(100, 150),
-      child(500, 200),
-      child(),
-      child(),
-      child(400),
-      child(),
+      child(0),
+      child(1, 100, 150),
+      child(2, 100, 150),
+      child(3, 500, 200),
+      child(4),
+      child(5),
+      child(6, 400),
+      child(7),
     ],
   },
 };
