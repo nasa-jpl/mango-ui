@@ -1,0 +1,21 @@
+.page {
+  display: flex;
+  background: var(--st-gray-15);
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-body {
+  flex-wrap: wrap;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.page--padded .page-body {
+  padding: 16px;
+}
+
+.page--padded .page-header {
+  border-bottom: var(--app-border);
+}

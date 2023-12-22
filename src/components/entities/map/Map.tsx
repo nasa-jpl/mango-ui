@@ -6,11 +6,11 @@ import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
 
-export declare type ChartProps = {
+export declare type MapProps = {
   mapEntity: MapEntity;
 };
 
-export const Map = ({ mapEntity }: ChartProps) => {
+export const Map = ({ mapEntity }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const map = useRef<MapType | null>();
 

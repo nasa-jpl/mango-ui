@@ -43,6 +43,11 @@
                   "id": "456",
                   "type": "map",
                   "title": "Entity 2"
+                },
+                {
+                  "id": "789",
+                  "type": "table",
+                  "title": "Entity 3"
                 }
               ]
             }

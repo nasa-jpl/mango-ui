@@ -1,16 +1,16 @@
 export type View = {
-  home: Page;
-  pageGroups: PageGroup[];
+  home: ViewPage;
+  pageGroups: ViewPageGroup[];
 };
 
-export type PageGroup = {
+export type ViewPageGroup = {
   id: string;
   title: string;
   url: string;
-  pages: Page[];
+  pages: ViewPage[];
 };
 
-export type Page = {
+export type ViewPage = {
   id: string;
   title: string;
   url: string;
@@ -23,6 +23,7 @@ export type Entity = {
   id: string;
   title: string;
   type: EntityType;
+  datasets?: Dataset[];
 };
 
 export interface SectionEntity extends Entity {
@@ -37,3 +38,12 @@ export interface ChartEntity extends Entity {
 export interface MapEntity extends Entity {
   // etc
 }
+
+export interface TableEntity extends Entity {}
+
+/* TODO move to a separate file? */
+export type Dataset = {
+  id: string;
+  name: string;
+  mission: string;
+};

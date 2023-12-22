@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
-import Sidebar from "../components/ui/Sidebar/Sidebar";
+import Sidebar from "../components/app/Sidebar/Sidebar";
 import { View } from "../types/view";
 
 export default function RootPage() {

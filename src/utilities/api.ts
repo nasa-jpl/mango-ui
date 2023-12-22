@@ -1,7 +1,7 @@
 import { config } from "../config";
 import { Metadata } from "../types/data";
 import { DateRange } from "../types/time";
-import fetchWithProgress from "./generic";
+import { fetchWithProgress } from "./generic";
 
 export const getMetadata = async (spacecraft: string): Promise<Metadata> => {
   const url =

@@ -1,6 +1,6 @@
 import { useOutletContext, useParams } from "react-router-dom";
-import Page from "../components/page/Page";
-import { Page as PageType, View } from "../types/view";
+import Page from "../components/page/ViewPage";
+import { View, ViewPage as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
   // TODO consider a reducer for this instead of context?
@@ -20,8 +20,8 @@ export default function ViewPage() {
   }
   return (
     <Page
-      page={page}
-      onPageChange={(page: PageType) => {
+      viewPage={page}
+      onPageChange={(page: ViewPageType) => {
         const newView = {
           ...view,
           pageGroups: view.pageGroups.map((pg) => {

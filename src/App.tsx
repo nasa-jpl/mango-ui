@@ -1,9 +1,9 @@
 import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import { useEffect, useState } from "react";
 import "./App.css";
-import { Sidebar } from "./components/ui/Sidebar/Sidebar";
+import { Sidebar } from "./components/app/Sidebar/Sidebar";
 import { DateRange } from "./types/time";
-import { getData } from "./utils/api";
+import { getData } from "./utilities/api";
 
 import {
   Button,
@@ -14,8 +14,8 @@ import {
   Progress,
 } from "@nasa-jpl/react-stellar";
 import GridLayout, { WidthProvider } from "react-grid-layout";
-import Table, { TableData } from "./components/entities/chart/Table";
 import Map from "./components/entities/map/Map";
+import Table, { TableData } from "./components/ui/DataGrid/DataGrid";
 import { Metadata, QueryMetadata, TelemetryMap } from "./types/data";
 import { View } from "./types/view";
 import "/node_modules/react-grid-layout/css/styles.css";

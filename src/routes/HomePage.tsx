@@ -1,8 +1,8 @@
 import { useOutletContext } from "react-router-dom";
-import Page from "../components/page/Page";
+import ViewPage from "../components/page/ViewPage";
 import { View } from "../types/view";
 
 export default function HomePage() {
   const [view] = useOutletContext<[View]>();
-  return <Page page={view.home} onPageChange={() => {}} />;
+  return <ViewPage viewPage={view.home} onPageChange={() => {}} />;
 }
