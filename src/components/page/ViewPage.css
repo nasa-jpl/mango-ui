@@ -1,0 +1,11 @@
+.page {
+  display: flex;
+  background: var(--st-gray-15);
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-body {
+  flex-wrap: wrap;
+  display: flex;
+}

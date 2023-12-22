@@ -9,7 +9,7 @@ import HomePage from "./routes/HomePage";
 import RootPage from "./routes/RootPage";
 import SandboxPage from "./routes/SandboxPage";
 import ViewPage from "./routes/ViewPage";
-import { View } from "./types/view";
+import { Dataset, View } from "./types/view";
 import "./variables.css";
 
 const fetchView = async (): Promise<View> => {
@@ -24,7 +24,18 @@ export async function loader() {
 }
 
 export async function datasetsLoader() {
-  return { datasets: ["a", "b", "c"] };
+  const datasets: Dataset[] = [];
+  datasets.push({
+    id: Math.random().toString(),
+    name: "ACC1A_A",
+    mission: "GRACE",
+  });
+  datasets.push({
+    id: Math.random().toString(),
+    name: "ACC1A_B",
+    mission: "GRACE",
+  });
+  return { datasets };
 }
 
 const router = createBrowserRouter([

@@ -1,19 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import Page from "./Page";
+import ViewPage from "./ViewPage";
 
 const meta = {
-  component: Page,
+  component: ViewPage,
   render: (args, { loaded: { view } }) => {
-    console.log("view :>> ", view);
     if (view.pageGroups.length === 0 || view.pageGroups[0].pages.length === 0) {
       return <div>Error</div>;
     }
-    return <Page {...args} page={view.pageGroups[0].pages[0]} />;
+    return <ViewPage {...args} viewPage={view.pageGroups[0].pages[0]} />;
   },
   parameters: {
     layout: "fullscreen",
   },
-} satisfies Meta<typeof Page>;
+} satisfies Meta<typeof ViewPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

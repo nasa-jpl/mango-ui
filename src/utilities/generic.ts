@@ -1,4 +1,10 @@
-export default function fetchWithProgress(url: string) {
+import { v4 as uuidv4 } from "uuid";
+
+export function generateUUID() {
+  return uuidv4();
+}
+
+export function fetchWithProgress(url: string) {
   let loading = false;
   let chunks: Uint8Array[] = [];
   let results = null;

@@ -1,26 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ChartEntity } from "../../../types/view";
-import Chart from "./Chart";
+import { MapEntity } from "../../../types/view";
+import Map from "./Map";
 
 const meta = {
-  component: Chart,
+  component: Map,
   parameters: {
     layout: "padded",
   },
-} satisfies Meta<typeof Chart>;
+} satisfies Meta<typeof Map>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const chartEntity: ChartEntity = {
+const mapEntity: MapEntity = {
   id: "123",
-  type: "chart",
-  title: "Chart 1",
-  yAxes: [],
+  type: "map",
+  title: "Map 1",
 };
 
 export const Default: Story = {
   args: {
-    chartEntity,
+    mapEntity,
   },
 };
