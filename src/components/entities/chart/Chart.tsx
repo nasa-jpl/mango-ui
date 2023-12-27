@@ -59,9 +59,12 @@ export const Chart = ({ chartEntity }: ChartProps) => {
   }, []);
 
   return (
-    <div>
+    <div className="chart">
       <EntityHeader title={chartEntity.title} />
-      <div style={{ width: "100%", height: "auto", position: "relative" }}>
+      <div
+        className="chart-canvas-container"
+        style={{ width: "100%", height: "100%", position: "relative" }}
+      >
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
       </div>
     </div>
