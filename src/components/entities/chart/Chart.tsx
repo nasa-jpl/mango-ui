@@ -40,9 +40,8 @@ export const Chart = ({ chartEntity }: ChartProps) => {
       options: {
         animation: false,
         responsive: true,
+        maintainAspectRatio: false,
       },
-      // options: options && { ...options },
-      // plugins,
     });
   };
 
@@ -62,7 +61,7 @@ export const Chart = ({ chartEntity }: ChartProps) => {
   return (
     <div>
       <EntityHeader title={chartEntity.title} />
-      <div style={{ width: "100%", height: "100%", position: "relative" }}>
+      <div style={{ width: "100%", height: "auto", position: "relative" }}>
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
       </div>
     </div>
