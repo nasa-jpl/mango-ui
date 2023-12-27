@@ -4,8 +4,3 @@
   flex-direction: column;
   width: 100%;
 }
-
-.page-body {
-  flex-wrap: wrap;
-  display: flex;
-}

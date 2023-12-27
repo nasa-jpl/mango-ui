@@ -32,6 +32,7 @@
               "id": "789",
               "type": "section",
               "title": "Section 1",
+              "defaultOpen": false,
               "entities": [
                 {
                   "id": "123",
@@ -47,7 +48,8 @@
                 {
                   "id": "789",
                   "type": "table",
-                  "title": "Entity 3"
+                  "title": "Entity 3",
+                  "fields": ["id", "field1", "field2"]
                 }
               ]
             }

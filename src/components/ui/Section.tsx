@@ -8,15 +8,15 @@ import { useState } from "react";
 import "./Section.css";
 
 export declare type SectionProps = {
-  title?: string;
-  defaultOpen?: boolean;
   children?: React.ReactNode;
+  defaultOpen?: boolean;
+  title?: string;
 };
 
 export const Section = ({
-  title = "",
-  defaultOpen = false,
   children,
+  defaultOpen = false,
+  title = "",
 }: SectionProps) => {
   const [open, setOpen] = useState(defaultOpen);
   return (

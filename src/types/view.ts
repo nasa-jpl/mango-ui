@@ -5,16 +5,16 @@ export type View = {
 
 export type ViewPageGroup = {
   id: string;
+  pages: ViewPage[];
   title: string;
   url: string;
-  pages: ViewPage[];
 };
 
 export type ViewPage = {
+  entities: Entity[];
   id: string;
   title: string;
   url: string;
-  entities: Entity[];
 };
 
 export type EntityType = "section" | "chart" | "table" | "map";
@@ -23,14 +23,16 @@ export type Entity = {
   id: string;
   title: string;
   type: EntityType;
-  datasets?: Dataset[];
+  /* TODO time range? */
 };
 
 export interface SectionEntity extends Entity {
   entities: Entity[];
+  defaultOpen?: boolean;
 }
 
 export interface ChartEntity extends Entity {
+  datasets?: Dataset[];
   yAxes: any;
   // etc
 }
@@ -39,7 +41,10 @@ export interface MapEntity extends Entity {
   // etc
 }
 
-export interface TableEntity extends Entity {}
+export interface TableEntity extends Entity {
+  datasets?: Dataset[];
+  fields: string[];
+}
 
 /* TODO move to a separate file? */
 export type Dataset = {
