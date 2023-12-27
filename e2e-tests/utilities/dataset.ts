@@ -1,11 +1,12 @@
 import { Dataset } from "../../src/types/view";
 import { generateUUID } from "../../src/utilities/generic";
+import { generateUniqueName } from "./generic";
 
 export const generateTestDataset = (): Dataset => {
   return {
     id: generateUUID(),
-    name: "test",
-    mission: "test",
+    name: generateUniqueName(),
+    mission: generateUniqueName(),
   };
 };
 

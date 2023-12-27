@@ -1,3 +1,9 @@
+import Page from "../components/ui/Page";
+
 export default function SandboxPage() {
-  return <div>Sandbox</div>;
+  return (
+    <Page title="Sandbox" padBody>
+      🌊🐚🪣 Future 🌊🐚🪣
+    </Page>
+  );
 }
