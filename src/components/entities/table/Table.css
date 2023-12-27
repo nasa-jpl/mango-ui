@@ -1,0 +1,13 @@
+.table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.table .ag-theme-stellar {
+  --ag-border-radius: 0px;
+}
+
+.table .ag-theme-stellar .ag-root-wrapper {
+  border: none;
+}
