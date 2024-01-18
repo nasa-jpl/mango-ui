@@ -41,14 +41,29 @@ export interface MapEntity extends Entity {
   // etc
 }
 
-export interface TableEntity extends Entity {
-  datasets?: Dataset[];
+export interface TableEntity<T> extends Entity {
   fields: string[];
+  rows?: T[];
 }
 
 /* TODO move to a separate file? */
 export type Dataset = {
+  available_fields: string[];
+  full_id: string; // <mission>_<dataset_id>
   id: string;
-  name: string;
   mission: string;
+  streams: Stream[];
+  timestamp_field: string; // the field in this dataset that denotes the time axis
+};
+
+export interface DatasetStream extends Omit<Dataset, "streams"> {
+  data_begin: string;
+  data_end: string;
+  streamId: string;
+}
+
+export type Stream = {
+  data_begin: string; // timestamp
+  data_end: string; // timestamp
+  id: string;
 };

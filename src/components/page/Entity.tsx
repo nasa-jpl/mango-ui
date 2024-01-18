@@ -35,7 +35,10 @@ export const Entity = ({ entity }: EntityProps) => {
     <div className="entity">
       {entity.type === "chart" && <Chart chartEntity={entity as ChartEntity} />}
       {entity.type === "map" && <Map mapEntity={entity as MapEntity} />}
-      {entity.type === "table" && <Table tableEntity={entity as TableEntity} />}
+      {/* TODO figure out type later/inside table? */}
+      {entity.type === "table" && (
+        <Table tableEntity={entity as TableEntity<never>} />
+      )}
     </div>
   );
 };

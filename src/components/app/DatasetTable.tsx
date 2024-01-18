@@ -1,14 +1,15 @@
-import { Dataset } from "../../types/view";
+import { DataGridColumnDef } from "../../types/data-grid";
+import { DatasetStream } from "../../types/view";
 import DataGrid from "../ui/DataGrid/DataGrid";
 
 export declare type DatasetTableProps = {
-  datasets: Dataset[];
+  datasets: DatasetStream[];
 };
 
 export const DatasetTable = ({ datasets }: DatasetTableProps) => {
-  const columnDefs = [
+  const columnDefs: DataGridColumnDef[] = [
     {
-      field: "name",
+      field: "id",
       filter: "string",
       headerName: "Dataset Name",
       resizable: true,
@@ -22,17 +23,30 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       sortable: true,
     },
     {
-      field: "id",
+      field: "streamId",
       filter: "string",
-      headerName: "ID",
+      headerName: "Spacecraft",
       resizable: true,
       sortable: true,
-      suppressAutoSize: true,
-      suppressSizeToFit: true,
-      width: 200,
+    },
+    {
+      field: "data_begin",
+      filter: "string",
+      headerName: "Data Start",
+      resizable: true,
+      sortable: true,
+      minWidth: 230,
+    },
+    {
+      field: "data_end",
+      filter: "string",
+      headerName: "Data End",
+      resizable: true,
+      sortable: true,
+      minWidth: 230,
     },
   ];
-  return <DataGrid<Dataset> rowData={datasets} columnDefs={columnDefs} />;
+  return <DataGrid<DatasetStream> rowData={datasets} columnDefs={columnDefs} />;
 };
 
 export default Map;

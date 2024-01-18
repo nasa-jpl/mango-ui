@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { generateTestDatasets } from "../../../e2e-tests/utilities/dataset";
+import { generateTestDatasetStreams } from "../../../e2e-tests/utilities/dataset";
 import { DatasetTable } from "./DatasetTable";
 
 const meta = {
@@ -20,6 +20,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    datasets: generateTestDatasets(100),
+    datasets: generateTestDatasetStreams(100),
   },
 };
