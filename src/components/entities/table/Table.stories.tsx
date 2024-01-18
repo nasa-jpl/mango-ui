@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { generateTestDatasets } from "../../../../e2e-tests/utilities/dataset";
+import { generateUniqueName } from "../../../../e2e-tests/utilities/generic";
 import { TableEntity } from "../../../types/view";
+import { generateUUID } from "../../../utilities/generic";
 import Table from "../table/Table";
+
+type TableRow = {
+  id: string;
+  name: string;
+};
 
 const meta = {
   component: Table,
@@ -19,12 +25,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const tableEntity: TableEntity = {
+const tableEntity: TableEntity<TableRow> = {
   type: "chart",
   id: "123",
-  datasets: generateTestDatasets(10),
-  title: "Chart 1",
-  fields: ["name", "mission", "id"],
+  rows: [
+    { id: generateUUID(), name: generateUniqueName() },
+    { id: generateUUID(), name: generateUniqueName() },
+    { id: generateUUID(), name: generateUniqueName() },
+    { id: generateUUID(), name: generateUniqueName() },
+  ],
+  title: "Table 1",
+  fields: ["id", "name"],
   /* TODO how should we relate entities and datasets and configuration of datasets in the table? */
 };
 

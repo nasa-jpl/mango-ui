@@ -4,8 +4,8 @@ import {
   IconExternalLink,
   IconHelp,
   IconHome,
+  IconMission,
   IconSettings,
-  IconStar,
 } from "@nasa-jpl/react-stellar";
 import { NavLink } from "react-router-dom";
 import { View } from "../../../types/view";
@@ -15,8 +15,8 @@ import SidebarGroup from "./SidebarGroup";
 import SidebarLink from "./SidebarLink";
 
 export declare type SidebarProps = {
-  view?: View;
   title?: string;
+  view?: View;
 };
 
 const getNavLinkClass = ({
@@ -35,7 +35,7 @@ const getNavLinkClass = ({
 
 export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
   return (
-    <SidebarContainer title={title} logo={<IconStar />}>
+    <SidebarContainer title={title} logo={<IconMission />}>
       <div className="sidebar-padded-content">
         <NavLink className={getNavLinkClass} to="/">
           <SidebarLink

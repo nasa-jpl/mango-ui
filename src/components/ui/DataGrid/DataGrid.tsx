@@ -11,7 +11,14 @@ export declare type DataGridProps<T> = {
 export function DataGrid<T>({ columnDefs, rowData }: DataGridProps<T>) {
   return (
     <div className="ag-theme-stellar" style={{ height: "100%", width: "100%" }}>
-      <AgGridReact<T> rowData={rowData} columnDefs={columnDefs} />
+      <AgGridReact<T>
+        rowData={rowData}
+        columnDefs={columnDefs}
+        animateRows={false}
+        suppressCellFocus
+        suppressDragLeaveHidesColumns
+        suppressRowClickSelection
+      />
     </div>
   );
 }

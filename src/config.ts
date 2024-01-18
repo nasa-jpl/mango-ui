@@ -1,11 +1,13 @@
 export const config = {
   api: {
     data: {
-      data: "/datasets/{SPACECRAFT}/streams/{STREAM_ID}/data",
-      metadata: "/datasets/{SPACECRAFT}/",
+      missions: "/missions/",
+      datasets: "/missions/{MISSION}/datasets/",
+      data: "/datasets/{MISSION}/streams/{STREAM_ID}/data",
+      metadata: "/datasets/{MISSION}",
     },
   },
   endpoints: {
-    data: "http://0.0.0.0:5464",
+    data: "http://0.0.0.0:8000",
   },
 };

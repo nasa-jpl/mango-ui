@@ -1,19 +1,31 @@
-import { Dataset } from "../../src/types/view";
-import { generateUUID } from "../../src/utilities/generic";
+import { DatasetStream, Stream } from "../../src/types/view";
 import { generateUniqueName } from "./generic";
 
-export const generateTestDataset = (): Dataset => {
+export const generateTestStream = (): Stream => {
   return {
-    id: generateUUID(),
-    name: generateUniqueName(),
-    mission: generateUniqueName(),
+    data_begin: "2022-01-01T00:00:00.037430+00:00",
+    data_end: "2023-01-01T00:00:00.037430+00:00",
+    id: generateUniqueName(),
   };
 };
 
-export const generateTestDatasets = (count: number): Dataset[] => {
-  const datasets: Dataset[] = [];
+export const generateTestDatasetStream = (): DatasetStream => {
+  return {
+    available_fields: [generateUniqueName(), generateUniqueName()],
+    full_id: generateUniqueName(),
+    id: generateUniqueName(),
+    mission: generateUniqueName(),
+    data_begin: "2022-01-01T00:00:00.037430+00:00",
+    data_end: "2023-01-01T00:00:00.037430+00:00",
+    streamId: generateUniqueName(),
+    timestamp_field: generateUniqueName(),
+  };
+};
+
+export const generateTestDatasetStreams = (count: number): DatasetStream[] => {
+  const datasets: DatasetStream[] = [];
   for (let i = 0; i < count; i++) {
-    datasets.push(generateTestDataset());
+    datasets.push(generateTestDatasetStream());
   }
   return datasets;
 };

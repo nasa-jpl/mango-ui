@@ -1,9 +1,8 @@
-import Plotly, { Data, Layout } from "plotly.js-dist-min";
 import { useEffect, useState } from "react";
 import "./App.css";
 import { Sidebar } from "./components/app/Sidebar/Sidebar";
 import { DateRange } from "./types/time";
-import { getData } from "./utilities/api";
+import { getData, getDatasets, getMissions } from "./utilities/api";
 
 import {
   Button,
@@ -70,31 +69,27 @@ function App() {
   const [queryMetadata, setQueryMetadata] = useState<QueryMetadata>();
   const [telemetry, setTelemetry] = useState<TelemetryMap>();
 
-  // useEffect(() => {
-  //   const stats = new Stats();
-  //   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-  //   if (document.getElementById("stats")?.childElementCount !== 0) return;
-  //   document.getElementById("stats")?.appendChild(stats.dom);
-
-  //   function animate() {
-  //     stats.begin();
-  //     // monitored code goes here
-  //     stats.end();
-  //     requestAnimationFrame(animate);
-  //   }
-  //   requestAnimationFrame(animate);
-  // });
-
   useEffect(() => {
+    initialize();
+  });
+
+  const initialize = () => {
     fetchView();
-    fetchInitialFields();
-  }, []);
+    fetchDatasets();
+  };
 
   const fetchView = async () => {
     const data = await fetch("/default-view.json");
     const view = (await data.json()) as View;
     setView(view);
     console.log("view :>> ", view);
+  };
+
+  const fetchDatasets = async () => {
+    const missions = await getMissions();
+    const datasets = Promise.all(
+      missions.map((mission) => getDatasets(mission))
+    );
   };
 
   const fetchInitialFields = async () => {
