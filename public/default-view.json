@@ -38,6 +38,17 @@
                   "id": "123",
                   "type": "chart",
                   "title": "Entity 1",
+                  "layers": [
+                    {
+                      "id": "123456",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "field": "lin_accl_x",
+                      "streamId": "C",
+                      "startTime": "2022-02-01T00:00:00.037430Z",
+                      "endTime": "2022-02-01T00:01:00.037430Z"
+                    }
+                  ],
                   "yAxes": []
                 },
                 {
@@ -57,19 +68,178 @@
         },
         {
           "id": "def",
-          "url": "page2",
-          "title": "Page 2",
+          "url": "acc",
+          "title": "Coalesced Acceleration",
           "entities": [
             {
               "id": "789",
               "type": "section",
-              "title": "Section 1",
+              "title": "GRACE-FO Linear Acceleration",
+              "defaultOpen": true,
               "entities": [
                 {
                   "id": "123",
                   "type": "chart",
-                  "title": "Entity 2",
-                  "yAxes": []
+                  "title": "Coalesced Linear Acceleration X (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "lin_accl_x",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "345678",
+                      "field": "lin_accl_x",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
+                },
+                {
+                  "id": "234",
+                  "type": "chart",
+                  "title": "Coalesced Linear Acceleration Y (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "lin_accl_y",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "234567",
+                      "field": "lin_accl_y",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
+                },
+                {
+                  "id": "345",
+                  "type": "chart",
+                  "title": "Coalesced Linear Acceleration Z (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "lin_accl_z",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "234567",
+                      "field": "lin_accl_z",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "123567",
+              "type": "section",
+              "title": "GRACE-FO Angular Acceleration",
+              "defaultOpen": true,
+              "entities": [
+                {
+                  "id": "123",
+                  "type": "chart",
+                  "title": "Coalesced Angular Acceleration X (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "ang_accl_x",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "345678",
+                      "field": "ang_accl_x",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
+                },
+                {
+                  "id": "234",
+                  "type": "chart",
+                  "title": "Coalesced Angular Acceleration Y (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "ang_accl_y",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "234567",
+                      "field": "ang_accl_y",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
+                },
+                {
+                  "id": "345",
+                  "type": "chart",
+                  "title": "Coalesced Angular Acceleration Z (nm/sec²)",
+                  "yAxes": [],
+                  "layers": [
+                    {
+                      "id": "234567",
+                      "field": "ang_accl_z",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "C",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    },
+                    {
+                      "id": "234567",
+                      "field": "ang_accl_z",
+                      "mission": "GRACEFO",
+                      "datasetId": "ACC1A",
+                      "streamId": "D",
+                      "startTime": "2022-03-02T00:00:00.037430Z",
+                      "endTime": "2022-03-02T00:01:00.037430Z"
+                    }
+                  ]
                 }
               ]
             }

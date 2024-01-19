@@ -3,8 +3,8 @@ export const config = {
     data: {
       missions: "/missions/",
       datasets: "/missions/{MISSION}/datasets/",
-      data: "/datasets/{MISSION}/streams/{STREAM_ID}/data",
-      metadata: "/datasets/{MISSION}",
+      data: "/missions/{MISSION}/datasets/{DATASET}/streams/{STREAM}/data",
+      // metadata: "/datasets/{MISSION}",
     },
   },
   endpoints: {
