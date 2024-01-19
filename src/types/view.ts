@@ -27,15 +27,25 @@ export type Entity = {
 };
 
 export interface SectionEntity extends Entity {
-  entities: Entity[];
   defaultOpen?: boolean;
+  entities: Entity[];
 }
 
 export interface ChartEntity extends Entity {
-  datasets?: Dataset[];
+  layers?: ChartLayer[];
   yAxes: any;
   // etc
 }
+
+export type ChartLayer = {
+  datasetId: string;
+  endTime: string;
+  id: string;
+  mission: string;
+  startTime: string;
+  streamId: string;
+  type: "line";
+};
 
 export interface MapEntity extends Entity {
   // etc
@@ -66,4 +76,15 @@ export type Stream = {
   data_begin: string; // timestamp
   data_end: string; // timestamp
   id: string;
+};
+
+/* TODO move to an API type file */
+export type DataResponse = {
+  data: Record<string, number | string>[];
+  data_begin: string;
+  data_count: number;
+  data_end: string;
+  from_isotimestamp: string;
+  query_elapsed_ms: number;
+  to_isotimestamp: string;
 };

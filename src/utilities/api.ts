@@ -28,19 +28,18 @@ export const getMetadata = async (entity: string): Promise<Metadata> => {
 };
 
 export const getData = (
-  entity: string,
-  streamId: number,
-  dateRange: DateRange,
-  decimationLevel: number,
-  numPoints: 5000
+  mission: string,
+  datasetId: string,
+  streamId: string,
+  dateRange: DateRange
 ) => {
   const { start, end } = dateRange;
   const url =
     config.endpoints.data +
     config.api.data.data
-      .replace("{MISSION}", entity)
-      .replace("{STREAM_ID}", streamId.toString()) +
-    `?from_isotimestamp=${start}&to_isotimestamp=${end}&decimation_ratio=${decimationLevel}&downsample_to_count=${numPoints}`;
-  console.log("url :>> ", url);
+      .replace("{MISSION}", mission)
+      .replace("{STREAM}", streamId)
+      .replace("{DATASET}", datasetId) +
+    `?from_isotimestamp=${start}&to_isotimestamp=${end}`;
   return fetchWithProgress(url);
 };
