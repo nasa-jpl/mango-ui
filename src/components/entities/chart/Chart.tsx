@@ -72,7 +72,6 @@ export const Chart = ({ chartEntity }: ChartProps) => {
 
   const addChartLayer = (l) => {
     if (chartRef.current) {
-      console.log("l :>> ", l);
       chartRef.current.clear();
       chartRef.current.update();
       chartRef.current.data.datasets.push({
