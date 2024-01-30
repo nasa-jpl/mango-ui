@@ -13,6 +13,10 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:codegen": "playwright codegen http://localhost:5173",
+    "test:e2e:debug": "PWDEBUG=1 playwright test",
+    "test:unit": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

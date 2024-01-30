@@ -1,16 +1,26 @@
-# Gravity Monitoring Analysis UI
+# gmat-ui
 
-Status: currently prototyping
-Running the UI:
+The client application for the GMAT system (Gravity Monitoring & Analysis Toolkit).
 
-1. `npm install`
-2. `npm run dev` and navigate to the URL specified in the output
+## Directory Structure
 
-Dependencies TODO:
+```sh
+.
+├── .storybook      # Storybook config
+├── .vscode         # VS Code settings
+├── docs            # Documentation
+├── e2e-tests       # End-to-end tests
+└── src             # The source code
+    ├── assets      # Additional assets
+    ├── components  # React components
+    ├── hooks       # React hooks
+    ├── routes      # React-router routes
+    ├── types       # TypeScript types
+    └── utilities   # Functions and constant values
+```
 
-- VSCode Plugins:
-  1. [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-  2. [Vitest](https://marketplace.visualstudio.com/items?itemName=ZixuanChen.vitest-explorer)
-  3. [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
-  4. [Path Intellisense](https://marketplace.visualstudio.com/items?itemName=christian-kohler.path-intellisense)
-  5. [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
+## Want to help?
+
+If you are a developer you can get started quickly by reading the [developer documentation][dev].
+
+[dev]: ./docs/DEVELOPER.md
