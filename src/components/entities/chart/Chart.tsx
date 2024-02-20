@@ -12,23 +12,26 @@ ChartJS.register(zoomPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
+  pageDateRange: DateRange;
 };
 
-export const Chart = ({ chartEntity }: ChartProps) => {
+export const Chart = ({ chartEntity, pageDateRange }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>();
   let timer: NodeJS.Timeout | null;
 
   const fetchLayerData = (
     layer: ChartLayer,
-    dateRange: DateRange
+    // dateRange: DateRange,
+    pageDateRange: DateRange
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
     return new Promise((resolve, reject) => {
       const { json, target, cancel } = getData(
         layer.mission,
         layer.datasetId,
         layer.streamId,
-        dateRange
+        pageDateRange,
+        // dateRange
       );
       json().then(({ result, error }) => {
         if (error) {
@@ -54,8 +57,9 @@ export const Chart = ({ chartEntity }: ChartProps) => {
         await Promise.all<{ id: string; result: DataResponse }>(
           (chartEntity.layers || []).map((layer) =>
             fetchLayerData(layer, {
-              start: layer.startTime,
-              end: layer.endTime,
+              // TODO: check whether to use entity dateRange or page dateRange
+              start: pageDateRange.start,
+              end: pageDateRange.end
             })
           )
         );
@@ -68,7 +72,7 @@ export const Chart = ({ chartEntity }: ChartProps) => {
       return;
     };
     fetchData();
-  }, [chartEntity.layers]);
+  }, [chartEntity.layers, pageDateRange]);
 
   const addChartLayer = (l) => {
     if (chartRef.current) {
