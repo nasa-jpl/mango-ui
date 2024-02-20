@@ -5,12 +5,14 @@ import useResizeObserver from "../../../hooks/resizeObserver";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
+import { DateRange } from "../../../types/time";
 
 export declare type MapProps = {
   mapEntity: MapEntity;
+  pageDateRange: DateRange;
 };
 
-export const Map = ({ mapEntity }: MapProps) => {
+export const Map = ({ mapEntity, pageDateRange }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const map = useRef<MapType | null>();
 

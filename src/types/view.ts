@@ -1,3 +1,5 @@
+import { DateRange } from "./time";
+
 export type View = {
   home: ViewPage;
   pageGroups: ViewPageGroup[];
@@ -15,15 +17,17 @@ export type ViewPage = {
   id: string;
   title: string;
   url: string;
+  dateRange: DateRange;
 };
 
 export type EntityType = "section" | "chart" | "table" | "map";
 
 export type Entity = {
   id: string;
+  dateRange: DateRange;
   title: string;
   type: EntityType;
-  /* TODO time range? */
+  syncWithPageTime: boolean;
 };
 
 export interface SectionEntity extends Entity {

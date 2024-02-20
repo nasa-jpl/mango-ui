@@ -1,10 +1,14 @@
 .page-header {
   padding: 16px 24px;
-  display: flex;
+  display: inline-flex;
   justify-content: space-between;
   background: var(--st-white);
 }
 
 .page-header-title {
   font-size: 18px;
+}
+
+.page-header-children > * {
+  margin: 0 5px;
 }
