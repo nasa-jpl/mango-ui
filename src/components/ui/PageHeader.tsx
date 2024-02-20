@@ -9,7 +9,7 @@ export const PageHeader = ({ title = "", children }: PageHeaderProps) => {
   return (
     <div className="page-header">
       <div className="page-header-title st-typography-displayBody">{title}</div>
-      {children}
+      <div className="page-header-children">{children}</div>
     </div>
   );
 };
