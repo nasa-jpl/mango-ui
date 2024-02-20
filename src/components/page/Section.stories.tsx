@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ChartEntity } from "../../../types/view";
-import Chart from "./Chart";
+import { ChartEntity } from "../../types/view";
+import Section from "./Section";
 
 const meta = {
-  component: Chart,
+  component: Section,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
-} satisfies Meta<typeof Chart>;
+} satisfies Meta<typeof Section>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -33,6 +33,25 @@ const chartEntity: ChartEntity = {
 
 export const Default: Story = {
   args: {
-    chartEntity,
+    onSectionChange: () => {},
+    section: {
+      id: "xyz",
+      layout: [{ i: "123", x: 0, y: 0, w: 4, h: 1 }],
+      title: "Section",
+
+      defaultOpen: true,
+      enableHeader: true,
+      entities: [chartEntity],
+    },
+  },
+};
+
+export const WithoutHeader: Story = {
+  args: {
+    ...Default.args,
+    section: {
+      ...Default.args.section,
+      enableHeader: false,
+    },
   },
 };

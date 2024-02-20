@@ -1,14 +1,16 @@
 import { Button } from "@nasa-jpl/react-stellar";
-import { SectionEntity, ViewPage as ViewPageType } from "../../types/view";
+import { Page as PageType, Section as SectionType } from "../../types/view";
+import { generateUUID } from "../../utilities/generic";
 import Page from "../ui/Page";
-import Entity from "./Entity";
+import Section from "./Section";
 import "./ViewPage.css";
 
 export declare type PageProps = {
-  viewPage?: ViewPageType;
-  onPageChange: (page: ViewPageType) => void;
+  onPageChange: (page: PageType) => void;
+  viewPage?: PageType;
 };
 
+// TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
 export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
   if (!viewPage) {
     return;
@@ -19,16 +21,19 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
       pageHeaderChildren={
         <Button
           onClick={() => {
-            const newViewPage: ViewPageType = {
+            const newViewPage: PageType = {
               ...viewPage,
-              entities: [
-                ...viewPage.entities,
+              sections: [
+                ...viewPage.sections,
                 {
-                  title: "New Entity",
-                  id: Math.random().toString(),
+                  title: "New Section",
+                  id: generateUUID(),
                   type: "section",
                   entities: [],
-                } as SectionEntity,
+                  layout: [],
+                  defaultOpen: true,
+                  enableHeader: true,
+                } as SectionType,
               ],
             };
             onPageChange(newViewPage);
@@ -38,8 +43,23 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
         </Button>
       }
     >
-      {viewPage.entities.map((entity) => (
-        <Entity entity={entity} key={entity.id} />
+      {viewPage.sections.map((section) => (
+        <Section
+          section={section}
+          key={section.id}
+          onSectionChange={(newSection: SectionType) => {
+            const newViewPage: PageType = {
+              ...viewPage,
+              sections: viewPage.sections.map((e) => {
+                if (e.id === newSection.id) {
+                  return newSection;
+                }
+                return e;
+              }),
+            };
+            onPageChange(newViewPage);
+          }}
+        />
       ))}
     </Page>
   );

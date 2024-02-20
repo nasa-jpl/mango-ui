@@ -7,7 +7,7 @@ const meta = {
     if (view.pageGroups.length === 0 || view.pageGroups[0].pages.length === 0) {
       return <div>Error</div>;
     }
-    return <ViewPage {...args} viewPage={view.pageGroups[0].pages[0]} />;
+    return <ViewPage {...args} viewPage={view.pageGroups[0].pages[1]} />;
   },
   parameters: {
     layout: "fullscreen",

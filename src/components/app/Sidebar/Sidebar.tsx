@@ -1,12 +1,10 @@
 import {
-  IconBeaker,
-  IconDatabase,
   IconExternalLink,
   IconHelp,
-  IconHome,
-  IconMission,
   IconSettings,
 } from "@nasa-jpl/react-stellar";
+import { Database, Flask, HouseLine, Planet } from "@phosphor-icons/react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { View } from "../../../types/view";
 import "./Sidebar.css";
@@ -19,42 +17,65 @@ export declare type SidebarProps = {
   view?: View;
 };
 
-const getNavLinkClass = ({
-  isActive,
-  isPending,
-}: {
-  isActive: boolean;
-  isPending: boolean;
-}) => {
-  return isActive
-    ? "sidebar-link--active"
-    : isPending
-    ? "sidebar-link--pending"
-    : "";
-};
-
 export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
+  const [active, setActive] = useState("home");
+
+  const getNavLinkClass = (isActive: boolean, path: string) => {
+    if (isActive) {
+      // Run the set state outside of this frame to avoid React warning
+      setTimeout(() => {
+        setActive(path);
+      }, 0);
+    }
+    return isActive ? "sidebar-link--active" : "";
+  };
+
   return (
-    <SidebarContainer title={title} logo={<IconMission />}>
+    <SidebarContainer title={title} logo={<Planet weight="duotone" />}>
       <div className="sidebar-padded-content">
-        <NavLink className={getNavLinkClass} to="/">
+        <NavLink
+          className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
+          to="/"
+        >
           <SidebarLink
             title="Home"
-            icon={<IconHome />}
+            icon={
+              <HouseLine weight={active === "/" ? "fill" : "bold"} size={16} />
+            }
             variant="primary-link"
           />
         </NavLink>
-        <NavLink className={getNavLinkClass} to="/datasets">
+        <NavLink
+          className={(activeNav) =>
+            getNavLinkClass(activeNav.isActive, "/datasets")
+          }
+          to="/datasets"
+        >
           <SidebarLink
             title="Datasets"
-            icon={<IconDatabase />}
+            icon={
+              <Database
+                weight={active === "/datasets" ? "fill" : "bold"}
+                size={16}
+              />
+            }
             variant="primary-link"
           />
         </NavLink>
-        <NavLink className={getNavLinkClass} to="/sandbox">
+        <NavLink
+          className={(activeNav) =>
+            getNavLinkClass(activeNav.isActive, "/sandbox")
+          }
+          to="/sandbox"
+        >
           <SidebarLink
             title="Sandbox"
-            icon={<IconBeaker />}
+            icon={
+              <Flask
+                size={16}
+                weight={active === "/sandbox" ? "fill" : "bold"}
+              />
+            }
             variant="primary-link"
           />
         </NavLink>
@@ -68,7 +89,12 @@ export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
               <SidebarGroup title={pageGroup.title}>
                 {pageGroup.pages.map((page) => (
                   <NavLink
-                    className={getNavLinkClass}
+                    className={(activeNav) =>
+                      getNavLinkClass(
+                        activeNav.isActive,
+                        `view/${pageGroup.url}/${page.url}`
+                      )
+                    }
                     to={`view/${pageGroup.url}/${page.url}`}
                     key={page.id}
                   >

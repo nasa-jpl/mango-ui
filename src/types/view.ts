@@ -1,23 +1,36 @@
+import { Layout } from "react-grid-layout";
+
 export type View = {
-  home: ViewPage;
-  pageGroups: ViewPageGroup[];
+  home: View;
+  pageGroups: PageGroup[];
 };
 
-export type ViewPageGroup = {
+export type PageGroup = {
   id: string;
-  pages: ViewPage[];
+  pages: Page[];
   title: string;
   url: string;
 };
 
-export type ViewPage = {
+export type Page = {
+  id: string;
+  sections: Section[];
+  title: string;
+  url: string;
+};
+
+export type Section = {
+  defaultOpen?: boolean;
+  enableHeader?: boolean;
   entities: Entity[];
   id: string;
+  layout: SectionLayout[];
   title: string;
-  url: string;
 };
 
-export type EntityType = "section" | "chart" | "table" | "map";
+export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
+
+export type EntityType = "chart" | "table" | "map";
 
 export type Entity = {
   id: string;
@@ -26,26 +39,25 @@ export type Entity = {
   /* TODO time range? */
 };
 
-export interface SectionEntity extends Entity {
-  defaultOpen?: boolean;
-  entities: Entity[];
-}
-
 export interface ChartEntity extends Entity {
   layers?: ChartLayer[];
   yAxes: any;
   // etc
 }
 
-export type ChartLayer = {
+export type DataLayer = {
   datasetId: string;
   endTime: string;
+  field: string;
   id: string;
   mission: string;
   startTime: string;
   streamId: string;
-  type: "line";
 };
+
+export interface ChartLayer extends DataLayer {
+  type: "line";
+}
 
 export interface MapEntity extends Entity {
   // etc
@@ -87,4 +99,8 @@ export type DataResponse = {
   from_isotimestamp: string;
   query_elapsed_ms: number;
   to_isotimestamp: string;
+};
+
+export type DataResponseError = {
+  detail: string;
 };
