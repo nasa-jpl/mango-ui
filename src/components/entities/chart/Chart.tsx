@@ -4,6 +4,7 @@ import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { ChartEntity, ChartLayer, DataResponse } from "../../../types/view";
+import { DateRange } from "../../../types/time";
 import { getData } from "../../../utilities/api";
 import { pluralize } from "../../../utilities/foo";
 import { getLayerId, isAbortError } from "../../../utilities/generic";
@@ -14,9 +15,10 @@ ChartJS.register(zoomPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
+  dateRange: DateRange;
 };
 
-export const Chart = ({ chartEntity }: ChartProps) => {
+export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS<"line"> | null>();
   const [loading, setLoading] = useState(false);
@@ -31,12 +33,12 @@ export const Chart = ({ chartEntity }: ChartProps) => {
   }, []);
 
   useEffect(() => {
-    visualizeChartLayers(chartEntity.layers || []);
+    visualizeChartLayers(chartEntity.layers || [], dateRange.start, dateRange.end);
 
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.layers)]);
+  }, [JSON.stringify(chartEntity.layers), dateRange]);
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
@@ -109,6 +111,7 @@ export const Chart = ({ chartEntity }: ChartProps) => {
         layer.datasetId,
         layer.streamId,
         layer.field,
+        // TODO: check whether or not to sync with page date range
         startTime || layer.startTime,
         endTime || layer.endTime
       );

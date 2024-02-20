@@ -1,4 +1,5 @@
 import { Layout } from "react-grid-layout";
+import { DateRange } from "./time";
 
 export type View = {
   home: View;
@@ -26,6 +27,7 @@ export type Section = {
   id: string;
   layout: SectionLayout[];
   title: string;
+  dateRange: DateRange;
 };
 
 export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
@@ -34,9 +36,10 @@ export type EntityType = "chart" | "table" | "map";
 
 export type Entity = {
   id: string;
+  dateRange: DateRange;
   title: string;
   type: EntityType;
-  /* TODO time range? */
+  syncWithPageDateRange: boolean;
 };
 
 export interface ChartEntity extends Entity {

@@ -29,10 +29,19 @@ const chartEntity: ChartEntity = {
       type: "line",
     },
   ],
+  dateRange: {
+    end: "",
+    start: ""
+  },
+  syncWithPageDateRange: false
 };
 
 export const Default: Story = {
   args: {
     chartEntity,
+    dateRange: {
+      end: "",
+      start: ""
+    }
   },
 };
