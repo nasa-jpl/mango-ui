@@ -1,3 +1,4 @@
+import { DateRange } from "../../types/time";
 import {
   ChartEntity,
   Entity as EntityType,
@@ -13,9 +14,10 @@ import "./Entity.css";
 
 export declare type EntityProps = {
   entity: EntityType;
+  pageDateRange: DateRange;
 };
 
-export const Entity = ({ entity }: EntityProps) => {
+export const Entity = ({ entity, pageDateRange }: EntityProps) => {
   if (entity.type === "section") {
     const section = entity as SectionEntity;
     return (
@@ -26,18 +28,18 @@ export const Entity = ({ entity }: EntityProps) => {
       >
         {section.entities.length === 0 && <div>No entities</div>}
         {section.entities.map((e) => (
-          <Entity key={e.id} entity={e} />
+          <Entity key={e.id} entity={e} pageDateRange={pageDateRange} />
         ))}
       </Section>
     );
   }
   return (
     <div className="entity">
-      {entity.type === "chart" && <Chart chartEntity={entity as ChartEntity} />}
-      {entity.type === "map" && <Map mapEntity={entity as MapEntity} />}
+      {entity.type === "chart" && <Chart chartEntity={entity as ChartEntity} pageDateRange={pageDateRange}/>}
+      {entity.type === "map" && <Map mapEntity={entity as MapEntity} pageDateRange={pageDateRange} />}
       {/* TODO figure out type later/inside table? */}
       {entity.type === "table" && (
-        <Table tableEntity={entity as TableEntity<never>} />
+        <Table tableEntity={entity as TableEntity<never>} pageDateRange={pageDateRange} />
       )}
     </div>
   );
