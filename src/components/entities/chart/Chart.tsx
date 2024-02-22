@@ -1,5 +1,5 @@
 import ChartJS, { ChartDataset, Point } from "chart.js/auto";
-import "chartjs-adapter-date-fns";
+import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
@@ -66,12 +66,14 @@ export const Chart = ({ chartEntity }: ChartProps) => {
     if (error || aborted || !chartRef.current) {
       return;
     }
+
     const chartJSDatasets = results.map(({ result, layer }) => ({
       id: getLayerId(layer),
       hidden: hiddenDatasets[getLayerId(layer)] || false,
       label: layer.streamId,
       data: result.data.map((x) => ({
         x: x.timestamp as number,
+        // x: new Date(x.timestamp).toUTCString(),
         y: x[layer.field] as number,
       })),
       pointRadius: 1,
@@ -190,6 +192,11 @@ export const Chart = ({ chartEntity }: ChartProps) => {
         maintainAspectRatio: false,
         scales: {
           x: {
+            adapters: {
+              date: {
+                zone: "UTC",
+              },
+            },
             type: "time",
             ticks: {
               autoSkip: true,
