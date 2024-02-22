@@ -14,6 +14,7 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       headerName: "Dataset Name",
       resizable: true,
       sortable: true,
+      width: 130,
     },
     {
       field: "mission",
@@ -21,6 +22,7 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       headerName: "Mission",
       resizable: true,
       sortable: true,
+      width: 90,
     },
     {
       field: "streamId",
@@ -28,6 +30,7 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       headerName: "Spacecraft",
       resizable: true,
       sortable: true,
+      width: 110,
     },
     {
       field: "data_begin",
@@ -35,7 +38,8 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       headerName: "Data Start",
       resizable: true,
       sortable: true,
-      minWidth: 230,
+      minWidth: 180,
+      valueFormatter: ({ value: dataEnd }) => new Date(dataEnd).toISOString(),
     },
     {
       field: "data_end",
@@ -43,7 +47,15 @@ export const DatasetTable = ({ datasets }: DatasetTableProps) => {
       headerName: "Data End",
       resizable: true,
       sortable: true,
-      minWidth: 230,
+      minWidth: 180,
+      valueFormatter: ({ value: dataEnd }) => new Date(dataEnd).toISOString(),
+    },
+    {
+      field: "available_fields",
+      filter: "string",
+      headerName: "Fields",
+      resizable: true,
+      flex: 1,
     },
   ];
   return <DataGrid<DatasetStream> rowData={datasets} columnDefs={columnDefs} />;
