@@ -49,13 +49,15 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
       title={viewPage.title}
       pageHeaderChildren={<>
         <Label htmlFor="pageStartTime">Start:</Label>
-        <input type="datetime-local" 
+        <input type="datetime-local"
+               id="page-datetime-start"
                name="pageStartTime" 
                defaultValue={state.pageDateRange.start.substring(0, 16)} 
                onChange={(e) => updateDateRange({ pageDateRange: { ...state.pageDateRange, start: new Date(Date.parse(e.target.value + 'Z')).toISOString() } })}>
         </input>
         <Label htmlFor="pageEndTime">End:</Label>
         <input type="datetime-local" 
+               id="page-datetime-end"
                name="pageEndTime" 
                defaultValue={state.pageDateRange.end.substring(0,16)} 
                onChange={(e) => updateDateRange({ pageDateRange: { ...state.pageDateRange, end: new Date(Date.parse(e.target.value + 'Z')).toISOString() } })}>
