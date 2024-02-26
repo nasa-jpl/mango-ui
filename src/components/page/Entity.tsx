@@ -1,45 +1,38 @@
+import classNames from "classnames";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import { Entity as EntityType, TableEntity } from "../../types/view";
 import { DateRange } from "../../types/time";
 import {
-  ChartEntity,
-  Entity as EntityType,
-  MapEntity,
-  SectionEntity,
-  TableEntity,
-} from "../../types/view";
+  isChartEntity,
+  isMapEntity,
+  isTableEntity,
+} from "../../utilities/view";
 import Chart from "../entities/chart/Chart";
 import Map from "../entities/map/Map";
 import Table from "../entities/table/Table";
-import Section from "../ui/Section";
 import "./Entity.css";
 
 export declare type EntityProps = {
+  className: string;
   entity: EntityType;
-  pageDateRange: DateRange;
+  dateRange: DateRange;
+  onEntityChange: (entity: EntityType) => void;
 };
 
-export const Entity = ({ entity, pageDateRange }: EntityProps) => {
-  if (entity.type === "section") {
-    const section = entity as SectionEntity;
-    return (
-      <Section
-        title={section.title}
-        key={section.id}
-        defaultOpen={section.defaultOpen}
-      >
-        {section.entities.length === 0 && <div>No entities</div>}
-        {section.entities.map((e) => (
-          <Entity key={e.id} entity={e} pageDateRange={pageDateRange} />
-        ))}
-      </Section>
-    );
-  }
+export const Entity = (props: EntityProps) => {
+  const { entity, onEntityChange, className = "", dateRange } = props;
+  const entityClass = classNames({
+    entity: true,
+    [className]: !!className,
+  });
   return (
-    <div className="entity">
-      {entity.type === "chart" && <Chart chartEntity={entity as ChartEntity} pageDateRange={pageDateRange}/>}
-      {entity.type === "map" && <Map mapEntity={entity as MapEntity} pageDateRange={pageDateRange} />}
+    <div className={entityClass}>
+      {isChartEntity(entity) && <Chart chartEntity={entity} dateRange={dateRange} />}
+      {isMapEntity(entity) && <Map mapEntity={entity} dateRange={dateRange} />}
       {/* TODO figure out type later/inside table? */}
-      {entity.type === "table" && (
-        <Table tableEntity={entity as TableEntity<never>} pageDateRange={pageDateRange} />
+      {isTableEntity(entity) && (
+        <Table tableEntity={entity as TableEntity<never>} dateRange={dateRange} />
       )}
     </div>
   );

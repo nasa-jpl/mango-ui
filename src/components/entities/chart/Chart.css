@@ -6,4 +6,13 @@
 
 .chart .chart-canvas-container {
   padding: 8px;
+  width: 100%;
+  position: relative;
+  height: 0;
+  flex: 1;
+}
+
+.chart-point-count {
+  font-size: 10px;
+  color: var(--st-gray-50);
 }

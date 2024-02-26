@@ -11,3 +11,24 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.entity-drag-handle {
+  cursor: move;
+  display: flex;
+  justify-content: center;
+}
+
+.entity-header-right-content {
+  display: flex;
+  gap: 8px;
+}
+
+.entity-loading {
+  user-select: none;
+  color: var(--st-gray-50);
+  font-size: 10px;
+}
+
+.entity-error {
+  color: var(--st-red);
+}

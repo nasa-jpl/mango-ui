@@ -1,16 +1,30 @@
 {
   "home": {
     "title": "Home",
-    "entities": [
+    "sections": [
       {
-        "id": "xyz",
+        "id": "dsfgr23rwe",
         "type": "section",
         "title": "Section 1",
+        "enableHeader": true,
+        "defaultOpen": true,
+        "layout": [{ "i": "sdfdgfhg", "x": 8, "y": 0, "w": 12, "h": 2 }],
         "entities": [
           {
-            "id": "789",
+            "id": "sdfdgfhg",
             "type": "chart",
             "title": "Entity 1",
+            "layers": [
+              {
+                "id": "3regf",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "C",
+                "startTime": "2022-02-01T00:00:00.000000Z",
+                "endTime": "2022-02-01T00:01:00.000000Z"
+              }
+            ],
             "yAxes": []
           }
         ]
@@ -27,11 +41,12 @@
           "id": "abc",
           "url": "page1",
           "title": "Page 1",
-          "entities": [
+          "sections": [
             {
-              "id": "789",
+              "id": "sdfg34sdf",
               "type": "section",
               "title": "Section 1",
+              "enableHeader": true,
               "defaultOpen": true,
               "entities": [
                 {
@@ -45,8 +60,8 @@
                       "datasetId": "ACC1A",
                       "field": "lin_accl_x",
                       "streamId": "C",
-                      "startTime": "2022-02-01T00:00:00.037430Z",
-                      "endTime": "2022-02-01T00:01:00.037430Z"
+                      "startTime": "2022-02-01T00:00:00.000000Z",
+                      "endTime": "2022-02-01T00:01:00.000000Z"
                     }
                   ],
                   "yAxes": []
@@ -70,12 +85,18 @@
           "id": "def",
           "url": "acc",
           "title": "Coalesced Acceleration",
-          "entities": [
+          "sections": [
             {
-              "id": "789",
+              "id": "sdfdghty",
               "type": "section",
               "title": "GRACE-FO Linear Acceleration",
+              "enableHeader": true,
               "defaultOpen": true,
+              "layout": [
+                { "i": "sdfghy4ter", "x": 0, "y": 0, "w": 4, "h": 2 },
+                { "i": "dfgrt43rwe", "x": 4, "y": 0, "w": 4, "h": 2 },
+                { "i": "dfg43er", "x": 8, "y": 0, "w": 4, "h": 2 }
+              ],
               "entities": [
                 {
                   "id": "sdfghy4ter",
@@ -89,8 +110,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "345678",
@@ -98,8 +119,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
                 },
@@ -115,8 +136,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "234567",
@@ -124,8 +145,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
                 },
@@ -141,8 +162,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "234567",
@@ -150,8 +171,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
                 }
@@ -161,7 +182,13 @@
               "id": "sdr4wdf",
               "type": "section",
               "title": "GRACE-FO Angular Acceleration",
+              "enableHeader": true,
               "defaultOpen": true,
+              "layout": [
+                { "i": "sdfer34wefsd", "x": 0, "y": 0, "w": 4, "h": 2 },
+                { "i": "fsdr4efd", "x": 4, "y": 0, "w": 4, "h": 2 },
+                { "i": "sdfer4edf", "x": 8, "y": 0, "w": 4, "h": 2 }
+              ],
               "entities": [
                 {
                   "id": "sdfer34wefsd",
@@ -175,8 +202,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "sfdr34red",
@@ -184,8 +211,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
                 },
@@ -201,8 +228,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "sdfer4ed",
@@ -210,8 +237,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
                 },
@@ -227,8 +254,8 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "C",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     },
                     {
                       "id": "dsfer4efd",
@@ -236,57 +263,10 @@
                       "mission": "GRACEFO",
                       "datasetId": "ACC1A",
                       "streamId": "D",
-                      "startTime": "2022-03-02T00:00:00.037430Z",
-                      "endTime": "2022-03-02T00:01:00.037430Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "456",
-      "url": "group2",
-      "title": "Group 2",
-      "pages": [
-        {
-          "id": "abc",
-          "url": "page1",
-          "title": "Page 1",
-          "entities": [
-            {
-              "id": "789",
-              "type": "section",
-              "title": "Section 1",
-              "entities": [
-                {
-                  "id": "123",
-                  "type": "chart",
-                  "title": "Entity 1",
-                  "yAxes": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "def",
-          "url": "page2",
-          "title": "Page 2",
-          "entities": [
-            {
-              "id": "789",
-              "type": "section",
-              "title": "Section 1",
-              "entities": [
-                {
-                  "id": "123",
-                  "type": "chart",
-                  "title": "Entity 1",
-                  "yAxes": []
                 }
               ]
             }

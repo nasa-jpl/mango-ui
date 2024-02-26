@@ -1,10 +1,13 @@
-import ChartJS from "chart.js/auto";
-import "chartjs-adapter-date-fns";
+import ChartJS, { ChartDataset, Point } from "chart.js/auto";
+import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { useEffect, useRef } from "react";
-import { DateRange } from "../../../types/time";
+import { debounce } from "lodash-es";
+import { useEffect, useRef, useState } from "react";
 import { ChartEntity, ChartLayer, DataResponse } from "../../../types/view";
+import { DateRange } from "../../../types/time";
 import { getData } from "../../../utilities/api";
+import { pluralize } from "../../../utilities/foo";
+import { getLayerId, isAbortError } from "../../../utilities/generic";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
 
@@ -12,134 +15,191 @@ ChartJS.register(zoomPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
-  pageDateRange: DateRange;
+  dateRange: DateRange;
 };
 
-export const Chart = ({ chartEntity, pageDateRange }: ChartProps) => {
+export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<ChartJS | null>();
-  let timer: NodeJS.Timeout | null;
+  const chartRef = useRef<ChartJS<"line"> | null>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>();
+  const [pointCount, setPointCount] = useState(0);
+  const cancelHandles: Record<string, () => void> = {};
+
+  useEffect(() => {
+    initializeChart();
+
+    return () => destroyChart();
+  }, []);
+
+  useEffect(() => {
+    visualizeChartLayers(chartEntity.layers || [], dateRange.start, dateRange.end);
+
+    // Use JSON.stringify for deep comparison (recommended)
+    // https://github.com/facebook/react/issues/14476#issuecomment-471199055
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(chartEntity.layers), dateRange]);
+
+  const visualizeChartLayers = async (
+    layers: ChartLayer[],
+    startTime?: string,
+    endTime?: string
+  ) => {
+    if (!chartRef.current) {
+      return;
+    }
+    const hiddenDatasets: Record<string, boolean> = {};
+    const datasets = chartRef.current.data.datasets as (ChartDataset<
+      "line",
+      (number | Point | null)[]
+    > & { id: string })[];
+    datasets.forEach((dataset, i) => {
+      if (dataset.id) {
+        hiddenDatasets[dataset.id] =
+          !chartRef.current?.isDatasetVisible(i) || false;
+      }
+    });
+    const { results, error, aborted } = await fetchAllLayerData(
+      layers,
+      startTime,
+      endTime
+    );
+
+    if (error || aborted || !chartRef.current) {
+      return;
+    }
+
+    const chartJSDatasets = results.map(({ result, layer }) => ({
+      id: getLayerId(layer),
+      hidden: hiddenDatasets[getLayerId(layer)] || false,
+      label: layer.streamId,
+      data: result.data.map((x) => ({
+        x: x.timestamp as number,
+        // x: new Date(x.timestamp).toUTCString(),
+        y: x[layer.field] as number,
+      })),
+      pointRadius: 1,
+      borderWidth: 1,
+      spanGaps: false,
+    }));
+
+    chartRef.current.data.datasets = chartJSDatasets;
+    chartRef.current.data.datasets.forEach((d, i) => {
+      chartRef.current?.setDatasetVisibility(i, !d.hidden);
+    });
+    chartRef.current.update();
+    const newCount = results
+      .map((result) => result.result.data_count)
+      .reduce((prev, curr) => prev + curr, 0);
+    setPointCount(newCount);
+  };
+
+  const debouncedVisualizeChartLayers = debounce(visualizeChartLayers, 500);
 
   const fetchLayerData = (
     layer: ChartLayer,
-    // dateRange: DateRange,
-    pageDateRange: DateRange
+    startTime: string | undefined,
+    endTime: string | undefined
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
+    const layerFullId = `${layer.mission}_${layer.datasetId}_${layer.field}_${layer.streamId}`;
+    if (cancelHandles[layerFullId]) {
+      cancelHandles[layerFullId]();
+    }
     return new Promise((resolve, reject) => {
-      const { json, target, cancel } = getData(
+      const { json, cancel } = getData(
         layer.mission,
         layer.datasetId,
         layer.streamId,
-        pageDateRange,
-        // dateRange
+        layer.field,
+        // TODO: check whether or not to sync with page date range
+        startTime || layer.startTime,
+        endTime || layer.endTime
       );
-      json().then(({ result, error }) => {
-        if (error) {
-          if (error.name === "AbortError") {
-            reject("AbortError");
-          } else {
-            reject(error);
-          }
-        } else {
+      cancelHandles[layerFullId] = cancel;
+      json()
+        .then((result) => {
+          delete cancelHandles[layerFullId];
           resolve({
             layer,
-            result: result as DataResponse,
+            result,
           });
-        }
-      });
+        })
+        .catch((error) => {
+          if (!isAbortError(error)) {
+            delete cancelHandles[layerFullId];
+            reject(error);
+          }
+        });
     });
   };
 
-  /* TODO make a data provider for fetching from API? For now fetch here */
-  useEffect(() => {
-    const fetchData = async () => {
-      const results: { id: string; result: DataResponse }[] =
-        await Promise.all<{ id: string; result: DataResponse }>(
-          (chartEntity.layers || []).map((layer) =>
-            fetchLayerData(layer, {
-              // TODO: check whether to use entity dateRange or page dateRange
-              start: pageDateRange.start,
-              end: pageDateRange.end
-            })
-          )
-        );
-      if (chartRef.current) {
-        chartRef.current.data.datasets = [];
+  const fetchAllLayerData = async (
+    layers: ChartLayer[],
+    startTime?: string,
+    endTime?: string
+  ) => {
+    setLoading(true);
+    setError(null);
+    let results: {
+      layer: ChartLayer;
+      result: DataResponse;
+    }[] = [];
+    let aborted = false;
+    let error = false;
+    try {
+      results = await Promise.all(
+        layers.map((layer) => fetchLayerData(layer, startTime, endTime))
+      );
+      setLoading(false);
+    } catch (err) {
+      if (!isAbortError(err)) {
+        setError(err as Error);
+        error = true;
+        setLoading(false);
+      } else {
+        aborted = true;
       }
-      results.forEach((result) => {
-        addChartLayer(result);
-      });
-      return;
-    };
-    fetchData();
-  }, [chartEntity.layers, pageDateRange]);
-
-  const addChartLayer = (l) => {
-    if (chartRef.current) {
-      chartRef.current.clear();
-      chartRef.current.update();
-      chartRef.current.data.datasets.push({
-        label: l.layer.streamId,
-        data: l.result.data.map((x) => ({
-          x: new Date(x.timestamp),
-          y: x[l.layer.field],
-        })),
-        pointRadius: 1,
-        borderWidth: 1,
-        spanGaps: false,
-      });
-      chartRef.current.update();
     }
+    return { results, aborted, error };
   };
 
   const onZoomComplete = () => {
     if (chartRef.current) {
       const { min, max } = chartRef.current.scales.x;
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(async () => {
-        console.log("Fetched data between " + min + " and " + max);
-        if (chartRef.current) {
-          const newData = await Promise.all(
-            (chartEntity.layers || []).map((layer) =>
-              fetchLayerData(layer, {
-                start: new Date(min).toISOString(),
-                end: new Date(max).toISOString(),
-              })
-            )
-          );
-          const massaged = newData.map((d) => ({
-            label: d.layer.streamId,
-            data: d.result.data.map((x) => ({
-              x: new Date(x.timestamp),
-              y: x[d.layer.field],
-            })),
-            pointRadius: 1,
-            borderWidth: 1,
-            spanGaps: false,
-          }));
-          chartRef.current.data.datasets = massaged;
-          chartRef.current.stop(); // make sure animations are not running
-          chartRef.current.update();
-        }
-      }, 1000);
+      debouncedVisualizeChartLayers(
+        chartEntity.layers || [],
+        new Date(min).toISOString(),
+        new Date(max).toISOString()
+      );
     }
   };
 
   const initializeChart = () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      return;
+    }
+
     chartRef.current = new ChartJS(canvasRef.current, {
       type: "line",
       data: {
         datasets: [],
       },
       options: {
+        font: {
+          family: "'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+          size: 11,
+          weight: 400,
+        },
         animation: false,
         responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
+            adapters: {
+              date: {
+                zone: "UTC",
+              },
+            },
             type: "time",
             ticks: {
               autoSkip: true,
@@ -149,6 +209,12 @@ export const Chart = ({ chartEntity, pageDateRange }: ChartProps) => {
           },
         },
         plugins: {
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) =>
+                `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y}`,
+            },
+          },
           decimation: {
             enabled: true,
             algorithm: "min-max",
@@ -161,12 +227,12 @@ export const Chart = ({ chartEntity, pageDateRange }: ChartProps) => {
               pinch: {
                 enabled: true,
               },
-              mode: "xy",
+              mode: "x",
               onZoomComplete: onZoomComplete,
             },
             pan: {
               enabled: true,
-              mode: "xy",
+              mode: "x",
               onPanComplete: onZoomComplete,
             },
           },
@@ -182,24 +248,21 @@ export const Chart = ({ chartEntity, pageDateRange }: ChartProps) => {
     }
   };
 
-  useEffect(() => {
-    initializeChart();
-
-    return () => destroyChart();
-  }, []);
-
   return (
     <div className="chart">
-      <EntityHeader title={chartEntity.title} />
-      <div
-        className="chart-canvas-container"
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          minHeight: "300px",
-        }}
-      >
+      <EntityHeader
+        title={chartEntity.title}
+        loading={loading}
+        error={error || undefined}
+        rightContent={
+          !loading && (
+            <div className="chart-point-count st-typography-label">
+              {pointCount} point{pluralize(pointCount)}
+            </div>
+          )
+        }
+      />
+      <div className="chart-canvas-container">
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
       </div>
     </div>

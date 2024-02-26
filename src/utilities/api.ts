@@ -1,8 +1,5 @@
 import { config } from "../config";
-import { Metadata } from "../types/data";
-import { DateRange } from "../types/time";
-import { Dataset } from "../types/view";
-import { fetchWithProgress } from "./generic";
+import { DataResponse, DataResponseError, Dataset } from "../types/view";
 
 export const getMissions = async (): Promise<string[]> => {
   const url = config.endpoints.data + config.api.data.missions;
@@ -18,28 +15,50 @@ export const getDatasets = async (mission: string): Promise<Dataset[]> => {
   return response.data;
 };
 
-export const getMetadata = async (entity: string): Promise<Metadata> => {
-  const url =
-    config.endpoints.data +
-    config.api.data.metadata.replace("{MISSION}", entity);
-  const response = await (await fetch(url)).json();
-  console.log("response :>> ", response);
-  return response;
-};
-
 export const getData = (
   mission: string,
   datasetId: string,
   streamId: string,
-  dateRange: DateRange
+  field: string,
+  startTime: string,
+  endTime: string
 ) => {
-  const { start, end } = dateRange;
   const url =
     config.endpoints.data +
     config.api.data.data
       .replace("{MISSION}", mission)
       .replace("{STREAM}", streamId)
       .replace("{DATASET}", datasetId) +
-    `?from_isotimestamp=${start}&to_isotimestamp=${end}`;
-  return fetchWithProgress(url);
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}`;
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const json = () =>
+    new Promise<DataResponse>((resolve, reject) => {
+      fetch(url, { signal: controller.signal })
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 400) {
+            response
+              .json()
+              .then((json) => {
+                if (response.status === 400) {
+                  throw new Error(
+                    (json as DataResponseError).detail || "Unknown error"
+                  );
+                } else {
+                  resolve(json as DataResponse);
+                }
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          } else {
+            reject(new Error(response.statusText));
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  return { json, cancel };
+  // return fetchWithProgress<DataResponse>(url);
 };
