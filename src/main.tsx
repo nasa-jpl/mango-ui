@@ -1,7 +1,9 @@
+import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
+import "@nasa-jpl/stellar/font/inter/inter.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import ErrorPage from "./error-page";
 import "./index.css";
 import DatasetsPage from "./routes/DatasetsPage";
@@ -23,21 +25,6 @@ export async function loader() {
   return { view };
 }
 
-// export async function datasetsLoader() {
-//   const datasets: Dataset[] = [];
-//   datasets.push({
-//     id: Math.random().toString(),
-//     name: "ACC1A_A",
-//     mission: "GRACE",
-//   });
-//   datasets.push({
-//     id: Math.random().toString(),
-//     name: "ACC1A_B",
-//     mission: "GRACE",
-//   });
-//   return { datasets };
-// }
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -52,7 +39,6 @@ const router = createBrowserRouter([
       {
         path: "datasets",
         element: <DatasetsPage />,
-        // loader: datasetsLoader,
       },
       {
         path: "sandbox",
@@ -68,6 +54,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <TooltipProvider>
+      <RouterProvider router={router} />
+    </TooltipProvider>
   </React.StrictMode>
 );

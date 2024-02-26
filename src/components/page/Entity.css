@@ -7,3 +7,7 @@
   overflow: hidden;
   flex: 1;
 }
+
+.entity-prevent-highlight {
+  user-select: none;
+}

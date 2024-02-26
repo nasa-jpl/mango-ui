@@ -1,10 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
+import { DataLayer } from "../types/view";
 
+/**
+ * Generates unique ID
+ */
 export function generateUUID() {
   return uuidv4();
 }
 
-export function fetchWithProgress(url: string) {
+export function fetchWithProgress<T>(url: string) {
   let loading = false;
   let chunks: Uint8Array[] = [];
   let results = null;
@@ -22,12 +26,12 @@ export function fetchWithProgress(url: string) {
 
       if (response.status >= 200 && response.status < 300) {
         results = (await _readBody(response)) || "";
-        return { result: JSON.parse(results) };
+        return { result: JSON.parse(results) as T };
       } else {
         throw new Error(response.statusText);
       }
     } catch (err) {
-      error = err;
+      error = err as Error;
       results = null;
       return { error };
     } finally {
@@ -93,4 +97,19 @@ export function fetchWithProgress(url: string) {
   };
 
   return { target, json, cancel };
+}
+
+/**
+ * Returns unique identifier for a layer which currently comprises of:
+ * mission, datasetid, field, and stream ID
+ */
+export function getLayerId(layer: DataLayer): string {
+  return `${layer.mission}_${layer.datasetId}_${layer.field}_${layer.streamId}`;
+}
+
+/**
+ * Returns true if the error is an Abort Error
+ */
+export function isAbortError(error: Error | unknown) {
+  return (error as Error).name === "AbortError";
 }
