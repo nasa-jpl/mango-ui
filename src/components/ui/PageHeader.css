@@ -1,6 +1,6 @@
 .page-header {
   padding: 16px 24px;
-  display: inline-flex;
+  display: flex;
   justify-content: space-between;
   background: var(--st-white);
 }
@@ -9,6 +9,8 @@
   font-size: 18px;
 }
 
-.page-header-children > * {
-  margin: 0 5px;
+.page-header-children {
+  display: flex;
+  height: 24px;
+  gap: 8px;
 }
