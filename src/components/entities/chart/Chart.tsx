@@ -33,7 +33,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   }, []);
 
   useEffect(() => {
-    visualizeChartLayers(chartEntity.layers || [], dateRange.start, dateRange.end);
+    debouncedVisualizeChartLayersImmediate(chartEntity.layers || [], dateRange.start, dateRange.end);
 
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
@@ -95,6 +95,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   };
 
   const debouncedVisualizeChartLayers = debounce(visualizeChartLayers, 500);
+  const debouncedVisualizeChartLayersImmediate = debounce(visualizeChartLayers, 500, { leading: true })
 
   const fetchLayerData = (
     layer: ChartLayer,
