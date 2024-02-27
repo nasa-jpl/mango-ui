@@ -6,6 +6,7 @@ import Section from "./Section";
 import "./ViewPage.css";
 import { useReducer } from "react";
 import { DateRange } from "../../types/time";
+import { toDatetimelocalStr, toUTCms } from "../../utilities/time";
 
 export declare type PageProps = {
   onPageChange: (page: PageType) => void;
@@ -46,6 +47,7 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
   if (!viewPage) {
     return;
   }
+
   return (
     <Page
       title={viewPage.title}
@@ -53,16 +55,18 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
         <Label htmlFor="pageStartTime">Start:</Label>
         <input type="datetime-local"
                id="page-datetime-start"
-               name="pageStartTime" 
-               defaultValue={state.dateRange.start.substring(0, 16)} 
-               onChange={(e) => updateDateRange({ dateRange: { ...state.dateRange, start: new Date(Date.parse(e.target.value + 'Z')).toISOString() } })}>
+               className="st-input"
+               name="pageStartTime"
+               defaultValue={toDatetimelocalStr(state.dateRange.start)}
+               onChange={(e) => updateDateRange({ dateRange: { ...state.dateRange, start: new Date(toUTCms(e.target.value)).toISOString() }})}>
         </input>
         <Label htmlFor="pageEndTime">End:</Label>
-        <input type="datetime-local" 
+        <input type="datetime-local"
                id="page-datetime-end"
-               name="pageEndTime" 
-               defaultValue={state.dateRange.end.substring(0,16)} 
-               onChange={(e) => updateDateRange({ dateRange: { ...state.dateRange, end: new Date(Date.parse(e.target.value + 'Z')).toISOString() } })}>
+               className="st-input"
+               name="pageEndTime"
+               defaultValue={toDatetimelocalStr(state.dateRange.end)}
+               onChange={(e) => updateDateRange({ dateRange: { ...state.dateRange, end: new Date(toUTCms(e.target.value)).toISOString() }})}>
         </input>
         <Button
           onClick={() => {
