@@ -6,7 +6,7 @@
  * @return {string} datetime-local string
  */
 export function toDatetimelocalStr(isoStr: string) {
-  return isoStr.substring(0,16)
+  return isoStr.substring(0, 16);
 }
 
 /**
@@ -16,6 +16,6 @@ export function toDatetimelocalStr(isoStr: string) {
  * @param {string} datetimeStr datetime-local string
  * @return {number} UTC time in milliseconds
  */
-export function toUTCms(value: string ) {
-  return Date.parse(value + 'Z')
+export function toUTCms(value: string) {
+  return Date.parse(value + "Z");
 }
