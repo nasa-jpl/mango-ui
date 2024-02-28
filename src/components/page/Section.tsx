@@ -21,7 +21,11 @@ export declare type SectionProps = {
   dateRange: DateRange;
 };
 
-export const Section = ({ section, onSectionChange, dateRange }: SectionProps) => {
+export const Section = ({
+  section,
+  onSectionChange,
+  dateRange,
+}: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
   const [dragging, setDragging] = useState(false);

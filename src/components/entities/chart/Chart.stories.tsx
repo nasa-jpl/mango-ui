@@ -31,9 +31,9 @@ const chartEntity: ChartEntity = {
   ],
   dateRange: {
     end: "",
-    start: ""
+    start: "",
   },
-  syncWithPageDateRange: false
+  syncWithPageDateRange: false,
 };
 
 export const Default: Story = {
@@ -41,7 +41,7 @@ export const Default: Story = {
     chartEntity,
     dateRange: {
       end: "",
-      start: ""
-    }
+      start: "",
+    },
   },
 };
