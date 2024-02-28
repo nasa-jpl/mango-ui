@@ -10,8 +10,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:force": "vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
+    "preview": "vite preview --port 8080 --host",
     "test": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
