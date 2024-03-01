@@ -2,7 +2,7 @@ import ChartJS, { ChartDataset, Point } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChartEntity, ChartLayer, DataResponse } from "../../../types/view";
 import { DateRange } from "../../../types/time";
 import { getData } from "../../../utilities/api";
@@ -26,6 +26,17 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   const [pointCount, setPointCount] = useState(0);
   const cancelHandles: Record<string, () => void> = {};
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedVisualizeChartLayersImmediate = useCallback(
+    debounce(
+      (layers, dateRange) =>
+        visualizeChartLayers(layers || [], dateRange.start, dateRange.end),
+      500,
+      { leading: true }
+    ),
+    []
+  );
+
   useEffect(() => {
     initializeChart();
 
@@ -33,16 +44,15 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   }, []);
 
   useEffect(() => {
-    debouncedVisualizeChartLayersImmediate(
-      chartEntity.layers || [],
-      dateRange.start,
-      dateRange.end
-    );
+    debouncedVisualizeChartLayersImmediate(chartEntity.layers || [], dateRange);
 
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.layers), dateRange]);
+  }, [JSON.stringify(chartEntity.layers),
+      dateRange,
+      debouncedVisualizeChartLayersImmediate,
+  ]);
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
@@ -99,10 +109,6 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   };
 
   const debouncedVisualizeChartLayers = debounce(visualizeChartLayers, 500);
-  const debouncedVisualizeChartLayersImmediate = useMemo(
-    () => debounce(visualizeChartLayers, 500, { leading: true }),
-    []
-  );
 
   const fetchLayerData = (
     layer: ChartLayer,
