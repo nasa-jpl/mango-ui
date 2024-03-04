@@ -5,7 +5,12 @@ COPY . /app
 
 RUN npm i
 RUN npm run build:force
-# COPY package.json /app
-# COPY node_modules /app/node_modules
-ENV PORT 8080
+
+# API (to be deployed)
+ENV PORT 8000
+
+# UI
+#EXPOSE 5173
+EXPOSE 8080
+
 CMD [ "npm", "run", "preview" ]
