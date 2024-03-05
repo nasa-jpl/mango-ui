@@ -89,7 +89,6 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
       label: layer.streamId,
       data: result.data.map((x) => ({
         x: x.timestamp as number,
-        // x: new Date(x.timestamp).toUTCString(),
         y: x[layer.field] as number,
       })),
       pointRadius: 1,
@@ -101,6 +100,9 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     chartRef.current.data.datasets.forEach((d, i) => {
       chartRef.current?.setDatasetVisibility(i, !d.hidden);
     });
+    if (chartRef.current.isZoomedOrPanned()) {
+      chartRef.current.resetZoom();
+    }
     chartRef.current.update();
     const newCount = results
       .map((result) => result.result.data_count)
