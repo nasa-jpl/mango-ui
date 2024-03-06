@@ -8,3 +8,9 @@
 .page-header-title {
   font-size: 18px;
 }
+
+.page-header-children {
+  display: flex;
+  height: 24px;
+  gap: 8px;
+}
