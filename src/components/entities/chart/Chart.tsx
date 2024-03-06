@@ -2,8 +2,9 @@ import ChartJS, { ChartDataset, Point } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChartEntity, ChartLayer, DataResponse } from "../../../types/view";
+import { DateRange } from "../../../types/time";
 import { getData } from "../../../utilities/api";
 import { pluralize } from "../../../utilities/foo";
 import { getLayerId, isAbortError } from "../../../utilities/generic";
@@ -14,15 +15,27 @@ ChartJS.register(zoomPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
+  dateRange: DateRange;
 };
 
-export const Chart = ({ chartEntity }: ChartProps) => {
+export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS<"line"> | null>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>();
   const [pointCount, setPointCount] = useState(0);
   const cancelHandles: Record<string, () => void> = {};
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedVisualizeChartLayersImmediate = useCallback(
+    debounce(
+      (layers, dateRange) =>
+        visualizeChartLayers(layers || [], dateRange.start, dateRange.end),
+      500,
+      { leading: true }
+    ),
+    []
+  );
 
   useEffect(() => {
     initializeChart();
@@ -31,12 +44,15 @@ export const Chart = ({ chartEntity }: ChartProps) => {
   }, []);
 
   useEffect(() => {
-    visualizeChartLayers(chartEntity.layers || []);
+    debouncedVisualizeChartLayersImmediate(chartEntity.layers || [], dateRange);
 
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.layers)]);
+  }, [JSON.stringify(chartEntity.layers),
+      dateRange,
+      debouncedVisualizeChartLayersImmediate,
+  ]);
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
@@ -73,7 +89,6 @@ export const Chart = ({ chartEntity }: ChartProps) => {
       label: layer.streamId,
       data: result.data.map((x) => ({
         x: x.timestamp as number,
-        // x: new Date(x.timestamp).toUTCString(),
         y: x[layer.field] as number,
       })),
       pointRadius: 1,
@@ -85,6 +100,9 @@ export const Chart = ({ chartEntity }: ChartProps) => {
     chartRef.current.data.datasets.forEach((d, i) => {
       chartRef.current?.setDatasetVisibility(i, !d.hidden);
     });
+    if (chartRef.current.isZoomedOrPanned()) {
+      chartRef.current.resetZoom();
+    }
     chartRef.current.update();
     const newCount = results
       .map((result) => result.result.data_count)
@@ -109,6 +127,7 @@ export const Chart = ({ chartEntity }: ChartProps) => {
         layer.datasetId,
         layer.streamId,
         layer.field,
+        // TODO: check whether or not to sync with page date range
         startTime || layer.startTime,
         endTime || layer.endTime
       );

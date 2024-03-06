@@ -10,6 +10,7 @@ import {
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
 import { Section as SectionType } from "../../types/view";
+import { DateRange } from "../../types/time";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
@@ -17,9 +18,14 @@ import "./Section.css";
 export declare type SectionProps = {
   onSectionChange: (section: SectionType) => void;
   section: SectionType;
+  dateRange: DateRange;
 };
 
-export const Section = ({ section, onSectionChange }: SectionProps) => {
+export const Section = ({
+  section,
+  onSectionChange,
+  dateRange,
+}: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
   const [dragging, setDragging] = useState(false);
@@ -113,6 +119,7 @@ export const Section = ({ section, onSectionChange }: SectionProps) => {
                   onEntityChange={() => {}}
                   key={e.id}
                   className={entityClass}
+                  dateRange={dateRange}
                 />
               </CustomGridItemComponent>
             );
