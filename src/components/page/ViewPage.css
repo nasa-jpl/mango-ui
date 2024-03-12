@@ -1,6 +1,6 @@
 .page {
-  display: flex;
   background: var(--st-gray-15);
+  display: flex;
   flex-direction: column;
   width: 100%;
 }

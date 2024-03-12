@@ -48,6 +48,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     initializeChart();
 
     return () => destroyChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(chartEntity.layers),
     dateRange,
     debouncedVisualizeChartLayersImmediate,

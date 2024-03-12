@@ -1,8 +1,8 @@
 .page-header {
-  padding: 16px 24px;
+  background: var(--st-white);
   display: flex;
   justify-content: space-between;
-  background: var(--st-white);
+  padding: 16px 24px;
 }
 
 .page-header-title {
@@ -11,6 +11,6 @@
 
 .page-header-children {
   display: flex;
-  height: 24px;
   gap: 8px;
+  height: 24px;
 }

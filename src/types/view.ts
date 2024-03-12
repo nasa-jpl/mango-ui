@@ -32,7 +32,6 @@ export type Section = {
   id: string;
   layout: SectionLayout[];
   title: string;
-  dateRange: DateRange;
 };
 
 export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
@@ -40,11 +39,11 @@ export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
 export type EntityType = "chart" | "table" | "map";
 
 export type Entity = {
-  id: string;
   dateRange: DateRange;
+  id: string;
+  syncWithPageDateRange?: boolean;
   title: string;
   type: EntityType;
-  syncWithPageDateRange: boolean;
 };
 
 export interface ChartEntity extends Entity {

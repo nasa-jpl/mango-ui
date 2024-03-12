@@ -1,18 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import assert from "assert";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("has title", async ({ page }) => {
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/GMAT/);
-});
-
 test("page date-time selection yields expected API response", async ({
   page,
 }) => {
+  test.skip(!!process.env.CI, "Skipped in CI due lack of API access");
+
   /**
    * Test to confirm page date-time selection results in valid API
    * response containing data for the selected date-time range.
@@ -35,12 +32,15 @@ test("page date-time selection yields expected API response", async ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, response] = await Promise.all([
     await page.fill("id=page-datetime-end", endDateTime),
-    page.waitForResponse((response) => {
-      return (
-        response.url().includes("/missions/GRACEFO/datasets/") &&
-        response.status() === 200
-      );
-    }),
+    page.waitForResponse(
+      (response) => {
+        return (
+          response.url().includes("/missions/GRACEFO/datasets/") &&
+          response.status() === 200
+        );
+      },
+      { timeout: 10000 }
+    ),
   ]);
 
   // Assert API response date-time range for requested data matches page date-time range

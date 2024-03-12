@@ -10,5 +10,10 @@ export default defineConfig({
   },
   test: {
     include: ["./src/**/*.test.ts"],
+    outputFile: {
+      json: "unit-test-results/json-results.json",
+      junit: "unit-test-results/junit-results.xml",
+    },
+    reporters: ["verbose", "json", "junit"],
   },
 });

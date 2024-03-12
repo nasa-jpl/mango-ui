@@ -9,16 +9,16 @@ import {
   IconCaretDown,
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
-import { Section as SectionType } from "../../types/view";
 import { DateRange } from "../../types/time";
+import { Section as SectionType } from "../../types/view";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
 
 export declare type SectionProps = {
+  dateRange: DateRange;
   onSectionChange: (section: SectionType) => void;
   section: SectionType;
-  dateRange: DateRange;
 };
 
 export const Section = ({

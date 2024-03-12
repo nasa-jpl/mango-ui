@@ -1,15 +1,15 @@
 .entity-header {
-  display: flex;
   background: var(--st-gray-10);
-  justify-content: space-between;
   border-bottom: var(--app-border);
+  display: flex;
+  justify-content: space-between;
   padding: 8px 10px;
 }
 
 .entity-header-title {
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entity-drag-handle {
@@ -24,9 +24,9 @@
 }
 
 .entity-loading {
-  user-select: none;
   color: var(--st-gray-50);
   font-size: 10px;
+  user-select: none;
 }
 
 .entity-error {

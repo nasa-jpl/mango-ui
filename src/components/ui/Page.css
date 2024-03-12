@@ -1,6 +1,6 @@
 .page {
-  display: flex;
   background: var(--st-gray-15);
+  display: flex;
   flex-direction: column;
   width: 100%;
 }
@@ -8,8 +8,8 @@
 .page-body {
   display: flex;
   flex-direction: column;
-  overflow: auto;
   height: 100%;
+  overflow: auto;
   width: 100%;
 }
 

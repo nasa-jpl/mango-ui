@@ -15,7 +15,7 @@ export function isMapEntity(entity: Entity): entity is MapEntity {
   return entity.type === "map";
 }
 
-export function isTableEntity(entity: Entity): entity is TableEntity {
+export function isTableEntity(entity: Entity): entity is TableEntity<never> {
   return entity.type === "table";
 }
 

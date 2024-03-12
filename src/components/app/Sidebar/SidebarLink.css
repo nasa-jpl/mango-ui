@@ -1,12 +1,12 @@
 .sidebar-link.st-button {
-  width: 100%;
-  justify-content: flex-start;
   align-items: center;
-  gap: 8px;
-  padding: 8px 6px;
-  color: var(--st-gray-60);
-  height: 30px;
   border-radius: 4px;
+  color: var(--st-gray-60);
+  gap: 8px;
+  height: 30px;
+  justify-content: flex-start;
+  padding: 8px 6px;
+  width: 100%;
 }
 
 .sidebar-link--primary {

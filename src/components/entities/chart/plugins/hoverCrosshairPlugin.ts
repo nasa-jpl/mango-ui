@@ -1,6 +1,8 @@
 /* This file defines a custom plugin for ChartJS */
 
-type CustomChartType = ChartType<"line"> & {
+import { Chart } from "chart.js";
+
+type CustomChartType = Chart<"line"> & {
   hoverCrosshair: { draw?: boolean; x: number; y: number };
 };
 

@@ -14,6 +14,7 @@ type Story = StoryObj<typeof meta>;
 
 const mapEntity: MapEntity = {
   id: "123",
+  dateRange: { start: "", end: "" },
   type: "map",
   title: "Map 1",
 };
@@ -21,5 +22,6 @@ const mapEntity: MapEntity = {
 export const Default: Story = {
   args: {
     mapEntity,
+    dateRange: { start: "", end: "" },
   },
 };

@@ -4,11 +4,11 @@
 }
 
 .sidebar-group-button.st-button {
-  justify-content: flex-start;
-  padding-left: 0px;
-  font-size: 10px;
   color: var(--st-gray-60);
+  font-size: 10px;
   gap: 2px;
+  justify-content: flex-start;
+  padding-left: 0;
 }
 
 .sidebar-group-content .sidebar-link.st-button {

@@ -17,7 +17,7 @@ export declare type SidebarProps = {
   view?: View;
 };
 
-export const Sidebar = ({ title = "", logo, view }: SidebarProps) => {
+export const Sidebar = ({ title = "", view }: SidebarProps) => {
   const [active, setActive] = useState("home");
 
   const getNavLinkClass = (isActive: boolean, path: string) => {

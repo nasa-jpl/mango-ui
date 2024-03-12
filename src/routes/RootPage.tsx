@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
 import Sidebar from "../components/app/Sidebar/Sidebar";
-import { Dataset, View } from "../types/view";
+import { Dataset } from "../types/api";
+import { View } from "../types/view";
 import { getDatasets, getMissions } from "../utilities/api";
 
 export default function RootPage() {
@@ -12,6 +13,7 @@ export default function RootPage() {
 
   useEffect(() => {
     initialize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initialize = () => {

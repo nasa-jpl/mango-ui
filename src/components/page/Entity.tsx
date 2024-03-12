@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Entity as EntityType, TableEntity } from "../../types/view";
 import { DateRange } from "../../types/time";
+import { Entity as EntityType, TableEntity } from "../../types/view";
 import {
   isChartEntity,
   isMapEntity,
@@ -15,13 +15,13 @@ import "./Entity.css";
 
 export declare type EntityProps = {
   className: string;
-  entity: EntityType;
   dateRange: DateRange;
+  entity: EntityType;
   onEntityChange: (entity: EntityType) => void;
 };
 
 export const Entity = (props: EntityProps) => {
-  const { entity, onEntityChange, className = "", dateRange } = props;
+  const { entity, className = "", dateRange } = props;
   const entityClass = classNames({
     entity: true,
     [className]: !!className,

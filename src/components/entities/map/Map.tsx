@@ -2,17 +2,17 @@ import L, { Map as MapType } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useResizeObserver from "../../../hooks/resizeObserver";
+import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
-import { DateRange } from "../../../types/time";
 
 export declare type MapProps = {
-  mapEntity: MapEntity;
   dateRange: DateRange;
+  mapEntity: MapEntity;
 };
 
-export const Map = ({ mapEntity, dateRange }: MapProps) => {
+export const Map = ({ mapEntity /* ,dateRange */ }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const map = useRef<MapType | null>();
 

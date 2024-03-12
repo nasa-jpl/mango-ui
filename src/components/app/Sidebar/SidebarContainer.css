@@ -1,25 +1,25 @@
 .sidebar {
-  flex-shrink: 0;
   background: var(--st-white);
   border-right: var(--app-border);
   display: flex;
   flex-direction: column;
-  width: 200px;
+  flex-shrink: 0;
   gap: 16px;
   height: 100%;
+  width: 200px;
 }
 
 .sidebar-branding {
+  align-items: center;
   display: flex;
   gap: 8px;
-  align-items: center;
-  padding: 16px 8px 0px;
+  padding: 16px 8px 0;
   user-select: none;
 }
 
 .sidebar-logo svg {
-  width: 32px;
   height: 32px;
+  width: 32px;
 }
 
 .sidebar-title {
@@ -27,11 +27,12 @@
 }
 
 .sidebar-logo {
-  width: 32px;
-  display: flex;
   align-items: center;
+  display: flex;
   justify-content: center;
+  width: 32px;
 }
+
 /* TODO should do better with BEM to differentiate between
    component and a part of a component
 */
