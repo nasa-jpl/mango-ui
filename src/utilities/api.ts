@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { DataResponse, DataResponseError, Dataset } from "../types/view";
+import { DataResponse, DataResponseError, Dataset } from "../types/api";
 
 export const getMissions = async (): Promise<string[]> => {
   const url = config.endpoints.data + config.api.data.missions;

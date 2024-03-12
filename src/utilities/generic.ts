@@ -113,3 +113,10 @@ export function getLayerId(layer: DataLayer): string {
 export function isAbortError(error: Error | unknown) {
   return (error as Error).name === "AbortError";
 }
+
+/**
+ * Returns s if count is 1
+ */
+export function pluralize(count: number): string {
+  return count === 1 ? "" : "s";
+}

@@ -1,17 +1,24 @@
-import ChartJS, { ChartDataset, Point } from "chart.js/auto";
+import ChartJS, { ChartDataset, Point, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChartEntity, ChartLayer, DataResponse } from "../../../types/view";
+import { DataResponse } from "../../../types/api";
 import { DateRange } from "../../../types/time";
+import { ChartEntity, ChartLayer, YAxis } from "../../../types/view";
 import { getData } from "../../../utilities/api";
-import { pluralize } from "../../../utilities/foo";
-import { getLayerId, isAbortError } from "../../../utilities/generic";
+import {
+  getLayerId,
+  isAbortError,
+  pluralize,
+} from "../../../utilities/generic";
+import { applyLayerTransform } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
+import hoverCrosshairPlugin from "./plugins/hoverCrosshairPlugin";
 
 ChartJS.register(zoomPlugin);
+ChartJS.register(hoverCrosshairPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
@@ -49,10 +56,44 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.layers),
-      dateRange,
-      debouncedVisualizeChartLayersImmediate,
+  }, [
+    JSON.stringify(chartEntity.layers),
+    dateRange,
+    debouncedVisualizeChartLayersImmediate,
   ]);
+
+  useEffect(() => {
+    configureChartAxes(chartEntity.yAxes || []);
+
+    // Use JSON.stringify for deep comparison (recommended)
+    // https://github.com/facebook/react/issues/14476#issuecomment-471199055
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(chartEntity.yAxes)]);
+
+  const configureChartAxes = (yAxes: YAxis[]) => {
+    if (
+      !chartRef.current ||
+      !chartRef.current.config.options ||
+      !chartRef.current.config.options.scales
+    ) {
+      return;
+    }
+    const newAxes: typeof chartRef.current.config.options.scales = {
+      x: chartRef.current.config.options.scales.x,
+    };
+    yAxes.forEach((axis, i) => {
+      const position = axis.position || "left";
+      newAxes[axis.id] = {
+        type: axis.type || "linear",
+        position,
+        title: { display: !!axis.label, text: axis.label, color: axis?.color },
+        grid: { display: i === 0 }, // only show horizontal axis ticks for first axis
+        ...(axis.min ? { min: axis.min } : null),
+        ...(axis.max ? { max: axis.max } : null),
+      };
+    });
+    chartRef.current.config.options.scales = newAxes;
+  };
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
@@ -87,15 +128,24 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
       id: getLayerId(layer),
       hidden: hiddenDatasets[getLayerId(layer)] || false,
       label: layer.streamId,
-      data: result.data.map((x) => ({
-        x: x.timestamp as number,
-        y: x[layer.field] as number,
-      })),
-      pointRadius: 1,
-      borderWidth: 1,
+      data: result.data.map((result) => {
+        const point = {
+          x: new Date(result.timestamp).getTime(),
+          y: result[layer.field] as number,
+        };
+        return applyLayerTransform(point, layer);
+      }),
+      borderWidth: typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
       spanGaps: false,
+      pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
+      pointRadius:
+        typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
+      showLine: layer.hideLines ? false : true,
+      yAxisID: layer.yAxisId,
+      ...(layer.color
+        ? { backgroundColor: layer.color, borderColor: layer.color }
+        : null),
     }));
-
     chartRef.current.data.datasets = chartJSDatasets;
     chartRef.current.data.datasets.forEach((d, i) => {
       chartRef.current?.setDatasetVisibility(i, !d.hidden);
@@ -200,6 +250,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
       data: {
         datasets: [],
       },
+      plugins: [hoverCrosshairPlugin],
       options: {
         font: {
           family: "'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
@@ -225,11 +276,15 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
           },
         },
         plugins: {
+          [hoverCrosshairPlugin.id]: {
+            enabled: chartEntity.chartOptions?.showCursor || false,
+          },
           tooltip: {
             callbacks: {
               label: (tooltipItem) =>
                 `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y}`,
             },
+            ...(chartEntity.chartOptions?.tooltip || {}),
           },
           decimation: {
             enabled: true,
