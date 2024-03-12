@@ -27,6 +27,7 @@ type Story = StoryObj<typeof meta>;
 
 const tableEntity: TableEntity<TableRow> = {
   type: "chart",
+  dateRange: { start: "", end: "" },
   id: "123",
   rows: [
     { id: generateUUID(), name: generateUniqueName() },
@@ -36,11 +37,13 @@ const tableEntity: TableEntity<TableRow> = {
   ],
   title: "Table 1",
   fields: ["id", "name"],
+
   /* TODO how should we relate entities and datasets and configuration of datasets in the table? */
 };
 
 export const Default: Story = {
   args: {
     tableEntity,
+    dateRange: { start: "", end: "" },
   },
 };

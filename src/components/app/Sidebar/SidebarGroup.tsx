@@ -3,9 +3,9 @@ import { useState } from "react";
 import "./SidebarGroup.css";
 
 export declare type SidebarGroupProps = {
-  title?: string;
-  defaultOpen?: boolean;
   children?: React.ReactNode;
+  defaultOpen?: boolean;
+  title?: string;
 };
 
 export const SidebarGroup = ({

@@ -1,9 +1,9 @@
 import "./SidebarContainer.css";
 
 export declare type SidebarContainerProps = {
-  title?: string;
-  logo?: React.ReactNode;
   children?: React.ReactNode;
+  logo?: React.ReactNode;
+  title?: string;
 };
 
 export const SidebarContainer = ({

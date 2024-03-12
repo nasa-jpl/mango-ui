@@ -1,5 +1,5 @@
+import { DatasetStream } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
-import { DatasetStream } from "../../types/view";
 import DataGrid from "../ui/DataGrid/DataGrid";
 
 export declare type DatasetTableProps = {

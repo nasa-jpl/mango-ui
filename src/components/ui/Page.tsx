@@ -3,10 +3,10 @@ import "./Page.css";
 import PageHeader from "./PageHeader";
 
 export declare type PageHeaderProps = {
-  title?: string;
+  children?: React.ReactNode;
   padBody?: boolean;
   pageHeaderChildren?: React.ReactNode;
-  children?: React.ReactNode;
+  title?: string;
 };
 
 export const Page = ({

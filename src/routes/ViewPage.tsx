@@ -1,6 +1,6 @@
 import { useOutletContext, useParams } from "react-router-dom";
 import Page from "../components/page/ViewPage";
-import { View, ViewPage as ViewPageType } from "../types/view";
+import { View, Page as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
   // TODO consider a reducer for this instead of context?

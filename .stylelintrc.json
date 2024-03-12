@@ -1,0 +1,13 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "plugins": ["stylelint-order"],
+  "rules": {
+    "order/properties-alphabetical-order": true,
+    "color-function-notation": "legacy",
+    "alpha-value-notation": "number",
+    "declaration-empty-line-before": "never",
+    "function-name-case": null,
+    "function-no-unknown": null,
+    "selector-class-pattern": null
+  }
+}

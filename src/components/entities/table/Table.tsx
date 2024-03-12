@@ -5,11 +5,11 @@ import DataGrid from "../../ui/DataGrid/DataGrid";
 import "./Table.css";
 
 export declare type TableProps<T> = {
-  tableEntity: TableEntity<T>;
   dateRange: DateRange;
+  tableEntity: TableEntity<T>;
 };
 
-export function Table<T>({ tableEntity, dateRange }: TableProps<T>) {
+export function Table<T>({ tableEntity /* dateRange */ }: TableProps<T>) {
   const columnDefs = tableEntity.fields.map((field) => ({
     field,
     filter: "string",

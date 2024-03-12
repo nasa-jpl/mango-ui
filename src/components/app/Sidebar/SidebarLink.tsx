@@ -3,8 +3,8 @@ import classNames from "classnames";
 import "./SidebarLink.css";
 
 export declare type SidebarLinkProps = {
-  title?: string;
   icon?: React.ReactNode;
+  title?: string;
   variant?: "primary-link" | "secondary-link";
 };
 

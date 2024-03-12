@@ -1,4 +1,4 @@
-import { DatasetStream, Stream } from "../../src/types/view";
+import { DatasetStream, Stream } from "../../src/types/api";
 import { generateUniqueName } from "./generic";
 
 export const generateTestStream = (): Stream => {
