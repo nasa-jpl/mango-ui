@@ -5,15 +5,21 @@
       {
         "id": "dsfgr23rwe",
         "type": "section",
-        "title": "Section 1",
+        "title": "Examples",
         "enableHeader": true,
         "defaultOpen": true,
-        "layout": [{ "i": "sdfdgfhg", "x": 8, "y": 0, "w": 12, "h": 2 }],
+        "layout": [
+          { "i": "sdfdgfhg", "x": 8, "y": 0, "w": 6, "h": 2 },
+          { "i": "sdf23edx", "x": 8, "y": 0, "w": 6, "h": 2 },
+          { "i": "3edfghtr", "x": 8, "y": 1, "w": 6, "h": 2 },
+          { "i": "3efgtre", "x": 8, "y": 1, "w": 6, "h": 2 },
+          { "i": "dfgdgfg", "x": 8, "y": 2, "w": 6, "h": 2 }
+        ],
         "entities": [
           {
             "id": "sdfdgfhg",
             "type": "chart",
-            "title": "Entity 1",
+            "title": "Multiple Axes, Y1 Fixed Min/Max",
             "layers": [
               {
                 "id": "3regf",
@@ -21,11 +27,241 @@
                 "datasetId": "ACC1A",
                 "field": "lin_accl_x",
                 "streamId": "C",
-                "startTime": "2022-02-01T00:00:00.000000Z",
-                "endTime": "2022-02-01T00:01:00.000000Z"
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "orange"
+              },
+              {
+                "id": "3rwefrd",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "blue"
+              },
+              {
+                "id": "frdgfhy",
+                "mission": "GRACEFO",
+                "datasetId": "PCI1A",
+                "field": "ant_centr_accl",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y2",
+                "color": "red"
               }
             ],
-            "yAxes": []
+            "yAxes": [
+              {
+                "id": "y1",
+                "label": "ACC1A Linear Acceleration X (m/sec²)",
+                "position": "left",
+                "min": -0.000015,
+                "max": -0.00001
+              },
+              {
+                "id": "y2",
+                "label": "IHK1A Antenna phase center offset correction accl",
+                "position": "right",
+                "color": "red"
+              }
+            ]
+          },
+          {
+            "id": "sdf23edx",
+            "type": "chart",
+            "title": "Multiple Axes, Y2 Log Scale",
+            "layers": [
+              {
+                "id": "fdv",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "orange"
+              },
+              {
+                "id": "sdfe",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "blue"
+              },
+              {
+                "id": "2wedfg",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "ang_accl_x",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y2",
+                "color": "red"
+              }
+            ],
+            "yAxes": [
+              {
+                "id": "y1",
+                "label": "ACC1A Linear Acceleration X (m/sec²)",
+                "position": "left"
+              },
+              {
+                "id": "y2",
+                "label": "IHK1A Antenna phase center offset correction accl",
+                "position": "right",
+                "type": "logarithmic",
+                "color": "red"
+              }
+            ]
+          },
+          {
+            "id": "3edfghtr",
+            "type": "chart",
+            "title": "Hide Lines, Hide Points, Point Radius, Line Width",
+            "layers": [
+              {
+                "id": "fdv",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:33:25.000000Z",
+                "endTime": "2022-03-02T00:33:35.000000Z",
+                "yAxisId": "y1",
+                "color": "orange",
+                "hideLines": true,
+                "pointRadius": 2
+              },
+              {
+                "id": "sdfe",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:33:25.000000Z",
+                "endTime": "2022-03-02T00:33:35.000000Z",
+                "yAxisId": "y1",
+                "color": "blue",
+                "hidePoints": true,
+                "lineWidth": 8
+              },
+              {
+                "id": "2ed",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_z",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:33:25.000000Z",
+                "endTime": "2022-03-02T00:33:35.000000Z",
+                "yAxisId": "y1",
+                "color": "green"
+              }
+            ],
+            "yAxes": [
+              {
+                "id": "y1",
+                "label": "ACC1A Linear Acceleration X (m/sec²)",
+                "position": "left"
+              }
+            ]
+          },
+          {
+            "id": "3efgtre",
+            "type": "chart",
+            "title": "Tooltip Intersection Off, Mode Index, Show Cursor",
+            "chartOptions": {
+              "tooltip": { "intersect": false, "mode": "index" },
+              "showCursor": true
+            },
+            "layers": [
+              {
+                "id": "fdv",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "orange"
+              },
+              {
+                "id": "sdfe",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "blue"
+              }
+            ],
+            "yAxes": [
+              {
+                "id": "y1",
+                "label": "ACC1A Linear Acceleration X (m/sec²)",
+                "position": "left"
+              }
+            ]
+          },
+          {
+            "id": "dfgdgfg",
+            "type": "chart",
+            "title": "Data Transformations (C: x+100000, D: y*-1 - 0.00001)",
+            "layers": [
+              {
+                "id": "fdv",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "C",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "orange",
+                "transforms": {
+                  "x": {
+                    "add": 100000
+                  }
+                }
+              },
+              {
+                "id": "sdfe",
+                "mission": "GRACEFO",
+                "datasetId": "ACC1A",
+                "field": "lin_accl_x",
+                "streamId": "D",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "endTime": "2022-03-02T00:36:00.000000Z",
+                "yAxisId": "y1",
+                "color": "blue",
+                "transforms": {
+                  "y": {
+                    "multiply": -1,
+                    "subtract": 0.00001
+                  }
+                }
+              }
+            ],
+            "yAxes": [
+              {
+                "id": "y1",
+                "label": "ACC1A Linear Acceleration X (m/sec²)",
+                "position": "left"
+              }
+            ]
           }
         ]
       }
@@ -60,11 +296,14 @@
                       "datasetId": "ACC1A",
                       "field": "lin_accl_x",
                       "streamId": "C",
-                      "startTime": "2022-02-01T00:00:00.000000Z",
-                      "endTime": "2022-02-01T00:01:00.000000Z"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
                     }
                   ],
-                  "yAxes": []
+                  "yAxes": [
+                    { "id": "y1", "label": "Label 1" },
+                    { "id": "y2", "label": "Label 2" }
+                  ]
                 },
                 {
                   "id": "456",
@@ -101,8 +340,7 @@
                 {
                   "id": "sdfghy4ter",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration X (nm/sec²)",
-                  "yAxes": [],
+                  "title": "Coalesced Linear Acceleration X (m/sec²)",
                   "layers": [
                     {
                       "id": "234567",
@@ -127,7 +365,7 @@
                 {
                   "id": "dfgrt43rwe",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Y (nm/sec²)",
+                  "title": "Coalesced Linear Acceleration Y (m/sec²)",
                   "yAxes": [],
                   "layers": [
                     {
@@ -153,7 +391,7 @@
                 {
                   "id": "dfg43er",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Z (nm/sec²)",
+                  "title": "Coalesced Linear Acceleration Z (m/sec²)",
                   "yAxes": [],
                   "layers": [
                     {
@@ -193,7 +431,7 @@
                 {
                   "id": "sdfer34wefsd",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration X (nm/sec²)",
+                  "title": "Coalesced Angular Acceleration X (m/sec²)",
                   "yAxes": [],
                   "layers": [
                     {
@@ -219,7 +457,7 @@
                 {
                   "id": "fsdr4efd",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Y (nm/sec²)",
+                  "title": "Coalesced Angular Acceleration Y (m/sec²)",
                   "yAxes": [],
                   "layers": [
                     {
@@ -245,7 +483,7 @@
                 {
                   "id": "sdfer4edf",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Z (nm/sec²)",
+                  "title": "Coalesced Angular Acceleration Z (m/sec²)",
                   "yAxes": [],
                   "layers": [
                     {

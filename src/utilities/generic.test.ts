@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import { DataLayer } from "../types/view";
-import { pluralize } from "./foo";
-import { generateUUID, getLayerId, isAbortError } from "./generic";
+import { generateUUID, getLayerId, isAbortError, pluralize } from "./generic";
 
 test("pluralize", () => {
   expect(pluralize(0)).toBe("s");

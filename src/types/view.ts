@@ -1,3 +1,8 @@
+import {
+  CartesianScaleOptions,
+  ChartTypeRegistry,
+  TooltipOptions,
+} from "chart.js";
 import { Layout } from "react-grid-layout";
 import { DateRange } from "./time";
 
@@ -43,10 +48,31 @@ export type Entity = {
 };
 
 export interface ChartEntity extends Entity {
+  chartOptions?: ChartOptions;
   layers?: ChartLayer[];
-  yAxes: any;
-  // etc
+  yAxes: YAxis[];
 }
+
+export type ChartOptions = {
+  showCursor?: boolean;
+  tooltip?: {
+    intersect?: TooltipOptions["intersect"];
+    mode?: TooltipOptions["mode"];
+  };
+};
+
+export type YAxis = {
+  /** If true, automatically adjust the axis domain to fit the data in view. If false, use the supplied min and max values. */
+  autoFitDomain?: boolean;
+  color?: string;
+  id: string;
+  label?: string;
+  max?: number;
+  min?: number;
+  position?: CartesianScaleOptions["position"];
+  /** Axis type, defaults to linear */
+  type?: ChartTypeRegistry["line"]["scales"];
+};
 
 export type DataLayer = {
   datasetId: string;
@@ -59,8 +85,25 @@ export type DataLayer = {
 };
 
 export interface ChartLayer extends DataLayer {
+  color?: string;
+  hideLines?: boolean;
+  hidePoints?: boolean;
+  lineWidth?: number;
+  pointRadius?: number;
+  transforms?: {
+    x?: DataTransform;
+    y?: DataTransform;
+  };
   type: "line";
+  yAxisId: string;
 }
+
+export type DataTransform = {
+  add?: number;
+  divide?: number;
+  multiply?: number;
+  subtract?: number;
+};
 
 export interface MapEntity extends Entity {
   // etc
@@ -70,40 +113,3 @@ export interface TableEntity<T> extends Entity {
   fields: string[];
   rows?: T[];
 }
-
-/* TODO move to a separate file? */
-export type Dataset = {
-  available_fields: string[];
-  full_id: string; // <mission>_<dataset_id>
-  id: string;
-  mission: string;
-  streams: Stream[];
-  timestamp_field: string; // the field in this dataset that denotes the time axis
-};
-
-export interface DatasetStream extends Omit<Dataset, "streams"> {
-  data_begin: string;
-  data_end: string;
-  streamId: string;
-}
-
-export type Stream = {
-  data_begin: string; // timestamp
-  data_end: string; // timestamp
-  id: string;
-};
-
-/* TODO move to an API type file */
-export type DataResponse = {
-  data: Record<string, number | string>[];
-  data_begin: string;
-  data_count: number;
-  data_end: string;
-  from_isotimestamp: string;
-  query_elapsed_ms: number;
-  to_isotimestamp: string;
-};
-
-export type DataResponseError = {
-  detail: string;
-};
