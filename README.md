@@ -1,4 +1,4 @@
-# gmat-ui
+# gmat-ui [![Build Status](***REMOVED***)](***REMOVED***)
 
 The client application for the GMAT system (Gravity Monitoring & Analysis Toolkit).
 
