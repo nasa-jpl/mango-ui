@@ -1,0 +1,24 @@
+.sidebar-link.st-button {
+  align-items: center;
+  border-radius: 4px;
+  color: var(--st-gray-60);
+  gap: 8px;
+  height: 30px;
+  justify-content: flex-start;
+  padding: 8px 6px;
+  width: 100%;
+}
+
+.sidebar-link--primary {
+  font-weight: 600;
+}
+
+.sidebar-link--active button.st-button,
+.sidebar-link--active button.st-button:hover {
+  background-color: #e6f3ff !important ; /* TODO figure out what color scheme to use and if this can be defined via stellar vars */
+  color: #007bff !important ;
+}
+
+.sidebar-link--pending {
+  color: gray;
+}

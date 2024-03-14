@@ -1,0 +1,5 @@
+dist/**
+e2e-test-results/**
+unit-test-results/**
+node_modules/**
+ag-grid-stellar.css

@@ -1,0 +1,16 @@
+.sidebar-group,
+.sidebar-group .sidebar-group-button {
+  width: 100%;
+}
+
+.sidebar-group-button.st-button {
+  color: var(--st-gray-60);
+  font-size: 10px;
+  gap: 2px;
+  justify-content: flex-start;
+  padding-left: 0;
+}
+
+.sidebar-group-content .sidebar-link.st-button {
+  padding-left: 18px;
+}

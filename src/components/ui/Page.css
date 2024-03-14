@@ -1,0 +1,22 @@
+.page {
+  background: var(--st-gray-15);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+}
+
+.page--padded .page-body {
+  padding: 16px;
+}
+
+.page--padded .page-header {
+  border-bottom: var(--app-border);
+}
