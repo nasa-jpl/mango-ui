@@ -1,0 +1,38 @@
+.sidebar {
+  background: var(--st-white);
+  border-right: var(--app-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 16px;
+  height: 100%;
+  width: 200px;
+}
+
+.sidebar-branding {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  padding: 16px 8px 0;
+  user-select: none;
+}
+
+.sidebar-logo svg {
+  height: 32px;
+  width: 32px;
+}
+
+.sidebar-title {
+  font-size: 18px;
+}
+
+.sidebar-logo {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 32px;
+}
+
+/* TODO should do better with BEM to differentiate between
+   component and a part of a component
+*/

@@ -1,0 +1,57 @@
+.section-header {
+  border-top: 1px solid var(--st-gray-20);
+  box-shadow: 0 1px 0 0 var(--st-gray-20);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.section-header .st-button {
+  background: var(--st-white);
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  gap: 4px;
+  height: 40px;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  width: 100%;
+}
+
+.section-content {
+  background: var(--st-gray-15);
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+}
+
+.section--open .section-content {
+  display: flex;
+}
+
+.section--open .section-header .st-button {
+  box-shadow: 0 1px 0 0 var(--st-gray-20);
+}
+
+.react-grid-layout {
+  flex: 1;
+  transition-property: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .react-grid-layout--enable-move-animations .react-grid-layout {
+    transition-property: height !important;
+  }
+
+  .react-grid-layout--enable-move-animations
+    .react-grid-layout
+    .react-grid-item.cssTransforms {
+    transition-property: transform !important;
+  }
+}
+
+.react-grid-item {
+  display: flex;
+  transition-property: none !important;
+}

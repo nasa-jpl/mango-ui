@@ -1,0 +1,13 @@
+.entity {
+  background: var(--st-white);
+  border: var(--app-border);
+  border-radius: 4px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.entity-prevent-highlight {
+  user-select: none;
+}

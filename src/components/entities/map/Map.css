@@ -1,0 +1,12 @@
+.map {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.leaflet-container {
+  height: 100%;
+  min-height: 300px;
+  width: 100%;
+}
