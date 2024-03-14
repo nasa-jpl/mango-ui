@@ -1,7 +1,9 @@
 import { Button, Label } from "@nasa-jpl/react-stellar";
 import { useReducer } from "react";
+import { pageDateRangeReducer } from "../../reducers/date-time";
+import { UPDATE_PAGE_DATE_RANGE } from "../../types/actions";
 import { Dataset } from "../../types/api";
-import { DateRange } from "../../types/time";
+import { PageDateRangeState } from "../../types/state";
 import { Page as PageType, Section as SectionType } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
 import { toDatetimelocalStr, toUTCms } from "../../utilities/time";
@@ -23,23 +25,7 @@ export const ViewPage = ({
   viewPage,
   onPageChange,
 }: PageProps) => {
-  // TODO: Pull out state management and maybe refactor a bit
-  type State = {
-    dateRange: DateRange;
-  };
-
-  // TODO will probably be addressed in upcoming store PR
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reducer = (state: State, action: any): State => {
-    switch (action.type) {
-      case "UPDATE_PAGE_DATE_RANGE":
-        return { ...state, ...action.payload };
-      default:
-        return state;
-    }
-  };
-
-  const initialState: State = {
+  const initialState: PageDateRangeState = {
     // TODO: Refactor to pull from config
     dateRange: {
       end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
@@ -47,12 +33,10 @@ export const ViewPage = ({
     },
   };
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(pageDateRangeReducer, initialState);
 
-  // TODO will probably be addressed in upcoming store PR
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateDateRange = (newDateRange: any) => {
-    dispatch({ type: "UPDATE_PAGE_DATE_RANGE", payload: newDateRange });
+  const updateDateRange = (newDateRange: PageDateRangeState) => {
+    dispatch({ type: UPDATE_PAGE_DATE_RANGE, payload: newDateRange });
   };
 
   if (!viewPage) {
