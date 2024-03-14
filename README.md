@@ -1,4 +1,4 @@
-# gmat-ui
+# gmat-ui [![Build Status](https://cae-jenkins2.jpl.nasa.gov/buildStatus/icon?job=Mass-Change-Viz%2FUI2%2Fdevelop)](https://cae-jenkins2.jpl.nasa.gov/job/Mass-Change-Viz/job/UI2/job/develop/)
 
 The client application for the GMAT system (Gravity Monitoring & Analysis Toolkit).
 
