@@ -9,6 +9,7 @@ import {
   IconCaretDown,
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
+import { Dataset } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Section as SectionType } from "../../types/view";
 import CustomGridItemComponent from "./CustomGridItem";
@@ -16,15 +17,17 @@ import Entity from "./Entity";
 import "./Section.css";
 
 export declare type SectionProps = {
+  datasets: Dataset[];
   dateRange: DateRange;
   onSectionChange: (section: SectionType) => void;
   section: SectionType;
 };
 
 export const Section = ({
+  dateRange,
+  datasets,
   section,
   onSectionChange,
-  dateRange,
 }: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
@@ -115,6 +118,7 @@ export const Section = ({
               // @ts-expect-error No typing available
               <CustomGridItemComponent key={e.id}>
                 <Entity
+                  datasets={datasets}
                   entity={e}
                   onEntityChange={() => {}}
                   key={e.id}

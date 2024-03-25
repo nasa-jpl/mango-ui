@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
+import { Dataset } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, TableEntity } from "../../types/view";
 import {
@@ -15,13 +16,19 @@ import "./Entity.css";
 
 export declare type EntityProps = {
   className: string;
+  datasets: Dataset[];
   dateRange: DateRange;
   entity: EntityType;
   onEntityChange: (entity: EntityType) => void;
 };
 
 export const Entity = (props: EntityProps) => {
-  const { entity, className = "", dateRange } = props;
+  const {
+    datasets,
+    entity,
+    className = "",
+    dateRange /* onEntityChange */,
+  } = props;
   const entityClass = classNames({
     entity: true,
     [className]: !!className,
@@ -29,7 +36,7 @@ export const Entity = (props: EntityProps) => {
   return (
     <div className={entityClass}>
       {isChartEntity(entity) && (
-        <Chart chartEntity={entity} dateRange={dateRange} />
+        <Chart chartEntity={entity} dateRange={dateRange} datasets={datasets} />
       )}
       {isMapEntity(entity) && <Map mapEntity={entity} dateRange={dateRange} />}
       {/* TODO figure out type later/inside table? */}

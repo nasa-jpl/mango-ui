@@ -5,3 +5,7 @@ body,
   margin: 0;
   width: 100%;
 }
+
+div[data-radix-popper-content-wrapper] {
+  z-index: 1 !important;
+}

@@ -20,6 +20,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     onPageChange: () => {},
+    datasets: [],
+    loadingInitialData: false,
   },
   loaders: [
     async () => ({

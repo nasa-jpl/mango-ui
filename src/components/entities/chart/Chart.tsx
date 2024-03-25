@@ -1,12 +1,16 @@
-import ChartJS, { ChartDataset, Point, PointStyle } from "chart.js/auto";
+import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DataResponse } from "../../../types/api";
+import { DataResponse, Dataset } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import { ChartEntity, ChartLayer, YAxis } from "../../../types/view";
 import { getData } from "../../../utilities/api";
+import {
+  getDatasetForLayer,
+  getFieldMetadataForLayer,
+} from "../../../utilities/dataset";
 import {
   getLayerId,
   isAbortError,
@@ -22,24 +26,48 @@ ChartJS.register(hoverCrosshairPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
+  // TODO could pass in only the list of datasets that this Chart cares about?
+  datasets: Dataset[];
   dateRange: DateRange;
 };
 
-export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
+export type CustomChartData = { x: string; y: number };
+
+export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<ChartJS<"line"> | null>();
-  const [loading, setLoading] = useState(false);
+  const chartRef = useRef<ChartJS<"line", CustomChartData[]> | null>();
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>();
-  const [pointCount, setPointCount] = useState(0);
+
   const cancelHandles: Record<string, () => void> = {};
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedVisualizeChartLayersImmediate = useCallback(
+  const debouncedVisualizeChartLayers = useCallback(
     debounce(
-      (layers, dateRange) =>
-        visualizeChartLayers(layers || [], dateRange.start, dateRange.end),
+      (layers, datasets, dateRange) =>
+        visualizeChartLayers(
+          layers || [],
+          datasets,
+          dateRange.start,
+          dateRange.end
+        ),
+      100
+    ),
+    []
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedVisualizeChartLayersTrailing = useCallback(
+    debounce(
+      (layers, datasets, dateRange) =>
+        visualizeChartLayers(
+          layers || [],
+          datasets,
+          dateRange.start,
+          dateRange.end
+        ),
       500,
-      { leading: true }
+      { leading: false, trailing: true }
     ),
     []
   );
@@ -48,27 +76,31 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     initializeChart();
 
     return () => destroyChart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    debouncedVisualizeChartLayersImmediate(chartEntity.layers || [], dateRange);
-
+    if (chartRef.current) {
+      debouncedVisualizeChartLayers(
+        chartEntity.layers || [],
+        datasets,
+        dateRange
+      );
+    }
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(dateRange),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(chartEntity.layers),
-    dateRange,
-    debouncedVisualizeChartLayersImmediate,
+    debouncedVisualizeChartLayers,
   ]);
 
   useEffect(() => {
     configureChartAxes(chartEntity.yAxes || []);
 
-    // Use JSON.stringify for deep comparison (recommended)
-    // https://github.com/facebook/react/issues/14476#issuecomment-471199055
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(chartEntity.yAxes)]);
 
@@ -99,6 +131,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
+    datasets: Dataset[],
     startTime?: string,
     endTime?: string
   ) => {
@@ -106,18 +139,18 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
       return;
     }
     const hiddenDatasets: Record<string, boolean> = {};
-    const datasets = chartRef.current.data.datasets as (ChartDataset<
-      "line",
-      (number | Point | null)[]
-    > & { id: string })[];
-    datasets.forEach((dataset, i) => {
-      if (dataset.id) {
-        hiddenDatasets[dataset.id] =
-          !chartRef.current?.isDatasetVisible(i) || false;
+    const chartJSDatasets = chartRef.current.data.datasets;
+
+    chartJSDatasets.forEach((d, i) => {
+      // @ts-expect-error can't seem to type extra properties passed into chart js datasets
+      if (d.id) {
+        // @ts-expect-error can't seem to type extra properties passed into chart js datasets
+        hiddenDatasets[d.id] = !chartRef.current?.isDatasetVisible(i) || false;
       }
     });
     const { results, error, aborted } = await fetchAllLayerData(
       layers,
+      datasets,
       startTime,
       endTime
     );
@@ -126,62 +159,185 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
       return;
     }
 
-    const chartJSDatasets = results.map(({ result, layer }) => ({
-      id: getLayerId(layer),
-      hidden: hiddenDatasets[getLayerId(layer)] || false,
-      label: layer.streamId,
-      data: result.data.map((result) => {
-        const point = {
-          x: new Date(result.timestamp).getTime(),
-          y: result[layer.field] as number,
+    const newChartJSDatasets: ChartDataset<"line", CustomChartData[]>[] =
+      results.map(({ result, layer }) => {
+        // Get metadata for this result layer in order to determine
+        // the optimal decimation factor to use when requesting data
+        const fieldMetadata = getFieldMetadataForLayer(layer, datasets);
+
+        let data: { x: string; y: number }[] = [];
+        result.data.forEach((d) => {
+          const fieldValue = d[layer.field];
+          const timestamp = d.timestamp;
+          if (!fieldValue || typeof timestamp !== "string") return;
+
+          // Case where downsampling is not applied
+          let points = [];
+          if (result.downsampling_factor === 1) {
+            points.push({ x: timestamp, y: fieldValue.value });
+          } else {
+            if (!fieldMetadata) return;
+            if (
+              fieldMetadata.supported_aggregations.find((x) => x === "min") &&
+              fieldMetadata.supported_aggregations.find((x) => x === "max")
+            ) {
+              // Compute middle time of aggregation window
+              const pointTimestampMS = new Date(timestamp).getTime();
+              const halfFieldDataIntervalMS =
+                ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
+              const middleTime = new Date(
+                pointTimestampMS + halfFieldDataIntervalMS
+              ).toISOString();
+
+              // Use the min and max set to the middle of the window
+              points.push({ x: middleTime, y: fieldValue.min });
+              points.push({ x: middleTime, y: fieldValue.max });
+            } else if (
+              fieldMetadata.supported_aggregations.find((x) => x === "avg")
+            ) {
+              points.push({ x: timestamp, y: fieldValue.avg });
+            }
+          }
+          points = points.map((point) => {
+            // Assume that this is a time series and that x is a date string
+            const transform = applyLayerTransform(
+              { x: new Date(point.x).getTime(), y: point.y },
+              layer
+            );
+            return {
+              x: new Date(transform.x).toISOString(),
+              y: transform.y,
+            };
+          });
+
+          data = data.concat(points);
+        });
+        return {
+          id: getLayerId(layer),
+          hidden: hiddenDatasets[getLayerId(layer)] || false,
+          // TODO would be nice to render these outside of the canvas in order to better format
+          // and control these labels
+          // TODO what should these labels contain metadata wise? Fairly verbose right now.
+          label: `${layer.mission} ${layer.datasetId} ${layer.field} ${
+            layer.streamId
+          } (${result.data_count} point${pluralize(result.data_count)}, 1:${
+            result.downsampling_factor
+          } scale)`,
+          data,
+          borderWidth:
+            typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
+          spanGaps: false,
+          pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
+          pointRadius:
+            typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
+          showLine: layer.hideLines ? false : true,
+          yAxisID: layer.yAxisId,
+          ...(layer.color
+            ? { backgroundColor: layer.color, borderColor: layer.color }
+            : null),
         };
-        return applyLayerTransform(point, layer);
-      }),
-      borderWidth: typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
-      spanGaps: false,
-      pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
-      pointRadius:
-        typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
-      showLine: layer.hideLines ? false : true,
-      yAxisID: layer.yAxisId,
-      ...(layer.color
-        ? { backgroundColor: layer.color, borderColor: layer.color }
-        : null),
-    }));
-    chartRef.current.data.datasets = chartJSDatasets;
+      });
+
+    // Update chartJS dataset list
+    chartRef.current.data.datasets = newChartJSDatasets;
+
+    // Update visibility of each dataset based on old visibility
+    // TODO this can be incorrect sometimes if visibility is toggled during load
     chartRef.current.data.datasets.forEach((d, i) => {
       chartRef.current?.setDatasetVisibility(i, !d.hidden);
     });
-    if (chartRef.current.isZoomedOrPanned()) {
-      chartRef.current.resetZoom();
-    }
-    chartRef.current.update();
-    const newCount = results
-      .map((result) => result.result.data_count)
-      .reduce((prev, curr) => prev + curr, 0);
-    setPointCount(newCount);
-  };
 
-  const debouncedVisualizeChartLayers = debounce(visualizeChartLayers, 500);
+    if (
+      chartRef.current.options.scales &&
+      chartRef.current.options.scales.x &&
+      layers.length
+    ) {
+      // Set min and max of the x axis to the requested start and end times
+      // with a fallback to the start and end times of the first layer if no
+      // start and end times are found
+      const computedStartTime = startTime || layers[0].startTime;
+      const computedEndTime = endTime || layers[0].endTime;
+      chartRef.current.options.scales.x.min = new Date(
+        computedStartTime
+      ).getTime();
+      chartRef.current.options.scales.x.max = new Date(
+        computedEndTime
+      ).getTime();
+
+      // Set suggested min/max on chart if no points were returned for this time range
+      // since otherwise ChartJS will default to today's date when no data are loaded
+      if (!results.find((item) => item.result.data_count > 0)) {
+        chartRef.current.options.scales.x.suggestedMin = new Date(
+          computedStartTime
+        );
+        chartRef.current.options.scales.x.suggestedMax = new Date(
+          computedEndTime
+        );
+      } else {
+        // If we do have points, clear the suggested min/max so that it can be
+        // handled automatically by the chart
+        chartRef.current.options.scales.x.suggestedMin = undefined;
+        chartRef.current.options.scales.x.suggestedMax = undefined;
+      }
+    }
+
+    // Trigger a chartJS update
+    chartRef.current.update();
+  };
 
   const fetchLayerData = (
     layer: ChartLayer,
+    datasets: Dataset[],
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
+    /* TODO maybe add the chart ID in here too so we can plot the stream multiple times on the same chart with diff options if needed */
     const layerFullId = `${layer.mission}_${layer.datasetId}_${layer.field}_${layer.streamId}`;
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
     return new Promise((resolve, reject) => {
+      const computedStartTime = startTime || layer.startTime;
+      const computedEndTime = endTime || layer.endTime;
+
+      // Compute aggregation factor
+      const durationSeconds =
+        (new Date(computedEndTime).getTime() -
+          new Date(computedStartTime).getTime()) /
+        1000;
+
+      const chartSize = chartRef.current?.width || 1000; // TODO store in state?
+
+      const dataset = getDatasetForLayer(layer, datasets);
+      let downsamplingFactor = 1;
+      if (dataset) {
+        for (let i = 0; i < dataset.available_resolutions.length; i++) {
+          const resolution = dataset.available_resolutions[i];
+          const nextResolution = dataset.available_resolutions[i + 1];
+          const pointsForDuration =
+            durationSeconds / resolution.nominal_data_interval_seconds;
+          const nextPointsForDuration = nextResolution
+            ? durationSeconds / nextResolution.nominal_data_interval_seconds
+            : null;
+          if (
+            pointsForDuration > chartSize &&
+            (nextPointsForDuration == null || nextPointsForDuration < chartSize)
+          ) {
+            downsamplingFactor = resolution.downsampling_factor;
+            break;
+          }
+        }
+      }
+
       const { json, cancel } = getData(
         layer.mission,
         layer.datasetId,
         layer.streamId,
         layer.field,
         // TODO: check whether or not to sync with page date range
-        startTime || layer.startTime,
-        endTime || layer.endTime
+        computedStartTime,
+        computedEndTime,
+        downsamplingFactor
       );
       cancelHandles[layerFullId] = cancel;
       json()
@@ -203,6 +359,7 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
 
   const fetchAllLayerData = async (
     layers: ChartLayer[],
+    datasets: Dataset[],
     startTime?: string,
     endTime?: string
   ) => {
@@ -216,7 +373,9 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
     let error = false;
     try {
       results = await Promise.all(
-        layers.map((layer) => fetchLayerData(layer, startTime, endTime))
+        layers.map((layer) =>
+          fetchLayerData(layer, datasets, startTime, endTime)
+        )
       );
       setLoading(false);
     } catch (err) {
@@ -232,12 +391,15 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
   };
 
   const onZoomComplete = () => {
-    if (chartRef.current) {
+    // Only perform an update if the zoom/pan was triggered by the user
+    // to prevent loopback after debounced visualizeChartLayers call
+    // where this onZoomComplete event will re-fire
+    if (chartRef.current && chartRef.current.isZoomedOrPanned()) {
       const { min, max } = chartRef.current.scales.x;
-      debouncedVisualizeChartLayers(
+      debouncedVisualizeChartLayersTrailing(
         chartEntity.layers || [],
-        new Date(min).toISOString(),
-        new Date(max).toISOString()
+        datasets,
+        { start: new Date(min).toISOString(), end: new Date(max).toISOString() }
       );
     }
   };
@@ -284,7 +446,8 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
           tooltip: {
             callbacks: {
               label: (tooltipItem) =>
-                `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y}`,
+                // @ts-expect-error can't seem to type extra properties passed into chart js datasets
+                `${tooltipItem.dataset.id}: ${tooltipItem.parsed.y}`,
             },
             ...(chartEntity.chartOptions?.tooltip || {}),
           },
@@ -327,13 +490,6 @@ export const Chart = ({ chartEntity, dateRange }: ChartProps) => {
         title={chartEntity.title}
         loading={loading}
         error={error || undefined}
-        rightContent={
-          !loading && (
-            <div className="chart-point-count st-typography-label">
-              {pointCount} point{pluralize(pointCount)}
-            </div>
-          )
-        }
       />
       <div className="chart-canvas-container">
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />

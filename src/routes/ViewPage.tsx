@@ -1,11 +1,14 @@
 import { useOutletContext, useParams } from "react-router-dom";
 import Page from "../components/page/ViewPage";
+import { Dataset } from "../types/api";
 import { View, Page as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
   // TODO consider a reducer for this instead of context?
-  const [view, setView] =
-    useOutletContext<[View, React.Dispatch<React.SetStateAction<View>>]>();
+  const [view, setView, datasets, loadingInitialData] =
+    useOutletContext<
+      [View, React.Dispatch<React.SetStateAction<View>>, Dataset[], boolean]
+    >();
 
   const { pageGroupURL, pageURL } = useParams();
   const pageGroup = view.pageGroups.find(
@@ -20,6 +23,8 @@ export default function ViewPage() {
   }
   return (
     <Page
+      datasets={datasets}
+      loadingInitialData={loadingInitialData}
       viewPage={page}
       onPageChange={(page: ViewPageType) => {
         const newView = {

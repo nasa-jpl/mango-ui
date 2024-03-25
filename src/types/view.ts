@@ -7,7 +7,7 @@ import { Layout } from "react-grid-layout";
 import { DateRange } from "./time";
 
 export type View = {
-  home: View;
+  home: Page;
   pageGroups: PageGroup[];
 };
 

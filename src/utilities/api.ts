@@ -1,17 +1,20 @@
 import { config } from "../config";
 import { DataResponse, DataResponseError, Dataset } from "../types/api";
 
-export const getMissions = async (): Promise<string[]> => {
+export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
   const url = config.endpoints.data + config.api.data.missions;
-  const response = await (await fetch(url)).json();
+  const response = await (await fetch(url, { signal })).json();
   return response.data;
 };
 
-export const getDatasets = async (mission: string): Promise<Dataset[]> => {
+export const getDatasets = async (
+  mission: string,
+  signal: AbortSignal
+): Promise<Dataset[]> => {
   const url =
     config.endpoints.data +
     config.api.data.datasets.replace("{MISSION}", mission);
-  const response = await (await fetch(url)).json();
+  const response = await (await fetch(url, { signal })).json();
   return response.data;
 };
 
@@ -21,7 +24,8 @@ export const getData = (
   streamId: string,
   field: string,
   startTime: string,
-  endTime: string
+  endTime: string,
+  downsamplingFactor: number
 ) => {
   const url =
     config.endpoints.data +
@@ -29,7 +33,8 @@ export const getData = (
       .replace("{MISSION}", mission)
       .replace("{STREAM}", streamId)
       .replace("{DATASET}", datasetId) +
-    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}`;
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&downsampling_factor=${downsamplingFactor}`;
+
   const controller = new AbortController();
   const cancel = () => controller.abort();
   const json = () =>

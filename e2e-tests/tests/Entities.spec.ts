@@ -18,7 +18,7 @@ test("page date-time selection yields expected API response", async ({
   const endDateTime = "2022-03-02T00:02";
 
   // Navigate to page containing charts
-  await page.getByRole("button", { name: "Coalesced Acceleration" }).click();
+  await page.getByRole("button", { name: "ACC1A" }).click();
 
   /**
    * API requests should be initiated when either the start or end page
