@@ -19,16 +19,20 @@
 }
 
 .entity-header-right-content {
+  align-items: center;
   display: flex;
   gap: 8px;
 }
 
 .entity-loading {
+  align-items: center;
   color: var(--st-gray-50);
+  display: flex;
   font-size: 10px;
   user-select: none;
 }
 
 .entity-error {
   color: var(--st-red);
+  display: flex;
 }

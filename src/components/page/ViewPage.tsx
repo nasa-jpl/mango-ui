@@ -1,5 +1,6 @@
 import { Button, Label } from "@nasa-jpl/react-stellar";
 import { useReducer } from "react";
+import { Dataset } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
@@ -9,12 +10,19 @@ import Section from "./Section";
 import "./ViewPage.css";
 
 export declare type PageProps = {
+  datasets: Dataset[];
+  loadingInitialData: boolean;
   onPageChange: (page: PageType) => void;
   viewPage?: PageType;
 };
 
 // TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
-export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
+export const ViewPage = ({
+  datasets,
+  loadingInitialData,
+  viewPage,
+  onPageChange,
+}: PageProps) => {
   // TODO: Pull out state management and maybe refactor a bit
   type State = {
     dateRange: DateRange;
@@ -115,25 +123,27 @@ export const ViewPage = ({ viewPage, onPageChange }: PageProps) => {
         </>
       }
     >
-      {viewPage.sections.map((section) => (
-        <Section
-          section={section}
-          key={section.id}
-          dateRange={state.dateRange}
-          onSectionChange={(newSection: SectionType) => {
-            const newViewPage: PageType = {
-              ...viewPage,
-              sections: viewPage.sections.map((e) => {
-                if (e.id === newSection.id) {
-                  return newSection;
-                }
-                return e;
-              }),
-            };
-            onPageChange(newViewPage);
-          }}
-        />
-      ))}
+      {!loadingInitialData &&
+        viewPage.sections.map((section) => (
+          <Section
+            datasets={datasets}
+            section={section}
+            key={section.id}
+            dateRange={state.dateRange}
+            onSectionChange={(newSection: SectionType) => {
+              const newViewPage: PageType = {
+                ...viewPage,
+                sections: viewPage.sections.map((e) => {
+                  if (e.id === newSection.id) {
+                    return newSection;
+                  }
+                  return e;
+                }),
+              };
+              onPageChange(newViewPage);
+            }}
+          />
+        ))}
     </Page>
   );
 };

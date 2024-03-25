@@ -1,4 +1,4 @@
-import { DatasetStream, Stream } from "../../src/types/api";
+import { Dataset, DatasetStream, Stream } from "../../src/types/api";
 import { generateUniqueName } from "./generic";
 
 export const generateTestStream = (): Stream => {
@@ -9,17 +9,37 @@ export const generateTestStream = (): Stream => {
   };
 };
 
-export const generateTestDatasetStream = (): DatasetStream => {
+export const generateTestDataset = (): Dataset => {
   return {
-    available_fields: [generateUniqueName(), generateUniqueName()],
+    available_fields: [
+      { name: generateUniqueName(), supported_aggregations: ["value"] },
+      { name: generateUniqueName(), supported_aggregations: ["min", "max"] },
+    ],
+    available_resolutions: [
+      { downsampling_factor: 1, nominal_data_interval_seconds: 0.1 },
+      { downsampling_factor: 5, nominal_data_interval_seconds: 0.5 },
+      { downsampling_factor: 25, nominal_data_interval_seconds: 0.25 },
+    ],
     full_id: generateUniqueName(),
     id: generateUniqueName(),
     mission: generateUniqueName(),
-    data_begin: "2022-01-01T00:00:00.037430+00:00",
-    data_end: "2023-01-01T00:00:00.037430+00:00",
-    streamId: generateUniqueName(),
+    streams: [generateTestStream(), generateTestStream()],
+    // data_begin: "2022-01-01T00:00:00.037430+00:00",
+    // data_end: "2023-01-01T00:00:00.037430+00:00",
     timestamp_field: generateUniqueName(),
+    query_result_limit: 1000,
   };
+};
+
+export const generateTestDatasetStream = (): DatasetStream => {
+  const dataset = generateTestDataset();
+  // @ts-expect-error transforming to DatasetStream
+  delete dataset.streams;
+  const datasetStream: DatasetStream = {
+    ...dataset,
+    streamId: generateUniqueName(),
+  };
+  return datasetStream;
 };
 
 export const generateTestDatasetStreams = (count: number): DatasetStream[] => {

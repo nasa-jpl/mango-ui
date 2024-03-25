@@ -6,7 +6,8 @@ import { View } from "../types/view";
 
 export default function DatasetsPage() {
   // const { datasets } = useLoaderData() as { datasets: Dataset[] };
-  const [, , datasets] = useOutletContext<[View, never, Dataset[]]>();
+  const [, , datasets, loadingInitialData] =
+    useOutletContext<[View, never, Dataset[], boolean]>();
 
   // Create a dataset row per stream
   const datasetEntries: DatasetStream[] = datasets
@@ -23,10 +24,9 @@ export default function DatasetsPage() {
         .flat();
     })
     .flat();
-
   return (
     <Page title="Datasets" padBody>
-      <DatasetTable datasets={datasetEntries} />
+      <DatasetTable datasets={datasetEntries} loading={loadingInitialData} />
     </Page>
   );
 }

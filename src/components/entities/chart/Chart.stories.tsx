@@ -1,4 +1,6 @@
+import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import type { Meta, StoryObj } from "@storybook/react";
+import { generateTestDataset } from "../../../../e2e-tests/utilities/dataset";
 import { ChartEntity } from "../../../types/view";
 import Chart from "./Chart";
 
@@ -7,6 +9,13 @@ const meta = {
   parameters: {
     layout: "padded",
   },
+  decorators: [
+    (Story) => (
+      <TooltipProvider>
+        <Story />
+      </TooltipProvider>
+    ),
+  ],
 } satisfies Meta<typeof Chart>;
 
 export default meta;
@@ -20,8 +29,8 @@ const chartEntity: ChartEntity = {
   layers: [
     {
       id: "234567",
-      field: "field1",
-      mission: "mission1",
+      field: "ACT1A",
+      mission: "GRACEFO",
       datasetId: "dataset1",
       streamId: "A",
       startTime: "2022-03-02T00:00:00.000000Z",
@@ -34,12 +43,12 @@ const chartEntity: ChartEntity = {
     end: "",
     start: "",
   },
-  syncWithPageDateRange: false,
 };
 
 export const Default: Story = {
   args: {
     chartEntity,
+    datasets: [generateTestDataset()],
     dateRange: {
       end: "",
       start: "",

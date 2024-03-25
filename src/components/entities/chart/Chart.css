@@ -11,8 +11,3 @@
   position: relative;
   width: 100%;
 }
-
-.chart-point-count {
-  color: var(--st-gray-50);
-  font-size: 10px;
-}
