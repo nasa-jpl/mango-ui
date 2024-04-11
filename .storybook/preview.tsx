@@ -1,3 +1,4 @@
+import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import type { Preview } from "@storybook/react";
 import React from "react";
@@ -8,7 +9,9 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <MemoryRouter initialEntries={["/"]}>
-        <Story />
+        <TooltipProvider>
+          <Story />
+        </TooltipProvider>
       </MemoryRouter>
     ),
   ],

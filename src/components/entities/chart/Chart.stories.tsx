@@ -1,4 +1,3 @@
-import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import type { Meta, StoryObj } from "@storybook/react";
 import { generateTestDataset } from "../../../../e2e-tests/utilities/dataset";
 import { ChartEntity } from "../../../types/view";
@@ -9,13 +8,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  decorators: [
-    (Story) => (
-      <TooltipProvider>
-        <Story />
-      </TooltipProvider>
-    ),
-  ],
+  decorators: [(Story) => <Story />],
 } satisfies Meta<typeof Chart>;
 
 export default meta;
@@ -36,6 +29,7 @@ const chartEntity: ChartEntity = {
       startTime: "2022-03-02T00:00:00.000000Z",
       endTime: "2022-03-02T00:01:00.000000Z",
       type: "line",
+      version: "04",
       yAxisId: "",
     },
   ],

@@ -12,6 +12,7 @@ export const generateTestChartLayer = (): ChartLayer => {
     startTime: "",
     streamId: generateUUID(),
     type: "line",
+    version: "04",
     yAxisId: generateUUID(),
   };
 };

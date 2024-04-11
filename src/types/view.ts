@@ -49,7 +49,7 @@ export type Entity = {
 export interface ChartEntity extends Entity {
   chartOptions?: ChartOptions;
   layers?: ChartLayer[];
-  yAxes: YAxis[];
+  yAxes?: YAxis[];
 }
 
 export type ChartOptions = {
@@ -81,6 +81,7 @@ export type DataLayer = {
   mission: string;
   startTime: string;
   streamId: string;
+  version: string;
 };
 
 export interface ChartLayer extends DataLayer {
@@ -94,7 +95,7 @@ export interface ChartLayer extends DataLayer {
     y?: DataTransform;
   };
   type: "line";
-  yAxisId: string;
+  yAxisId?: string;
 }
 
 export type DataTransform = {

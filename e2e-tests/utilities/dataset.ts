@@ -1,4 +1,4 @@
-import { Dataset, DatasetStream, Stream } from "../../src/types/api";
+import { Dataset, Stream } from "../../src/types/api";
 import { generateUniqueName } from "./generic";
 
 export const generateTestStream = (): Stream => {
@@ -15,6 +15,7 @@ export const generateTestDataset = (): Dataset => {
       { name: generateUniqueName(), supported_aggregations: ["value"] },
       { name: generateUniqueName(), supported_aggregations: ["min", "max"] },
     ],
+    available_versions: ["04"],
     available_resolutions: [
       { downsampling_factor: 1, nominal_data_interval_seconds: 0.1 },
       { downsampling_factor: 5, nominal_data_interval_seconds: 0.5 },
@@ -31,21 +32,21 @@ export const generateTestDataset = (): Dataset => {
   };
 };
 
-export const generateTestDatasetStream = (): DatasetStream => {
-  const dataset = generateTestDataset();
-  // @ts-expect-error transforming to DatasetStream
-  delete dataset.streams;
-  const datasetStream: DatasetStream = {
-    ...dataset,
-    streamId: generateUniqueName(),
-  };
-  return datasetStream;
-};
+// export const generateTestDatasetStream = (): DatasetStream => {
+//   const dataset = generateTestDataset();
+//   // @ts-expect-error transforming to DatasetStream
+//   delete dataset.streams;
+//   const datasetStream: DatasetStream = {
+//     ...dataset,
+//     streamId: generateUniqueName(),
+//   };
+//   return datasetStream;
+// };
 
-export const generateTestDatasetStreams = (count: number): DatasetStream[] => {
-  const datasets: DatasetStream[] = [];
+export const generateTestDatasets = (count: number): Dataset[] => {
+  const datasets: Dataset[] = [];
   for (let i = 0; i < count; i++) {
-    datasets.push(generateTestDatasetStream());
+    datasets.push(generateTestDataset());
   }
   return datasets;
 };

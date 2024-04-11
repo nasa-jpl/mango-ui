@@ -22,6 +22,7 @@ export const getData = (
   mission: string,
   datasetId: string,
   streamId: string,
+  version: string,
   field: string,
   startTime: string,
   endTime: string,
@@ -32,7 +33,8 @@ export const getData = (
     config.api.data.data
       .replace("{MISSION}", mission)
       .replace("{STREAM}", streamId)
-      .replace("{DATASET}", datasetId) +
+      .replace("{DATASET}", datasetId)
+      .replace("{VERSION}", version) +
     `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&downsampling_factor=${downsamplingFactor}`;
 
   const controller = new AbortController();
