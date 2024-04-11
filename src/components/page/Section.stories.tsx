@@ -28,6 +28,7 @@ const chartEntity: ChartEntity = {
       startTime: "2022-03-02T00:00:00.000000Z",
       endTime: "2022-03-02T00:01:00.000000Z",
       type: "line",
+      version: "04",
       yAxisId: "",
     },
   ],

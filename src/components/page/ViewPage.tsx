@@ -54,7 +54,7 @@ export const ViewPage = ({
             id="page-datetime-start"
             className="st-input"
             name="pageStartTime"
-            defaultValue={toDatetimelocalStr(state.dateRange.start)}
+            value={toDatetimelocalStr(state.dateRange.start)}
             onChange={(e) =>
               updateDateRange({
                 dateRange: {
@@ -70,7 +70,7 @@ export const ViewPage = ({
             id="page-datetime-end"
             className="st-input"
             name="pageEndTime"
-            defaultValue={toDatetimelocalStr(state.dateRange.end)}
+            value={toDatetimelocalStr(state.dateRange.end)}
             onChange={(e) =>
               updateDateRange({
                 dateRange: {
@@ -114,6 +114,11 @@ export const ViewPage = ({
             section={section}
             key={section.id}
             dateRange={state.dateRange}
+            onDateRangeChange={(newDateRange) =>
+              updateDateRange({
+                dateRange: newDateRange,
+              })
+            }
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,

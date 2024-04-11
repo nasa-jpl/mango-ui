@@ -2,7 +2,7 @@ import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { debounce } from "lodash-es";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataResponse, Dataset } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import { ChartEntity, ChartLayer, YAxis } from "../../../types/view";
@@ -29,11 +29,19 @@ export declare type ChartProps = {
   // TODO could pass in only the list of datasets that this Chart cares about?
   datasets: Dataset[];
   dateRange: DateRange;
+  onDateRangeChange?: (dateRange: DateRange) => void;
+  showHeader?: boolean;
 };
 
 export type CustomChartData = { x: string; y: number };
 
-export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
+export const Chart = ({
+  chartEntity,
+  datasets,
+  dateRange,
+  showHeader = true,
+  onDateRangeChange = () => {},
+}: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS<"line", CustomChartData[]> | null>();
   const [loading, setLoading] = useState(true);
@@ -44,7 +52,7 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedVisualizeChartLayers = useCallback(
     debounce(
-      (layers, datasets, dateRange) =>
+      (layers: ChartLayer[], datasets: Dataset[], dateRange: DateRange) =>
         visualizeChartLayers(
           layers || [],
           datasets,
@@ -72,19 +80,34 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
     []
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedOnDateRangeChange = useCallback(
+    debounce((newDateRange) => onDateRangeChange(newDateRange), 500, {
+      leading: false,
+      trailing: true,
+    }),
+    []
+  );
+
   useEffect(() => {
     initializeChart();
 
     return () => destroyChart();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const computedDateRange = useMemo(
+    () =>
+      chartEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
+    [chartEntity.syncWithPageDateRange, dateRange]
+  );
 
   useEffect(() => {
     if (chartRef.current) {
       debouncedVisualizeChartLayers(
         chartEntity.layers || [],
         datasets,
-        dateRange
+        computedDateRange
       );
     }
     // Use JSON.stringify for deep comparison (recommended)
@@ -92,9 +115,10 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(dateRange),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(chartEntity.layers),
+    chartEntity.syncWithPageDateRange,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(computedDateRange),
     debouncedVisualizeChartLayers,
   ]);
 
@@ -103,6 +127,57 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(chartEntity.yAxes)]);
+
+  const onZoomComplete = (
+    layers: ChartLayer[],
+    datasets: Dataset[],
+    syncWithDateRange = true
+  ) => {
+    // Only perform an update if the zoom/pan was triggered by the user
+    // to prevent loopback after debounced visualizeChartLayers call
+    // where this onZoomComplete event will re-fire
+    if (chartRef.current && chartRef.current.isZoomedOrPanned()) {
+      const { min, max } = chartRef.current.scales.x;
+      const newDateRange = {
+        start: new Date(min).toISOString(),
+        end: new Date(max).toISOString(),
+      };
+      if (syncWithDateRange) {
+        debouncedOnDateRangeChange(newDateRange);
+      } else {
+        debouncedVisualizeChartLayersTrailing(
+          layers || [],
+          datasets,
+          newDateRange
+        );
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Re-assign the zoom callback since it is only defined in the
+    // initialization options of the chart
+    if (
+      chartRef.current &&
+      chartEntity.layers !== undefined &&
+      chartRef.current.options.plugins?.zoom?.pan &&
+      chartRef.current.options.plugins?.zoom?.zoom
+    ) {
+      chartRef.current.options.plugins.zoom.pan.onPanComplete = () =>
+        onZoomComplete(
+          chartEntity.layers as ChartLayer[],
+          datasets,
+          chartEntity.syncWithPageDateRange
+        );
+      chartRef.current.options.plugins.zoom.zoom.onZoomComplete = () =>
+        onZoomComplete(
+          chartEntity.layers as ChartLayer[],
+          datasets,
+          chartEntity.syncWithPageDateRange
+        );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(chartEntity.layers), chartEntity.syncWithPageDateRange]);
 
   const configureChartAxes = (yAxes: YAxis[]) => {
     if (
@@ -333,6 +408,7 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
         layer.mission,
         layer.datasetId,
         layer.streamId,
+        layer.version,
         layer.field,
         // TODO: check whether or not to sync with page date range
         computedStartTime,
@@ -388,20 +464,6 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
       }
     }
     return { results, aborted, error };
-  };
-
-  const onZoomComplete = () => {
-    // Only perform an update if the zoom/pan was triggered by the user
-    // to prevent loopback after debounced visualizeChartLayers call
-    // where this onZoomComplete event will re-fire
-    if (chartRef.current && chartRef.current.isZoomedOrPanned()) {
-      const { min, max } = chartRef.current.scales.x;
-      debouncedVisualizeChartLayersTrailing(
-        chartEntity.layers || [],
-        datasets,
-        { start: new Date(min).toISOString(), end: new Date(max).toISOString() }
-      );
-    }
   };
 
   const initializeChart = () => {
@@ -464,12 +526,24 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
                 enabled: true,
               },
               mode: "x",
-              onZoomComplete: onZoomComplete,
+              onZoomComplete: () => {
+                onZoomComplete(
+                  chartEntity.layers || [],
+                  datasets,
+                  chartEntity.syncWithPageDateRange
+                );
+              },
             },
             pan: {
               enabled: true,
               mode: "x",
-              onPanComplete: onZoomComplete,
+              onPanComplete: () => {
+                onZoomComplete(
+                  chartEntity.layers || [],
+                  datasets,
+                  chartEntity.syncWithPageDateRange
+                );
+              },
             },
           },
         },
@@ -486,13 +560,45 @@ export const Chart = ({ chartEntity, datasets, dateRange }: ChartProps) => {
 
   return (
     <div className="chart">
-      <EntityHeader
-        title={chartEntity.title}
-        loading={loading}
-        error={error || undefined}
-      />
+      {showHeader && <EntityHeader title={chartEntity.title} />}
       <div className="chart-canvas-container">
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
+        {chartRef.current && loading && (
+          <div
+            className="chart-indicator-overlay chart-loading-indicator st-typography-medium"
+            style={{
+              position: "absolute",
+              top: `${
+                chartRef.current.chartArea.top +
+                chartRef.current.chartArea.height / 2
+              }px`,
+              left: `${
+                chartRef.current.chartArea.left +
+                chartRef.current.chartArea.width / 2
+              }px`,
+            }}
+          >
+            Loading
+          </div>
+        )}
+        {chartRef.current && !loading && error && (
+          <div
+            className="chart-indicator-overlay chart-error-indicator st-typography-medium"
+            style={{
+              position: "absolute",
+              top: `${
+                chartRef.current.chartArea.top +
+                chartRef.current.chartArea.height / 2
+              }px`,
+              left: `${
+                chartRef.current.chartArea.left +
+                chartRef.current.chartArea.width / 2
+              }px`,
+            }}
+          >
+            Error: {error.message}
+          </div>
+        )}
       </div>
     </div>
   );

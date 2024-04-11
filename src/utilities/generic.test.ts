@@ -16,6 +16,7 @@ test("getLayerId", () => {
     streamId: "STREAM",
     endTime: "",
     startTime: "",
+    version: "04",
     id: "1",
   };
   expect(getLayerId(layer)).toEqual("MISSION_DATASET_FIELD_STREAM");

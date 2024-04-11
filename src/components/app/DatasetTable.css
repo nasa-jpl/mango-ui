@@ -1,0 +1,7 @@
+.dataset-stream-preview-button {
+  height: inherit;
+}
+
+.dataset-table div[role="row"]:not(:hover) .dataset-stream-preview-button {
+  display: none;
+}
