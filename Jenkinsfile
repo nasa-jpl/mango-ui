@@ -110,7 +110,6 @@ pipeline {
         allOf {
           anyOf {
             // Trigger docker builds off develop, main, or tags
-            branch 'feature/21/jenkins-build-deploy'
             branch 'develop'
             branch 'main'
             tag '*'
