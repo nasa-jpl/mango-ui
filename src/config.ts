@@ -3,7 +3,7 @@ export const config = {
     data: {
       missions: "/missions/",
       datasets: "/missions/{MISSION}/datasets/",
-      data: "/missions/{MISSION}/datasets/{DATASET}/streams/{STREAM}/versions/{VERSION}/data",
+      data: "/missions/{MISSION}/datasets/{DATASET}/versions/{VERSION}/streams/{STREAM}/data",
     },
   },
   endpoints: {
