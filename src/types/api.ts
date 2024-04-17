@@ -3,6 +3,8 @@ export type Dataset = {
   available_fields: DatasetField[];
   /* Logarithmic aggregation/decimation factors that can be requested for this dataset */
   available_resolutions: DatasetResolution[];
+  /* Versions available for this dataset (e.g. "04", "05", etc) */
+  available_versions: string[];
   /* <mission>_<dataset_id> */
   full_id: string;
   id: string;

@@ -1,10 +1,11 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import { AgGridReact } from "ag-grid-react"; // React Grid Logic
+import { useEffect, useRef } from "react";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import "./ag-grid-stellar.css";
-import { useEffect, useRef } from "react";
 
 export declare type DataGridProps<T> = {
+  className?: string;
   columnDefs: DataGridColumnDef[];
   loading?: boolean;
   rowData: T[];
@@ -14,6 +15,7 @@ export function DataGrid<T>({
   columnDefs,
   rowData,
   loading,
+  className = "",
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   useEffect(() => {
@@ -31,6 +33,7 @@ export function DataGrid<T>({
     <div className="ag-theme-stellar" style={{ height: "100%", width: "100%" }}>
       <AgGridReact<T>
         ref={gridRef}
+        className={className}
         rowData={rowData}
         columnDefs={columnDefs}
         animateRows={false}

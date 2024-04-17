@@ -19,6 +19,7 @@ import "./Section.css";
 export declare type SectionProps = {
   datasets: Dataset[];
   dateRange: DateRange;
+  onDateRangeChange: (dateRange: DateRange) => void;
   onSectionChange: (section: SectionType) => void;
   section: SectionType;
 };
@@ -28,6 +29,7 @@ export const Section = ({
   datasets,
   section,
   onSectionChange,
+  onDateRangeChange = () => {},
 }: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
@@ -121,6 +123,7 @@ export const Section = ({
                   datasets={datasets}
                   entity={e}
                   onEntityChange={() => {}}
+                  onDateRangeChange={onDateRangeChange}
                   key={e.id}
                   className={entityClass}
                   dateRange={dateRange}
