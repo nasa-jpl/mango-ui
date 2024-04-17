@@ -132,7 +132,7 @@ pipeline {
       when {
         allOf {
           anyOf {
-            // Trigger push to Artifactory off develop, main, or tags
+            // Trigger image push to Artifactory off develop, main, or tags
             branch 'develop'
             branch 'main'
             tag '*'
