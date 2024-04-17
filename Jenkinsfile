@@ -130,16 +130,8 @@ pipeline {
 
     stage('Deploy to Artifactory') {
       when {
-        allOf {
-          anyOf {
-            // Trigger push to Artifactory off develop, main, or tags
-            branch 'develop'
-            branch 'main'
-            tag '*'
-          }
-          expression {
+        expression {
             currentBuild.currentResult == 'SUCCESS'
-          }
         }
       }
       steps {
