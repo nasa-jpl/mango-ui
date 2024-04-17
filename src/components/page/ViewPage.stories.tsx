@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     onPageChange: () => {},
-    datasets: [],
+    datasets: [] /* TODO fetch from API */,
     loadingInitialData: false,
   },
   loaders: [

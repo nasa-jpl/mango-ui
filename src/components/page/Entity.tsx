@@ -19,6 +19,7 @@ export declare type EntityProps = {
   datasets: Dataset[];
   dateRange: DateRange;
   entity: EntityType;
+  onDateRangeChange: (dateRange: DateRange) => void;
   onEntityChange: (entity: EntityType) => void;
 };
 
@@ -26,8 +27,9 @@ export const Entity = (props: EntityProps) => {
   const {
     datasets,
     entity,
+    dateRange,
     className = "",
-    dateRange /* onEntityChange */,
+    onDateRangeChange = () => {},
   } = props;
   const entityClass = classNames({
     entity: true,
@@ -36,7 +38,12 @@ export const Entity = (props: EntityProps) => {
   return (
     <div className={entityClass}>
       {isChartEntity(entity) && (
-        <Chart chartEntity={entity} dateRange={dateRange} datasets={datasets} />
+        <Chart
+          chartEntity={entity}
+          dateRange={dateRange}
+          datasets={datasets}
+          onDateRangeChange={onDateRangeChange}
+        />
       )}
       {isMapEntity(entity) && <Map mapEntity={entity} dateRange={dateRange} />}
       {/* TODO figure out type later/inside table? */}
