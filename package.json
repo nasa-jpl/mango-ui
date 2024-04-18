@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@nasa-jpl/react-stellar": "^1.1.6",
-    "@phosphor-icons/react": "^2.0.15",
+    "@phosphor-icons/react": "^2.1.0",
     "@playwright/test": "^1.42.1",
     "@storybook/addon-essentials": "^7.6.4",
     "@storybook/addon-interactions": "^7.6.4",

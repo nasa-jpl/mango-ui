@@ -1,9 +1,11 @@
 .entity-header {
+  align-items: center;
   background: var(--st-gray-10);
   border-bottom: var(--app-border);
   display: flex;
+  height: 32px;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding-left: 10px;
 }
 
 .entity-header-title {
@@ -13,15 +15,17 @@
 }
 
 .entity-drag-handle {
+  color: var(--st-gray-60);
   cursor: move;
   display: flex;
   justify-content: center;
+  width: 28px;
 }
 
 .entity-header-right-content {
   align-items: center;
   display: flex;
-  gap: 8px;
+  height: 100%;
 }
 
 .entity-loading {

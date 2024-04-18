@@ -1,7 +1,5 @@
 .chart {
   display: flex;
-
-  /* height: 100%; */
   flex: 1;
   flex-direction: column;
   height: 0;
@@ -37,6 +35,32 @@
   border-color: var(--st-red);
   color: var(--st-red);
   max-width: 310px;
+}
+
+.chart-header-buttons {
+  border-right: 1px solid var(--st-gray-20);
+  height: 100%;
+  visibility: hidden;
+}
+
+.chart:hover .chart-header-buttons {
+  visibility: visible;
+}
+
+.st-button.icon.chart-button.chart-button-active {
+  border-bottom: 1px solid var(--st-primary);
+  color: var(--st-primary);
+}
+
+.st-button.icon.chart-button {
+  border-radius: 0;
+  color: var(--st-gray-60);
+  height: 100%;
+  width: 28px;
+}
+
+.st-button.icon.chart-button:hover {
+  background: var(--st-gray-15);
 }
 
 @keyframes delay-visibility {
