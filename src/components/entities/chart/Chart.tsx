@@ -1,6 +1,15 @@
+import { Button, Tooltip } from "@nasa-jpl/react-stellar";
+import {
+  ArrowCounterClockwise,
+  ArrowsVertical,
+  BoundingBox,
+  VectorTwo,
+} from "@phosphor-icons/react";
+import { ArrowsHorizontal } from "@phosphor-icons/react/dist/ssr";
 import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { Mode } from "chartjs-plugin-zoom/types/options";
 import { debounce } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataResponse, Dataset } from "../../../types/api";
@@ -45,6 +54,8 @@ export const Chart = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS<"line", CustomChartData[]> | null>();
   const [loading, setLoading] = useState(true);
+  const [boxZoomEnabled, setBoxZoomEnabled] = useState(false);
+  const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
 
   const cancelHandles: Record<string, () => void> = {};
@@ -525,6 +536,10 @@ export const Chart = ({
               pinch: {
                 enabled: true,
               },
+              drag: {
+                enabled: true,
+                modifierKey: "meta",
+              },
               mode: "x",
               onZoomComplete: () => {
                 onZoomComplete(
@@ -558,9 +573,118 @@ export const Chart = ({
     }
   };
 
+  const setChartBoxZoomEnabled = (enabled: boolean) => {
+    if (
+      chartRef.current &&
+      chartRef.current.options.plugins?.zoom?.zoom?.drag &&
+      chartRef.current.options.plugins?.zoom?.pan
+    ) {
+      // Zoom configuration
+      chartRef.current.options.plugins.zoom.zoom.drag.modifierKey = enabled
+        ? undefined
+        : "meta";
+
+      // Pan configuration
+      // chartRef.current.options.plugins.zoom.pan.enabled = true;
+      chartRef.current.options.plugins.zoom.pan.modifierKey = enabled
+        ? "meta"
+        : undefined;
+
+      // Trigger a chartJS update
+      chartRef.current.update();
+    }
+  };
+
+  const toggleBoxZoom = () => {
+    setChartBoxZoomEnabled(!boxZoomEnabled);
+    setBoxZoomEnabled(!boxZoomEnabled);
+  };
+
+  const setChartInteractionAxes = (mode: Mode) => {
+    if (
+      chartRef.current &&
+      chartRef.current.options.plugins?.zoom?.zoom?.drag &&
+      chartRef.current.options.plugins?.zoom?.pan
+    ) {
+      // Zoom configuration
+      chartRef.current.options.plugins.zoom.zoom.mode = mode;
+      chartRef.current.options.plugins.zoom.pan.mode = mode;
+
+      // Trigger a chartJS update
+      chartRef.current.update();
+    }
+  };
+
+  const cycleInteractionModes = () => {
+    let newInteractionAxes: Mode = "x";
+    if (interactionAxes === "x") {
+      newInteractionAxes = "y";
+    } else if (interactionAxes === "y") {
+      newInteractionAxes = "xy";
+    } else {
+      newInteractionAxes = "x";
+    }
+    setInteractionAxes(newInteractionAxes);
+    setChartInteractionAxes(newInteractionAxes);
+  };
+
+  const resetPan = () => {
+    if (chartRef.current) {
+      chartRef.current.resetZoom();
+    }
+  };
+
   return (
     <div className="chart">
-      {showHeader && <EntityHeader title={chartEntity.title} />}
+      {showHeader && (
+        <EntityHeader
+          title={chartEntity.title}
+          rightContent={
+            <div className="chart-header-buttons">
+              <Tooltip content="Reset Y Axis">
+                <Button
+                  className="chart-button"
+                  onClick={resetPan}
+                  variant="icon"
+                  icon={<ArrowCounterClockwise weight="regular" size={16} />}
+                />
+              </Tooltip>
+              <Tooltip content={`Cycle Pan & Zoom Axis (${interactionAxes})`}>
+                <Button
+                  className="chart-button"
+                  onClick={cycleInteractionModes}
+                  variant="icon"
+                  icon={
+                    interactionAxes === "x" ? (
+                      <ArrowsHorizontal weight="regular" size={16} />
+                    ) : interactionAxes === "xy" ? (
+                      <VectorTwo weight="regular" size={16} />
+                    ) : (
+                      <ArrowsVertical weight="regular" size={16} />
+                    )
+                  }
+                />
+              </Tooltip>
+              <Tooltip
+                content={
+                  !boxZoomEnabled ? "Enable box zoom" : "Disable box zoom"
+                }
+              >
+                <Button
+                  className={
+                    boxZoomEnabled
+                      ? "chart-button chart-button-active"
+                      : "chart-button"
+                  }
+                  onClick={toggleBoxZoom}
+                  variant="icon"
+                  icon={<BoundingBox weight="regular" size={16} />}
+                />
+              </Tooltip>
+            </div>
+          }
+        />
+      )}
       <div className="chart-canvas-container">
         <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
         {chartRef.current && loading && (
