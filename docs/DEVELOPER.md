@@ -1,6 +1,6 @@
 # Developer
 
-This document describes how to set up your development environment to build and develop gmat-ui.
+This document describes how to set up your development environment to build and develop mango-ui.
 
 - [Prerequisite Software](#prerequisite-software)
 - [Code Editor](#code-editor)
@@ -12,20 +12,20 @@ This document describes how to set up your development environment to build and 
 
 ## Prerequisite Software
 
-Before you can run gmat-ui you must install and configure the following products on your development machine:
+Before you can run mango-ui you must install and configure the following products on your development machine:
 
 - [Git](http://git-scm.com) and/or the [GitHub app](https://desktop.github.com/); [GitHub's Guide to Installing Git](https://help.github.com/articles/set-up-git) is a good source of information.
 
 - [Node.js LTS](http://nodejs.org) which is used to run a development web server, and generate distributable files. We recommend using the [Node Version Manager (NVM)](https://github.com/nvm-sh/nvm) to install Node.js and [NPM](https://www.npmjs.com/) on your machine. Once you have NVM installed you can use the required Node.js/NPM versions via:
 
   ```shell
-  cd gmat-ui
+  cd mango-ui
   nvm use
   ```
 
 ## Code Editor
 
-The recommended editor for developing gmat-ui is [VS Code](https://code.visualstudio.com/) with the following settings and extensions. You can easily use another editor of your choice as long as you can replicate the code formatting settings.
+The recommended editor for developing mango-ui is [VS Code](https://code.visualstudio.com/) with the following settings and extensions. You can easily use another editor of your choice as long as you can replicate the code formatting settings.
 
 ### Settings.json
 
@@ -43,16 +43,16 @@ Your editor should follow the same settings found in [.vscode/settings.json](../
 
 ## Getting the Sources
 
-[Clone](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) the gmat-ui repository:
+[Clone](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) the mango-ui repository:
 
 ```shell
-git clone git@github.jpl.nasa.gov:Mass-Change/gmat-ui.git
-cd gmat-ui
+git clone ***REMOVED***
+cd mango-ui
 ```
 
 ## Installing NPM Modules
 
-Install the JavaScript modules needed to build gmat-ui:
+Install the JavaScript modules needed to build mango-ui:
 
 ```shell
 npm install
