@@ -8,9 +8,9 @@ pipeline {
   }
 
   environment {
-    DOCKER_IMAGE_NAME = 'gmat-ui'
+    DOCKER_IMAGE_NAME = 'mango-ui'
     ARTIFACTORY_URL = '***REMOVED***'
-    ARTIFACTORY_REPO = 'gov/nasa/jpl/gracec/gmat'
+    ARTIFACTORY_REPO = '***REMOVED***'
   }
 
   options {
@@ -79,7 +79,7 @@ pipeline {
         stage('unit-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.42.1-jammy'
+              image 'mcr.microsoft.com/playwright:v1.43.1-jammy'
               args '-v /unit-test-results:/unit-test-results'
               args '-u root:root'
               reuseNode true
@@ -92,7 +92,7 @@ pipeline {
         stage('e2e-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.42.1-jammy'
+              image 'mcr.microsoft.com/playwright:v1.43.1-jammy'
               args '-v /e2e-test-results:/e2e-test-results'
               args '-u root:root'
               reuseNode true

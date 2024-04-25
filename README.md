@@ -1,6 +1,6 @@
-# gmat-ui [![Build Status](https://cae-jenkins2.jpl.nasa.gov/buildStatus/icon?job=Mass-Change-Viz%2FUI2%2Fdevelop)](https://cae-jenkins2.jpl.nasa.gov/job/Mass-Change-Viz/job/UI2/job/develop/)
+# mango-ui [![Build Status](https://cae-jenkins2.jpl.nasa.gov/buildStatus/icon?job=Mass-Change-Viz%2FUI2%2Fdevelop)](https://cae-jenkins2.jpl.nasa.gov/job/Mass-Change-Viz/job/UI2/job/develop/)
 
-The client application for the GMAT system (Gravity Monitoring & Analysis Toolkit).
+The client application for the MANGO system (Monitoring and ANalysis for Gravity Operations).
 
 ## Directory Structure
 
@@ -10,10 +10,13 @@ The client application for the GMAT system (Gravity Monitoring & Analysis Toolki
 ├── .vscode         # VS Code settings
 ├── docs            # Documentation
 ├── e2e-tests       # End-to-end tests
+├── public          # Public resources
 └── src             # The source code
+    ├── actions     # React actions
     ├── assets      # Additional assets
     ├── components  # React components
     ├── hooks       # React hooks
+    ├── reducers    # React reducers
     ├── routes      # React-router routes
     ├── types       # TypeScript types
     └── utilities   # Functions and constant values
