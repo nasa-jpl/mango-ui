@@ -8,9 +8,9 @@ pipeline {
   }
 
   environment {
-    DOCKER_IMAGE_NAME = 'gmat-ui'
+    DOCKER_IMAGE_NAME = 'mango-ui'
     ARTIFACTORY_URL = '***REMOVED***'
-    ARTIFACTORY_REPO = 'gov/nasa/jpl/gracec/gmat'
+    ARTIFACTORY_REPO = '***REMOVED***'
   }
 
   options {

@@ -4,7 +4,7 @@ This document describes the testing development workflow. End-to-end tests are r
 
 ## End-to-end
 
-All end-to-end tests assume all GMAT services are running and available on `localhost`.
+All end-to-end tests assume all MANGO services are running and available on `localhost`.
 
 To execute end-to-end tests normally (i.e. not in debug mode), use the following command:
 
@@ -35,7 +35,7 @@ npm run test:e2e:debug
 The codegen test script runs the [Playwright test generator](https://playwright.dev/docs/codegen), which automatically generates [locators](https://playwright.dev/docs/locators) as you click elements on the page. It can greatly save test development time. The generator requires an instance of the application already running to select against.
 
 ```sh
-npm run preview          # Starts production build of gmat-ui
+npm run preview          # Starts production build of mango-ui
 npm run test:e2e:codegen # Starts codegen
 ```
 
