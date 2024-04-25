@@ -79,7 +79,7 @@ pipeline {
         stage('unit-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.42.1-jammy'
+              image 'mcr.microsoft.com/playwright:v1.43.1-jammy'
               args '-v /unit-test-results:/unit-test-results'
               args '-u root:root'
               reuseNode true
