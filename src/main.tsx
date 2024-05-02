@@ -15,7 +15,7 @@ import { View } from "./types/view";
 import "./variables.css";
 
 const fetchView = async (): Promise<View> => {
-  const data = await fetch("/default-view.json");
+  const data = await fetch("default-view.json");
   const view = (await data.json()) as View;
   return view;
 };
