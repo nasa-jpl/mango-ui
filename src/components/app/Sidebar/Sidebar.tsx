@@ -35,7 +35,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
       <div className="sidebar-padded-content">
         <NavLink
           className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
-          to="/"
+          to=""
         >
           <SidebarLink
             title="Home"
@@ -49,7 +49,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
           className={(activeNav) =>
             getNavLinkClass(activeNav.isActive, "/datasets")
           }
-          to="/datasets"
+          to="datasets"
         >
           <SidebarLink
             title="Datasets"
@@ -66,7 +66,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
           className={(activeNav) =>
             getNavLinkClass(activeNav.isActive, "/sandbox")
           }
-          to="/sandbox"
+          to="sandbox"
         >
           <SidebarLink
             title="Sandbox"

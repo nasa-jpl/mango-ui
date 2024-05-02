@@ -2,7 +2,7 @@ import { test } from "@playwright/test";
 import assert from "assert";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/mango/");
 });
 
 test("page date-time selection yields expected API response", async ({
