@@ -35,7 +35,7 @@ export default function RootPage() {
   }, []);
 
   const fetchView = async (signal: AbortSignal) => {
-    const data = await fetch("/default-view.json", { signal });
+    const data = await fetch("default-view.json", { signal });
     const view = (await data.json()) as View;
     setView(view);
   };

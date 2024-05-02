@@ -25,7 +25,7 @@ export const Default: Story = {
   },
   loaders: [
     async () => ({
-      view: await (await fetch("/default-view.json")).json(),
+      view: await (await fetch("default-view.json")).json(),
     }),
   ],
 };
