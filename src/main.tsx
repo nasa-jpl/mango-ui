@@ -27,7 +27,7 @@ export async function loader() {
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: import.meta.env.VITE_APP_PATH,
     element: <RootPage />,
     loader,
     errorElement: <ErrorPage />,
