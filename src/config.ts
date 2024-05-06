@@ -7,6 +7,6 @@ export const config = {
     },
   },
   endpoints: {
-    data: "http://0.0.0.0:8000",
+    data: import.meta.env.VITE_API_URL,
   },
 };
