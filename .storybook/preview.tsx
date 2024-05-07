@@ -4,6 +4,7 @@ import type { Preview } from "@storybook/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "../src/Variables.css";
+import "../src/index.css";
 
 const preview: Preview = {
   decorators: [

@@ -29,9 +29,9 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@nasa-jpl/react-stellar": "^1.1.6",
+    "@nasa-jpl/react-stellar": "^1.1.10",
     "@phosphor-icons/react": "^2.1.0",
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "^1.44.0",
     "@storybook/addon-essentials": "^7.6.4",
     "@storybook/addon-interactions": "^7.6.4",
     "@storybook/addon-links": "^7.6.4",
@@ -76,5 +76,8 @@
     "unique-names-generator": "^4.7.1",
     "vite": "^5.0.9",
     "vitest": "^1.0.4"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.17.2"
   }
 }
