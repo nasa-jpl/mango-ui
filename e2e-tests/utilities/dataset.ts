@@ -1,4 +1,4 @@
-import { Dataset, Stream } from "../../src/types/api";
+import { Dataset, DatasetStream, Stream } from "../../src/types/api";
 import { generateUniqueName } from "./generic";
 
 export const generateTestStream = (): Stream => {
@@ -32,16 +32,16 @@ export const generateTestDataset = (): Dataset => {
   };
 };
 
-// export const generateTestDatasetStream = (): DatasetStream => {
-//   const dataset = generateTestDataset();
-//   // @ts-expect-error transforming to DatasetStream
-//   delete dataset.streams;
-//   const datasetStream: DatasetStream = {
-//     ...dataset,
-//     streamId: generateUniqueName(),
-//   };
-//   return datasetStream;
-// };
+export const generateTestDatasetStream = (): DatasetStream => {
+  const dataset = generateTestDataset();
+  // @ts-expect-error transforming to DatasetStream
+  delete dataset.streams;
+  const datasetStream: DatasetStream = {
+    ...dataset,
+    streamId: generateUniqueName(),
+  };
+  return datasetStream;
+};
 
 export const generateTestDatasets = (count: number): Dataset[] => {
   const datasets: Dataset[] = [];

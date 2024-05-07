@@ -2,7 +2,6 @@ import {
   Button,
   Dropdown,
   IconLineChartTrendingUp,
-  Label,
   Modal,
   ModalActionRow,
   ModalBody,
@@ -18,8 +17,8 @@ import { Dataset, DatasetStream } from "../../types/api";
 import { PageDateRangeState } from "../../types/state";
 import { ChartEntity } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
-import { toDatetimelocalStr, toUTCms } from "../../utilities/time";
 import Chart from "../entities/chart/Chart";
+import DateRangePicker from "../ui/DateRangePicker";
 import "./DatasetStreamPreviewModal.css";
 
 const getDatasetStreamDisplayName = (datasetStream: DatasetStream) => {
@@ -130,39 +129,25 @@ export const DatasetPreviewModal = ({
               }))}
             />
             <div className="dataset-stream-preview-date">
-              <Label htmlFor="pageStartTime">Start</Label>
-              <input
-                type="datetime-local"
-                id="page-datetime-start"
-                className="st-input"
-                name="pageStartTime"
-                value={toDatetimelocalStr(state.dateRange.start)}
-                onChange={(e) =>
+              <DateRangePicker
+                startDate={new Date(state.dateRange.start)}
+                endDate={new Date(state.dateRange.end)}
+                onStartDateChange={(date) => {
                   updateDateRange({
                     dateRange: {
                       ...state.dateRange,
-                      start: new Date(toUTCms(e.target.value)).toISOString(),
+                      start: date.toISOString(),
                     },
-                  })
-                }
-              />
-            </div>
-            <div className="dataset-stream-preview-date">
-              <Label htmlFor="pageEndTime">End</Label>
-              <input
-                type="datetime-local"
-                id="page-datetime-end"
-                className="st-input"
-                name="pageEndTime"
-                value={toDatetimelocalStr(state.dateRange.end)}
-                onChange={(e) =>
+                  });
+                }}
+                onEndDateChange={(date) => {
                   updateDateRange({
                     dateRange: {
                       ...state.dateRange,
-                      end: new Date(toUTCms(e.target.value)).toISOString(),
+                      end: date.toISOString(),
                     },
-                  })
-                }
+                  });
+                }}
               />
             </div>
           </div>
@@ -184,4 +169,4 @@ export const DatasetPreviewModal = ({
   );
 };
 
-export default Map;
+export default DatasetPreviewModal;

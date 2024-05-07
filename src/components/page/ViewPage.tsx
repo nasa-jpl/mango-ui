@@ -1,12 +1,10 @@
-import { Button, Label } from "@nasa-jpl/react-stellar";
 import { useReducer } from "react";
 import { pageDateRangeReducer } from "../../reducers/date-time";
 import { UPDATE_PAGE_DATE_RANGE } from "../../types/actions";
 import { Dataset } from "../../types/api";
 import { PageDateRangeState } from "../../types/state";
 import { Page as PageType, Section as SectionType } from "../../types/view";
-import { generateUUID } from "../../utilities/generic";
-import { toDatetimelocalStr, toUTCms } from "../../utilities/time";
+import DateRangePicker from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import Section from "./Section";
 import "./ViewPage.css";
@@ -48,62 +46,26 @@ export const ViewPage = ({
       title={viewPage.title}
       pageHeaderChildren={
         <>
-          <Label htmlFor="pageStartTime">Start:</Label>
-          <input
-            type="datetime-local"
-            id="page-datetime-start"
-            className="st-input"
-            name="pageStartTime"
-            value={toDatetimelocalStr(state.dateRange.start)}
-            onChange={(e) =>
+          <DateRangePicker
+            startDate={new Date(state.dateRange.start)}
+            endDate={new Date(state.dateRange.end)}
+            onStartDateChange={(date) => {
               updateDateRange({
                 dateRange: {
                   ...state.dateRange,
-                  start: new Date(toUTCms(e.target.value)).toISOString(),
+                  start: date.toISOString(),
                 },
-              })
-            }
-          ></input>
-          <Label htmlFor="pageEndTime">End:</Label>
-          <input
-            type="datetime-local"
-            id="page-datetime-end"
-            className="st-input"
-            name="pageEndTime"
-            value={toDatetimelocalStr(state.dateRange.end)}
-            onChange={(e) =>
-              updateDateRange({
-                dateRange: {
-                  ...state.dateRange,
-                  end: new Date(toUTCms(e.target.value)).toISOString(),
-                },
-              })
-            }
-          ></input>
-          <Button
-            onClick={() => {
-              const newViewPage: PageType = {
-                ...viewPage,
-                sections: [
-                  ...viewPage.sections,
-                  {
-                    title: "New Section",
-                    id: generateUUID(),
-                    type: "section",
-                    entities: [],
-                    layout: [],
-                    defaultOpen: true,
-                    enableHeader: true,
-                    dateRange: { end: "", start: "" },
-                    syncWithPageDateRange: true,
-                  } as SectionType,
-                ],
-              };
-              onPageChange(newViewPage);
+              });
             }}
-          >
-            Add section
-          </Button>
+            onEndDateChange={(date) => {
+              updateDateRange({
+                dateRange: {
+                  ...state.dateRange,
+                  end: date.toISOString(),
+                },
+              });
+            }}
+          />
         </>
       }
     >

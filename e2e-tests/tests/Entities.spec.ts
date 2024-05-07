@@ -14,8 +14,8 @@ test("page date-time selection yields expected API response", async ({
    * Test to confirm page date-time selection results in valid API
    * response containing data for the selected date-time range.
    */
-  const startDateTime = "2022-03-02T00:01";
-  const endDateTime = "2022-03-02T00:02";
+  const startDateTime = "2022-03-02T00:28:50.000Z";
+  const endDateTime = "2022-03-02T00:28:51.000Z";
 
   // Navigate to page containing charts
   await page.getByRole("button", { name: "ACC1A" }).click();
@@ -26,27 +26,29 @@ test("page date-time selection yields expected API response", async ({
    * make sure the date range for the data in the response matches the
    * range defined by the page datepickers.
    */
-  page.fill("id=page-datetime-start", startDateTime);
+  await page.getByLabel("Start").fill(startDateTime);
+  await page.getByLabel("Start").blur();
   await page.waitForLoadState("networkidle");
 
+  await page.getByLabel("End").fill(endDateTime);
+  page.getByLabel("End").blur();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, response] = await Promise.all([
-    await page.fill("id=page-datetime-end", endDateTime),
-    page.waitForResponse(
-      (response) => {
-        return (
-          response.url().includes("/missions/GRACEFO/datasets/") &&
-          response.status() === 200
-        );
-      },
-      { timeout: 10000 }
-    ),
-  ]);
+  const response = await page.waitForResponse(
+    (response) => {
+      return (
+        response.url().includes("/missions/GRACEFO/datasets/") &&
+        response.status() === 200
+      );
+    },
+    { timeout: 10000 }
+  );
 
   // Assert API response date-time range for requested data matches page date-time range
   const data = await response.json();
   assert(
-    data["from_isotimestamp"].substring(0, 16) === startDateTime &&
-      data["to_isotimestamp"].substring(0, 16) === endDateTime
+    data["from_isotimestamp"].substring(0, 16) ===
+      startDateTime.substring(0, 16) &&
+      data["to_isotimestamp"].substring(0, 16) === endDateTime.substring(0, 16)
   );
 });
