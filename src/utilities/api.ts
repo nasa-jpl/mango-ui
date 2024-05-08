@@ -1,5 +1,14 @@
 import { config } from "../config";
 import { DataResponse, DataResponseError, Dataset } from "../types/api";
+import { View } from "../types/view";
+
+export const getView = async (signal?: AbortSignal): Promise<View> => {
+  const data = await fetch(import.meta.env.BASE_URL + "default-view.json", {
+    signal,
+  });
+  const view = (await data.json()) as View;
+  return view;
+};
 
 export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
   const url = config.endpoints.data + config.api.data.missions;

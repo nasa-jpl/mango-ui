@@ -3,7 +3,7 @@ import { Outlet, useLoaderData } from "react-router-dom";
 import Sidebar from "../components/app/Sidebar/Sidebar";
 import { Dataset } from "../types/api";
 import { View } from "../types/view";
-import { getDatasets, getMissions } from "../utilities/api";
+import { getDatasets, getMissions, getView } from "../utilities/api";
 
 export default function RootPage() {
   // TODO consider a reducer for this instead of context?
@@ -35,8 +35,7 @@ export default function RootPage() {
   }, []);
 
   const fetchView = async (signal: AbortSignal) => {
-    const data = await fetch("default-view.json", { signal });
-    const view = (await data.json()) as View;
+    const view = await getView(signal);
     setView(view);
   };
 
