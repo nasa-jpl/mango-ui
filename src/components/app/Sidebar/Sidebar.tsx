@@ -35,7 +35,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
       <div className="sidebar-padded-content">
         <NavLink
           className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
-          to=""
+          to="/"
         >
           <SidebarLink
             title="Home"

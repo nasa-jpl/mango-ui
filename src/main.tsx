@@ -11,46 +11,49 @@ import HomePage from "./routes/HomePage";
 import RootPage from "./routes/RootPage";
 import SandboxPage from "./routes/SandboxPage";
 import ViewPage from "./routes/ViewPage";
-import { View } from "./types/view";
+import { getView } from "./utilities/api";
 import "./variables.css";
 
-const fetchView = async (): Promise<View> => {
-  const data = await fetch("default-view.json");
-  const view = (await data.json()) as View;
-  return view;
-};
-
 export async function loader() {
-  const view = await fetchView();
+  let view = {};
+  try {
+    view = await getView();
+  } catch (err) {
+    // TODO generate a default view
+    return {};
+  }
   return { view };
 }
 
-const router = createBrowserRouter([
-  {
-    path: import.meta.env.VITE_APP_PATH,
-    element: <RootPage />,
-    loader,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        element: <HomePage />,
-        index: true,
-      },
-      {
-        path: "datasets",
-        element: <DatasetsPage />,
-      },
-      {
-        path: "sandbox",
-        element: <SandboxPage />,
-      },
-      {
-        path: "view/:pageGroupURL/:pageURL",
-        element: <ViewPage />,
-      },
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootPage />,
+      loader,
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          element: <HomePage />,
+          index: true,
+        },
+        {
+          path: "datasets",
+          element: <DatasetsPage />,
+        },
+        {
+          path: "sandbox",
+          element: <SandboxPage />,
+        },
+        {
+          path: "view/:pageGroupURL/:pageURL",
+          element: <ViewPage />,
+        },
+      ],
+    },
+  ],
+  { basename: import.meta.env.VITE_APP_PATH }
+);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
