@@ -1,7 +1,5 @@
-import L, { Map as MapType } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useCallback, useEffect, useRef, useState } from "react";
-import useResizeObserver from "../../../hooks/resizeObserver";
+import { Viewer as CesiumViewer } from "cesium";
+import { useEffect, useRef } from "react";
 import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
@@ -12,39 +10,24 @@ export declare type MapProps = {
   mapEntity: MapEntity;
 };
 
-export const Map = ({ mapEntity /* ,dateRange */ }: MapProps) => {
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const map = useRef<MapType | null>();
-
-  const onResize = useCallback((target: HTMLDivElement) => {
-    // Handle the resize event
-    if (target.getBoundingClientRect().height > 0) {
-      map.current?.invalidateSize();
-    }
-  }, []);
-
-  const mapRef = useResizeObserver(onResize);
+export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
+  const map = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (mapRef.current && !mapInitialized) {
-      setMapInitialized(true);
-      if (mapRef.current.childElementCount === 0) {
-        map.current = L.map(mapRef.current).setView([30, 30], 10);
-        L.tileLayer(
-          "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/EPSG3857_500m/{z}/{y}/{x}.jpeg",
-          {
-            maxZoom: 8,
-          }
-        ).addTo(map.current);
-      }
-    }
-  }, [mapRef, mapInitialized]);
+    new CesiumViewer(map.current as HTMLDivElement, {
+      timeline: false,
+      animation: false,
+      fullscreenButton: false,
+    });
+  }, []);
 
   return (
-    <div className="map">
+    <>
       <EntityHeader title={mapEntity.title} />
-      <div ref={mapRef} id="map" />
-    </div>
+      <div className="cesium-container">
+        <div className="viewer-container" ref={map} />
+      </div>
+    </>
   );
 };
 
