@@ -27,7 +27,8 @@
   "dependencies": {
     "d3-format": "^3.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "vite-plugin-cesium": "^1.2.22"
   },
   "devDependencies": {
     "@nasa-jpl/react-stellar": "^1.1.11",
