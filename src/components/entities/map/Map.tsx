@@ -48,7 +48,7 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
 
     viewer.baseLayerPicker.viewModel.terrainProviderViewModels = [];
     viewer.cesiumWidget.creditContainer.remove();
-  }, []);
+  }, [imageryViewModels]);
 
   return (
     <>
