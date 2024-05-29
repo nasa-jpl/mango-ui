@@ -10,7 +10,7 @@ import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Mode } from "chartjs-plugin-zoom/types/options";
-import { debounce } from "lodash-es";
+import { debounce, throttle } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataResponse, Dataset } from "../../../types/api";
 import { DateRange } from "../../../types/time";
@@ -28,17 +28,17 @@ import {
 import { applyLayerTransform } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
-import hoverCrosshairPlugin from "./plugins/hoverCrosshairPlugin";
 
 ChartJS.register(zoomPlugin);
-ChartJS.register(hoverCrosshairPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
   // TODO could pass in only the list of datasets that this Chart cares about?
   datasets: Dataset[];
   dateRange: DateRange;
+  hoverDate: Date | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
+  onHoverDateChange?: (date: Date | null) => void;
   showHeader?: boolean;
 };
 
@@ -50,6 +50,8 @@ export const Chart = ({
   dateRange,
   showHeader = true,
   onDateRangeChange = () => {},
+  onHoverDateChange = () => {},
+  hoverDate,
 }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS<"line", CustomChartData[]> | null>();
@@ -487,7 +489,6 @@ export const Chart = ({
       data: {
         datasets: [],
       },
-      plugins: [hoverCrosshairPlugin],
       options: {
         font: {
           family: "'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
@@ -513,9 +514,6 @@ export const Chart = ({
           },
         },
         plugins: {
-          [hoverCrosshairPlugin.id]: {
-            enabled: chartEntity.chartOptions?.showCursor || false,
-          },
           tooltip: {
             callbacks: {
               label: (tooltipItem) =>
@@ -564,7 +562,31 @@ export const Chart = ({
         },
       },
     });
+
+    chartRef.current.canvas.onmousemove = (e) => throttledOnChartMouseMove(e);
+    chartRef.current.canvas.onmouseleave = (e) => onChartMouseMove(e);
   };
+
+  const onChartMouseMove = (event: MouseEvent) => {
+    if (
+      chartRef.current?.isPointInArea({
+        x: event.offsetX,
+        y: event.offsetY,
+      })
+    ) {
+      const newX = chartRef.current?.scales.x.getValueForPixel(event.offsetX);
+      if (typeof newX === "number") {
+        onHoverDateChange(new Date(newX));
+        return;
+      }
+    }
+    onHoverDateChange(null);
+  };
+
+  const throttledOnChartMouseMove = throttle(onChartMouseMove, 0, {
+    leading: true,
+    trailing: true,
+  });
 
   const destroyChart = () => {
     if (chartRef.current) {
@@ -634,6 +656,72 @@ export const Chart = ({
     }
   };
 
+  const renderChartOverlays = () => {
+    if (!chartRef.current) {
+      return;
+    }
+    return (
+      <>
+        {hoverDate && !boxZoomEnabled && (
+          <div
+            className="chart-cursor-container"
+            style={{
+              top: `${chartRef.current.chartArea.top}px`,
+              width: `${chartRef.current.chartArea.width}px`,
+              left: `${chartRef.current.chartArea.left}px`,
+              height: `${chartRef.current.chartArea.height}px`,
+            }}
+          >
+            <div
+              className="chart-cursor"
+              style={{
+                left: `${
+                  chartRef.current.scales.x.getPixelForValue(
+                    hoverDate.getTime()
+                  ) - chartRef.current.chartArea.left
+                }px`,
+              }}
+            />
+          </div>
+        )}
+        {loading && (
+          <div
+            className="chart-indicator-overlay chart-loading-indicator st-typography-medium"
+            style={{
+              top: `${
+                chartRef.current.chartArea.top +
+                chartRef.current.chartArea.height / 2
+              }px`,
+              left: `${
+                chartRef.current.chartArea.left +
+                chartRef.current.chartArea.width / 2
+              }px`,
+            }}
+          >
+            Loading
+          </div>
+        )}
+        {!loading && error && (
+          <div
+            className="chart-indicator-overlay chart-error-indicator st-typography-medium"
+            style={{
+              top: `${
+                chartRef.current.chartArea.top +
+                chartRef.current.chartArea.height / 2
+              }px`,
+              left: `${
+                chartRef.current.chartArea.left +
+                chartRef.current.chartArea.width / 2
+              }px`,
+            }}
+          >
+            Error: {error.message}
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="chart">
       {showHeader && (
@@ -685,44 +773,11 @@ export const Chart = ({
           }
         />
       )}
-      <div className="chart-canvas-container">
-        <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
-        {chartRef.current && loading && (
-          <div
-            className="chart-indicator-overlay chart-loading-indicator st-typography-medium"
-            style={{
-              position: "absolute",
-              top: `${
-                chartRef.current.chartArea.top +
-                chartRef.current.chartArea.height / 2
-              }px`,
-              left: `${
-                chartRef.current.chartArea.left +
-                chartRef.current.chartArea.width / 2
-              }px`,
-            }}
-          >
-            Loading
-          </div>
-        )}
-        {chartRef.current && !loading && error && (
-          <div
-            className="chart-indicator-overlay chart-error-indicator st-typography-medium"
-            style={{
-              position: "absolute",
-              top: `${
-                chartRef.current.chartArea.top +
-                chartRef.current.chartArea.height / 2
-              }px`,
-              left: `${
-                chartRef.current.chartArea.left +
-                chartRef.current.chartArea.width / 2
-              }px`,
-            }}
-          >
-            Error: {error.message}
-          </div>
-        )}
+      <div className="chart-canvas-container-padded">
+        <div className="chart-canvas-container">
+          <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
+          {renderChartOverlays()}
+        </div>
       </div>
     </div>
   );

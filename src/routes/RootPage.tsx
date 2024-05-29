@@ -6,7 +6,6 @@ import { View } from "../types/view";
 import { getDatasets, getMissions, getView } from "../utilities/api";
 
 export default function RootPage() {
-  // TODO consider a reducer for this instead of context?
   const { view: initialView } = useLoaderData() as Record<"view", View>;
   const [view, setView] = useState<View>(initialView);
   const [datasets, setDatasets] = useState<Dataset[]>([]);

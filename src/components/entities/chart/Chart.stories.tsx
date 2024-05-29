@@ -47,5 +47,6 @@ export const Default: Story = {
       end: "",
       start: "",
     },
+    hoverDate: null,
   },
 };

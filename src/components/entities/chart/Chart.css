@@ -5,10 +5,17 @@
   height: 0;
 }
 
-.chart .chart-canvas-container {
+.chart .chart-canvas-container-padded {
+  display: flex;
   flex: 1;
   height: 0;
   padding: 8px;
+  width: 100%;
+}
+
+.chart .chart-canvas-container {
+  flex: 1;
+  height: 100%;
   position: relative;
   width: 100%;
 }
@@ -23,7 +30,8 @@
   margin-top: 0;
   padding: 2px 8px;
   pointer-events: none;
-  transform: translateX(-50%);
+  position: absolute;
+  transform: translateX(-50%) translateY(-50%);
 }
 
 .chart-loading-indicator {
@@ -45,6 +53,21 @@
 
 .chart:hover .chart-header-buttons {
   visibility: visible;
+}
+
+.chart-cursor-container {
+  pointer-events: none;
+  position: absolute;
+}
+
+.chart-cursor {
+  background: rgba(0, 0, 0, 0.5);
+  height: 100%;
+  pointer-events: none;
+  position: relative;
+  top: 0;
+  transform: translateX(-0.5px);
+  width: 1px;
 }
 
 .st-button.icon.chart-button.chart-button-active {

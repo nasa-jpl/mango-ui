@@ -10,11 +10,9 @@ import {
   Tooltip,
   TooltipProvider,
 } from "@nasa-jpl/react-stellar";
-import { useReducer, useState } from "react";
-import { pageDateRangeReducer } from "../../reducers/date-time";
-import { UPDATE_PAGE_DATE_RANGE } from "../../types/actions";
+import { useState } from "react";
 import { Dataset, DatasetStream } from "../../types/api";
-import { PageDateRangeState } from "../../types/state";
+import { DateRange } from "../../types/time";
 import { ChartEntity } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
 import Chart from "../entities/chart/Chart";
@@ -38,25 +36,15 @@ export const DatasetPreviewModal = ({
     datasetStream.available_fields[0]?.name
   );
 
-  const initialState: PageDateRangeState = {
-    // TODO: Refactor to pull from dataset once start and end available?
-    dateRange: {
-      end: new Date(Date.UTC(2022, 11, 31, 11, 0)).toISOString(),
-      start: new Date(Date.UTC(2022, 0, 1, 0, 0)).toISOString(),
-    },
-  };
-
-  const [state, dispatch] = useReducer(pageDateRangeReducer, initialState);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
+    start: new Date(Date.UTC(2022, 2, 2, 0, 26)).toISOString(), //2022-03-02T00:26:00
+  });
   const [version, setVersion] = useState(datasetStream.available_versions[0]);
-
-  const updateDateRange = (newDateRange: PageDateRangeState) => {
-    dispatch({ type: UPDATE_PAGE_DATE_RANGE, payload: newDateRange });
-  };
 
   const start = new Date("2022-01-01").toISOString();
   const end = new Date("2023-01-01").toISOString();
 
-  /* TODO need to show the error somewhere */
   const chartEntity: ChartEntity = {
     dateRange: { start: start, end: end },
     id: generateUUID(),
@@ -130,22 +118,18 @@ export const DatasetPreviewModal = ({
             />
             <div className="dataset-stream-preview-date">
               <DateRangePicker
-                startDate={new Date(state.dateRange.start)}
-                endDate={new Date(state.dateRange.end)}
+                startDate={new Date(dateRange.start)}
+                endDate={new Date(dateRange.end)}
                 onStartDateChange={(date) => {
-                  updateDateRange({
-                    dateRange: {
-                      ...state.dateRange,
-                      start: date.toISOString(),
-                    },
+                  setDateRange({
+                    end: dateRange.end,
+                    start: date.toISOString(),
                   });
                 }}
                 onEndDateChange={(date) => {
-                  updateDateRange({
-                    dateRange: {
-                      ...state.dateRange,
-                      end: date.toISOString(),
-                    },
+                  setDateRange({
+                    end: date.toISOString(),
+                    start: dateRange.start,
                   });
                 }}
               />
@@ -154,8 +138,10 @@ export const DatasetPreviewModal = ({
           <Chart
             chartEntity={chartEntity}
             datasets={datasets}
-            dateRange={state.dateRange}
-            onDateRangeChange={(dateRange) => updateDateRange({ dateRange })}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            hoverDate={null}
+            onHoverDateChange={() => {}}
             showHeader={false}
           />
         </div>

@@ -53,7 +53,6 @@ export interface ChartEntity extends Entity {
 }
 
 export type ChartOptions = {
-  showCursor?: boolean;
   tooltip?: {
     intersect?: TooltipOptions["intersect"];
     mode?: TooltipOptions["mode"];
