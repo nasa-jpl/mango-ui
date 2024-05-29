@@ -4,7 +4,6 @@ import { Dataset } from "../types/api";
 import { View, Page as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
-  // TODO consider a reducer for this instead of context?
   const [view, setView, datasets, loadingInitialData] =
     useOutletContext<
       [View, React.Dispatch<React.SetStateAction<View>>, Dataset[], boolean]

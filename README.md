@@ -12,11 +12,9 @@ The client application for the MANGO system (Monitoring and ANalysis for Gravity
 ├── e2e-tests       # End-to-end tests
 ├── public          # Public resources
 └── src             # The source code
-    ├── actions     # React actions
     ├── assets      # Additional assets
     ├── components  # React components
     ├── hooks       # React hooks
-    ├── reducers    # React reducers
     ├── routes      # React-router routes
     ├── types       # TypeScript types
     └── utilities   # Functions and constant values

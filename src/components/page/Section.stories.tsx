@@ -39,6 +39,7 @@ export const Default: Story = {
     onSectionChange: () => {},
     dateRange: { start: "", end: "" },
     datasets: [],
+    hoverDate: null,
     section: {
       id: "xyz",
       layout: [{ i: "123", x: 0, y: 0, w: 4, h: 1 }],

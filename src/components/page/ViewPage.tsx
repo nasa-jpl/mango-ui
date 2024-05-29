@@ -1,8 +1,15 @@
-import { useReducer } from "react";
-import { pageDateRangeReducer } from "../../reducers/date-time";
-import { UPDATE_PAGE_DATE_RANGE } from "../../types/actions";
+import {
+  Button,
+  IconSettings,
+  Popover,
+  PopoverContent,
+  Switch,
+  Tooltip,
+} from "@nasa-jpl/react-stellar";
+import { useState } from "react";
 import { Dataset } from "../../types/api";
-import { PageDateRangeState } from "../../types/state";
+import { PageOptions } from "../../types/page";
+import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
 import DateRangePicker from "../ui/DateRangePicker";
 import Page from "../ui/Page";
@@ -23,19 +30,14 @@ export const ViewPage = ({
   viewPage,
   onPageChange,
 }: PageProps) => {
-  const initialState: PageDateRangeState = {
-    // TODO: Refactor to pull from config
-    dateRange: {
-      end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
-      start: new Date(Date.UTC(2022, 2, 2, 0, 26)).toISOString(), //2022-03-02T00:26:00
-    },
-  };
-
-  const [state, dispatch] = useReducer(pageDateRangeReducer, initialState);
-
-  const updateDateRange = (newDateRange: PageDateRangeState) => {
-    dispatch({ type: UPDATE_PAGE_DATE_RANGE, payload: newDateRange });
-  };
+  const [dateRange, setDateRange] = useState<DateRange>({
+    end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
+    start: new Date(Date.UTC(2022, 2, 2, 0, 26)).toISOString(), //2022-03-02T00:26:00
+  });
+  const [hoverDate, setHoverDate] = useState<Date | null>(null);
+  const [pageOptions, setPageOptions] = useState<PageOptions>({
+    showHoverDate: true,
+  });
 
   if (!viewPage) {
     return;
@@ -47,25 +49,50 @@ export const ViewPage = ({
       pageHeaderChildren={
         <>
           <DateRangePicker
-            startDate={new Date(state.dateRange.start)}
-            endDate={new Date(state.dateRange.end)}
+            startDate={new Date(dateRange.start)}
+            endDate={new Date(dateRange.end)}
             onStartDateChange={(date) => {
-              updateDateRange({
-                dateRange: {
-                  ...state.dateRange,
-                  start: date.toISOString(),
-                },
+              setDateRange({
+                end: dateRange.end,
+                start: date.toISOString(),
               });
             }}
             onEndDateChange={(date) => {
-              updateDateRange({
-                dateRange: {
-                  ...state.dateRange,
-                  end: date.toISOString(),
-                },
+              setDateRange({
+                end: date.toISOString(),
+                start: dateRange.start,
               });
             }}
           />
+
+          <Popover
+            contentProps={{ sideOffset: 41 }}
+            trigger={
+              <div>
+                <Tooltip content="Settings">
+                  <Button variant="icon">
+                    <IconSettings />
+                  </Button>
+                </Tooltip>
+              </div>
+            }
+          >
+            <PopoverContent collisionPadding={{ right: 16 }}>
+              <div
+                className="st-typography-medium"
+                style={{ marginBottom: "8px" }}
+              >
+                Settings
+              </div>
+              <Switch
+                label="Show time cursor"
+                checked={pageOptions.showHoverDate}
+                onCheckedChange={(checked) =>
+                  setPageOptions({ ...pageOptions, showHoverDate: checked })
+                }
+              />
+            </PopoverContent>
+          </Popover>
         </>
       }
     >
@@ -75,12 +102,10 @@ export const ViewPage = ({
             datasets={datasets}
             section={section}
             key={section.id}
-            dateRange={state.dateRange}
-            onDateRangeChange={(newDateRange) =>
-              updateDateRange({
-                dateRange: newDateRange,
-              })
-            }
+            dateRange={dateRange}
+            hoverDate={pageOptions.showHoverDate ? hoverDate : null}
+            onDateRangeChange={setDateRange}
+            onHoverDateChange={setHoverDate}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,

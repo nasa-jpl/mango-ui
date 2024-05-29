@@ -19,17 +19,21 @@ import "./Section.css";
 export declare type SectionProps = {
   datasets: Dataset[];
   dateRange: DateRange;
+  hoverDate: Date | null;
   onDateRangeChange: (dateRange: DateRange) => void;
+  onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
   section: SectionType;
 };
 
 export const Section = ({
   dateRange,
+  hoverDate,
   datasets,
   section,
   onSectionChange,
   onDateRangeChange = () => {},
+  onHoverDateChange = () => {},
 }: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
@@ -124,9 +128,11 @@ export const Section = ({
                   entity={e}
                   onEntityChange={() => {}}
                   onDateRangeChange={onDateRangeChange}
+                  onHoverDateChange={onHoverDateChange}
                   key={e.id}
                   className={entityClass}
                   dateRange={dateRange}
+                  hoverDate={hoverDate}
                 />
               </CustomGridItemComponent>
             );

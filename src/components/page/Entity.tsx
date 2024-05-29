@@ -19,8 +19,10 @@ export declare type EntityProps = {
   datasets: Dataset[];
   dateRange: DateRange;
   entity: EntityType;
+  hoverDate: Date | null;
   onDateRangeChange: (dateRange: DateRange) => void;
   onEntityChange: (entity: EntityType) => void;
+  onHoverDateChange: (date: Date | null) => void;
 };
 
 export const Entity = (props: EntityProps) => {
@@ -28,8 +30,10 @@ export const Entity = (props: EntityProps) => {
     datasets,
     entity,
     dateRange,
+    hoverDate,
     className = "",
     onDateRangeChange = () => {},
+    onHoverDateChange = () => {},
   } = props;
   const entityClass = classNames({
     entity: true,
@@ -41,8 +45,10 @@ export const Entity = (props: EntityProps) => {
         <Chart
           chartEntity={entity}
           dateRange={dateRange}
+          hoverDate={hoverDate}
           datasets={datasets}
           onDateRangeChange={onDateRangeChange}
+          onHoverDateChange={onHoverDateChange}
         />
       )}
       {isMapEntity(entity) && <Map mapEntity={entity} dateRange={dateRange} />}

@@ -236,11 +236,10 @@
                 {
                   "id": "3efgtre",
                   "type": "chart",
-                  "title": "Tooltip Intersection Off, Mode Index, Show Cursor",
+                  "title": "Tooltip Intersection Off, Mode Index",
                   "syncWithPageDateRange": true,
                   "chartOptions": {
-                    "tooltip": { "intersect": false, "mode": "index" },
-                    "showCursor": true
+                    "tooltip": { "intersect": false, "mode": "index" }
                   },
                   "layers": [
                     {
