@@ -16,7 +16,7 @@ export const Map = ({ mapEntity /* ,dateRange */ }: MapProps) => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const map = useRef<MapType | null>();
 
-  const test = "";
+  // const test = "";
 
   const onResize = useCallback((target: HTMLDivElement) => {
     // Handle the resize event
