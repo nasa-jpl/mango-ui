@@ -1,14 +1,14 @@
 import {
   Viewer as CesiumViewer,
-  Ion,
   ProviderViewModel,
-  UrlTemplateImageryProvider,
+  WebMapTileServiceImageryProvider,
 } from "cesium";
 import { useEffect, useRef } from "react";
 import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
+import { gibsTilingScheme } from "./gibs";
 
 export declare type MapProps = {
   dateRange: DateRange;
@@ -17,38 +17,39 @@ export declare type MapProps = {
 
 export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
   const map = useRef<HTMLDivElement>(null);
-  Ion.defaultAccessToken = "";
 
   useEffect(() => {
-    // Define basemaps
-    const imageryViewModels: ProviderViewModel[] = [];
-    imageryViewModels.push(
-      new ProviderViewModel({
-        name: "BlueMarble_ShadedRelief_Bathymetry",
-        tooltip: "BlueMarble_ShadedRelief_Bathymetry",
-        iconUrl:
-          "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/2/1/1.jpeg",
-        creationFunction: function () {
-          return new UrlTemplateImageryProvider({
-            url: "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/{z}/{y}/{x}.jpeg",
-            minimumLevel: 0,
-            maximumLevel: 18,
-          });
-        },
-      })
-    );
+    const models = [];
+    const model = new ProviderViewModel({
+      name: "BlueMarble_ShadedRelief_Bathymetry",
+      iconUrl: "",
+      tooltip: "",
+      creationFunction: function () {
+        return new WebMapTileServiceImageryProvider({
+          url: "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/{TileMatrix}/{TileRow}/{TileCol}.jpeg",
+          layer: "BlueMarble_ShadedRelief_Bathymetry",
+          style: "default",
+          format: "image/jpeg",
+          tileMatrixSetID: "500m",
+          maximumLevel: 8,
+          tileWidth: 256,
+          tileHeight: 256,
+          tilingScheme: gibsTilingScheme(),
+        });
+      },
+    });
+    models.push(model);
 
-    // Initialize map viewer
     const viewer = new CesiumViewer(map.current as HTMLDivElement, {
-      imageryProviderViewModels: imageryViewModels,
-      selectedImageryProviderViewModel: imageryViewModels[1],
-      timeline: false,
       animation: false,
+      baseLayerPicker: false,
+      geocoder: false,
+      timeline: false,
+      imageryProviderViewModels: models,
       fullscreenButton: false,
     });
 
-    // Remove cesium-ion stuff
-    viewer.baseLayerPicker.viewModel.terrainProviderViewModels = [];
+    // Remove cesium-ion credit
     viewer.cesiumWidget.creditContainer.remove();
   }, []);
 
