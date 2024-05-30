@@ -3,7 +3,7 @@ import {
   ProviderViewModel,
   WebMapTileServiceImageryProvider,
 } from "cesium";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
@@ -19,7 +19,7 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
   const map = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const models = [];
+    const models: ProviderViewModel[] = [];
     const model = new ProviderViewModel({
       name: "BlueMarble_ShadedRelief_Bathymetry",
       iconUrl: "",
@@ -54,12 +54,12 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
   }, []);
 
   return (
-    <>
+    <React.Fragment>
       <EntityHeader title={mapEntity.title} />
       <div className="cesium-container">
         <div className="viewer-container" ref={map} />
       </div>
-    </>
+    </React.Fragment>
   );
 };
 
