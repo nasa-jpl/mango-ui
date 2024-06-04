@@ -10,6 +10,7 @@ module.exports = {
   parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   plugins: ["react-refresh"],
   rules: {
+    "no-unused-vars": "warn",
     "@typescript-eslint/member-ordering": [
       "error",
       {
