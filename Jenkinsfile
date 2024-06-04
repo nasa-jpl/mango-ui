@@ -53,6 +53,7 @@ pipeline {
                 publishChecks name: 'lint', title: 'ESLint', summary: 'Check lint output', text: "eslint process returned status code: ${lint}", conclusion: 'SUCCESS', status: 'COMPLETED'
             } else {
                 publishChecks name: 'lint', title: 'ESLint', summary: 'Check lint output', text: "eslint process returned status code: ${lint}", conclusion: 'FAILURE', status: 'COMPLETED'
+                error "eslint process returned status code: ${lint}"
               }
             }
           }
@@ -67,6 +68,7 @@ pipeline {
                 publishChecks name: 'lint-css', title: 'CSS Style Linting', summary: 'Check lint output', text: "css lint process returned status code: ${lintcss}", conclusion: 'SUCCESS', status: 'COMPLETED'
             } else {
                 publishChecks name: 'lint-css', title: 'CSS Style Linting', summary: 'Check lint output', text: "css lint process returned status code: ${lintcss}", conclusion: 'FAILURE', status: 'COMPLETED'
+                error "css lint process returned status code: ${lint}"
               }
             }
           }
