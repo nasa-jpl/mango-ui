@@ -77,9 +77,9 @@ export type DataLayer = {
   endTime: string;
   field: string;
   id: string;
+  instrument: string;
   mission: string;
   startTime: string;
-  instrument: string;
   version: string;
 };
 
