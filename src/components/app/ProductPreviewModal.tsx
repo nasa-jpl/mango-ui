@@ -1,7 +1,6 @@
 import {
   Button,
   Dropdown,
-  IconLineChartTrendingUp,
   Modal,
   ModalActionRow,
   ModalBody,
@@ -10,58 +9,58 @@ import {
   Tooltip,
   TooltipProvider,
 } from "@nasa-jpl/react-stellar";
+import { ChartLine } from "@phosphor-icons/react";
 import { useState } from "react";
-import { Dataset, DatasetStream } from "../../types/api";
+import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { ChartEntity } from "../../types/view";
-import { generateUUID } from "../../utilities/generic";
 import Chart from "../entities/chart/Chart";
 import DateRangePicker from "../ui/DateRangePicker";
-import "./DatasetStreamPreviewModal.css";
+import "./ProductPreviewModal.css";
 
-const getDatasetStreamDisplayName = (datasetStream: DatasetStream) => {
-  return `${datasetStream.mission} ${datasetStream.streamId} ${datasetStream.id}`;
+const getProductDisplayName = (product: Product) => {
+  return `${product.mission} ${product.instruments[0]} ${product.id}`;
 };
 
-export declare type DatasetPreviewModalProps = {
-  datasetStream: DatasetStream;
-  datasets: Dataset[];
+export declare type ProductPreviewModalProps = {
+  product: Product;
+  products: Product[];
 };
 
-export const DatasetPreviewModal = ({
-  datasetStream,
-  datasets,
-}: DatasetPreviewModalProps) => {
-  const [field, setField] = useState<string>(
-    datasetStream.available_fields[0]?.name
-  );
-
+export const ProductPreviewModal = ({
+  product,
+  products,
+}: ProductPreviewModalProps) => {
+  const [field, setField] = useState<string>(product.available_fields[0]?.name);
+  const [version, setVersion] = useState(product.available_versions[0]);
+  // TODO populate from data_begin and end
   const [dateRange, setDateRange] = useState<DateRange>({
-    end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
-    start: new Date(Date.UTC(2022, 2, 2, 0, 26)).toISOString(), //2022-03-02T00:26:00
+    end: new Date(product.datasets[0].data_end).toISOString(), //2022-03-02T00:36:00
+    start: new Date(product.datasets[0].data_begin).toISOString(), //2022-03-02T00:26:00
   });
-  const [version, setVersion] = useState(datasetStream.available_versions[0]);
 
   const start = new Date("2022-01-01").toISOString();
   const end = new Date("2023-01-01").toISOString();
 
   const chartEntity: ChartEntity = {
     dateRange: { start: start, end: end },
-    id: generateUUID(),
+    id: "chartEntity1",
     title: "What",
     type: "chart",
     syncWithPageDateRange: true,
+    yAxes: [{ position: "left", id: "y1" }],
     layers: [
       {
         type: "line",
-        datasetId: datasetStream.id,
+        dataset: product.id,
         startTime: start,
         endTime: end,
         version,
         field,
-        id: generateUUID(),
-        mission: datasetStream.mission,
-        streamId: datasetStream.streamId,
+        id: "layer1",
+        mission: product.mission,
+        instrument: product.instruments[0] /* TODO make it instrument */,
+        yAxisId: "y1",
       },
     ],
   };
@@ -78,30 +77,41 @@ export const DatasetPreviewModal = ({
 
   return (
     <Modal
-      className="dataset-stream-preview-modal"
+      className="product-preview-modal"
       onOpenChange={function noRefCheck() {}}
-      title={`${getDatasetStreamDisplayName(datasetStream)} Preview`}
+      title={`${getProductDisplayName(product)} Preview`}
       trigger={
-        <div className="dataset-stream-preview-button">
+        <div className="product-preview-button">
           <TooltipProvider>
             <Tooltip content="Preview">
-              <Button variant="icon" icon={<IconLineChartTrendingUp />} />
+              <Button
+                variant="icon"
+                icon={<ChartLine height={24} width={24} />}
+              />
             </Tooltip>
           </TooltipProvider>
         </div>
       }
     >
       <ModalBody>
-        <div className="dataset-stream-preview-modal-content">
-          <div className="dataset-stream-preview-controls">
+        <div className="product-preview-modal-content">
+          <div className="product-preview-controls">
             <Dropdown
+              className="product-preview-field"
               value={{ value: field, label: field }}
               label="Field"
               labelPosition="left"
               // @ts-expect-error TODO fix from the react-stellar side
               onChange={onFieldChange}
-              options={datasetStream.available_fields.map((f) => ({
-                label: f.name,
+              options={product.available_fields.map((f) => ({
+                label: (
+                  <div className="product-preview-field--label">
+                    {f.name}
+                    <div>
+                      {f.unit} ({f.type})
+                    </div>
+                  </div>
+                ),
                 value: f.name,
               }))}
             />
@@ -111,12 +121,12 @@ export const DatasetPreviewModal = ({
               labelPosition="left"
               // @ts-expect-error TODO fix from the react-stellar side
               onChange={onVersionChange}
-              options={datasetStream.available_versions.map((v) => ({
+              options={product.available_versions.map((v) => ({
                 label: v,
                 value: v,
               }))}
             />
-            <div className="dataset-stream-preview-date">
+            <div className="product-preview-date">
               <DateRangePicker
                 startDate={new Date(dateRange.start)}
                 endDate={new Date(dateRange.end)}
@@ -137,7 +147,7 @@ export const DatasetPreviewModal = ({
           </div>
           <Chart
             chartEntity={chartEntity}
-            datasets={datasets}
+            products={products}
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
             hoverDate={null}
@@ -155,4 +165,4 @@ export const DatasetPreviewModal = ({
   );
 };
 
-export default DatasetPreviewModal;
+export default ProductPreviewModal;

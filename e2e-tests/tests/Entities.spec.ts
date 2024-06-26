@@ -37,7 +37,7 @@ test("page date-time selection yields expected API response", async ({
   const response = await page.waitForResponse(
     (response) => {
       return (
-        response.url().includes("/missions/GRACEFO/datasets/") &&
+        response.url().includes("/missions/GRACEFO/products/") &&
         response.status() === 200
       );
     },

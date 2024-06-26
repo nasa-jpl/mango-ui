@@ -11,15 +11,15 @@ test("pluralize", () => {
 test("getLayerId", () => {
   const layer: DataLayer = {
     mission: "MISSION",
-    datasetId: "DATASET",
+    dataset: "DATASET",
     field: "FIELD",
-    streamId: "STREAM",
+    instrument: "INSTRUMENT",
     endTime: "",
     startTime: "",
     version: "04",
     id: "1",
   };
-  expect(getLayerId(layer)).toEqual("MISSION_DATASET_FIELD_STREAM");
+  expect(getLayerId(layer)).toEqual("MISSION_DATASET_FIELD_INSTRUMENT");
 });
 
 test("isAbortError", () => {

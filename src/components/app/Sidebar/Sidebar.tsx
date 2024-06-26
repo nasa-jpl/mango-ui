@@ -47,15 +47,15 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         </NavLink>
         <NavLink
           className={(activeNav) =>
-            getNavLinkClass(activeNav.isActive, "/datasets")
+            getNavLinkClass(activeNav.isActive, "/products")
           }
-          to="datasets"
+          to="products"
         >
           <SidebarLink
-            title="Datasets"
+            title="Products"
             icon={
               <Database
-                weight={active === "/datasets" ? "fill" : "bold"}
+                weight={active === "/products" ? "fill" : "bold"}
                 size={16}
               />
             }

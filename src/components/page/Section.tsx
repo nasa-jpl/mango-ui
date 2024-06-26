@@ -9,7 +9,7 @@ import {
   IconCaretDown,
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
-import { Dataset } from "../../types/api";
+import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Section as SectionType } from "../../types/view";
 import CustomGridItemComponent from "./CustomGridItem";
@@ -17,19 +17,19 @@ import Entity from "./Entity";
 import "./Section.css";
 
 export declare type SectionProps = {
-  datasets: Dataset[];
   dateRange: DateRange;
   hoverDate: Date | null;
   onDateRangeChange: (dateRange: DateRange) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
+  products: Product[];
   section: SectionType;
 };
 
 export const Section = ({
   dateRange,
   hoverDate,
-  datasets,
+  products,
   section,
   onSectionChange,
   onDateRangeChange = () => {},
@@ -124,7 +124,7 @@ export const Section = ({
               // @ts-expect-error No typing available
               <CustomGridItemComponent key={e.id}>
                 <Entity
-                  datasets={datasets}
+                  products={products}
                   entity={e}
                   onEntityChange={() => {}}
                   onDateRangeChange={onDateRangeChange}

@@ -3,7 +3,7 @@ import {
   generateTestDatasetStream,
   generateTestDatasets,
 } from "../../../e2e-tests/utilities/dataset";
-import DatasetStreamPreviewModal from "./DatasetStreamPreviewModal";
+import DatasetStreamPreviewModal from "./ProductPreviewModal";
 
 const meta = {
   component: DatasetStreamPreviewModal,

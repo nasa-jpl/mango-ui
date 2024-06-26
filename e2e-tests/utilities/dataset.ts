@@ -38,7 +38,7 @@ export const generateTestDatasetStream = (): DatasetStream => {
   delete dataset.streams;
   const datasetStream: DatasetStream = {
     ...dataset,
-    streamId: generateUniqueName(),
+    instrument: generateUniqueName(),
   };
   return datasetStream;
 };

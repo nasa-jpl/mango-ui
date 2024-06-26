@@ -101,10 +101,10 @@ export function fetchWithProgress<T>(url: string) {
 
 /**
  * Returns unique identifier for a layer which currently comprises of:
- * mission, datasetid, field, and stream ID
+ * mission, dataset, field, and instrument
  */
 export function getLayerId(layer: DataLayer): string {
-  return `${layer.mission}_${layer.datasetId}_${layer.field}_${layer.streamId}`;
+  return `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
 }
 
 /**

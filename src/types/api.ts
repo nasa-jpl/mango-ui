@@ -1,46 +1,58 @@
-export type Dataset = {
+/* A group of measurements, ex ACC1A */
+export type Product = {
   /* Fields available for querying */
-  available_fields: DatasetField[];
-  /* Logarithmic aggregation/decimation factors that can be requested for this dataset */
-  available_resolutions: DatasetResolution[];
-  /* Versions available for this dataset (e.g. "04", "05", etc) */
+  available_fields: ProductField[];
+  /* Logarithmic aggregation/decimation factors that can be requested for this product */
+  available_resolutions: ProductResolution[];
+  /* Versions available for this product (e.g. "04", "05", etc) */
   available_versions: string[];
-  /* <mission>_<dataset_id> */
+  datasets: Dataset[];
+  description: string;
+  /* <mission>_<product_id> */
   full_id: string;
   id: string;
+  instruments: string[];
   mission: string;
+  processing_level: string;
   /* maximum number of values that the query will return */
   query_result_limit: number;
-  streams: Stream[];
   /* the field in the dataset that denotes the time axis */
   timestamp_field: string;
 };
 
-export type DatasetField = {
-  constant_value?: (string | number)[];
-  name: string;
-  supported_aggregations: DatasetAggregationType[];
+/* A distinct stream of data values within a Product defined by <product_id>_<version>_<instrument>_<channel?>, ex ACC1A_04_C */
+export type Dataset = {
+  /* time of first entry */
+  data_begin: string;
+  /* time of last entry */
+  data_end: string;
+  /* ID of instrument */
+  instrument: string;
+  /* time of last update */
+  last_updated: string;
+  /* <mission>_<product_id> */
+  product: string;
 };
 
-export type DatasetResolution = {
+export type ProductField = {
+  constant_value?: (string | number)[];
+  description?: string;
+  name: string;
+  supported_aggregations: ProductAggregation[];
+  type: "int" | "bool" | "float" | "str" | "datetime" | "dict"; // TODO ask about complete set
+  unit: string | null;
+};
+
+export type ProductResolution = {
   downsampling_factor: number;
   nominal_data_interval_seconds: number;
 };
 
 /* TODO could use a rename https://jpl.slack.com/archives/C05BULTQEN7/p1709659838448609?thread_ts=1709615444.609529&cid=C05BULTQEN7 */
-export type DatasetAggregationType = "value" | "min" | "max" | "avg";
-
-export interface DatasetStream extends Omit<Dataset, "streams"> {
-  /* No data begin/end until API fixes it */
-  // data_begin: string;
-  // data_end: string;
-  streamId: string;
-}
-
-export type Stream = {
-  data_begin: string; // timestamp
-  data_end: string; // timestamp
-  id: string;
+export type ProductAggregationType = "min" | "max" | "avg" | "centroid";
+export type ProductAggregation = {
+  field_name: string;
+  type: ProductAggregationType;
 };
 
 export type DataResponse = {
@@ -56,7 +68,7 @@ export type DataResponse = {
 };
 
 export type DataResponseDataEntry = {
-  [key: string]: Record<DatasetAggregationType, number>;
+  [key: string]: Record<"value" | "min" | "max" | "avg" | "centroid", number>;
 } & { timestamp: string };
 
 export type DataResponseError = {

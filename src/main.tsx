@@ -6,8 +6,8 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import ErrorPage from "./error-page";
 import "./index.css";
-import DatasetsPage from "./routes/DatasetsPage";
 import HomePage from "./routes/HomePage";
+import ProductsPage from "./routes/ProductsPage";
 import RootPage from "./routes/RootPage";
 import SandboxPage from "./routes/SandboxPage";
 import ViewPage from "./routes/ViewPage";
@@ -38,8 +38,8 @@ const router = createBrowserRouter(
           index: true,
         },
         {
-          path: "datasets",
-          element: <DatasetsPage />,
+          path: "products",
+          element: <ProductsPage />,
         },
         {
           path: "sandbox",

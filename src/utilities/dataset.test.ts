@@ -1,12 +1,12 @@
 import { expect, test } from "vitest";
 import { generateTestDataset } from "../../e2e-tests/utilities/dataset";
 import { generateTestChartLayer } from "../../e2e-tests/utilities/view";
-import { getDatasetForLayer, getFieldMetadataForLayer } from "./dataset";
+import { getDatasetForLayer, getFieldMetadataForLayer } from "./product";
 
 test("getDatasetForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
-  layer.datasetId = "bar";
+  layer.dataset = "bar";
   layer.field = "field1";
 
   const dataset1 = generateTestDataset();
@@ -47,7 +47,7 @@ test("getDatasetForLayer", () => {
 test("getFieldMetadataForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
-  layer.datasetId = "bar";
+  layer.dataset = "bar";
   layer.field = "field1";
 
   const dataset1 = generateTestDataset();

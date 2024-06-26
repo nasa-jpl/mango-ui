@@ -2,8 +2,8 @@ export const config = {
   api: {
     data: {
       missions: "/missions/",
-      datasets: "/missions/{MISSION}/datasets/",
-      data: "/missions/{MISSION}/datasets/{DATASET}/versions/{VERSION}/streams/{STREAM}/data",
+      products: "/missions/{MISSION}/products/",
+      data: "/missions/{MISSION}/products/{DATASET}/versions/{VERSION}/instruments/{INSTRUMENT}/data",
     },
   },
   endpoints: {
