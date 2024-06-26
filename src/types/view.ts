@@ -73,13 +73,13 @@ export type YAxis = {
 };
 
 export type DataLayer = {
-  datasetId: string;
+  dataset: string;
   endTime: string;
   field: string;
   id: string;
   mission: string;
   startTime: string;
-  streamId: string;
+  instrument: string;
   version: string;
 };
 

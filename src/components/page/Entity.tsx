@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Dataset } from "../../types/api";
+import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, TableEntity } from "../../types/view";
 import {
@@ -16,18 +16,18 @@ import "./Entity.css";
 
 export declare type EntityProps = {
   className: string;
-  datasets: Dataset[];
   dateRange: DateRange;
   entity: EntityType;
   hoverDate: Date | null;
   onDateRangeChange: (dateRange: DateRange) => void;
   onEntityChange: (entity: EntityType) => void;
   onHoverDateChange: (date: Date | null) => void;
+  products: Product[];
 };
 
 export const Entity = (props: EntityProps) => {
   const {
-    datasets,
+    products,
     entity,
     dateRange,
     hoverDate,
@@ -46,7 +46,7 @@ export const Entity = (props: EntityProps) => {
           chartEntity={entity}
           dateRange={dateRange}
           hoverDate={hoverDate}
-          datasets={datasets}
+          products={products}
           onDateRangeChange={onDateRangeChange}
           onHoverDateChange={onHoverDateChange}
         />

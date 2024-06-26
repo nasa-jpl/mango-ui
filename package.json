@@ -25,11 +25,12 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "d3-format": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@nasa-jpl/react-stellar": "^1.1.10",
+    "@nasa-jpl/react-stellar": "^1.1.11",
     "@phosphor-icons/react": "^2.1.0",
     "@playwright/test": "^1.44.0",
     "@storybook/addon-essentials": "^7.6.4",

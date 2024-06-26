@@ -19,17 +19,22 @@
               {
                 "id": "3regf",
                 "mission": "GRACEFO",
-                "datasetId": "ACT1A",
+                "dataset": "ACT1A",
                 "field": "lin_accl_x",
                 "version": "04",
-                "streamId": "C",
+                "instrument": "C",
                 "startTime": "2022-03-02T00:26:00.000000Z",
                 "endTime": "2022-03-02T00:36:00.000000Z",
                 "yAxisId": "y1",
                 "color": "orange"
               }
             ],
-            "yAxes": []
+            "yAxes": [
+              {
+                "id": "y1",
+                "position": "left"
+              }
+            ]
           }
         ]
       }
@@ -70,10 +75,10 @@
                     {
                       "id": "3regf",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -82,10 +87,10 @@
                     {
                       "id": "3rwefrd",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -94,10 +99,10 @@
                     {
                       "id": "frdgfhy",
                       "mission": "GRACEFO",
-                      "datasetId": "PCI1A",
+                      "dataset": "PCI1A",
                       "field": "ant_centr_accl",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y2",
@@ -129,10 +134,10 @@
                     {
                       "id": "fdv",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -141,10 +146,10 @@
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -153,10 +158,10 @@
                     {
                       "id": "2wedfg",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "ang_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y2",
@@ -187,10 +192,10 @@
                     {
                       "id": "fdv",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
@@ -201,10 +206,10 @@
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
@@ -215,10 +220,10 @@
                     {
                       "id": "2ed",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_z",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
@@ -245,10 +250,10 @@
                     {
                       "id": "fdv",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -257,10 +262,10 @@
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -284,10 +289,10 @@
                     {
                       "id": "fdv",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -301,10 +306,10 @@
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
+                      "dataset": "ACC1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "D",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
@@ -334,10 +339,10 @@
                     {
                       "id": "asdasd",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
+                      "dataset": "ACT1A",
                       "field": "lin_accl_x",
                       "version": "04",
-                      "streamId": "C",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -375,8 +380,8 @@
                       "field": "lin_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -385,8 +390,8 @@
                       "field": "lin_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -404,8 +409,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -414,8 +419,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -433,8 +438,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -443,8 +448,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -476,8 +481,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -486,8 +491,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -505,8 +510,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -515,8 +520,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -534,8 +539,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "C",
+                      "dataset": "ACC1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -544,8 +549,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACC1A",
-                      "streamId": "D",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -584,8 +589,8 @@
                       "field": "lin_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -594,8 +599,8 @@
                       "field": "lin_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -613,8 +618,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -623,8 +628,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -642,8 +647,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -652,8 +657,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -685,8 +690,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -695,8 +700,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -714,8 +719,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -724,8 +729,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -743,8 +748,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -753,8 +758,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -793,8 +798,8 @@
                       "field": "on_time_att_ctrl_1_1",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -803,8 +808,8 @@
                       "field": "on_time_att_ctrl_1_2",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -813,8 +818,8 @@
                       "field": "on_time_att_ctrl_1_3",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -823,8 +828,8 @@
                       "field": "on_time_att_ctrl_1_4",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -833,8 +838,8 @@
                       "field": "on_time_att_ctrl_1_5",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -843,8 +848,8 @@
                       "field": "on_time_att_ctrl_1_6",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "THR1A",
-                      "streamId": "C",
+                      "dataset": "THR1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -862,8 +867,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -872,8 +877,8 @@
                       "field": "lin_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -891,8 +896,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -901,8 +906,8 @@
                       "field": "lin_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -934,8 +939,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -944,8 +949,8 @@
                       "field": "ang_accl_x",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -963,8 +968,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -973,8 +978,8 @@
                       "field": "ang_accl_y",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }
@@ -992,8 +997,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "C",
+                      "dataset": "ACT1A",
+                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     },
@@ -1002,8 +1007,8 @@
                       "field": "ang_accl_z",
                       "version": "04",
                       "mission": "GRACEFO",
-                      "datasetId": "ACT1A",
-                      "streamId": "D",
+                      "dataset": "ACT1A",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z"
                     }

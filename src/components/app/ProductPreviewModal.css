@@ -1,0 +1,42 @@
+.product-preview-button {
+  align-items: center;
+  display: flex;
+}
+
+.product-preview-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 70vh;
+  width: 80vw;
+}
+
+.product-preview-controls {
+  display: flex;
+  gap: 16px;
+}
+
+.product-preview-date {
+  display: flex;
+  gap: var(--st-react-formfield-horizontal-grid-unit);
+}
+
+.product-preview-field {
+  flex: 1;
+  max-width: 400px;
+  min-width: 100px;
+}
+
+.product-preview-field .st-react-form-field {
+  flex: 1;
+}
+
+.product-preview-field--label {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.product-preview-field--label div {
+  opacity: 0.5;
+}

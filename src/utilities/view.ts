@@ -1,3 +1,4 @@
+import { format } from "d3-format";
 import {
   ChartEntity,
   ChartLayer,
@@ -41,4 +42,12 @@ export function applyLayerTransform(
     x: layer.transforms.x ? applyIndividualTransform(x, layer.transforms.x) : x,
     y: layer.transforms.y ? applyIndividualTransform(y, layer.transforms.y) : y,
   };
+}
+
+// TODO move fn
+export function formatYValue(tickValue: number | string): string {
+  if (typeof tickValue === "string") {
+    return tickValue;
+  }
+  return format("~g")(tickValue);
 }

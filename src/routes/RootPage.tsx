@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
 import Sidebar from "../components/app/Sidebar/Sidebar";
-import { Dataset } from "../types/api";
+import { Product } from "../types/api";
 import { View } from "../types/view";
-import { getDatasets, getMissions, getView } from "../utilities/api";
+import { getMissions, getProducts, getView } from "../utilities/api";
 
 export default function RootPage() {
   const { view: initialView } = useLoaderData() as Record<"view", View>;
   const [view, setView] = useState<View>(initialView);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function RootPage() {
         try {
           await Promise.all([
             fetchView(abortController.signal),
-            fetchDatasets(abortController.signal),
+            fetchProductss(abortController.signal),
           ]);
         } catch (err) {
           if ((err as Error).name !== "AbortError") {
@@ -38,19 +38,19 @@ export default function RootPage() {
     setView(view);
   };
 
-  const fetchDatasets = async (signal: AbortSignal) => {
+  const fetchProductss = async (signal: AbortSignal) => {
     const missions = await getMissions(signal);
-    const datasets = await Promise.all(
-      missions.map((mission) => getDatasets(mission, signal))
+    const products = await Promise.all(
+      missions.map((mission) => getProducts(mission, signal))
     );
-    setDatasets(datasets.flat());
+    setProducts(products.flat());
     setLoadingInitialData(false);
   };
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
       <Sidebar view={view} title={import.meta.env.VITE_APP_TITLE} />
-      <Outlet context={[view, setView, datasets, loadingInitialData]} />
+      <Outlet context={[view, setView, products, loadingInitialData]} />
     </div>
   );
 }
