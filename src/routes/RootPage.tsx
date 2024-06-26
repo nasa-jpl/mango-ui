@@ -18,7 +18,7 @@ export default function RootPage() {
         try {
           await Promise.all([
             fetchView(abortController.signal),
-            fetchProductss(abortController.signal),
+            fetchProducts(abortController.signal),
           ]);
         } catch (err) {
           if ((err as Error).name !== "AbortError") {
@@ -38,7 +38,7 @@ export default function RootPage() {
     setView(view);
   };
 
-  const fetchProductss = async (signal: AbortSignal) => {
+  const fetchProducts = async (signal: AbortSignal) => {
     const missions = await getMissions(signal);
     const products = await Promise.all(
       missions.map((mission) => getProducts(mission, signal))
