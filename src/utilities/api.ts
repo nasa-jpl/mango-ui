@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { DataResponse, DataResponseError, Dataset } from "../types/api";
+import { DataResponse, DataResponseError, Product } from "../types/api";
 import { View } from "../types/view";
 
 export const getView = async (signal?: AbortSignal): Promise<View> => {
@@ -19,7 +19,7 @@ export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
 export const getProducts = async (
   mission: string,
   signal: AbortSignal
-): Promise<Dataset[]> => {
+): Promise<Product[]> => {
   const url =
     config.endpoints.data +
     config.api.data.products.replace("{MISSION}", mission);

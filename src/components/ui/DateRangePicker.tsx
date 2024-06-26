@@ -23,12 +23,7 @@ export const DateRangePicker = ({
 
   const valid = isValidDateRange(internalStartDate, internalEndDate);
   return (
-    <div
-      style={{ display: "flex", gap: "8px" }}
-      onFocusCapture={(e) => {
-        // e.stopPropagation();
-      }}
-    >
+    <div style={{ display: "flex", gap: "8px" }}>
       <DatePicker
         label="Start"
         date={startDate}
