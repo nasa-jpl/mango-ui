@@ -110,7 +110,13 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         <div className="sidebar-divider" />
         <div className="sidebar-padded-content">
           <SidebarLink title="Settings" icon={<IconSettings />} />
-          <SidebarLink title="Help" icon={<IconHelp />} />
+          <NavLink
+            to="***REMOVED***"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <SidebarLink title="Help" icon={<IconHelp />} />
+          </NavLink>
           <SidebarLink title="Sign Out" icon={<IconExternalLink />} />
         </div>
       </div>
