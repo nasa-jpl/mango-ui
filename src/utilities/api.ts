@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { DataResponse, DataResponseError, Dataset } from "../types/api";
+import { DataResponse, DataResponseError, Product } from "../types/api";
 import { View } from "../types/view";
 
 export const getView = async (signal?: AbortSignal): Promise<View> => {
@@ -16,21 +16,21 @@ export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
   return response.data;
 };
 
-export const getDatasets = async (
+export const getProducts = async (
   mission: string,
   signal: AbortSignal
-): Promise<Dataset[]> => {
+): Promise<Product[]> => {
   const url =
     config.endpoints.data +
-    config.api.data.datasets.replace("{MISSION}", mission);
+    config.api.data.products.replace("{MISSION}", mission);
   const response = await (await fetch(url, { signal })).json();
   return response.data;
 };
 
 export const getData = (
   mission: string,
-  datasetId: string,
-  streamId: string,
+  dataset: string,
+  instrumentId: string,
   version: string,
   field: string,
   startTime: string,
@@ -41,8 +41,8 @@ export const getData = (
     config.endpoints.data +
     config.api.data.data
       .replace("{MISSION}", mission)
-      .replace("{STREAM}", streamId)
-      .replace("{DATASET}", datasetId)
+      .replace("{INSTRUMENT}", instrumentId)
+      .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +
     `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&downsampling_factor=${downsamplingFactor}`;
 

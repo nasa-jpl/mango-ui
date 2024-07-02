@@ -1,0 +1,7 @@
+.product-preview-button {
+  height: inherit;
+}
+
+.product-table div[role="row"]:not(:hover) .product-preview-button {
+  display: none;
+}

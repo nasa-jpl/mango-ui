@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { generateTestDatasets } from "../../../e2e-tests/utilities/dataset";
-import { DatasetTable } from "./DatasetTable";
+import { generateTestProducts } from "../../../e2e-tests/utilities/product";
+import { ProductTable } from "./ProductTable";
 
 const meta = {
-  component: DatasetTable,
+  component: ProductTable,
   parameters: {
     layout: "padded",
     docs: {
@@ -13,13 +13,13 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof DatasetTable>;
+} satisfies Meta<typeof ProductTable>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    datasets: generateTestDatasets(100),
+    products: generateTestProducts(100),
   },
 };

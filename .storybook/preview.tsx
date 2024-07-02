@@ -3,8 +3,8 @@ import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import type { Preview } from "@storybook/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import "../src/Variables.css";
 import "../src/index.css";
+import "../src/variables.css";
 
 const preview: Preview = {
   decorators: [

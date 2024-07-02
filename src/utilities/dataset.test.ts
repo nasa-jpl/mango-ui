@@ -1,45 +1,45 @@
 import { expect, test } from "vitest";
-import { generateTestDataset } from "../../e2e-tests/utilities/dataset";
+import { generateTestProduct } from "../../e2e-tests/utilities/product";
 import { generateTestChartLayer } from "../../e2e-tests/utilities/view";
-import { getDatasetForLayer, getFieldMetadataForLayer } from "./dataset";
+import { getFieldMetadataForLayer, getProductForLayer } from "./product";
 
-test("getDatasetForLayer", () => {
+test("getProductForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
-  layer.datasetId = "bar";
+  layer.dataset = "bar";
   layer.field = "field1";
 
-  const dataset1 = generateTestDataset();
+  const dataset1 = generateTestProduct();
   dataset1.mission = "foo";
   dataset1.id = "bar";
   dataset1.available_fields = [
-    { name: "field1", supported_aggregations: [] },
-    { name: "field2", supported_aggregations: [] },
+    { name: "field1", supported_aggregations: [], type: "float", unit: null },
+    { name: "field2", supported_aggregations: [], type: "float", unit: null },
   ];
-  const dataset2 = generateTestDataset();
+  const dataset2 = generateTestProduct();
   dataset2.mission = "foo";
   dataset2.id = "bar";
   dataset2.available_fields = [
-    { name: "x", supported_aggregations: [] },
-    { name: "y", supported_aggregations: [] },
+    { name: "x", supported_aggregations: [], type: "float", unit: null },
+    { name: "y", supported_aggregations: [], type: "float", unit: null },
   ];
-  const dataset3 = generateTestDataset();
+  const dataset3 = generateTestProduct();
   dataset3.mission = "foo";
   dataset3.id = "bat";
   dataset3.available_fields = [
-    { name: "x", supported_aggregations: [] },
-    { name: "y", supported_aggregations: [] },
+    { name: "x", supported_aggregations: [], type: "float", unit: null },
+    { name: "y", supported_aggregations: [], type: "float", unit: null },
   ];
-  const dataset4 = generateTestDataset();
+  const dataset4 = generateTestProduct();
   dataset4.mission = "cat";
   dataset4.id = "bat";
   dataset4.available_fields = [
-    { name: "x", supported_aggregations: [] },
-    { name: "y", supported_aggregations: [] },
+    { name: "x", supported_aggregations: [], type: "float", unit: null },
+    { name: "y", supported_aggregations: [], type: "float", unit: null },
   ];
-  expect(getDatasetForLayer(layer, [])).to.be.undefined;
-  expect(getDatasetForLayer(layer, [dataset2])).to.be.undefined;
-  expect(getDatasetForLayer(layer, [dataset1, dataset2, dataset3])).to.deep.eq(
+  expect(getProductForLayer(layer, [])).to.be.undefined;
+  expect(getProductForLayer(layer, [dataset2])).to.be.undefined;
+  expect(getProductForLayer(layer, [dataset1, dataset2, dataset3])).to.deep.eq(
     dataset1
   );
 });
@@ -47,15 +47,15 @@ test("getDatasetForLayer", () => {
 test("getFieldMetadataForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
-  layer.datasetId = "bar";
+  layer.dataset = "bar";
   layer.field = "field1";
 
-  const dataset1 = generateTestDataset();
+  const dataset1 = generateTestProduct();
   dataset1.mission = "foo";
   dataset1.id = "bar";
   dataset1.available_fields = [
-    { name: "field1", supported_aggregations: [] },
-    { name: "field2", supported_aggregations: [] },
+    { name: "field1", supported_aggregations: [], type: "float", unit: null },
+    { name: "field2", supported_aggregations: [], type: "float", unit: null },
   ];
   expect(getFieldMetadataForLayer(layer, [])).to.be.undefined;
   expect(getFieldMetadataForLayer(layer, [dataset1])).to.deep.eq(

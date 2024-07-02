@@ -1,31 +1,31 @@
 import { Button, Tooltip } from "@nasa-jpl/react-stellar";
 import {
   ArrowCounterClockwise,
+  ArrowsHorizontal,
   ArrowsVertical,
   BoundingBox,
   VectorTwo,
 } from "@phosphor-icons/react";
-import { ArrowsHorizontal } from "@phosphor-icons/react/dist/ssr";
 import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Mode } from "chartjs-plugin-zoom/types/options";
 import { debounce, throttle } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DataResponse, Dataset } from "../../../types/api";
+import { DataResponse, Product } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import { ChartEntity, ChartLayer, YAxis } from "../../../types/view";
 import { getData } from "../../../utilities/api";
-import {
-  getDatasetForLayer,
-  getFieldMetadataForLayer,
-} from "../../../utilities/dataset";
 import {
   getLayerId,
   isAbortError,
   pluralize,
 } from "../../../utilities/generic";
-import { applyLayerTransform } from "../../../utilities/view";
+import {
+  getFieldMetadataForLayer,
+  getProductForLayer,
+} from "../../../utilities/product";
+import { applyLayerTransform, formatYValue } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
 
@@ -33,12 +33,12 @@ ChartJS.register(zoomPlugin);
 
 export declare type ChartProps = {
   chartEntity: ChartEntity;
-  // TODO could pass in only the list of datasets that this Chart cares about?
-  datasets: Dataset[];
   dateRange: DateRange;
   hoverDate: Date | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onHoverDateChange?: (date: Date | null) => void;
+  // TODO could pass in only the list of products that this Chart cares about?
+  products: Product[];
   showHeader?: boolean;
 };
 
@@ -46,7 +46,7 @@ export type CustomChartData = { x: string; y: number };
 
 export const Chart = ({
   chartEntity,
-  datasets,
+  products,
   dateRange,
   showHeader = true,
   onDateRangeChange = () => {},
@@ -65,10 +65,10 @@ export const Chart = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedVisualizeChartLayers = useCallback(
     debounce(
-      (layers: ChartLayer[], datasets: Dataset[], dateRange: DateRange) =>
+      (layers: ChartLayer[], products: Product[], dateRange: DateRange) =>
         visualizeChartLayers(
           layers || [],
-          datasets,
+          products,
           dateRange.start,
           dateRange.end
         ),
@@ -80,10 +80,10 @@ export const Chart = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedVisualizeChartLayersTrailing = useCallback(
     debounce(
-      (layers, datasets, dateRange) =>
+      (layers, products, dateRange) =>
         visualizeChartLayers(
           layers || [],
-          datasets,
+          products,
           dateRange.start,
           dateRange.end
         ),
@@ -119,7 +119,7 @@ export const Chart = ({
     if (chartRef.current) {
       debouncedVisualizeChartLayers(
         chartEntity.layers || [],
-        datasets,
+        products,
         computedDateRange
       );
     }
@@ -139,11 +139,11 @@ export const Chart = ({
     configureChartAxes(chartEntity.yAxes || []);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.yAxes)]);
+  }, [JSON.stringify(chartEntity.yAxes), JSON.stringify(chartEntity.layers)]);
 
   const onZoomComplete = (
     layers: ChartLayer[],
-    datasets: Dataset[],
+    products: Product[],
     syncWithDateRange = true
   ) => {
     // Only perform an update if the zoom/pan was triggered by the user
@@ -160,7 +160,7 @@ export const Chart = ({
       } else {
         debouncedVisualizeChartLayersTrailing(
           layers || [],
-          datasets,
+          products,
           newDateRange
         );
       }
@@ -179,13 +179,13 @@ export const Chart = ({
       chartRef.current.options.plugins.zoom.pan.onPanComplete = () =>
         onZoomComplete(
           chartEntity.layers as ChartLayer[],
-          datasets,
+          products,
           chartEntity.syncWithPageDateRange
         );
       chartRef.current.options.plugins.zoom.zoom.onZoomComplete = () =>
         onZoomComplete(
           chartEntity.layers as ChartLayer[],
-          datasets,
+          products,
           chartEntity.syncWithPageDateRange
         );
     }
@@ -203,12 +203,32 @@ export const Chart = ({
     const newAxes: typeof chartRef.current.config.options.scales = {
       x: chartRef.current.config.options.scales.x,
     };
+
     yAxes.forEach((axis, i) => {
+      let axisLabel = axis.label;
+      if (!axisLabel) {
+        // Find layers associated with this axis
+        const associatedLayers = chartEntity.layers?.filter(
+          (layer) => layer.yAxisId === axis.id
+        );
+
+        if (associatedLayers?.length) {
+          // Derive label from first layer
+          const metadata = getFieldMetadataForLayer(
+            associatedLayers[0],
+            products
+          );
+          axisLabel = metadata?.unit || "";
+        }
+      }
       const position = axis.position || "left";
       newAxes[axis.id] = {
         type: axis.type || "linear",
         position,
-        title: { display: !!axis.label, text: axis.label, color: axis?.color },
+        ticks: {
+          callback: formatYValue,
+        },
+        title: { display: !!axisLabel, text: axisLabel, color: axis?.color },
         grid: { display: i === 0 }, // only show horizontal axis ticks for first axis
         ...(axis.min ? { min: axis.min } : null),
         ...(axis.max ? { max: axis.max } : null),
@@ -219,7 +239,7 @@ export const Chart = ({
 
   const visualizeChartLayers = async (
     layers: ChartLayer[],
-    datasets: Dataset[],
+    products: Product[],
     startTime?: string,
     endTime?: string
   ) => {
@@ -238,7 +258,7 @@ export const Chart = ({
     });
     const { results, error, aborted } = await fetchAllLayerData(
       layers,
-      datasets,
+      products,
       startTime,
       endTime
     );
@@ -251,7 +271,7 @@ export const Chart = ({
       results.map(({ result, layer }) => {
         // Get metadata for this result layer in order to determine
         // the optimal decimation factor to use when requesting data
-        const fieldMetadata = getFieldMetadataForLayer(layer, datasets);
+        const fieldMetadata = getFieldMetadataForLayer(layer, products);
 
         let data: { x: string; y: number }[] = [];
         result.data.forEach((d) => {
@@ -266,8 +286,12 @@ export const Chart = ({
           } else {
             if (!fieldMetadata) return;
             if (
-              fieldMetadata.supported_aggregations.find((x) => x === "min") &&
-              fieldMetadata.supported_aggregations.find((x) => x === "max")
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "min"
+              ) &&
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "max"
+              )
             ) {
               // Compute middle time of aggregation window
               const pointTimestampMS = new Date(timestamp).getTime();
@@ -281,7 +305,9 @@ export const Chart = ({
               points.push({ x: middleTime, y: fieldValue.min });
               points.push({ x: middleTime, y: fieldValue.max });
             } else if (
-              fieldMetadata.supported_aggregations.find((x) => x === "avg")
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "avg"
+              )
             ) {
               points.push({ x: timestamp, y: fieldValue.avg });
             }
@@ -302,12 +328,15 @@ export const Chart = ({
         });
         return {
           id: getLayerId(layer),
+          unit:
+            getFieldMetadataForLayer(layer, products)?.unit ||
+            "" /* TODO cache this above? */,
           hidden: hiddenDatasets[getLayerId(layer)] || false,
           // TODO would be nice to render these outside of the canvas in order to better format
           // and control these labels
           // TODO what should these labels contain metadata wise? Fairly verbose right now.
-          label: `${layer.mission} ${layer.datasetId} ${layer.field} ${
-            layer.streamId
+          label: `${layer.mission} ${layer.dataset} ${layer.field} ${
+            layer.instrument
           } (${result.data_count} point${pluralize(result.data_count)}, 1:${
             result.downsampling_factor
           } scale)`,
@@ -375,12 +404,12 @@ export const Chart = ({
 
   const fetchLayerData = (
     layer: ChartLayer,
-    datasets: Dataset[],
+    products: Product[],
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
-    /* TODO maybe add the chart ID in here too so we can plot the stream multiple times on the same chart with diff options if needed */
-    const layerFullId = `${layer.mission}_${layer.datasetId}_${layer.field}_${layer.streamId}`;
+    /* TODO maybe add the chart ID in here too so we can plot the dataset multiple times on the same chart with diff options if needed */
+    const layerFullId = `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
@@ -396,12 +425,12 @@ export const Chart = ({
 
       const chartSize = chartRef.current?.width || 1000; // TODO store in state?
 
-      const dataset = getDatasetForLayer(layer, datasets);
+      const product = getProductForLayer(layer, products);
       let downsamplingFactor = 1;
-      if (dataset) {
-        for (let i = 0; i < dataset.available_resolutions.length; i++) {
-          const resolution = dataset.available_resolutions[i];
-          const nextResolution = dataset.available_resolutions[i + 1];
+      if (product) {
+        for (let i = 0; i < product.available_resolutions.length; i++) {
+          const resolution = product.available_resolutions[i];
+          const nextResolution = product.available_resolutions[i + 1];
           const pointsForDuration =
             durationSeconds / resolution.nominal_data_interval_seconds;
           const nextPointsForDuration = nextResolution
@@ -419,8 +448,8 @@ export const Chart = ({
 
       const { json, cancel } = getData(
         layer.mission,
-        layer.datasetId,
-        layer.streamId,
+        layer.dataset,
+        layer.instrument,
         layer.version,
         layer.field,
         // TODO: check whether or not to sync with page date range
@@ -448,7 +477,7 @@ export const Chart = ({
 
   const fetchAllLayerData = async (
     layers: ChartLayer[],
-    datasets: Dataset[],
+    products: Product[],
     startTime?: string,
     endTime?: string
   ) => {
@@ -463,7 +492,7 @@ export const Chart = ({
     try {
       results = await Promise.all(
         layers.map((layer) =>
-          fetchLayerData(layer, datasets, startTime, endTime)
+          fetchLayerData(layer, products, startTime, endTime)
         )
       );
       setLoading(false);
@@ -512,13 +541,27 @@ export const Chart = ({
               maxRotation: 0,
             },
           },
+          y: {
+            ticks: {
+              callback: formatYValue,
+            },
+          },
         },
         plugins: {
           tooltip: {
             callbacks: {
-              label: (tooltipItem) =>
-                // @ts-expect-error can't seem to type extra properties passed into chart js datasets
-                `${tooltipItem.dataset.id}: ${tooltipItem.parsed.y}`,
+              label: (tooltipItem) => {
+                return `${
+                  // @ts-expect-error can't seem to type extra properties passed into chart js datasets
+                  tooltipItem.dataset.id
+                }: ${formatYValue(tooltipItem.parsed.y)}${
+                  // @ts-expect-error ^^^
+                  tooltipItem.dataset.unit
+                    ? // @ts-expect-error ^^^
+                      ` (${tooltipItem.dataset.unit})`
+                    : ""
+                }`;
+              },
             },
             ...(chartEntity.chartOptions?.tooltip || {}),
           },
@@ -542,7 +585,7 @@ export const Chart = ({
               onZoomComplete: () => {
                 onZoomComplete(
                   chartEntity.layers || [],
-                  datasets,
+                  products,
                   chartEntity.syncWithPageDateRange
                 );
               },
@@ -553,7 +596,7 @@ export const Chart = ({
               onPanComplete: () => {
                 onZoomComplete(
                   chartEntity.layers || [],
-                  datasets,
+                  products,
                   chartEntity.syncWithPageDateRange
                 );
               },

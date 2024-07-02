@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { generateTestDataset } from "../../../../e2e-tests/utilities/dataset";
+import { generateTestProduct } from "../../../../e2e-tests/utilities/product";
 import { ChartEntity } from "../../../types/view";
 import Chart from "./Chart";
 
@@ -22,15 +22,15 @@ const chartEntity: ChartEntity = {
   layers: [
     {
       id: "234567",
-      field: "ACT1A",
+      field: "lin_accl_x",
       mission: "GRACEFO",
-      datasetId: "dataset1",
-      streamId: "A",
+      dataset: "ACT1A",
+      instrument: "C",
       startTime: "2022-03-02T00:00:00.000000Z",
       endTime: "2022-03-02T00:01:00.000000Z",
       type: "line",
       version: "04",
-      yAxisId: "",
+      yAxisId: "y1",
     },
   ],
   dateRange: {
@@ -42,7 +42,7 @@ const chartEntity: ChartEntity = {
 export const Default: Story = {
   args: {
     chartEntity,
-    datasets: [generateTestDataset()],
+    products: [generateTestProduct()],
     dateRange: {
       end: "",
       start: "",
