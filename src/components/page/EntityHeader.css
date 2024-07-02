@@ -3,6 +3,7 @@
   background: var(--st-gray-10);
   border-bottom: var(--app-border);
   display: flex;
+  flex-shrink: 0;
   height: 32px;
   justify-content: space-between;
   padding-left: 10px;
