@@ -8,7 +8,7 @@ import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
-import { gibsTilingScheme } from "./gibs";
+import { gibsTilingScheme } from "./lib/gibs";
 
 export declare type MapProps = {
   dateRange: DateRange;
@@ -42,10 +42,14 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
 
     const viewer = new CesiumViewer(map.current as HTMLDivElement, {
       animation: false,
-      baseLayerPicker: false,
+      baseLayerPicker: true,
       geocoder: false,
       timeline: false,
+      homeButton: false,
+      navigationHelpButton: false,
       imageryProviderViewModels: models,
+      // must be provided or cesium will attempt to load Bing maps
+      selectedImageryProviderViewModel: models[0],
       fullscreenButton: false,
     });
 
