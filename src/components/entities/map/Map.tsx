@@ -22,8 +22,9 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
     const models: ProviderViewModel[] = [];
     const model = new ProviderViewModel({
       name: "BlueMarble_ShadedRelief_Bathymetry",
-      iconUrl: "",
-      tooltip: "",
+      iconUrl:
+        "https://gibs-b.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/2/0/2.jpeg",
+      tooltip: "BlueMarble_ShadedRelief_Bathymetry",
       creationFunction: function () {
         return new WebMapTileServiceImageryProvider({
           url: "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/{TileMatrix}/{TileRow}/{TileCol}.jpeg",
