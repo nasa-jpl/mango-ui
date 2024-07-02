@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "@nasa-jpl/react-stellar";
 import { useState } from "react";
-import { Dataset } from "../../types/api";
+import { Product } from "../../types/api";
 import { PageOptions } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
@@ -17,15 +17,15 @@ import Section from "./Section";
 import "./ViewPage.css";
 
 export declare type PageProps = {
-  datasets: Dataset[];
   loadingInitialData: boolean;
   onPageChange: (page: PageType) => void;
+  products: Product[];
   viewPage?: PageType;
 };
 
 // TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
 export const ViewPage = ({
-  datasets,
+  products,
   loadingInitialData,
   viewPage,
   onPageChange,
@@ -99,7 +99,7 @@ export const ViewPage = ({
       {!loadingInitialData &&
         viewPage.sections.map((section) => (
           <Section
-            datasets={datasets}
+            products={products}
             section={section}
             key={section.id}
             dateRange={dateRange}

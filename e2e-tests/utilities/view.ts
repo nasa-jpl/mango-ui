@@ -4,13 +4,13 @@ import { generateUUID } from "../../src/utilities/generic";
 
 export const generateTestChartLayer = (): ChartLayer => {
   return {
-    datasetId: generateUniqueName(),
+    dataset: generateUniqueName(),
     endTime: "",
     field: generateUniqueName(),
     id: generateUUID(),
     mission: "",
     startTime: "",
-    streamId: generateUUID(),
+    instrument: generateUUID(),
     type: "line",
     version: "04",
     yAxisId: generateUUID(),

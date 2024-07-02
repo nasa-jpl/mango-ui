@@ -1,23 +1,23 @@
-import { Dataset, DatasetField } from "../types/api";
+import { Product, ProductField } from "../types/api";
 import { DataLayer } from "../types/view";
 
-export function getDatasetForLayer(
+export function getProductForLayer(
   layer: DataLayer,
-  datasets: Dataset[]
-): Dataset | undefined {
-  return datasets.find(
+  products: Product[]
+): Product | undefined {
+  return products.find(
     (d) =>
       layer.mission === d.mission &&
-      layer.datasetId === d.id &&
+      layer.dataset === d.id &&
       d.available_fields.find((f) => f.name === layer.field)
   );
 }
 
 export function getFieldMetadataForLayer(
   layer: DataLayer,
-  datasets: Dataset[]
-): DatasetField | undefined {
-  const dataset = getDatasetForLayer(layer, datasets);
+  products: Product[]
+): ProductField | undefined {
+  const dataset = getProductForLayer(layer, products);
   if (dataset) {
     return dataset.available_fields.find((f) => f.name === layer.field);
   }

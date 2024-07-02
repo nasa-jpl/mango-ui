@@ -47,15 +47,15 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         </NavLink>
         <NavLink
           className={(activeNav) =>
-            getNavLinkClass(activeNav.isActive, "/datasets")
+            getNavLinkClass(activeNav.isActive, "/products")
           }
-          to="datasets"
+          to="products"
         >
           <SidebarLink
-            title="Datasets"
+            title="Products"
             icon={
               <Database
-                weight={active === "/datasets" ? "fill" : "bold"}
+                weight={active === "/products" ? "fill" : "bold"}
                 size={16}
               />
             }
@@ -110,7 +110,13 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         <div className="sidebar-divider" />
         <div className="sidebar-padded-content">
           <SidebarLink title="Settings" icon={<IconSettings />} />
-          <SidebarLink title="Help" icon={<IconHelp />} />
+          <NavLink
+            to="***REMOVED***"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <SidebarLink title="Help" icon={<IconHelp />} />
+          </NavLink>
           <SidebarLink title="Sign Out" icon={<IconExternalLink />} />
         </div>
       </div>

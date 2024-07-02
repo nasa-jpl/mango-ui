@@ -11,8 +11,8 @@ test("has title", async ({ page }) => {
 
 test("navigates to page", async ({ page }) => {
   // Navigate to page
-  await page.getByRole("button", { name: "Datasets" }).click();
+  await page.getByRole("button", { name: "Products" }).click();
 
   // Confirm page configuration is loaded by examining page header
-  await page.getByRole("banner").getByText("Datasets").click();
+  await page.getByRole("banner").getByText("Products").click();
 });

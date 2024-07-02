@@ -1,12 +1,12 @@
 import { useOutletContext, useParams } from "react-router-dom";
 import Page from "../components/page/ViewPage";
-import { Dataset } from "../types/api";
+import { Product } from "../types/api";
 import { View, Page as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
-  const [view, setView, datasets, loadingInitialData] =
+  const [view, setView, products, loadingInitialData] =
     useOutletContext<
-      [View, React.Dispatch<React.SetStateAction<View>>, Dataset[], boolean]
+      [View, React.Dispatch<React.SetStateAction<View>>, Product[], boolean]
     >();
 
   const { pageGroupURL, pageURL } = useParams();
@@ -22,7 +22,7 @@ export default function ViewPage() {
   }
   return (
     <Page
-      datasets={datasets}
+      products={products}
       loadingInitialData={loadingInitialData}
       viewPage={page}
       onPageChange={(page: ViewPageType) => {
