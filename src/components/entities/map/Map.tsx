@@ -1,50 +1,75 @@
-import L, { Map as MapType } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useCallback, useEffect, useRef, useState } from "react";
-import useResizeObserver from "../../../hooks/resizeObserver";
+import {
+  Viewer as CesiumViewer,
+  ProviderViewModel,
+  WebMapTileServiceImageryProvider,
+} from "cesium";
+import React, { useEffect, useRef } from "react";
 import { DateRange } from "../../../types/time";
 import { MapEntity } from "../../../types/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
+import { gibsTilingScheme } from "./lib/gibs";
 
 export declare type MapProps = {
   dateRange: DateRange;
   mapEntity: MapEntity;
 };
 
-export const Map = ({ mapEntity /* ,dateRange */ }: MapProps) => {
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const map = useRef<MapType | null>();
-
-  const onResize = useCallback((target: HTMLDivElement) => {
-    // Handle the resize event
-    if (target.getBoundingClientRect().height > 0) {
-      map.current?.invalidateSize();
-    }
-  }, []);
-
-  const mapRef = useResizeObserver(onResize);
+export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
+  const map = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (mapRef.current && !mapInitialized) {
-      setMapInitialized(true);
-      if (mapRef.current.childElementCount === 0) {
-        map.current = L.map(mapRef.current).setView([30, 30], 10);
-        L.tileLayer(
-          "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/EPSG3857_500m/{z}/{y}/{x}.jpeg",
-          {
-            maxZoom: 8,
-          }
-        ).addTo(map.current);
-      }
-    }
-  }, [mapRef, mapInitialized]);
+    const models: ProviderViewModel[] = [];
+    const model = new ProviderViewModel({
+      name: "BlueMarble_ShadedRelief_Bathymetry",
+      iconUrl:
+        "https://gibs-b.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/2/0/2.jpeg",
+      tooltip: "BlueMarble_ShadedRelief_Bathymetry",
+      creationFunction: function () {
+        return new WebMapTileServiceImageryProvider({
+          url: "https://gibs-{s}.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/2004-08/500m/{TileMatrix}/{TileRow}/{TileCol}.jpeg",
+          layer: "BlueMarble_ShadedRelief_Bathymetry",
+          style: "default",
+          format: "image/jpeg",
+          tileMatrixSetID: "500m",
+          maximumLevel: 8,
+          tileWidth: 256,
+          tileHeight: 256,
+          tilingScheme: gibsTilingScheme(),
+        });
+      },
+    });
+    models.push(model);
+
+    const viewer = new CesiumViewer(map.current as HTMLDivElement, {
+      animation: false,
+      baseLayerPicker: true,
+      geocoder: false,
+      timeline: false,
+      homeButton: false,
+      navigationHelpButton: false,
+      imageryProviderViewModels: models,
+      terrainProviderViewModels: [],
+      // must be provided or cesium will attempt to load Bing maps
+      selectedImageryProviderViewModel: models[0],
+      fullscreenButton: false,
+    });
+
+    // set max/min zoom (camera height in meters)
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 200000;
+    viewer.scene.screenSpaceCameraController.maximumZoomDistance = 20000000;
+
+    // Remove cesium-ion credit
+    viewer.cesiumWidget.creditContainer.remove();
+  }, []);
 
   return (
-    <div className="map">
+    <React.Fragment>
       <EntityHeader title={mapEntity.title} />
-      <div ref={mapRef} id="map" />
-    </div>
+      <div className="cesium-container">
+        <div className="viewer-container" ref={map} />
+      </div>
+    </React.Fragment>
   );
 };
 
