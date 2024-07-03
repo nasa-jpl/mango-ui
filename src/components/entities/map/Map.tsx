@@ -49,10 +49,15 @@ export const Map = ({ mapEntity /* dateRange */ }: MapProps) => {
       homeButton: false,
       navigationHelpButton: false,
       imageryProviderViewModels: models,
+      terrainProviderViewModels: [],
       // must be provided or cesium will attempt to load Bing maps
       selectedImageryProviderViewModel: models[0],
       fullscreenButton: false,
     });
+
+    // set max/min zoom (camera height in meters)
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 200000;
+    viewer.scene.screenSpaceCameraController.maximumZoomDistance = 20000000;
 
     // Remove cesium-ion credit
     viewer.cesiumWidget.creditContainer.remove();
