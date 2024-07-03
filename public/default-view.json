@@ -58,6 +58,7 @@
               "enableHeader": true,
               "defaultOpen": true,
               "layout": [
+                { "i": "hisudhis", "x": 8, "y": 0, "w": 6, "h": 2 },
                 { "i": "sdfdgfhg", "x": 8, "y": 0, "w": 6, "h": 2 },
                 { "i": "sdf23edx", "x": 8, "y": 0, "w": 6, "h": 2 },
                 { "i": "3edfghtr", "x": 8, "y": 1, "w": 6, "h": 2 },
@@ -66,6 +67,13 @@
                 { "i": "sdfgrtrw", "x": 8, "y": 2, "w": 6, "h": 2 }
               ],
               "entities": [
+                {
+                  "id": "hisudhis",
+                  "type": "map",
+                  "title": "Map",
+                  "syncWithPageDateRange": true,
+                  "layers": []
+                },
                 {
                   "id": "sdfdgfhg",
                   "type": "chart",
