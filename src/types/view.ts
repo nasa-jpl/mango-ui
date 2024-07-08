@@ -97,6 +97,12 @@ export interface ChartLayer extends DataLayer {
   yAxisId?: string;
 }
 
+export interface MapLayer extends DataLayer {
+  color?: string;
+  hidePoints?: boolean;
+  pointRadius?: number;
+}
+
 export type DataTransform = {
   add?: number;
   divide?: number;
@@ -105,7 +111,7 @@ export type DataTransform = {
 };
 
 export interface MapEntity extends Entity {
-  // etc
+  layers?: MapLayer[];
 }
 
 export interface TableEntity<T> extends Entity {

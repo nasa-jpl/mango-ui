@@ -72,7 +72,18 @@
                   "type": "map",
                   "title": "Map",
                   "syncWithPageDateRange": true,
-                  "layers": []
+                  "layers": [
+                    {
+                      "id": "3regf",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1A",
+                      "field": "lin_accl_x",
+                      "version": "04",
+                      "instrument": "C",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
+                    }
+                  ]
                 },
                 {
                   "id": "sdfdgfhg",
