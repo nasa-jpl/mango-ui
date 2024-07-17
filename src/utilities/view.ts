@@ -3,9 +3,12 @@ import {
   ChartEntity,
   ChartLayer,
   DataTransform,
+  DataTransformDerived,
+  DataTransformSelf,
   Entity,
   MapEntity,
   TableEntity,
+  TimeSeriesPoint,
 } from "../types/view";
 
 export function isChartEntity(entity: Entity): entity is ChartEntity {
@@ -20,31 +23,87 @@ export function isTableEntity(entity: Entity): entity is TableEntity<never> {
   return entity.type === "table";
 }
 
-export function applyIndividualTransform(
-  x: number,
-  transform: DataTransform
-): number {
-  let newN = x;
-  newN += transform.add ?? 0;
-  newN -= transform.subtract ?? 0;
-  newN *= transform.multiply ?? 1;
-  newN /= transform.divide ?? 1;
-  return newN;
-}
-
 export function applyLayerTransform(
-  point: { x: number; y: number },
-  layer: ChartLayer
-) {
-  if (!layer.transforms) return point;
-  const { x, y } = point;
-  return {
-    x: layer.transforms.x ? applyIndividualTransform(x, layer.transforms.x) : x,
-    y: layer.transforms.y ? applyIndividualTransform(y, layer.transforms.y) : y,
-  };
+  value: number,
+  point: TimeSeriesPoint,
+  transform: DataTransform,
+  data: { layer: ChartLayer; points: TimeSeriesPoint[] }[],
+  index: number = 0
+): number {
+  let newValue = value;
+  if (transform.type === "self") {
+    // Transform using specified modifiers on the original data
+    const transformSelf = transform as DataTransformSelf;
+    newValue += transformSelf.add ?? 0;
+    newValue -= transformSelf.subtract ?? 0;
+    newValue *= transformSelf.multiply ?? 1;
+    newValue /= transformSelf.divide ?? 1;
+  } else if (transform.type === "derived") {
+    const transformDerived = transform as DataTransformDerived;
+    // Transform using the matching point from a specified layer
+    const matchingLayer = data.find(
+      ({ layer }) => layer.id === transformDerived.layerId
+    );
+    if (matchingLayer) {
+      // Find matching value in time
+      const matchingPoint = matchingLayer.points[index];
+      if (
+        typeof matchingPoint === "object" &&
+        // TODO would be nice to refactor this to take in a Point<number, number> where x is milliseconds
+        // instead of a timestamp string
+        new Date(matchingPoint.x).getTime() === new Date(point.x).getTime()
+      ) {
+        newValue += transform.add ? matchingPoint.y : 0;
+        newValue -= transform.subtract ? matchingPoint.y : 0;
+        newValue *= transform.multiply ? matchingPoint.y : 1;
+        newValue /= transform.divide ? matchingPoint.y : 1;
+      }
+    }
+  }
+
+  return newValue;
 }
 
-// TODO move fn
+/* Apply layer transformations to a point at the given index */
+export function applyLayerTransforms(
+  point: TimeSeriesPoint,
+  layer: ChartLayer,
+  data: { layer: ChartLayer; points: TimeSeriesPoint[] }[],
+  index: number
+) {
+  if (!layer.transforms || !layer.transforms.length) return point;
+  let newPoint = { ...point };
+  layer.transforms.forEach((transform) => {
+    const value = newPoint[transform.axis];
+    newPoint = {
+      x:
+        transform.axis === "x"
+          ? new Date(
+              applyLayerTransform(
+                new Date(value).getTime(),
+                newPoint,
+                transform,
+                data,
+                index
+              )
+            ).toISOString()
+          : newPoint.x,
+      y:
+        transform.axis === "y"
+          ? applyLayerTransform(
+              value as number,
+              newPoint,
+              transform,
+              data,
+              index
+            )
+          : newPoint.y,
+    };
+  });
+  return newPoint;
+}
+
+// TODO move to a more generic utils file?
 export function formatYValue(tickValue: number | string): string {
   if (typeof tickValue === "string") {
     return tickValue;

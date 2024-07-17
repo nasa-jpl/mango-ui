@@ -14,7 +14,12 @@ import { debounce, throttle } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataResponse, Product } from "../../../types/api";
 import { DateRange } from "../../../types/time";
-import { ChartEntity, ChartLayer, YAxis } from "../../../types/view";
+import {
+  ChartEntity,
+  ChartLayer,
+  TimeSeriesPoint,
+  YAxis,
+} from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import {
   getLayerId,
@@ -25,7 +30,7 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
-import { applyLayerTransform, formatYValue } from "../../../utilities/view";
+import { applyLayerTransforms, formatYValue } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
 
@@ -267,93 +272,109 @@ export const Chart = ({
       return;
     }
 
-    const newChartJSDatasets: ChartDataset<"line", CustomChartData[]>[] =
-      results.map(({ result, layer }) => {
-        // Get metadata for this result layer in order to determine
-        // the optimal decimation factor to use when requesting data
-        const fieldMetadata = getFieldMetadataForLayer(layer, products);
+    // Process result points
+    const processedData = results.map(({ result, layer }) => {
+      // Get metadata for this result layer in order to determine
+      // the optimal decimation factor to use when requesting data
+      const fieldMetadata = getFieldMetadataForLayer(layer, products);
 
-        let data: { x: string; y: number }[] = [];
-        result.data.forEach((d) => {
-          const fieldValue = d[layer.field];
-          const timestamp = d.timestamp;
-          if (!fieldValue || typeof timestamp !== "string") return;
+      // TODO for time series we could convert date string -> ms and convert back to string later for chartjs?
+      // or maybe chartjs is ok with ms though there may be issues with that approach
+      let allPoints: TimeSeriesPoint[] = [];
+      result.data.forEach((d) => {
+        const fieldValue = d[layer.field];
+        const timestamp = d.timestamp;
+        if (!fieldValue || typeof timestamp !== "string") return;
 
-          // Case where downsampling is not applied
-          let points = [];
-          if (result.downsampling_factor === 1) {
-            points.push({ x: timestamp, y: fieldValue.value });
-          } else {
-            if (!fieldMetadata) return;
-            if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "min"
-              ) &&
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "max"
-              )
-            ) {
-              // Compute middle time of aggregation window
-              const pointTimestampMS = new Date(timestamp).getTime();
-              const halfFieldDataIntervalMS =
-                ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
-              const middleTime = new Date(
-                pointTimestampMS + halfFieldDataIntervalMS
-              ).toISOString();
+        // Case where downsampling is not applied
+        const points = [];
+        if (result.downsampling_factor === 1) {
+          points.push({ x: timestamp, y: fieldValue.value });
+        } else {
+          if (!fieldMetadata) return;
+          if (
+            fieldMetadata.supported_aggregations.find(
+              ({ type }) => type === "min"
+            ) &&
+            fieldMetadata.supported_aggregations.find(
+              ({ type }) => type === "max"
+            )
+          ) {
+            // Compute middle time of aggregation window
+            const pointTimestampMS = new Date(timestamp).getTime();
+            const halfFieldDataIntervalMS =
+              ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
+            const middleTime = new Date(
+              pointTimestampMS + halfFieldDataIntervalMS
+            ).toISOString();
 
-              // Use the min and max set to the middle of the window
-              points.push({ x: middleTime, y: fieldValue.min });
+            // Use the min and max set to the middle of the window
+            points.push({ x: middleTime, y: fieldValue.min });
+            if (fieldValue.min !== fieldValue.max) {
               points.push({ x: middleTime, y: fieldValue.max });
-            } else if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "avg"
-              )
-            ) {
-              points.push({ x: timestamp, y: fieldValue.avg });
             }
+          } else if (
+            fieldMetadata.supported_aggregations.find(
+              ({ type }) => type === "avg"
+            )
+          ) {
+            points.push({ x: timestamp, y: fieldValue.avg });
           }
-          points = points.map((point) => {
-            // Assume that this is a time series and that x is a date string
-            const transform = applyLayerTransform(
-              { x: new Date(point.x).getTime(), y: point.y },
-              layer
-            );
-            return {
-              x: new Date(transform.x).toISOString(),
-              y: transform.y,
-            };
-          });
-
-          data = data.concat(points);
-        });
-        return {
-          id: getLayerId(layer),
-          unit:
-            getFieldMetadataForLayer(layer, products)?.unit ||
-            "" /* TODO cache this above? */,
-          hidden: hiddenDatasets[getLayerId(layer)] || false,
-          // TODO would be nice to render these outside of the canvas in order to better format
-          // and control these labels
-          // TODO what should these labels contain metadata wise? Fairly verbose right now.
-          label: `${layer.mission} ${layer.dataset} ${layer.field} ${
-            layer.instrument
-          } (${result.data_count} point${pluralize(result.data_count)}, 1:${
-            result.downsampling_factor
-          } scale)`,
-          data,
-          borderWidth:
-            typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
-          spanGaps: false,
-          pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
-          pointRadius:
-            typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
-          showLine: layer.hideLines ? false : true,
-          yAxisID: layer.yAxisId,
-          ...(layer.color
-            ? { backgroundColor: layer.color, borderColor: layer.color }
-            : null),
-        };
+        }
+        allPoints = allPoints.concat(points);
       });
+      return {
+        layer,
+        points: allPoints,
+        data_count: result.data_count,
+        downsampling_factor: result.downsampling_factor,
+      };
+    });
+
+    // Transformed points
+    processedData.forEach(({ layer, points, ...rest }, i) => {
+      let newPoints = points;
+      if (layer.transforms?.length) {
+        newPoints = newPoints.map((point, j) => {
+          return applyLayerTransforms(point, layer, processedData, j);
+        });
+      }
+      processedData[i] = { layer, points: newPoints, ...rest };
+    });
+
+    const newChartJSDatasets: ChartDataset<"line", CustomChartData[]>[] =
+      processedData
+        .filter(({ layer }) => !layer.hidden)
+        .map(({ points, layer, data_count, downsampling_factor }) => {
+          return {
+            layer,
+            id: getLayerId(layer),
+            hidden: hiddenDatasets[getLayerId(layer)] || false,
+            // TODO would be nice to render these outside of the canvas in order to better format
+            // and control these labels
+            // TODO what should these labels contain metadata wise? Fairly verbose right now.
+            // TODO bring point count back into label option
+            label:
+              layer.label ||
+              `${layer.mission} ${layer.dataset} ${layer.field} ${
+                layer.instrument
+              } (${data_count} point${pluralize(
+                data_count
+              )}, 1:${downsampling_factor} scale)`,
+            data: points,
+            borderWidth:
+              typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
+            spanGaps: false,
+            pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
+            pointRadius:
+              typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
+            showLine: layer.hideLines ? false : true,
+            yAxisID: layer.yAxisId,
+            ...(layer.color
+              ? { backgroundColor: layer.color, borderColor: layer.color }
+              : null),
+          };
+        });
 
     // Update chartJS dataset list
     chartRef.current.data.datasets = newChartJSDatasets;
@@ -408,8 +429,8 @@ export const Chart = ({
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
-    /* TODO maybe add the chart ID in here too so we can plot the dataset multiple times on the same chart with diff options if needed */
-    const layerFullId = `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
+    /* TODO maybe add the chart ID in here too so we can plot the time series multiple times on the same chart with diff options if needed */
+    const layerFullId = getLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
@@ -550,18 +571,10 @@ export const Chart = ({
         plugins: {
           tooltip: {
             callbacks: {
-              label: (tooltipItem) => {
-                return `${
-                  // @ts-expect-error can't seem to type extra properties passed into chart js datasets
-                  tooltipItem.dataset.id
-                }: ${formatYValue(tooltipItem.parsed.y)}${
-                  // @ts-expect-error ^^^
-                  tooltipItem.dataset.unit
-                    ? // @ts-expect-error ^^^
-                      ` (${tooltipItem.dataset.unit})`
-                    : ""
-                }`;
-              },
+              label: (tooltipItem) =>
+                `${tooltipItem.dataset.label}: ${formatYValue(
+                  tooltipItem.parsed.y
+                )}`,
             },
             ...(chartEntity.chartOptions?.tooltip || {}),
           },

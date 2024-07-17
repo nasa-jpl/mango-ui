@@ -16,10 +16,12 @@ test("getLayerId", () => {
     instrument: "INSTRUMENT",
     endTime: "",
     startTime: "",
-    version: "04",
-    id: "1",
+    version: "VERSION",
+    id: "ID",
   };
-  expect(getLayerId(layer)).toEqual("MISSION_DATASET_FIELD_INSTRUMENT");
+  expect(getLayerId(layer)).toEqual(
+    "MISSION_DATASET_FIELD_INSTRUMENT_VERSION_ID"
+  );
 });
 
 test("isAbortError", () => {
