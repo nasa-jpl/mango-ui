@@ -104,7 +104,7 @@ export function fetchWithProgress<T>(url: string) {
  * mission, dataset, field, and instrument
  */
 export function getLayerId(layer: DataLayer): string {
-  return `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
+  return `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}_${layer.version}_${layer.id}`;
 }
 
 /**
