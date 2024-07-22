@@ -64,6 +64,7 @@
                 { "i": "3edfghtr", "x": 8, "y": 1, "w": 6, "h": 2 },
                 { "i": "3efgtre", "x": 8, "y": 1, "w": 6, "h": 2 },
                 { "i": "dfgdgfg", "x": 8, "y": 2, "w": 6, "h": 2 },
+                { "i": "sfrgtef", "x": 8, "y": 2, "w": 6, "h": 2 },
                 { "i": "sdfgrtrw", "x": 8, "y": 2, "w": 6, "h": 2 }
               ],
               "entities": [
@@ -288,45 +289,57 @@
                   ]
                 },
                 {
-                  "id": "dfgdgfg",
+                  "id": "sfrgtef",
                   "type": "chart",
-                  "title": "Data Transformations (C: x+100000, D: y*-1 - 0.00001)",
+                  "title": "Data Transformations: Self and Derived",
                   "syncWithPageDateRange": true,
                   "layers": [
                     {
-                      "id": "fdv",
+                      "id": "adfsdghy",
                       "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "field": "lin_accl_x",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "orange",
-                      "transforms": {
-                        "x": {
-                          "add": 100000
-                        }
-                      }
-                    },
-                    {
-                      "id": "sdfe",
-                      "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "field": "lin_accl_x",
+                      "dataset": "ACT1B",
+                      "field": "lin_accl_y",
+                      "label": "GRACEFO D: lin_accl_y v04",
                       "version": "04",
                       "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "startTime": "2020-03-02T00:26:00.000000Z",
+                      "endTime": "2023-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1",
+                      "color": "green"
+                    },
+                    {
+                      "id": "adfsdghy",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1B",
+                      "field": "lin_accl_y",
+                      "label": "GRACEFO D: lin_accl_y v00",
+                      "version": "00",
+                      "instrument": "D",
+                      "startTime": "2020-03-02T00:26:00.000000Z",
+                      "endTime": "2023-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1",
+                      "color": "red"
+                    },
+                    {
+                      "id": "3r4etfnh",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1B",
+                      "field": "lin_accl_y",
+                      "label": "GRACEFO D: lin_accl_y v00-v04",
+                      "version": "00",
+                      "instrument": "D",
+                      "startTime": "2020-03-02T00:26:00.000000Z",
+                      "endTime": "2023-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
                       "color": "blue",
-                      "transforms": {
-                        "y": {
-                          "multiply": -1,
-                          "subtract": 0.00001
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "derived",
+                          "subtract": true,
+                          "layerId": "adfsdghy"
                         }
-                      }
+                      ]
                     }
                   ],
                   "yAxes": [
