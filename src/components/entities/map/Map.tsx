@@ -22,15 +22,25 @@ export declare type MapProps = {
   products: Product[];
 };
 
+export declare type Geolocation = {
+  latitude: number;
+  longitude: number;
+};
+
 export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<CesiumViewer | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<number | null>(null);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<Error | null>();
+
   const cancelHandles: Record<string, () => void> = {};
-  //TODO: this should probably be wrraped in the MapEntity
-  let points: { latitude: number; longitude: number }[] = [];
+
+  // Maximum number of points the api can performantly return (TODO: should be a config option)
+  const MAX_POINT_NUMBER = 20000;
 
   const fetchLayerData = (
     layer: MapLayer,
@@ -38,7 +48,6 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: MapLayer; result: DataResponse }> => {
-    /* TODO maybe add the chart ID in here too so we can plot the stream multiple times on the same chart with diff options if needed */
     const layerFullId = `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
@@ -46,6 +55,13 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     return new Promise((resolve, reject) => {
       const computedStartTime = startTime || layer.startTime;
       const computedEndTime = endTime || layer.endTime;
+
+      // Compute aggregation factor
+      const durationSeconds =
+        (new Date(computedEndTime).getTime() -
+          new Date(computedStartTime).getTime()) /
+        1000;
+
       const product = getProductForLayer(layer, products);
       let downsamplingFactor = 1;
 
@@ -53,17 +69,21 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         for (let i = 0; i < product.available_resolutions.length; i++) {
           const resolution = product.available_resolutions[i];
           const nextResolution = product.available_resolutions[i + 1];
-          const tmpds = zoomLevel / 1000000;
+          const pointsForDuration =
+            durationSeconds / resolution.nominal_data_interval_seconds;
+          const nextPointsForDuration = nextResolution
+            ? durationSeconds / nextResolution.nominal_data_interval_seconds
+            : null;
+
           if (
-            tmpds < resolution.downsampling_factor ||
-            nextResolution == null
+            pointsForDuration < MAX_POINT_NUMBER ||
+            nextPointsForDuration == null
           ) {
             downsamplingFactor = resolution.downsampling_factor;
             break;
           }
         }
       }
-      console.log("Downsampling: ", downsamplingFactor);
 
       const { json, cancel } = getData(
         layer.mission,
@@ -86,7 +106,6 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
           });
         })
         .catch((error) => {
-          // console.log("Error caught: ", error);
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
             reject(error);
@@ -141,49 +160,58 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       endTime
     );
     if (error || aborted || !mapRef.current) {
-      console.log("aborting");
       return;
     }
-    results.map(({ result }) => {
-      // clear old points
-      points = [];
+
+    let downsampling = 1;
+    const points: { latitude: number; longitude: number }[] = [];
+
+    // TODO: does it make sense to support multiple layers for the map view?
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    results.map(({ result, layer }) => {
+      downsampling = result.downsampling_factor;
       result.data.forEach((d) => {
-        const geolocation = d.location;
-        // Case where downsampling is not applied
-        if (result.downsampling_factor === 1) {
-          points.push({
-            latitude: geolocation.latitude,
-            longitude: geolocation.longitude,
-          });
-        } else {
-          points.push({
-            latitude: geolocation.latitude,
-            longitude: geolocation.longitude,
-          });
-        }
+        console.log(result);
+        const geolocation: Geolocation = d.location as unknown as Geolocation;
+        if (!geolocation) return;
+        points.push({
+          latitude: geolocation["latitude"],
+          longitude: geolocation["longitude"],
+        });
       });
     });
 
     if (viewerRef.current) {
-      // clear existing entities
+      // Clear existing points/lines
       viewerRef.current.entities.removeAll();
-      points.forEach((d) => {
+
+      const coordinates = points.map((point) => {
+        return Cartesian3.fromDegrees(point.longitude, point.latitude);
+      });
+
+      // For full-res data, render individual points; for decimated data, render polylines
+      if (downsampling === 1) {
+        coordinates.forEach((coordinate) => {
+          viewerRef.current?.entities.add({
+            position: coordinate,
+            point: {
+              pixelSize: 1,
+              color: Color.RED,
+            },
+          });
+        });
+      } else {
         viewerRef.current?.entities.add({
-          position: Cartesian3.fromDegrees(d.longitude, d.latitude),
-          point: {
-            pixelSize: 2,
-            color: Color.RED,
+          polyline: {
+            positions: coordinates,
+            width: 1,
+            material: Color.RED,
           },
         });
-      });
-      viewerRef.current.scene.requestRender();
-    }
-  };
+      }
 
-  const onZoomComplete = () => {
-    if (viewerRef.current) {
-      const newZoomLevel = viewerRef.current.camera.positionCartographic.height;
-      setZoomLevel(newZoomLevel);
+      // Trigger Cesium map update
+      viewerRef.current.scene.requestRender();
     }
   };
 
@@ -221,16 +249,14 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         navigationHelpButton: false,
         imageryProviderViewModels: models,
         terrainProviderViewModels: [],
-        // must be provided or cesium will attempt to load Bing maps
+        // Must be provided or cesium will attempt to load Bing maps
         selectedImageryProviderViewModel: models[0],
         fullscreenButton: false,
       });
 
-      viewerRef.current.camera.changed.addEventListener(onZoomComplete);
-
-      // set max/min zoom (camera height in meters)
+      // Set max/min zoom to limits of basemap imagery available (camera height in meters)
       viewerRef.current.scene.screenSpaceCameraController.minimumZoomDistance = 200000;
-      viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance = 20000000;
+      viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance = 40000000;
     }
   }, []);
 
@@ -242,7 +268,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       dateRange.end
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange, zoomLevel, products, mapEntity.layers]);
+  }, [dateRange, products, mapEntity.layers]);
 
   return (
     <React.Fragment>
