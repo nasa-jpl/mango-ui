@@ -78,6 +78,7 @@ export type DataLayer = {
   field: string;
   id: string;
   instrument: string;
+  label?: string;
   mission: string;
   startTime: string;
   version: string;
@@ -85,14 +86,12 @@ export type DataLayer = {
 
 export interface ChartLayer extends DataLayer {
   color?: string;
+  hidden?: boolean;
   hideLines?: boolean;
   hidePoints?: boolean;
   lineWidth?: number;
   pointRadius?: number;
-  transforms?: {
-    x?: DataTransform;
-    y?: DataTransform;
-  };
+  transforms?: DataTransform[];
   type: "line";
   yAxisId?: string;
 }
@@ -103,11 +102,33 @@ export interface MapLayer extends DataLayer {
   pointRadius?: number;
 }
 
-export type DataTransform = {
+export type Point<X = string, Y = number> = {
+  x: X;
+  y: Y;
+};
+
+export type TimeSeriesPoint = Point<string, number>;
+
+export type DataTransform = { axis: "x" | "y" } & (
+  | DataTransformSelf
+  | DataTransformDerived
+);
+
+export type DataTransformSelf = {
   add?: number;
   divide?: number;
   multiply?: number;
   subtract?: number;
+  type: "self";
+};
+
+export type DataTransformDerived = {
+  add?: boolean;
+  divide?: boolean;
+  layerId: DataLayer["id"];
+  multiply?: boolean;
+  subtract?: boolean;
+  type: "derived";
 };
 
 export interface MapEntity extends Entity {
