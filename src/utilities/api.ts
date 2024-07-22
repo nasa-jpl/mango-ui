@@ -44,7 +44,7 @@ export const getData = (
       .replace("{INSTRUMENT}", instrumentId)
       .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +
-    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&fields=location&downsampling_factor=${downsamplingFactor}`;
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&downsampling_factor=${downsamplingFactor}`;
 
   const controller = new AbortController();
   const cancel = () => controller.abort();
