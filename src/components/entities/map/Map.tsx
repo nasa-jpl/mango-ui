@@ -5,7 +5,7 @@ import {
   ProviderViewModel,
   WebMapTileServiceImageryProvider,
 } from "cesium";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DataResponse, Product } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import { MapEntity, MapLayer } from "../../../types/view";
@@ -14,7 +14,11 @@ import { isAbortError } from "../../../utilities/generic";
 import { getProductForLayer } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
-import { gibsTilingScheme } from "./lib/gibs";
+import {
+  MAX_ZOOM_DISTANCE,
+  MIN_ZOOM_DISTANCE,
+  gibsTilingScheme,
+} from "./lib/gibs";
 
 export declare type MapProps = {
   dateRange: DateRange;
@@ -22,7 +26,7 @@ export declare type MapProps = {
   products: Product[];
 };
 
-export declare type Geolocation = {
+export declare type Location = {
   latitude: number;
   longitude: number;
 };
@@ -31,16 +35,15 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<CesiumViewer | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(true);
+  // Maximum number of points the api can performantly return (TODO: should be a config option)
+  const MAX_POINT_NUMBER = 5000;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>();
 
-  const cancelHandles: Record<string, () => void> = {};
-
-  // Maximum number of points the api can performantly return (TODO: should be a config option)
-  const MAX_POINT_NUMBER = 20000;
+  const cancelHandles = useMemo(() => {
+    return {} as Record<string, () => void>;
+  }, []);
 
   const fetchLayerData = (
     layer: MapLayer,
@@ -171,12 +174,11 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     results.map(({ result, layer }) => {
       downsampling = result.downsampling_factor;
       result.data.forEach((d) => {
-        console.log(result);
-        const geolocation: Geolocation = d.location as unknown as Geolocation;
-        if (!geolocation) return;
+        const location: Location = d.location as unknown as Location;
+        if (!location) return;
         points.push({
-          latitude: geolocation["latitude"],
-          longitude: geolocation["longitude"],
+          latitude: location["latitude"],
+          longitude: location["longitude"],
         });
       });
     });
@@ -252,13 +254,48 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         // Must be provided or cesium will attempt to load Bing maps
         selectedImageryProviderViewModel: models[0],
         fullscreenButton: false,
+        msaaSamples: 4,
       });
 
       // Set max/min zoom to limits of basemap imagery available (camera height in meters)
-      viewerRef.current.scene.screenSpaceCameraController.minimumZoomDistance = 200000;
-      viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance = 40000000;
+      viewerRef.current.scene.screenSpaceCameraController.minimumZoomDistance =
+        MIN_ZOOM_DISTANCE;
+      viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance =
+        MAX_ZOOM_DISTANCE;
     }
   }, []);
+
+  const renderMapOverlays = () => {
+    if (!viewerRef.current) {
+      return;
+    }
+    return (
+      <>
+        {loading && (
+          <div
+            className="map-indicator-overlay map-loading-indicator st-typography-medium"
+            style={{
+              top: `${viewerRef.current.container.clientHeight / 2}px`,
+              left: `${viewerRef.current.container.clientWidth / 2}px`,
+            }}
+          >
+            Loading
+          </div>
+        )}
+        {!loading && error && (
+          <div
+            className="map-indicator-overlay map-error-indicator st-typography-medium"
+            style={{
+              top: `${viewerRef.current.container.clientHeight / 2}px`,
+              left: `${viewerRef.current.container.clientWidth / 2}px`,
+            }}
+          >
+            Error: {error.message}
+          </div>
+        )}
+      </>
+    );
+  };
 
   useEffect(() => {
     visualizeMapLayers(
@@ -275,6 +312,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       <EntityHeader title={mapEntity.title} />
       <div className="cesium-container">
         <div className="viewer-container" ref={mapRef} />
+        {renderMapOverlays()}
       </div>
     </React.Fragment>
   );
