@@ -25,6 +25,9 @@ import {
   Cartesian2
 } from "cesium";
 
+export const MIN_ZOOM_DISTANCE = 200000;
+export const MAX_ZOOM_DISTANCE = 40000000;
+
 export const gibsTilingScheme = function (options) {
   var self = new GeographicTilingScheme(options);
 

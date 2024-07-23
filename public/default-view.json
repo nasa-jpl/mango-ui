@@ -73,7 +73,18 @@
                   "type": "map",
                   "title": "Map",
                   "syncWithPageDateRange": true,
-                  "layers": []
+                  "layers": [
+                    {
+                      "id": "3regf",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1A",
+                      "field": "location",
+                      "version": "04",
+                      "instrument": "C",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
+                    }
+                  ]
                 },
                 {
                   "id": "sdfdgfhg",
@@ -104,18 +115,6 @@
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
                       "color": "blue"
-                    },
-                    {
-                      "id": "frdgfhy",
-                      "mission": "GRACEFO",
-                      "dataset": "PCI1A",
-                      "field": "ant_centr_accl",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y2",
-                      "color": "red"
                     }
                   ],
                   "yAxes": [

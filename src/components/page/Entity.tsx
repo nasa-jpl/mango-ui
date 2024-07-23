@@ -51,7 +51,9 @@ export const Entity = (props: EntityProps) => {
           onHoverDateChange={onHoverDateChange}
         />
       )}
-      {isMapEntity(entity) && <Map mapEntity={entity} dateRange={dateRange} />}
+      {isMapEntity(entity) && (
+        <Map mapEntity={entity} products={products} dateRange={dateRange} />
+      )}
       {/* TODO figure out type later/inside table? */}
       {isTableEntity(entity) && (
         <Table
