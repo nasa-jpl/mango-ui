@@ -2,7 +2,7 @@ export const config = {
   api: {
     data: {
       missions: "/missions/",
-      products: "/missions/{MISSION}/products/",
+      products: "/missions/{MISSION}/products",
       data: "/missions/{MISSION}/products/{DATASET}/versions/{VERSION}/instruments/{INSTRUMENT}/data",
     },
   },
