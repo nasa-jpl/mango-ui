@@ -96,6 +96,12 @@ export interface ChartLayer extends DataLayer {
   yAxisId?: string;
 }
 
+export interface MapLayer extends DataLayer {
+  color?: string;
+  hidePoints?: boolean;
+  pointRadius?: number;
+}
+
 export type Point<X = string, Y = number> = {
   x: X;
   y: Y;
@@ -126,7 +132,7 @@ export type DataTransformDerived = {
 };
 
 export interface MapEntity extends Entity {
-  // etc
+  layers?: MapLayer[];
 }
 
 export interface TableEntity<T> extends Entity {
