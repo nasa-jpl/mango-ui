@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { generateTestProduct } from "../../../../e2e-tests/utilities/product";
 import { MapEntity } from "../../../types/view";
 import Map from "./Map";
 
@@ -23,5 +24,6 @@ export const Default: Story = {
   args: {
     mapEntity,
     dateRange: { start: "", end: "" },
+    products: [generateTestProduct()],
   },
 };

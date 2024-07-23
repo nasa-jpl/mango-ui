@@ -170,8 +170,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     const points: { latitude: number; longitude: number }[] = [];
 
     // TODO: does it make sense to support multiple layers for the map view?
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    results.map(({ result, layer }) => {
+    results.map(({ result }) => {
       downsampling = result.downsampling_factor;
       result.data.forEach((d) => {
         const location: Location = d.location as unknown as Location;
