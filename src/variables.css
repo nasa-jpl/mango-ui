@@ -1,4 +1,7 @@
 :root {
   /* TODO prefix with whatever app name we use */
-  --app-border: 1px solid var(--st-gray-20);
+
+  /* --app-border: 1px solid var(--st-gray-20); */
+  --app-border: 1px solid var(--app-border-color);
+  --app-border-color: #dee2e6;
 }

@@ -9,3 +9,29 @@ body,
 div[data-radix-popper-content-wrapper] {
   z-index: 99999 !important;
 }
+
+/* TODO move to stellar styles? */
+
+/* Fixes transform issue causing blurriness with dropdowns */
+.st-react-modal--overlay {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  overflow: auto;
+  position: fixed;
+}
+
+.st-react-modal {
+  display: flex;
+  flex-direction: column;
+  left: unset;
+  top: unset;
+  transform: unset;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .st-react-modal {
+    animation: unset !important;
+  }
+}

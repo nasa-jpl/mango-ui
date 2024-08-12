@@ -11,6 +11,12 @@
   width: 80vw;
 }
 
+.product-preview-modal-content .chart {
+  border: var(--app-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
 .product-preview-controls {
   display: flex;
   gap: 16px;

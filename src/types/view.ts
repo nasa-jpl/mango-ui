@@ -36,7 +36,13 @@ export type Section = {
 
 export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
 
-export type EntityType = "chart" | "table" | "map";
+export type EntityType =
+  | "chart"
+  | "table"
+  | "map"
+  | "timeline"
+  | "timeline-row"
+  | "text";
 
 export type Entity = {
   dateRange: DateRange;
@@ -45,6 +51,20 @@ export type Entity = {
   title: string;
   type: EntityType;
 };
+
+export interface TimelineEntity extends Entity {
+  marginLeft: number;
+  rows: TimelineRowEntity[];
+}
+
+export interface TimelineRowEntity extends Entity {
+  entity: Entity;
+  subrows: Entity[];
+}
+
+export interface TextEntity extends Omit<Entity, "dateRange"> {
+  text: string;
+}
 
 export interface ChartEntity extends Entity {
   chartOptions?: ChartOptions;
@@ -135,7 +155,16 @@ export interface MapEntity extends Entity {
   layers?: MapLayer[];
 }
 
-export interface TableEntity<T> extends Entity {
+export interface TableLayer extends Omit<DataLayer, "field"> {
   fields: string[];
-  rows?: T[];
+}
+
+export type TableColumn = {
+  field: string;
+  layerId: string;
+};
+
+export interface TableEntity extends Entity {
+  columns: TableColumn[];
+  layers: TableLayer[];
 }

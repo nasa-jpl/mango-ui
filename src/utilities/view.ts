@@ -6,9 +6,13 @@ import {
   DataTransformDerived,
   DataTransformSelf,
   Entity,
+  EntityType,
   MapEntity,
   TableEntity,
+  TextEntity,
   TimeSeriesPoint,
+  TimelineEntity,
+  TimelineRowEntity,
 } from "../types/view";
 
 export function isChartEntity(entity: Entity): entity is ChartEntity {
@@ -19,8 +23,24 @@ export function isMapEntity(entity: Entity): entity is MapEntity {
   return entity.type === "map";
 }
 
-export function isTableEntity(entity: Entity): entity is TableEntity<never> {
+export function isTableEntity(entity: Entity): entity is TableEntity {
   return entity.type === "table";
+}
+
+export function isTimelineEntity(entity: Entity): entity is TimelineEntity {
+  return entity.type === "timeline";
+}
+
+export function isTimelineRowEntity(
+  entity: Entity
+): entity is TimelineRowEntity {
+  return entity.type === "timeline-row";
+}
+
+export function isTextEntity(entity: {
+  type: EntityType;
+}): entity is TextEntity {
+  return entity.type === "text";
 }
 
 export function applyLayerTransform(

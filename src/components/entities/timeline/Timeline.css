@@ -1,0 +1,51 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-time-visualization {
+  align-items: center;
+  border-bottom: var(--app-border);
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+}
+
+.timeline-time-visualization-label {
+  flex-shrink: 0;
+  padding-left: 24px;
+}
+
+.ticks {
+  align-items: center;
+  display: flex;
+  font-size: 10px;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.tick {
+  position: absolute;
+}
+
+.tick-mark {
+  background: var(--app-border-color);
+  height: 10px;
+  margin-top: 2px;
+  position: absolute;
+  width: 1px;
+}
+
+.tick-label {
+  color: var(--st-gray-70);
+  transform: translateX(calc(-50%));
+}
+
+.tick:last-of-type .tick-label {
+  transform: translateX(calc(-100% + -8px));
+}
+
+.tick:last-of-type .tick-mark {
+  display: none;
+}

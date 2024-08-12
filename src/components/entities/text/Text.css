@@ -1,0 +1,12 @@
+.text-entity {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.text-entity--text {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  padding: 4px;
+}

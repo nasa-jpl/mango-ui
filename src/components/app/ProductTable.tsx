@@ -1,17 +1,24 @@
+import { Button } from "@nasa-jpl/react-stellar";
+import { ChartLine } from "@phosphor-icons/react";
 import { Product, ProductField, ProductResolution } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
+import { ProductPreview } from "../../types/page";
 import DataGrid from "../ui/DataGrid/DataGrid";
-import ProductPreviewModal from "./ProductPreviewModal";
 import "./ProductTable.css";
 
 export declare type ProductTableProps = {
   loading?: boolean;
+  onSetProductPreview: (previewProduct: ProductPreview) => void;
   products: Product[];
 };
 
-export const ProductTable = ({ products, loading }: ProductTableProps) => {
+export const ProductTable = ({
+  products,
+  loading,
+  onSetProductPreview,
+}: ProductTableProps) => {
   console.log("products :>> ", products);
-  // return <div>TODO</div>;
+
   // Create a row per product dataset
   const productEntries: Product[] = products
     .map((product) => {
@@ -106,9 +113,15 @@ export const ProductTable = ({ products, loading }: ProductTableProps) => {
       headerName: "",
       width: 50,
       cellRenderer: (params: { data: Product | undefined }) => {
-        if (!params.data) return;
+        const { data } = params;
+        if (data === undefined) return;
         return (
-          <ProductPreviewModal product={params.data} products={products} />
+          <Button
+            variant="icon"
+            onClick={() => onSetProductPreview({ product: data })}
+          >
+            <ChartLine height={24} width={24} />
+          </Button>
         );
       },
     },

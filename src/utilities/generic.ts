@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { DataLayer } from "../types/view";
+import { ChartLayer, TableLayer } from "../types/view";
 
 /**
  * Generates unique ID
@@ -103,8 +103,14 @@ export function fetchWithProgress<T>(url: string) {
  * Returns unique identifier for a layer which currently comprises of:
  * mission, dataset, field, and instrument
  */
-export function getLayerId(layer: DataLayer): string {
+export function getChartLayerId(layer: ChartLayer): string {
   return `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}_${layer.version}_${layer.id}`;
+}
+
+export function getTableLayerId(layer: TableLayer): string {
+  return `${layer.mission}_${layer.dataset}_${layer.fields.join("_")}_${
+    layer.instrument
+  }_${layer.version}_${layer.id}`;
 }
 
 /**

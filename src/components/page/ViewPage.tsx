@@ -8,7 +8,7 @@ import {
 } from "@nasa-jpl/react-stellar";
 import { useState } from "react";
 import { Product } from "../../types/api";
-import { PageOptions } from "../../types/page";
+import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
 import DateRangePicker from "../ui/DateRangePicker";
@@ -19,6 +19,7 @@ import "./ViewPage.css";
 export declare type PageProps = {
   loadingInitialData: boolean;
   onPageChange: (page: PageType) => void;
+  onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
   viewPage?: PageType;
 };
@@ -29,7 +30,11 @@ export const ViewPage = ({
   loadingInitialData,
   viewPage,
   onPageChange,
+  onSetProductPreview,
 }: PageProps) => {
+  // TODO maybe move this to RootPage and provide a dispatch in context
+  // so that we can store dateRange, hoverDate, pageOptions, and preview product + initial values in a store
+  // and not have to pass individual callbacks down through components? Or could have dispatch be on the entity level?
   const [dateRange, setDateRange] = useState<DateRange>({
     end: new Date(Date.UTC(2022, 2, 2, 0, 36)).toISOString(), //2022-03-02T00:36:00
     start: new Date(Date.UTC(2022, 2, 2, 0, 26)).toISOString(), //2022-03-02T00:26:00
@@ -106,6 +111,7 @@ export const ViewPage = ({
             hoverDate={pageOptions.showHoverDate ? hoverDate : null}
             onDateRangeChange={setDateRange}
             onHoverDateChange={setHoverDate}
+            onSetProductPreview={onSetProductPreview}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,

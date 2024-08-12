@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
+import ProductPreviewModal from "../components/app/ProductPreviewModal";
 import Sidebar from "../components/app/Sidebar/Sidebar";
 import { Product } from "../types/api";
+import { ProductPreview } from "../types/page";
 import { View } from "../types/view";
 import { getMissions, getProducts, getView } from "../utilities/api";
 
@@ -10,6 +12,9 @@ export default function RootPage() {
   const [view, setView] = useState<View>(initialView);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
+  const [productPreview, setProductPreview] = useState<ProductPreview>({
+    product: undefined,
+  });
 
   useEffect(() => {
     const initialize = () => {
@@ -47,10 +52,22 @@ export default function RootPage() {
     setLoadingInitialData(false);
   };
 
+  const context = useMemo(
+    () => [view, setView, products, setProductPreview, loadingInitialData],
+    [view, setView, products, setProductPreview, loadingInitialData]
+  );
+
   return (
     <div style={{ display: "flex", height: "100%" }}>
       <Sidebar view={view} title={import.meta.env.VITE_APP_TITLE} />
-      <Outlet context={[view, setView, products, loadingInitialData]} />
+      <Outlet context={context} />
+      {!loadingInitialData && (
+        <ProductPreviewModal
+          onClose={() => setProductPreview({ product: undefined })}
+          products={products}
+          {...productPreview}
+        />
+      )}
     </div>
   );
 }

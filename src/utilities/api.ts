@@ -32,10 +32,10 @@ export const getData = (
   dataset: string,
   instrumentId: string,
   version: string,
-  field: string,
+  fields: string[],
   startTime: string,
   endTime: string,
-  downsamplingFactor: number
+  downsamplingFactor?: number
 ) => {
   const url =
     config.endpoints.data +
@@ -44,7 +44,13 @@ export const getData = (
       .replace("{INSTRUMENT}", instrumentId)
       .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +
-    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp&fields=${field}&downsampling_factor=${downsamplingFactor}`;
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp${
+      fields.length ? `${fields.map((f) => `&fields=${f}`).join("")}` : ""
+    }${
+      typeof downsamplingFactor === "number"
+        ? `&downsampling_factor=${downsamplingFactor}`
+        : ""
+    }`;
 
   const controller = new AbortController();
   const cancel = () => controller.abort();

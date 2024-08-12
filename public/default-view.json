@@ -42,6 +42,173 @@
   },
   "pageGroups": [
     {
+      "id": "345",
+      "url": "downlink",
+      "title": "Downlink & Product Generation",
+      "pages": [
+        {
+          "id": "abc",
+          "url": "dashboard",
+          "title": "Downlink Dashboard",
+          "sections": [
+            {
+              "id": "sertryfdf",
+              "type": "section",
+              "title": "Examples",
+              "enableHeader": false,
+              "defaultOpen": true,
+              "layout": [{ "i": "efdgb", "x": 0, "y": 0, "w": 12, "h": 4 }],
+              "entities": [
+                {
+                  "id": "efdgb",
+                  "type": "timeline",
+                  "title": "Timeline",
+                  "marginLeft": 160,
+                  "rows": [
+                    {
+                      "id": "sdfsdf",
+                      "type": "timeline-row",
+                      "title": "ACC1A",
+                      "syncWithPageDateRange": true,
+                      "entity": {
+                        "id": "aedfsrdvc",
+                        "type": "chart",
+                        "title": "Coalesced Angular Acceleration X (m/sec²)",
+                        "syncWithPageDateRange": true,
+                        "yAxes": [
+                          {
+                            "id": "y1",
+                            "label": "",
+                            "position": "left"
+                          }
+                        ],
+                        "layers": [
+                          {
+                            "id": "3ewfsvd",
+                            "field": "ang_accl_x",
+                            "version": "04",
+                            "mission": "GRACEFO",
+                            "dataset": "ACC1A",
+                            "instrument": "D",
+                            "startTime": "2022-03-02T00:26:00.000000Z",
+                            "endTime": "2022-03-02T00:36:00.000000Z",
+                            "yAxisId": "y1"
+                          }
+                        ]
+                      },
+                      "subrows": [
+                        {
+                          "id": "3r4wrfdv",
+                          "type": "text",
+                          "title": "Description",
+                          "text": "Level 1A accelerometer data"
+                        },
+                        {
+                          "id": "fghyjtyt4r",
+                          "type": "table",
+                          "title": "Values",
+                          "syncWithPageDateRange": true,
+                          "columns": [
+                            { "field": "timestamp", "layerId": "48gne" },
+                            { "field": "ang_accl_x", "layerId": "48gne" },
+                            { "field": "ang_accl_y", "layerId": "48gne" },
+                            { "field": "ang_accl_z", "layerId": "48gne" }
+                          ],
+                          "layers": [
+                            {
+                              "id": "48gne",
+                              "version": "04",
+                              "mission": "GRACEFO",
+                              "dataset": "ACC1A",
+                              "instrument": "D",
+                              "fields": [
+                                "ang_accl_x",
+                                "ang_accl_y",
+                                "ang_accl_z",
+                                "timestamp"
+                              ],
+                              "startTime": "2022-03-02T00:26:00.000000Z",
+                              "endTime": "2022-03-02T00:36:00.000000Z"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "sdfsdf2",
+                      "type": "timeline-row",
+                      "title": "ACT1A",
+                      "syncWithPageDateRange": true,
+                      "entity": {
+                        "id": "aedfsrdvc",
+                        "type": "chart",
+                        "title": "Coalesced Angular Acceleration X (m/sec²)",
+                        "syncWithPageDateRange": true,
+                        "yAxes": [
+                          {
+                            "id": "y1",
+                            "label": "",
+                            "position": "left"
+                          }
+                        ],
+                        "layers": [
+                          {
+                            "id": "5dfgdfgdfg",
+                            "field": "lin_accl_x",
+                            "version": "04",
+                            "mission": "GRACEFO",
+                            "dataset": "ACT1A",
+                            "instrument": "D",
+                            "startTime": "2022-03-02T00:26:00.000000Z",
+                            "endTime": "2022-03-02T00:36:00.000000Z",
+                            "yAxisId": "y1"
+                          }
+                        ]
+                      },
+                      "subrows": []
+                    },
+                    {
+                      "id": "sdfsdf3",
+                      "type": "timeline-row",
+                      "title": "ACT1B",
+                      "syncWithPageDateRange": true,
+                      "entity": {
+                        "id": "aedfsrdvc",
+                        "type": "chart",
+                        "title": "Coalesced Angular Acceleration X (m/sec²)",
+                        "syncWithPageDateRange": true,
+                        "yAxes": [
+                          {
+                            "id": "y1",
+                            "label": "",
+                            "position": "left"
+                          }
+                        ],
+                        "layers": [
+                          {
+                            "id": "3rdfcf",
+                            "field": "lin_accl_x",
+                            "version": "04",
+                            "mission": "GRACEFO",
+                            "dataset": "ACT1B",
+                            "instrument": "D",
+                            "startTime": "2022-03-02T00:26:00.000000Z",
+                            "endTime": "2022-03-02T00:36:00.000000Z",
+                            "yAxisId": "y1"
+                          }
+                        ]
+                      },
+                      "subrows": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "123",
       "url": "l1",
       "title": "L1 Processing",

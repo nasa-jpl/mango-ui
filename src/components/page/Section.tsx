@@ -10,6 +10,7 @@ import {
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
 import { Product } from "../../types/api";
+import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Section as SectionType } from "../../types/view";
 import CustomGridItemComponent from "./CustomGridItem";
@@ -22,6 +23,7 @@ export declare type SectionProps = {
   onDateRangeChange: (dateRange: DateRange) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
+  onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
   section: SectionType;
 };
@@ -34,6 +36,7 @@ export const Section = ({
   onSectionChange,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
+  onSetProductPreview = () => {},
 }: SectionProps) => {
   const { defaultOpen, enableHeader, entities, layout, title } = section;
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
@@ -126,9 +129,9 @@ export const Section = ({
                 <Entity
                   products={products}
                   entity={e}
-                  onEntityChange={() => {}}
                   onDateRangeChange={onDateRangeChange}
                   onHoverDateChange={onHoverDateChange}
+                  onSetProductPreview={onSetProductPreview}
                   key={e.id}
                   className={entityClass}
                   dateRange={dateRange}
