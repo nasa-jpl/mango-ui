@@ -6,12 +6,19 @@ import {
   BoundingBox,
   VectorTwo,
 } from "@phosphor-icons/react";
-import ChartJS, { ChartDataset, PointStyle } from "chart.js/auto";
+import ChartJS, {
+  ChartDataset,
+  LinearScale,
+  LogarithmicScale,
+  PointStyle,
+} from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Mode } from "chartjs-plugin-zoom/types/options";
+import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Root, createRoot } from "react-dom/client";
 import { DataResponse, Product } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import {
@@ -22,7 +29,7 @@ import {
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import {
-  getLayerId,
+  getChartLayerId,
   isAbortError,
   pluralize,
 } from "../../../utilities/generic";
@@ -33,11 +40,15 @@ import {
 import { applyLayerTransforms, formatYValue } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
+import ChartTooltip from "./ChartTooltip";
 
 ChartJS.register(zoomPlugin);
 
+let tooltipRoot: Root;
+
 export declare type ChartProps = {
   chartEntity: ChartEntity;
+  compact?: boolean;
   dateRange: DateRange;
   hoverDate: Date | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
@@ -49,10 +60,17 @@ export declare type ChartProps = {
 
 export type CustomChartData = { x: string; y: number };
 
+function toDimension(value: number | string, dimension: number) {
+  return typeof value === "string" && value.endsWith("%")
+    ? (parseFloat(value) / 100) * dimension
+    : +value;
+}
+
 export const Chart = ({
   chartEntity,
   products,
   dateRange,
+  compact = false,
   showHeader = true,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
@@ -228,7 +246,29 @@ export const Chart = ({
       }
       const position = axis.position || "left";
       newAxes[axis.id] = {
+        display: !compact,
         type: axis.type || "linear",
+        // type: axis.type || "myscale",
+        afterBuildTicks: function (scale: LinearScale | LogarithmicScale) {
+          if (!compact) return;
+
+          const { min, max } = scale.getMinMax(true);
+          scale.min = isFinite(min) ? min : 0;
+          scale.max = isFinite(max) ? max : 1;
+
+          if (
+            scale.type === "linear" &&
+            typeof (scale as LinearScale).options.grace !== "undefined"
+          ) {
+            const grace = toDimension(
+              (scale as LinearScale).options.grace || "",
+              1
+            );
+            scale.min -= scale.min * grace;
+            scale.max += scale.max * grace;
+          }
+        },
+        grace: "0.001%",
         position,
         ticks: {
           callback: formatYValue,
@@ -325,6 +365,7 @@ export const Chart = ({
       });
       return {
         layer,
+        unit: fieldMetadata?.unit || "",
         points: allPoints,
         data_count: result.data_count,
         downsampling_factor: result.downsampling_factor,
@@ -345,27 +386,33 @@ export const Chart = ({
     const newChartJSDatasets: ChartDataset<"line", CustomChartData[]>[] =
       processedData
         .filter(({ layer }) => !layer.hidden)
-        .map(({ points, layer, data_count, downsampling_factor }) => {
+        .map(({ points, layer, data_count, downsampling_factor, unit }) => {
           return {
             layer,
-            id: getLayerId(layer),
-            hidden: hiddenDatasets[getLayerId(layer)] || false,
+            unit,
+            id: getChartLayerId(layer),
+            hidden: hiddenDatasets[getChartLayerId(layer)] || false,
             // TODO would be nice to render these outside of the canvas in order to better format
             // and control these labels
             // TODO what should these labels contain metadata wise? Fairly verbose right now.
             // TODO bring point count back into label option
             label:
               layer.label ||
-              `${layer.mission} ${layer.dataset} ${layer.field} ${
-                layer.instrument
-              } (${data_count} point${pluralize(
+              `${layer.mission} ${layer.instrument} ${layer.dataset} ${
+                layer.field
+              }  (v${layer.version}) (${data_count} point${pluralize(
                 data_count
               )}, 1:${downsampling_factor} scale)`,
             data: points,
+            // smooth the downsampling a tiny fraction to ease artifacting
+            tension: downsampling_factor !== 1 ? 0.01 : 0,
             borderWidth:
               typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
             spanGaps: false,
-            pointStyle: layer.hidePoints ? (false as PointStyle) : "circle",
+            pointStyle:
+              layer.hidePoints || downsampling_factor !== 1
+                ? (false as PointStyle)
+                : "circle",
             pointRadius:
               typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
             showLine: layer.hideLines ? false : true,
@@ -429,8 +476,7 @@ export const Chart = ({
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
-    /* TODO maybe add the chart ID in here too so we can plot the time series multiple times on the same chart with diff options if needed */
-    const layerFullId = getLayerId(layer);
+    const layerFullId = getChartLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
@@ -472,7 +518,7 @@ export const Chart = ({
         layer.dataset,
         layer.instrument,
         layer.version,
-        layer.field,
+        [layer.field],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
@@ -548,8 +594,12 @@ export const Chart = ({
         animation: false,
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          autoPadding: !compact,
+        },
         scales: {
           x: {
+            display: !compact,
             adapters: {
               date: {
                 zone: "UTC",
@@ -561,21 +611,51 @@ export const Chart = ({
               autoSkipPadding: 50,
               maxRotation: 0,
             },
+            grid: {
+              display: !compact,
+            },
           },
           y: {
+            type: "linear",
+            display: !compact,
             ticks: {
               callback: formatYValue,
+              // mirror: compact,
             },
           },
         },
         plugins: {
+          legend: {
+            display: !compact,
+          },
           tooltip: {
-            callbacks: {
-              label: (tooltipItem) =>
-                `${tooltipItem.dataset.label}: ${formatYValue(
-                  tooltipItem.parsed.y
-                )}`,
+            enabled: false,
+            external: function (context) {
+              const tooltipModel = context.tooltip;
+              const position = context.chart.canvas.getBoundingClientRect();
+
+              // Tooltip Element
+              let tooltipEl = document.getElementById("chartjs-tooltip");
+
+              // Create element on first render
+              if (!tooltipEl) {
+                tooltipEl = document.createElement("div");
+                tooltipEl.id = "chartjs-tooltip";
+                document.body.appendChild(tooltipEl);
+                tooltipRoot = createRoot(tooltipEl!);
+              }
+
+              // Render ChartTooltip to the tooltipRoot react container
+              tooltipRoot?.render(
+                <ChartTooltip
+                  left={position.left}
+                  top={position.top}
+                  // @ts-expect-error type this later
+                  tooltip={tooltipModel}
+                />
+              );
             },
+
             ...(chartEntity.chartOptions?.tooltip || {}),
           },
           decimation: {
@@ -742,7 +822,10 @@ export const Chart = ({
         )}
         {loading && (
           <div
-            className="chart-indicator-overlay chart-loading-indicator st-typography-medium"
+            className={classNames(
+              "chart-indicator-overlay chart-loading-indicator st-typography-medium",
+              { "chart-indicator-overlay--compact": compact }
+            )}
             style={{
               top: `${
                 chartRef.current.chartArea.top +
@@ -759,7 +842,10 @@ export const Chart = ({
         )}
         {!loading && error && (
           <div
-            className="chart-indicator-overlay chart-error-indicator st-typography-medium"
+            className={classNames(
+              "chart-indicator-overlay chart-error-indicator st-typography-medium",
+              { "chart-indicator-overlay--compact": compact }
+            )}
             style={{
               top: `${
                 chartRef.current.chartArea.top +
@@ -829,7 +915,11 @@ export const Chart = ({
           }
         />
       )}
-      <div className="chart-canvas-container-padded">
+      <div
+        className={classNames("chart-canvas-container-padded", {
+          "chart-canvas-container-compact": compact,
+        })}
+      >
         <div className="chart-canvas-container">
           <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
           {renderChartOverlays()}

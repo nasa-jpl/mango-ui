@@ -6,11 +6,8 @@ import {
   ModalBody,
   ModalClose,
   OptionType,
-  Tooltip,
-  TooltipProvider,
 } from "@nasa-jpl/react-stellar";
-import { ChartLine } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { ChartEntity } from "../../types/view";
@@ -23,29 +20,65 @@ const getProductDisplayName = (product: Product) => {
 };
 
 export declare type ProductPreviewModalProps = {
-  product: Product;
+  dateRange?: DateRange | undefined;
+  field?: string;
+  onClose: () => void;
+  product?: Product;
   products: Product[];
+  version?: string;
 };
 
 export const ProductPreviewModal = ({
+  onClose,
   product,
   products,
+  version: defaultVersion = "",
+  dateRange: defaultDateRange,
+  field: defaultField = "",
 }: ProductPreviewModalProps) => {
-  const [field, setField] = useState<string>(product.available_fields[0]?.name);
-  const [version, setVersion] = useState(product.available_versions[0]);
-  // TODO populate from data_begin and end
-  const [dateRange, setDateRange] = useState<DateRange>({
-    end: new Date(product.datasets[0].data_end).toISOString(), //2022-03-02T00:36:00
-    start: new Date(product.datasets[0].data_begin).toISOString(), //2022-03-02T00:26:00
-  });
+  const [field, setField] = useState<string>(defaultField);
+  const [version, setVersion] = useState(defaultVersion);
+  const [dateRange, setDateRange] = useState<DateRange>(
+    defaultDateRange || {
+      end: new Date("2025").toISOString(),
+      start: new Date("2020").toISOString(),
+    }
+  );
 
-  const start = new Date("2022-01-01").toISOString();
-  const end = new Date("2023-01-01").toISOString();
+  useEffect(() => {
+    let field = "";
+    let version = "";
+    let dateRange = {
+      end: new Date("2025").toISOString(),
+      start: new Date("2020").toISOString(),
+    };
+    if (product) {
+      field = defaultField || product.available_fields[0].name;
+      version = defaultVersion || product.available_versions[0];
+      dateRange = defaultDateRange || {
+        end: new Date(product.datasets[0].data_end).toISOString(),
+        start: new Date(product.datasets[0].data_begin).toISOString(),
+      };
+    }
+    setField(field);
+    setVersion(version);
+    setDateRange(dateRange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(product),
+    defaultField,
+    defaultVersion,
+  ]);
+
+  if (!product) {
+    return null;
+  }
 
   const chartEntity: ChartEntity = {
-    dateRange: { start: start, end: end },
+    dateRange,
     id: "chartEntity1",
-    title: "What",
+    title: field,
     type: "chart",
     syncWithPageDateRange: true,
     yAxes: [{ position: "left", id: "y1" }],
@@ -53,13 +86,13 @@ export const ProductPreviewModal = ({
       {
         type: "line",
         dataset: product.id,
-        startTime: start,
-        endTime: end,
+        startTime: dateRange.start,
+        endTime: dateRange.end,
         version,
         field,
         id: "layer1",
         mission: product.mission,
-        instrument: product.instruments[0] /* TODO make it instrument */,
+        instrument: product.instruments[0],
         yAxisId: "y1",
       },
     ],
@@ -78,20 +111,9 @@ export const ProductPreviewModal = ({
   return (
     <Modal
       className="product-preview-modal"
-      onOpenChange={function noRefCheck() {}}
+      onOpenChange={onClose}
+      open
       title={`${getProductDisplayName(product)} Preview`}
-      trigger={
-        <div className="product-preview-button">
-          <TooltipProvider>
-            <Tooltip content="Preview">
-              <Button
-                variant="icon"
-                icon={<ChartLine height={24} width={24} />}
-              />
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      }
     >
       <ModalBody>
         <div className="product-preview-modal-content">
@@ -152,7 +174,6 @@ export const ProductPreviewModal = ({
             onDateRangeChange={setDateRange}
             hoverDate={null}
             onHoverDateChange={() => {}}
-            showHeader={false}
           />
         </div>
       </ModalBody>

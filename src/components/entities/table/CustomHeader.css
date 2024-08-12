@@ -1,0 +1,28 @@
+.ag-header-cell-menu-button {
+  display: none;
+}
+
+.ag-header-cell-menu-button,
+.ag-header-cell-menu-button:hover {
+  color: var(--ag-header-foreground-color) !important;
+}
+
+.ag-header-cell-menu-button:hover {
+  background: var(--st-gray-20) !important;
+}
+
+.ag-header-cell:hover .ag-header-cell-menu-button {
+  display: flex;
+  opacity: 1;
+}
+
+.ag-header-cell-menu-button.ag-has-popup-positioned-under {
+  display: flex;
+  opacity: 1;
+}
+
+.ag-header-cell-filtered .ag-header-cell-menu-button--filter {
+  color: var(--st-primary) !important;
+  display: flex !important;
+  opacity: 1;
+}

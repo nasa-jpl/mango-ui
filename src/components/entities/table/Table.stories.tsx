@@ -1,13 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { generateUniqueName } from "../../../../e2e-tests/utilities/generic";
 import { TableEntity } from "../../../types/view";
-import { generateUUID } from "../../../utilities/generic";
 import Table from "../table/Table";
-
-type TableRow = {
-  id: string;
-  name: string;
-};
 
 const meta = {
   component: Table,
@@ -16,7 +9,7 @@ const meta = {
     docs: {
       story: {
         inline: false,
-        iframeHeight: 400,
+        iframeHeight: 600,
       },
     },
   },
@@ -25,25 +18,45 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const tableEntity: TableEntity<TableRow> = {
+const tableEntity: TableEntity = {
   type: "chart",
   dateRange: { start: "", end: "" },
   id: "123",
-  rows: [
-    { id: generateUUID(), name: generateUniqueName() },
-    { id: generateUUID(), name: generateUniqueName() },
-    { id: generateUUID(), name: generateUniqueName() },
-    { id: generateUUID(), name: generateUniqueName() },
+  columns: [
+    { field: "lin_accl_x", layerId: "234567" },
+    { field: "lin_accl_x", layerId: "8765432" },
+    { field: "bogus", layerId: "234567" },
+  ],
+  layers: [
+    {
+      id: "234567",
+      fields: ["lin_accl_x"],
+      mission: "GRACEFO",
+      dataset: "ACT1A",
+      instrument: "C",
+      startTime: "2022-03-02T00:00:00.000000Z",
+      endTime: "2022-03-02T00:01:00.000000Z",
+      version: "04",
+    },
+    {
+      id: "8765432",
+      fields: ["lin_accl_x"],
+      mission: "GRACEFO",
+      dataset: "ACC1A",
+      instrument: "C",
+      startTime: "2022-03-02T00:00:00.000000Z",
+      endTime: "2022-03-02T00:01:00.000000Z",
+      version: "04",
+    },
   ],
   title: "Table 1",
-  fields: ["id", "name"],
-
-  /* TODO how should we relate entities and datasets and configuration of datasets in the table? */
 };
 
 export const Default: Story = {
   args: {
     tableEntity,
     dateRange: { start: "", end: "" },
+    products: [],
+    onSetProductPreview: () => {},
   },
 };

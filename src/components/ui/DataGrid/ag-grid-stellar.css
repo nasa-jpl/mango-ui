@@ -9,7 +9,7 @@
 .ag-theme-stellar-dark {
   --ag-background-color: #fff;
   --ag-border-color: var(--st-gray-20);
-  --ag-border-radius: 3px;
+  --ag-border-radius: 4px;
   --ag-borders-side-button: none;
   --ag-borders: solid 1px;
   --ag-card-shadow: 0 1px 4px 1px rgba(186, 191, 199, 0.4);
@@ -38,10 +38,11 @@
   --ag-input-border-color: var(--ag-border-color);
   --ag-input-disabled-background-color: rgba(186, 191, 199, 0.15);
   --ag-input-disabled-border-color: rgba(186, 191, 199, 0.3);
-  --ag-input-focus-border-color: rgba(33, 150, 243, 0.4);
-  --ag-input-focus-box-shadow: 0 0 2px 0.1rem var(--ag-input-focus-border-color);
+  --ag-input-focus-border-color: #2196f3;
+  --ag-input-focus-box-shadow: 0 0 0 3px
+    color-mix(in srgb, transparent, var(--ag-input-focus-border-color) 47%);
   --ag-invalid-color: #e02525;
-  --ag-list-item-height: calc(var(--ag-grid-size) * 4);
+  --ag-list-item-height: calc(var(--ag-grid-size) * 6);
   --ag-odd-row-background-color: #fcfcfc;
   --ag-popup-shadow: var(--ag-card-shadow);
   --ag-range-selection-background-color-2: rgba(33, 150, 243, 0.36);
@@ -125,7 +126,7 @@
 .ag-theme-stellar-dark input[class^="ag-"][type="datetime-local"],
 .ag-theme-stellar-dark textarea[class^="ag-"] {
   border-radius: var(--ag-border-radius);
-  min-height: calc(var(--ag-grid-size) * 4);
+  min-height: calc(var(--ag-grid-size) * 6);
 }
 .ag-theme-stellar .ag-ltr input[class^="ag-"]:not([type]),
 .ag-theme-stellar .ag-ltr input[class^="ag-"][type="text"],
@@ -141,7 +142,7 @@
 .ag-theme-stellar-dark .ag-ltr input[class^="ag-"][type="date"],
 .ag-theme-stellar-dark .ag-ltr input[class^="ag-"][type="datetime-local"],
 .ag-theme-stellar-dark .ag-ltr textarea[class^="ag-"] {
-  padding-left: var(--ag-grid-size);
+  padding-left: calc(var(--ag-grid-size) * 2);
 }
 
 .ag-theme-stellar .ag-rtl input[class^="ag-"]:not([type]),
@@ -498,6 +499,10 @@
   font-weight: var(--st-typography-medium-font-weight);
   letter-spacing: var(--st-typography-medium-letter-spacing);
   line-height: var(--st-typography-medium-line-height);
+}
+
+.ag-select .ag-picker-field-wrapper {
+  min-height: calc(var(--ag-grid-size) * 6);
 }
 
 .ag-filter-condition,

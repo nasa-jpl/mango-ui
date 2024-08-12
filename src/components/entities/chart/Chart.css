@@ -13,6 +13,10 @@
   width: 100%;
 }
 
+.chart .chart-canvas-container-compact {
+  padding: 0;
+}
+
 .chart .chart-canvas-container {
   flex: 1;
   height: 100%;
@@ -36,6 +40,11 @@
 
 .chart-loading-indicator {
   animation: 100ms delay-visibility;
+}
+
+.chart-indicator-overlay--compact {
+  line-height: 12px;
+  padding: 0 4px;
 }
 
 .chart-error-indicator {

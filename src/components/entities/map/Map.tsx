@@ -93,7 +93,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         layer.dataset,
         layer.instrument,
         layer.version,
-        layer.field,
+        [layer.field],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,

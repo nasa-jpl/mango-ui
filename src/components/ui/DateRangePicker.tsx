@@ -1,5 +1,5 @@
 import { DatePicker } from "@nasa-jpl/react-stellar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export declare type DateRangePickerProps = {
   endDate: Date;
@@ -20,6 +20,11 @@ export const DateRangePicker = ({
 }: DateRangePickerProps) => {
   const [internalStartDate, setInternalStartDate] = useState(startDate);
   const [internalEndDate, setInternalEndDate] = useState(endDate);
+
+  useEffect(() => {
+    setInternalStartDate(startDate);
+    setInternalEndDate(endDate);
+  }, [startDate, endDate]);
 
   const valid = isValidDateRange(internalStartDate, internalEndDate);
   return (

@@ -1,6 +1,12 @@
 import { expect, test } from "vitest";
-import { DataLayer } from "../types/view";
-import { generateUUID, getLayerId, isAbortError, pluralize } from "./generic";
+import { ChartLayer, TableLayer } from "../types/view";
+import {
+  generateUUID,
+  getChartLayerId,
+  getTableLayerId,
+  isAbortError,
+  pluralize,
+} from "./generic";
 
 test("pluralize", () => {
   expect(pluralize(0)).toBe("s");
@@ -8,19 +14,36 @@ test("pluralize", () => {
   expect(pluralize(10)).toBe("s");
 });
 
-test("getLayerId", () => {
-  const layer: DataLayer = {
+test("getChartLayerId", () => {
+  const layer: ChartLayer = {
     mission: "MISSION",
     dataset: "DATASET",
     field: "FIELD",
     instrument: "INSTRUMENT",
     endTime: "",
     startTime: "",
+    type: "line",
     version: "VERSION",
     id: "ID",
   };
-  expect(getLayerId(layer)).toEqual(
+  expect(getChartLayerId(layer)).toEqual(
     "MISSION_DATASET_FIELD_INSTRUMENT_VERSION_ID"
+  );
+});
+
+test("getTableLayerId", () => {
+  const layer: TableLayer = {
+    mission: "MISSION",
+    dataset: "DATASET",
+    fields: ["FIELD1", "FIELD2"],
+    instrument: "INSTRUMENT",
+    endTime: "",
+    startTime: "",
+    version: "VERSION",
+    id: "ID",
+  };
+  expect(getTableLayerId(layer)).toEqual(
+    "MISSION_DATASET_FIELD1_FIELD2_INSTRUMENT_VERSION_ID"
   );
 });
 

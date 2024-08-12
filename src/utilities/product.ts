@@ -17,8 +17,8 @@ export function getFieldMetadataForLayer(
   layer: DataLayer,
   products: Product[]
 ): ProductField | undefined {
-  const dataset = getProductForLayer(layer, products);
-  if (dataset) {
-    return dataset.available_fields.find((f) => f.name === layer.field);
+  const product = getProductForLayer(layer, products);
+  if (product) {
+    return product.available_fields.find((f) => f.name === layer.field);
   }
 }
