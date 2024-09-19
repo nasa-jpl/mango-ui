@@ -14,9 +14,27 @@ export default defineConfig(({ mode }) => {
       APP_VERSION: JSON.stringify(process.env.npm_package_version),
     },
     server: {
+      cors: {
+        origin: "*",
+        methods: ["GET", "PUT", "POST"],
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "Access-Control-Allow-Credentials",
+        ],
+        credentials: true,
+      },
       https: {
         key: fs.readFileSync("./.cert/key.pem"),
         cert: fs.readFileSync("./.cert/cert.pem"),
+      },
+      proxy: {
+        "/api": {
+          target: "***REMOVED***/",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
       },
     },
     test: {
