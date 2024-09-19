@@ -8,6 +8,7 @@
     "npm": ">=8.19.0"
   },
   "scripts": {
+    "create-cert": "mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'mass-change-viz' 'localhost'",
     "dev": "vite",
     "build": "tsc && vite build",
     "build:force": "vite build",
@@ -18,7 +19,7 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:codegen": "playwright codegen http://localhost:5173",
+    "test:e2e:codegen": "playwright codegen https://localhost:5173",
     "test:e2e:debug": "PWDEBUG=1 playwright test",
     "test:unit": "vitest run",
     "storybook": "storybook dev -p 6006",

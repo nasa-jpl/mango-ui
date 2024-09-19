@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import react from "@vitejs/plugin-react";
+import fs from "fs";
 import { defineConfig, loadEnv } from "vite";
 import cesium from "vite-plugin-cesium";
 
@@ -11,6 +12,12 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_APP_PATH,
     define: {
       APP_VERSION: JSON.stringify(process.env.npm_package_version),
+    },
+    server: {
+      https: {
+        key: fs.readFileSync("./.cert/key.pem"),
+        cert: fs.readFileSync("./.cert/cert.pem"),
+      },
     },
     test: {
       include: ["./src/**/*.test.ts"],

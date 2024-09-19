@@ -58,9 +58,17 @@ Install the JavaScript modules needed to build mango-ui:
 npm install
 ```
 
+## Creating a certificate
+
+Create a self-signed certificate:
+
+```shell
+npm run create-cert
+```
+
 ## Start Development Server
 
-Run `npm run dev` for a dev server. Navigate to `http://localhost:5173/`. The app will automatically reload if you change any of the source files.
+Run `npm run dev` for a dev server. Navigate to `https://localhost:5173/`. The app will automatically reload if you change any of the source files.
 
 ## Building For Production
 
