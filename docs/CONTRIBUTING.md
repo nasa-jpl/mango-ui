@@ -9,7 +9,7 @@ To contribute code, follow the guidelines below.
 
 1. Click `Fork` on Github to create your own fork e.g. `username/mango-ui`
 
-2. Clone your project: `***REMOVED***`
+2. Clone your project: ``
 
 3. `cd mango-ui`
 

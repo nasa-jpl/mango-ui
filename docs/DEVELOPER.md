@@ -46,7 +46,6 @@ Your editor should follow the same settings found in [.vscode/settings.json](../
 [Clone](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) the mango-ui repository:
 
 ```shell
-git clone ***REMOVED***
 cd mango-ui
 ```
 

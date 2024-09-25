@@ -1,5 +1,3 @@
-# mango-ui [![Build Status](***REMOVED***)](***REMOVED***)
-
 The client application for the MANGO system (Monitoring and ANalysis for Gravity Operations).
 
 ## Directory Structure
