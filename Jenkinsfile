@@ -37,8 +37,8 @@ pipeline {
                                      file(credentialsId: KEY_FILE, variable: 'KEY_FILE')]) {
             sh """
                         mkdir -p ./certs
-                        cp "\${CERT_FILE}" ./certs/cert.pem
-                        cp "\${KEY_FILE}" ./certs/key.pem
+                        cp "\${CERT_FILE}" ./cert/cert.pem
+                        cp "\${KEY_FILE}" ./cert/key.pem
                         """
                                      }
             }
