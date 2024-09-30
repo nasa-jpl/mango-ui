@@ -13,7 +13,15 @@ export default defineConfig(({ mode }) => {
     define: {
       APP_VERSION: JSON.stringify(process.env.npm_package_version),
     },
+    preview: {
+      // Preview server
+      https: {
+        key: fs.readFileSync("./.cert/key.pem"),
+        cert: fs.readFileSync("./.cert/cert.pem"),
+      },
+    },
     server: {
+      // Development server
       cors: {
         origin: "*",
         methods: ["GET", "PUT", "POST"],
@@ -22,7 +30,7 @@ export default defineConfig(({ mode }) => {
           "Authorization",
           "Access-Control-Allow-Credentials",
         ],
-        credentials: true,
+        // credentials: true,
       },
       https: {
         key: fs.readFileSync("./.cert/key.pem"),
@@ -30,7 +38,7 @@ export default defineConfig(({ mode }) => {
       },
       proxy: {
         "/api": {
-          target: "***REMOVED***/",
+          target: "***REMOVED***",
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, ""),

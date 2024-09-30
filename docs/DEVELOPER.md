@@ -58,12 +58,13 @@ Install the JavaScript modules needed to build mango-ui:
 npm install
 ```
 
-## Creating a certificate
+## Create certificates
 
-Create a self-signed certificate:
+Create a self-signed certificate for local development.
 
-```shell
-npm run create-cert
+```
+brew install mkcert
+mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'localhost'
 ```
 
 ## Start Development Server
