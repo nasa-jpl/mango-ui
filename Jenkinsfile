@@ -11,6 +11,8 @@ pipeline {
     DOCKER_IMAGE_NAME = 'mango-ui'
     ARTIFACTORY_URL = '***REMOVED***'
     ARTIFACTORY_REPO = '***REMOVED***'
+    CERT_FILE = 'CERT_PEM'
+    KEY_FILE = 'KEY_PEM'
   }
 
   options {
@@ -26,6 +28,21 @@ pipeline {
       steps {
         sh 'npm ci'
       }
+    }
+
+    stage('Inject Certificates') {
+        steps {
+            script {
+          withCredentials([file(credentialsId: CERT_FILE, variable: 'CERT_FILE'),
+                                     file(credentialsId: KEY_FILE, variable: 'KEY_FILE')]) {
+            sh """
+                        mkdir -p ./certs
+                        cp "\${CERT_FILE}" ./certs/cert.pem
+                        cp "\${KEY_FILE}" ./certs/key.pem
+                        """
+                                     }
+            }
+        }
     }
 
     stage('Build UI') {
