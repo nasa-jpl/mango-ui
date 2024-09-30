@@ -98,7 +98,7 @@ pipeline {
         stage('unit-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.44.0-jammy'
+              image 'mcr.microsoft.com/playwright:v1.47.2-jammy'
               args '-v /unit-test-results:/unit-test-results'
               args '-u root:root'
               reuseNode true
@@ -111,7 +111,7 @@ pipeline {
         stage('e2e-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.44.0-jammy'
+              image 'mcr.microsoft.com/playwright:v1.47.2-jammy'
               args '-v /e2e-test-results:/e2e-test-results'
               args '-u root:root'
               reuseNode true
