@@ -48,9 +48,6 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        launchOptions: {
-          args: ["--ignore-certificate-errors"],
-        },
       },
     },
 
@@ -58,9 +55,6 @@ export default defineConfig({
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"],
-        launchOptions: {
-          args: ["--ignore-certificate-errors"],
-        },
       },
     },
 
@@ -68,9 +62,6 @@ export default defineConfig({
       name: "webkit",
       use: {
         ...devices["Desktop Safari"],
-        launchOptions: {
-          args: ["--ignore-certificate-errors"],
-        },
       },
     },
 
