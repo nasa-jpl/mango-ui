@@ -12,7 +12,9 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
 
 export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
   const url = config.endpoints.data + config.api.data.missions;
-  const response = await (await fetch(url, { signal })).json();
+  const response = await (
+    await fetch(url, { signal, credentials: "include" })
+  ).json();
   return response.data;
 };
 
@@ -23,7 +25,9 @@ export const getProducts = async (
   const url =
     config.endpoints.data +
     config.api.data.products.replace("{MISSION}", mission);
-  const response = await (await fetch(url, { signal })).json();
+  const response = await (
+    await fetch(url, { signal, credentials: "include" })
+  ).json();
   return response.data;
 };
 
@@ -56,7 +60,7 @@ export const getData = (
   const cancel = () => controller.abort();
   const json = () =>
     new Promise<DataResponse>((resolve, reject) => {
-      fetch(url, { signal: controller.signal })
+      fetch(url, { signal: controller.signal, credentials: "include" })
         .then((response) => {
           if (response.status >= 200 && response.status <= 400) {
             response

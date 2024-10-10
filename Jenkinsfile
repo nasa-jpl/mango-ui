@@ -11,6 +11,8 @@ pipeline {
     DOCKER_IMAGE_NAME = 'mango-ui'
     ARTIFACTORY_URL = '***REMOVED***'
     ARTIFACTORY_REPO = '***REMOVED***'
+    CERT_FILE = 'CERT_PEM'
+    KEY_FILE = 'KEY_PEM'
   }
 
   options {
@@ -26,6 +28,21 @@ pipeline {
       steps {
         sh 'npm ci'
       }
+    }
+
+    stage('Inject Certificates') {
+        steps {
+            script {
+          withCredentials([file(credentialsId: CERT_FILE, variable: 'CERT_FILE'),
+                                     file(credentialsId: KEY_FILE, variable: 'KEY_FILE')]) {
+            sh """
+                        mkdir -p ./.cert
+                        cp "\${CERT_FILE}" ./.cert/cert.pem
+                        cp "\${KEY_FILE}" ./.cert/key.pem
+                        """
+                                     }
+            }
+        }
     }
 
     stage('Build UI') {
@@ -81,7 +98,7 @@ pipeline {
         stage('unit-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.44.0-jammy'
+              image 'mcr.microsoft.com/playwright:v1.47.2-jammy'
               args '-v /unit-test-results:/unit-test-results'
               args '-u root:root'
               reuseNode true
@@ -94,7 +111,7 @@ pipeline {
         stage('e2e-tests') {
           agent {
             docker {
-              image 'mcr.microsoft.com/playwright:v1.44.0-jammy'
+              image 'mcr.microsoft.com/playwright:v1.47.2-jammy'
               args '-v /e2e-test-results:/e2e-test-results'
               args '-u root:root'
               reuseNode true

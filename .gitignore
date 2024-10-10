@@ -30,3 +30,6 @@ dist-ssr
 # testing
 unit-test-results/
 e2e-test-results/
+
+# Cert
+/.cert/
