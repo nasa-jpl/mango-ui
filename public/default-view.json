@@ -158,7 +158,6 @@
               "id": "sertryfdf",
               "type": "section",
               "title": "Examples",
-              "enableHeader": false,
               "defaultOpen": true,
               "layout": [
                 { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 4 }
@@ -168,6 +167,7 @@
                   "id": "fghyjqiqii",
                   "type": "table",
                   "title": "Table",
+                  "showHeader": false,
                   "syncWithPageDateRange": true,
                   "columnGroups": [
                     { "id": "ocimaom", "name": "KBR-GPS Performance" },

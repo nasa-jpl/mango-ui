@@ -56,6 +56,7 @@ export type Entity = {
   dateRange?: DateRange;
   id: string;
   idField?: string;
+  showHeader?: boolean;
   syncWithPageDateRange?: boolean;
   title: string;
   type: EntityType;

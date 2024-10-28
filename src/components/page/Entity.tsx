@@ -54,7 +54,7 @@ export const Entity = (props: EntityProps) => {
     instrument = null,
     mission = null,
     className = "",
-    showHeader = true,
+    showHeader = entity.showHeader ?? true,
     compact = false,
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
