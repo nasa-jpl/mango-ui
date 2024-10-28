@@ -209,11 +209,18 @@ export interface MapEntity extends Entity {
 }
 
 export type TableColumn = {
+  columnGroupId?: string;
   field: string;
   layerId: string;
 };
 
+export type TableColumnGroup = {
+  id: string;
+  name: string;
+};
+
 export interface TableEntity extends Entity {
+  columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
   layers: DataLayer[];
 }

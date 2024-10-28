@@ -12,3 +12,7 @@
 .table .ag-theme-stellar .ag-root-wrapper {
   border: none;
 }
+
+.table-column-group-header {
+  font-weight: 700; /* bold */
+}

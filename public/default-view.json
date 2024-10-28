@@ -148,6 +148,68 @@
               ]
             }
           ]
+        },
+        {
+          "id": "abcd",
+          "url": "performance_reports",
+          "title": "Performance Reports",
+          "sections": [
+            {
+              "id": "sertryfdf",
+              "type": "section",
+              "title": "Examples",
+              "enableHeader": false,
+              "defaultOpen": true,
+              "layout": [
+                { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 4 }
+              ],
+              "entities": [
+                {
+                  "id": "fghyjqiqii",
+                  "type": "table",
+                  "title": "Table",
+                  "syncWithPageDateRange": true,
+                  "columnGroups": [
+                    { "id": "ocimaom", "name": "KBR-GPS Performance" },
+                    { "id": "ociaaom", "name": "KBR-GPS" }
+                  ],
+                  "columns": [
+                    {
+                      "field": "ang_accl_x",
+                      "layerId": "48gnes",
+                      "columnGroupId": "ocimaom"
+                    },
+                    {
+                      "field": "ang_accl_y",
+                      "layerId": "48gnes"
+                    },
+                    {
+                      "field": "ang_accl_z",
+                      "layerId": "48gnes",
+                      "columnGroupId": "ocimaom"
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "48gnes",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "ACC1A",
+                      "instrument": "D",
+                      "fields": [
+                        "ang_accl_x",
+                        "ang_accl_y",
+                        "ang_accl_z",
+                        "timestamp"
+                      ],
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "endTime": "2022-03-02T00:36:00.000000Z"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
