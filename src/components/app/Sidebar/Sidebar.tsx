@@ -111,7 +111,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         <div className="sidebar-padded-content">
           <SidebarLink title="Settings" icon={<IconSettings />} />
           <NavLink
-            to="***REMOVED***"
+            to={import.meta.env.VITE_MANGO_DOCS_URL}
             target="_blank"
             rel="noopener noreferrer"
           >

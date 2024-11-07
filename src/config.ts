@@ -7,6 +7,6 @@ export const config = {
     },
   },
   endpoints: {
-    data: import.meta.env.VITE_API_URL,
+    data: import.meta.env.VITE_PROXY_API_URL,
   },
 };
