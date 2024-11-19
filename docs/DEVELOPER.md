@@ -69,8 +69,12 @@ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem '
 
 ## Start Development Server
 
-Run `npm run dev` for a dev server. Navigate to `https://localhost:5173/`. The app will automatically reload if you change any of the source files.
+Run `npm run dev` for a dev server. Navigate to `https://localhost:5173/mango`. The app will automatically reload if you change any of the source files.
+
+The development server loads the environment variables from `.env.development`. To make requests to the API and access the MANGO Docs from the UI, make sure to populate the `VITE_API_URL` and `VITE_MANGO_DOCS_URL` environment variables, respectively.
 
 ## Building For Production
 
 Run `npm run build` to build a production version of the project. The build artifacts will be stored in the `build/` directory.
+
+## Docker
