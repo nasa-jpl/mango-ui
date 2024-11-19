@@ -3,7 +3,7 @@ FROM node:lts-alpine
 WORKDIR /app
 COPY . /app
 
-# API URL to be injected at runtime
+# Venue-specific parameters to be injected at runtime
 ENV VITE_API_URL=PLACEHOLDER_API_URL
 ENV VITE_MANGO_DOCS_URL=PLACEHOLDER_MANGO_DOCS_URL
 
