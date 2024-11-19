@@ -12,5 +12,7 @@ export const config = {
     data: import.meta.env.DEV
       ? import.meta.env.VITE_PROXY_API_URL
       : "{PLACEHOLDER_API_URL}",
+
+    docs: "{PLACEHOLDER_MANGO_DOCS_URL}",
   },
 };
