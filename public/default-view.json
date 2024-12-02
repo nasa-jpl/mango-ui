@@ -179,110 +179,132 @@
                   "columns": [
                     {
                       "field": "timestamp",
+                      "label": "Date",
                       "layerId": "48gnes"
                     },
                     {
                       "field": "resid_rms",
+                      "label": "RMS (mm)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "field": "resid_nobs",
+                      "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "field": "arc_length",
+                      "label": "arc (hr)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "field": "clkdd_nobs",
+                      "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "field": "clkdd_mean",
+                      "label": "mean",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "field": "clkdd_sigma",
+                      "label": "stddev",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "field": "clkdd_rms",
+                      "label": "RMS",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "field": "rms_phase",
+                      "label": "rms (mm)",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "n_phase",
+                      "label": "#obs phase",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "per_phase_rej",
+                      "label": "%edt phase",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "rms_range",
+                      "label": "rms (cm)",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "n_range",
+                      "label": "#obs range",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "per_range_rej",
+                      "label": "%edt range",
                       "layerId": "48gnek",
                       "columnGroupId": "zxkzjkj"
                     },
                     {
                       "field": "rms_phase",
+                      "label": "rms (mm)",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "n_phase",
+                      "label": "#obs phase",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "per_phase_rej",
+                      "label": "%edt phase",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "rms_range",
+                      "label": "rms (cms)",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "n_range",
+                      "label": "#obs range",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "per_range_rej",
+                      "label": "%edt range",
                       "layerId": "48gnep",
                       "columnGroupId": "qhwuwhh"
                     },
                     {
                       "field": "n_qual_bits",
+                      "label": "GFO-C (mm)",
                       "layerId": "48gnew",
                       "columnGroupId": "wwwhwiw"
                     },
                     {
                       "field": "n_qual_bits",
+                      "label": "GFO-D (mm)",
                       "layerId": "48gneq",
                       "columnGroupId": "wwwhwiw"
                     }
