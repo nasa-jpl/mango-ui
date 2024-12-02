@@ -6,6 +6,7 @@ import {
 import { Database, Flask, HouseLine, Planet } from "@phosphor-icons/react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { config } from "../../../config";
 import { View } from "../../../types/view";
 import "./Sidebar.css";
 import SidebarContainer from "./SidebarContainer";
@@ -111,7 +112,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         <div className="sidebar-padded-content">
           <SidebarLink title="Settings" icon={<IconSettings />} />
           <NavLink
-            to="***REMOVED***"
+            to={config.endpoints.docs}
             target="_blank"
             rel="noopener noreferrer"
           >
