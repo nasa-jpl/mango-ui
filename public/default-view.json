@@ -297,13 +297,13 @@
                       "columnGroupId": "qhwuwhh"
                     },
                     {
-                      "field": "n_qual_bits",
+                      "field": "lpos_rms_start",
                       "label": "GFO-C (mm)",
                       "layerId": "48gnew",
                       "columnGroupId": "wwwhwiw"
                     },
                     {
-                      "field": "n_qual_bits",
+                      "field": "lpos_rms_start",
                       "label": "GFO-D (mm)",
                       "layerId": "48gneq",
                       "columnGroupId": "wwwhwiw"
@@ -320,6 +320,10 @@
                         "resid_rms",
                         "resid_nobs",
                         "arc_length",
+                        "clkdd_nobs",
+                        "clkdd_mean",
+                        "clkdd_sigma",
+                        "clkdd_rms",
                         "timestamp"
                       ],
                       "startTime": "2023-06-30T00:00:00.000000Z",
@@ -367,7 +371,7 @@
                       "mission": "GRACEFO",
                       "dataset": "GNV1B_RPT",
                       "instrument": "C",
-                      "fields": ["n_qual_bits", "timestamp"],
+                      "fields": ["lpos_rms_start", "timestamp"],
                       "startTime": "2023-06-30T00:00:00.000000Z",
                       "endTime": "2023-06-30T23:59:00.000000Z"
                     },
@@ -377,7 +381,7 @@
                       "mission": "GRACEFO",
                       "dataset": "GNV1B_RPT",
                       "instrument": "D",
-                      "fields": ["n_qual_bits", "timestamp"],
+                      "fields": ["lpos_rms_start", "timestamp"],
                       "startTime": "2023-06-30T00:00:00.000000Z",
                       "endTime": "2023-06-30T23:59:00.000000Z"
                     }
