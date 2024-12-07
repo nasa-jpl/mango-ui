@@ -26,3 +26,7 @@
   display: flex !important;
   opacity: 1;
 }
+
+.ag-header-cell-label svg {
+  flex-shrink: 0;
+}

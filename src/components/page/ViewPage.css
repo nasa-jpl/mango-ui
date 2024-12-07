@@ -4,3 +4,10 @@
   flex-direction: column;
   width: 100%;
 }
+
+.loading-indicator {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}

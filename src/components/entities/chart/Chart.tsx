@@ -7,10 +7,16 @@ import {
   VectorTwo,
 } from "@phosphor-icons/react";
 import ChartJS, {
+  ActiveElement,
+  BarOptions,
   ChartDataset,
+  ChartEvent,
+  Color,
+  CommonElementOptions,
   LinearScale,
   LogarithmicScale,
   PointStyle,
+  TooltipModel,
 } from "chart.js/auto";
 import "chartjs-adapter-luxon";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -19,7 +25,11 @@ import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
-import { DataResponse, Product } from "../../../types/api";
+import {
+  DataResponse,
+  DataResponseDataEntry,
+  Product,
+} from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import {
   ChartEntity,
@@ -29,7 +39,8 @@ import {
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import {
-  getChartLayerId,
+  convertHexToRGBA,
+  getDataLayerId,
   isAbortError,
   pluralize,
 } from "../../../utilities/generic";
@@ -37,7 +48,12 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
-import { applyLayerTransforms, formatYValue } from "../../../utilities/view";
+import {
+  applyLayerTransforms,
+  formatYValue,
+  isChartLayerEvent,
+  isChartLayerLine,
+} from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
 import "./Chart.css";
 import ChartTooltip from "./ChartTooltip";
@@ -51,14 +67,31 @@ export declare type ChartProps = {
   compact?: boolean;
   dateRange: DateRange;
   hoverDate: Date | null;
+  instrument?: string | null;
+  loading?: boolean;
+  mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onHoverDateChange?: (date: Date | null) => void;
+  onSelectPoint?: (point: DataResponseDataEntry | null) => void;
   // TODO could pass in only the list of products that this Chart cares about?
   products: Product[];
+  selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
 };
 
-export type CustomChartData = { x: string; y: number };
+export type CustomChartData = {
+  data?: TimeSeriesPoint[];
+  raw: DataResponseDataEntry;
+  selected: boolean;
+  tooltipLabel?: string;
+  x: string;
+  y: number;
+};
+
+type CustomChartType = ChartJS<
+  "line" | "bar" | "scatter" | "bubble",
+  CustomChartData[]
+>;
 
 function toDimension(value: number | string, dimension: number) {
   return typeof value === "string" && value.endsWith("%")
@@ -70,14 +103,19 @@ export const Chart = ({
   chartEntity,
   products,
   dateRange,
+  instrument: instrumentProp,
+  mission: missionProp,
   compact = false,
   showHeader = true,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
+  onSelectPoint = () => {},
   hoverDate,
+  selectedPoint,
+  loading: loadingProp,
 }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<ChartJS<"line", CustomChartData[]> | null>();
+  const chartRef = useRef<CustomChartType | null>();
   const [loading, setLoading] = useState(true);
   const [boxZoomEnabled, setBoxZoomEnabled] = useState(false);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
@@ -88,12 +126,22 @@ export const Chart = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedVisualizeChartLayers = useCallback(
     debounce(
-      (layers: ChartLayer[], products: Product[], dateRange: DateRange) =>
+      (
+        layers: ChartLayer[],
+        products: Product[],
+        chartEntity: ChartEntity,
+        dateRange: DateRange,
+        mission,
+        instrument
+      ) =>
         visualizeChartLayers(
           layers || [],
           products,
+          chartEntity,
           dateRange.start,
-          dateRange.end
+          dateRange.end,
+          mission,
+          instrument
         ),
       100
     ),
@@ -103,12 +151,15 @@ export const Chart = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedVisualizeChartLayersTrailing = useCallback(
     debounce(
-      (layers, products, dateRange) =>
+      (layers, products, chartEntity, dateRange, mission, instrument) =>
         visualizeChartLayers(
           layers || [],
           products,
+          chartEntity,
           dateRange.start,
-          dateRange.end
+          dateRange.end,
+          mission,
+          instrument
         ),
       500,
       { leading: false, trailing: true }
@@ -130,7 +181,7 @@ export const Chart = ({
 
     return () => destroyChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [compact]);
 
   const computedDateRange = useMemo(
     () =>
@@ -143,7 +194,10 @@ export const Chart = ({
       debouncedVisualizeChartLayers(
         chartEntity.layers || [],
         products,
-        computedDateRange
+        chartEntity,
+        computedDateRange,
+        missionProp,
+        instrumentProp
       );
     }
     // Use JSON.stringify for deep comparison (recommended)
@@ -152,22 +206,34 @@ export const Chart = ({
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(chartEntity.layers),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(chartEntity.data),
     chartEntity.syncWithPageDateRange,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(computedDateRange),
     debouncedVisualizeChartLayers,
+    compact,
+    missionProp,
+    instrumentProp,
   ]);
 
   useEffect(() => {
     configureChartAxes(chartEntity.yAxes || []);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(chartEntity.yAxes), JSON.stringify(chartEntity.layers)]);
+  }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(chartEntity.yAxes),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(chartEntity.layers),
+    compact,
+  ]);
 
   const onZoomComplete = (
     layers: ChartLayer[],
     products: Product[],
-    syncWithDateRange = true
+    chartEntity: ChartEntity,
+    syncWithDateRange: boolean = true
   ) => {
     // Only perform an update if the zoom/pan was triggered by the user
     // to prevent loopback after debounced visualizeChartLayers call
@@ -184,7 +250,10 @@ export const Chart = ({
         debouncedVisualizeChartLayersTrailing(
           layers || [],
           products,
-          newDateRange
+          chartEntity,
+          newDateRange,
+          missionProp,
+          instrumentProp
         );
       }
     }
@@ -203,17 +272,55 @@ export const Chart = ({
         onZoomComplete(
           chartEntity.layers as ChartLayer[],
           products,
+          chartEntity,
           chartEntity.syncWithPageDateRange
         );
       chartRef.current.options.plugins.zoom.zoom.onZoomComplete = () =>
         onZoomComplete(
           chartEntity.layers as ChartLayer[],
           products,
+          chartEntity,
           chartEntity.syncWithPageDateRange
         );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(chartEntity.layers), chartEntity.syncWithPageDateRange]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.data.datasets.forEach((dataset) => {
+        dataset.data = dataset.data.map((d) => {
+          if (!selectedPoint) {
+            d.selected = false;
+          } else {
+            let selected = false;
+            const matchesTimestamp =
+              d.raw.timestamp === selectedPoint.timestamp;
+            if (matchesTimestamp) {
+              // Make sure all fields match
+              let allMatching = true;
+              Object.keys(d.raw).forEach((key) => {
+                if (key === "timestamp") {
+                  return;
+                }
+                if (selectedPoint[key]) {
+                  if (selectedPoint[key].value !== d.raw[key].value) {
+                    allMatching = false;
+                  }
+                }
+              });
+              selected = allMatching;
+            }
+            d.selected = selected;
+          }
+          return d;
+        });
+      });
+      chartRef.current.update();
+      configureChartAxes(chartEntity.yAxes || []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(selectedPoint)]);
 
   const configureChartAxes = (yAxes: YAxis[]) => {
     if (
@@ -238,6 +345,7 @@ export const Chart = ({
         if (associatedLayers?.length) {
           // Derive label from first layer
           const metadata = getFieldMetadataForLayer(
+            associatedLayers[0].fields[0],
             associatedLayers[0],
             products
           );
@@ -245,12 +353,13 @@ export const Chart = ({
         }
       }
       const position = axis.position || "left";
+
       newAxes[axis.id] = {
-        display: !compact,
+        display: !compact && !axis.hidden,
         type: axis.type || "linear",
         // type: axis.type || "myscale",
         afterBuildTicks: function (scale: LinearScale | LogarithmicScale) {
-          if (!compact) return;
+          if (!compact || axis.type === "category") return;
 
           const { min, max } = scale.getMinMax(true);
           scale.min = isFinite(min) ? min : 0;
@@ -277,6 +386,7 @@ export const Chart = ({
         grid: { display: i === 0 }, // only show horizontal axis ticks for first axis
         ...(axis.min ? { min: axis.min } : null),
         ...(axis.max ? { max: axis.max } : null),
+        ...(axis.type === "category" ? { labels: ["bin1"] } : null),
       };
     });
     chartRef.current.config.options.scales = newAxes;
@@ -285,8 +395,11 @@ export const Chart = ({
   const visualizeChartLayers = async (
     layers: ChartLayer[],
     products: Product[],
+    chartEntity: ChartEntity,
     startTime?: string,
-    endTime?: string
+    endTime?: string,
+    _mission?: string,
+    _instrument?: string
   ) => {
     if (!chartRef.current) {
       return;
@@ -304,124 +417,313 @@ export const Chart = ({
     const { results, error, aborted } = await fetchAllLayerData(
       layers,
       products,
+      chartEntity,
       startTime,
-      endTime
+      endTime,
+      _mission,
+      _instrument
     );
 
     if (error || aborted || !chartRef.current) {
       return;
     }
-
     // Process result points
-    const processedData = results.map(({ result, layer }) => {
+    const processedData: {
+      data_count: number;
+      downsampling_factor: number;
+      layer: ChartLayer;
+      pointsByField: Record<string, CustomChartData[]>;
+      unit: string;
+    }[] = results.map(({ result, layer }) => {
       // Get metadata for this result layer in order to determine
       // the optimal decimation factor to use when requesting data
-      const fieldMetadata = getFieldMetadataForLayer(layer, products);
-
       // TODO for time series we could convert date string -> ms and convert back to string later for chartjs?
       // or maybe chartjs is ok with ms though there may be issues with that approach
-      let allPoints: TimeSeriesPoint[] = [];
+      const pointsByField: Record<string, CustomChartData[]> = {};
       result.data.forEach((d) => {
-        const fieldValue = d[layer.field];
-        const timestamp = d.timestamp;
-        if (!fieldValue || typeof timestamp !== "string") return;
+        layer.fields.forEach((field) => {
+          const fieldMetadata = getFieldMetadataForLayer(
+            field,
+            layer,
+            products
+          );
+          const fieldValue = d[field];
+          const timestamp = d.timestamp;
+          if (!fieldValue || typeof timestamp !== "string") return;
 
-        // Case where downsampling is not applied
-        const points = [];
-        if (result.downsampling_factor === 1) {
-          points.push({ x: timestamp, y: fieldValue.value });
-        } else {
-          if (!fieldMetadata) return;
-          if (
-            fieldMetadata.supported_aggregations.find(
-              ({ type }) => type === "min"
-            ) &&
-            fieldMetadata.supported_aggregations.find(
-              ({ type }) => type === "max"
-            )
-          ) {
-            // Compute middle time of aggregation window
-            const pointTimestampMS = new Date(timestamp).getTime();
-            const halfFieldDataIntervalMS =
-              ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
-            const middleTime = new Date(
-              pointTimestampMS + halfFieldDataIntervalMS
-            ).toISOString();
+          // Case where downsampling is not applied
+          const points: CustomChartData[] = [];
+          if (result.downsampling_factor === 1) {
+            points.push({
+              x: timestamp,
+              y: fieldValue.value as number,
+              raw: d,
+              selected: false,
+            });
+          } else {
+            if (!fieldMetadata) return;
+            if (
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "min"
+              ) &&
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "max"
+              )
+            ) {
+              // Compute middle time of aggregation window
+              const pointTimestampMS = new Date(timestamp).getTime();
+              const halfFieldDataIntervalMS =
+                ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
+              const middleTime = new Date(
+                pointTimestampMS + halfFieldDataIntervalMS
+              ).toISOString();
 
-            // Use the min and max set to the middle of the window
-            points.push({ x: middleTime, y: fieldValue.min });
-            if (fieldValue.min !== fieldValue.max) {
-              points.push({ x: middleTime, y: fieldValue.max });
+              // Use the min and max set to the middle of the window
+              points.push({
+                x: middleTime,
+                y: fieldValue.min as number,
+                raw: d,
+                selected: false,
+              });
+              if (fieldValue.min !== fieldValue.max) {
+                points.push({
+                  x: middleTime,
+                  y: fieldValue.max as number,
+                  raw: d,
+                  selected: false,
+                });
+              }
+            } else if (
+              fieldMetadata.supported_aggregations.find(
+                ({ type }) => type === "avg"
+              )
+            ) {
+              points.push({
+                x: timestamp,
+                y: fieldValue.avg as number,
+                raw: d,
+                selected: false,
+              });
             }
-          } else if (
-            fieldMetadata.supported_aggregations.find(
-              ({ type }) => type === "avg"
-            )
-          ) {
-            points.push({ x: timestamp, y: fieldValue.avg });
           }
-        }
-        allPoints = allPoints.concat(points);
+          if (!pointsByField[field]) {
+            pointsByField[field] = [];
+          }
+          pointsByField[field].push(...points);
+        });
       });
+      const firstFieldMetadata = getFieldMetadataForLayer(
+        layer.fields[0],
+        layer,
+        products
+      );
       return {
         layer,
-        unit: fieldMetadata?.unit || "",
-        points: allPoints,
+        unit: firstFieldMetadata?.unit || "",
+        pointsByField,
         data_count: result.data_count,
         downsampling_factor: result.downsampling_factor,
       };
     });
 
     // Transformed points
-    processedData.forEach(({ layer, points, ...rest }, i) => {
-      let newPoints = points;
+    processedData.forEach(({ layer, pointsByField, ...rest }, i) => {
+      const newPointsByField = pointsByField;
       if (layer.transforms?.length) {
-        newPoints = newPoints.map((point, j) => {
-          return applyLayerTransforms(point, layer, processedData, j);
+        Object.keys(newPointsByField).forEach((key) => {
+          const existingData = newPointsByField[key];
+          newPointsByField[key] = existingData.map((point, j) => {
+            // Apply transforms to specified keys or all keys if none specified
+            if (
+              !layer.transformTargets ||
+              (layer.transformTargets &&
+                layer.transformTargets.indexOf(key) > -1)
+            ) {
+              return applyLayerTransforms(
+                point,
+                layer,
+                processedData,
+                j
+              ) as CustomChartData;
+            }
+            return point;
+          });
         });
       }
-      processedData[i] = { layer, points: newPoints, ...rest };
+      processedData[i] = { layer, pointsByField: newPointsByField, ...rest };
     });
 
-    const newChartJSDatasets: ChartDataset<"line", CustomChartData[]>[] =
-      processedData
-        .filter(({ layer }) => !layer.hidden)
-        .map(({ points, layer, data_count, downsampling_factor, unit }) => {
-          return {
+    // @ts-expect-error TODO chartjs is difficult to type dynamically here
+    const newChartJSDatasets: ChartDataset<
+      "line" | "bar" | "scatter" | "bubble",
+      CustomChartData[]
+    >[] = processedData
+      .filter(({ layer }) => !layer.hidden)
+      .map(
+        ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
+          const mission = _mission ?? layer.mission;
+          const instrument = _instrument ?? layer.instrument;
+          const isLineLayer = isChartLayerLine(layer);
+          const isEventLayer = isChartLayerEvent(layer);
+          const commonConfig = {
             layer,
             unit,
-            id: getChartLayerId(layer),
-            hidden: hiddenDatasets[getChartLayerId(layer)] || false,
-            // TODO would be nice to render these outside of the canvas in order to better format
-            // and control these labels
-            // TODO what should these labels contain metadata wise? Fairly verbose right now.
-            // TODO bring point count back into label option
-            label:
-              layer.label ||
-              `${layer.mission} ${layer.instrument} ${layer.dataset} ${
-                layer.field
-              }  (v${layer.version}) (${data_count} point${pluralize(
-                data_count
-              )}, 1:${downsampling_factor} scale)`,
-            data: points,
-            // smooth the downsampling a tiny fraction to ease artifacting
-            tension: downsampling_factor !== 1 ? 0.01 : 0,
-            borderWidth:
-              typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
-            spanGaps: false,
-            pointStyle:
-              layer.hidePoints || downsampling_factor !== 1
-                ? (false as PointStyle)
-                : "circle",
-            pointRadius:
-              typeof layer.pointRadius === "number" ? layer.pointRadius : 1,
-            showLine: layer.hideLines ? false : true,
-            yAxisID: layer.yAxisId,
-            ...(layer.color
-              ? { backgroundColor: layer.color, borderColor: layer.color }
-              : null),
+            id: getDataLayerId(layer),
+            hidden: hiddenDatasets[getDataLayerId(layer)] || false,
           };
-        });
+          if (isLineLayer) {
+            const isDownsampled = downsampling_factor !== 1;
+            return {
+              ...commonConfig, // TODO would be nice to render these outside of the canvas in order to better format
+              // and control these labels
+              // TODO what should these labels contain metadata wise? Fairly verbose right now.
+              data: pointsByField[layer.fields[0]],
+              type: "line",
+              label:
+                layer.label ||
+                `${mission} ${instrument} ${layer.dataset} ${
+                  layer.fields[0]
+                }  (v${layer.version}) (${data_count} point${pluralize(
+                  data_count
+                )}, 1:${downsampling_factor} scale)`,
+              // smooth the downsampling a tiny fraction to ease artifacting
+              tension: isDownsampled ? 0.01 : 0,
+              borderWidth:
+                typeof layer.lineWidth === "number" ? layer.lineWidth : 1,
+              spanGaps: false,
+              pointStyle:
+                layer.hidePoints || isDownsampled
+                  ? (false as PointStyle)
+                  : "circle",
+              pointRadius: (x: CustomChartData) => {
+                if (x.raw?.selected) {
+                  return 3;
+                }
+                return typeof layer.pointRadius === "number"
+                  ? layer.pointRadius
+                  : 1.25;
+              },
+              showLine: layer.hideLines ? false : true,
+              yAxisID: layer.yAxisId,
+              ...(layer.color
+                ? {
+                    borderColor: layer.color,
+                  }
+                : null),
+              backgroundColor: ((x: CustomChartData) => {
+                if (x.raw?.selected) {
+                  return "red";
+                } else {
+                  return layer.color ?? "rgba(0,123,255,1)";
+                }
+              }) as unknown as Color, // chartjs does not provide correct type for color function, expects string
+              borderColor: () => {
+                const opacity = isDownsampled ? 1 : 0.8;
+                return layer.color
+                  ? convertHexToRGBA(layer.color, opacity)
+                  : `rgba(0,123,255,${opacity})`;
+              },
+            };
+          } else if (isEventLayer) {
+            if (layer.style === "bar" || layer.style === "bubble") {
+              // Transform to bar plot format
+              const processedPoints: (Omit<CustomChartData, "x" | "y"> & {
+                x: string[];
+                y: string;
+              })[] = [];
+              (pointsByField[layer.fields[0]] || []).forEach((_, i) => {
+                const startField = layer.dataFieldStart ?? layer.fields[0];
+                const endField = layer.dataFieldEnd ?? layer.fields[1];
+                const startTime = pointsByField[startField][i].y;
+                const endTime = pointsByField[endField][i].y;
+                const raw = pointsByField[startField][i].raw;
+                processedPoints.push({
+                  x: [
+                    new Date(startTime).toISOString(),
+                    new Date(endTime).toISOString(),
+                  ],
+                  y: "bin1",
+                  raw,
+                  selected: false,
+                  tooltipLabel:
+                    pointsByField[layer.tooltipField || startField][
+                      i
+                    ].y.toString(),
+                });
+              });
+              return {
+                ...commonConfig,
+                type: "bar",
+                base: 0,
+                borderSkipped: false,
+                borderRadius: layer.style === "bubble" ? 30 : 0,
+                inflateAmount: 0,
+                indexAxis: "y",
+                yAxisID: layer.yAxisId,
+                borderWidth: layer.style === "bubble" ? 1 : 0,
+                categoryPercentage: 1,
+                borderColor: "#E3B924",
+                backgroundColor: ((x: CustomChartData) => {
+                  if (x.raw?.selected) {
+                    return "rgba(0, 0, 255, 1)";
+                  } else {
+                    return layer.color ?? "";
+                  }
+                }) as unknown as Color,
+                hoverBackgroundColor: "rgba(0, 0, 255, 0.28)",
+                hoverBorderColor: "rgba(0, 0, 255, 1)",
+                data: processedPoints,
+              } as BarOptions;
+            } else if (layer.style === "scatter") {
+              const processedPoints: CustomChartData[] = [];
+              (pointsByField[layer.fields[0]] || []).forEach((_, i) => {
+                // Transform to scatter plot format
+                const startField = layer.dataFieldStart ?? layer.fields[0];
+                const startTime = pointsByField[startField][i].y;
+                const raw = pointsByField[startField][i].raw;
+                processedPoints.push({
+                  x: new Date(startTime).toISOString(),
+                  y: 0,
+                  raw,
+                  selected: false,
+                  tooltipLabel:
+                    pointsByField[layer.tooltipField || startField][
+                      i
+                    ].y.toString(),
+                });
+              });
+              return {
+                ...commonConfig,
+                type: "scatter",
+                indexAxis: "y",
+                yAxisID: layer.yAxisId,
+                borderWidth: 0,
+                categoryPercentage: 1,
+                pointRadius: (x: CustomChartData) => {
+                  if (x.raw?.selected) {
+                    return 6;
+                  }
+                  return 3;
+                },
+                borderColor: "#E3B924",
+                backgroundColor: ((x: CustomChartData) => {
+                  if (x.raw?.selected) {
+                    return "rgba(0, 0, 255, 1)";
+                  } else {
+                    return layer.color ?? "";
+                  }
+                }) as unknown as Color,
+                hoverBackgroundColor: "rgba(0, 0, 255, 0.28)",
+                hoverBorderColor: "rgba(0, 0, 255, 1)",
+                data: processedPoints,
+              } as CommonElementOptions;
+            } else {
+              return commonConfig;
+            }
+          }
+          return { ...commonConfig, data: [] };
+        }
+      );
 
     // Update chartJS dataset list
     chartRef.current.data.datasets = newChartJSDatasets;
@@ -466,6 +768,17 @@ export const Chart = ({
       }
     }
 
+    if (
+      chartRef.current.options.plugins &&
+      chartRef.current.options.plugins.tooltip &&
+      chartRef.current.options.plugins.tooltip.external
+    ) {
+      chartRef.current.options.plugins.tooltip.external = (tooltipModel) => {
+        //@ts-expect-error incorrect typings here from library again
+        renderTooltip(tooltipModel, _mission, _instrument);
+      };
+    }
+
     // Trigger a chartJS update
     chartRef.current.update();
   };
@@ -473,16 +786,28 @@ export const Chart = ({
   const fetchLayerData = (
     layer: ChartLayer,
     products: Product[],
+    chartEntity: ChartEntity,
     startTime: string | undefined,
-    endTime: string | undefined
+    endTime: string | undefined,
+    mission?: string,
+    instrument?: string
   ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
-    const layerFullId = getChartLayerId(layer);
+    const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
     return new Promise((resolve, reject) => {
-      const computedStartTime = startTime || layer.startTime;
-      const computedEndTime = endTime || layer.endTime;
+      let computedStartTime = startTime || layer.startTime;
+      let computedEndTime = endTime || layer.endTime;
+      if (typeof layer.windowBuffer === "number") {
+        const newStartTimeDate = new Date(computedStartTime);
+        newStartTimeDate.setDate(newStartTimeDate.getDate() - 1);
+        computedStartTime = newStartTimeDate.toISOString();
+
+        const newEndTimeDate = new Date(computedEndTime);
+        newEndTimeDate.setDate(newEndTimeDate.getDate() + 1);
+        computedEndTime = newEndTimeDate.toISOString();
+      }
 
       // Compute aggregation factor
       const durationSeconds =
@@ -492,7 +817,14 @@ export const Chart = ({
 
       const chartSize = chartRef.current?.width || 1000; // TODO store in state?
 
-      const product = getProductForLayer(layer, products);
+      const product = getProductForLayer(
+        {
+          ...layer,
+          mission: mission ?? layer.mission,
+          instrument: instrument ?? layer.instrument,
+        },
+        products
+      );
       let downsamplingFactor = 1;
       if (product) {
         for (let i = 0; i < product.available_resolutions.length; i++) {
@@ -513,12 +845,25 @@ export const Chart = ({
         }
       }
 
+      if (chartEntity.data) {
+        const matchingData = chartEntity.data
+          ? chartEntity.data.find((d) => d.layer.id === layer.id)
+          : null;
+        if (matchingData) {
+          resolve({ layer, result: matchingData.result as DataResponse });
+          return;
+        } else {
+          reject(new Error("Bad"));
+          return;
+        }
+      }
+
       const { json, cancel } = getData(
-        layer.mission,
+        mission ?? layer.mission,
         layer.dataset,
-        layer.instrument,
+        instrument ?? layer.instrument,
         layer.version,
-        [layer.field],
+        layer.fields,
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
@@ -542,11 +887,36 @@ export const Chart = ({
     });
   };
 
+  const onPointClick = (
+    _: ChartEvent,
+    elements: ActiveElement[],
+    chart: CustomChartType
+  ) => {
+    const element = elements[0];
+    if (!element) {
+      onSelectPoint(null);
+      return;
+    }
+    const dataset = chart.data.datasets[element.datasetIndex];
+    if (!dataset) {
+      onSelectPoint(null);
+      return;
+    }
+    const point = dataset.data[element.index];
+
+    if (point) {
+      onSelectPoint(point.raw || null);
+    }
+  };
+
   const fetchAllLayerData = async (
     layers: ChartLayer[],
     products: Product[],
+    chartEntity: ChartEntity,
     startTime?: string,
-    endTime?: string
+    endTime?: string,
+    mission?: string,
+    instrument?: string
   ) => {
     setLoading(true);
     setError(null);
@@ -559,7 +929,15 @@ export const Chart = ({
     try {
       results = await Promise.all(
         layers.map((layer) =>
-          fetchLayerData(layer, products, startTime, endTime)
+          fetchLayerData(
+            layer,
+            products,
+            chartEntity,
+            startTime,
+            endTime,
+            mission,
+            instrument
+          )
         )
       );
       setLoading(false);
@@ -573,6 +951,48 @@ export const Chart = ({
       }
     }
     return { results, aborted, error };
+  };
+
+  const renderTooltip = (
+    context: TooltipModel<"line">,
+    mission?: string,
+    instrument?: string
+  ) => {
+    //@ts-expect-error incorrect typings from library
+    const tooltipModel = context.tooltip;
+    const position = context.chart.canvas.getBoundingClientRect();
+
+    // Tooltip Element
+    let tooltipEl = document.getElementById("chartjs-tooltip");
+
+    // Create element on first render
+    if (!tooltipEl) {
+      tooltipEl = document.createElement("div");
+      tooltipEl.id = "chartjs-tooltip";
+      document.body.appendChild(tooltipEl);
+      tooltipRoot = createRoot(tooltipEl!);
+    }
+
+    // Render ChartTooltip to the tooltipRoot react container
+    tooltipRoot?.render(
+      <ChartTooltip
+        left={position.left}
+        top={position.top}
+        tooltip={tooltipModel}
+        renderHeader={(point) => (
+          <>
+            {mission ?? point.dataset.layer.mission}{" "}
+            {instrument ?? point.dataset.layer.instrument}{" "}
+            {point.dataset.layer.dataset}{" "}
+            {point.dataset.layer.fields.length === 1
+              ? point.dataset.layer.fields[0]
+              : ""}{" "}
+            (v
+            {point.dataset.layer.version}):
+          </>
+        )}
+      />
+    );
   };
 
   const initializeChart = () => {
@@ -597,6 +1017,8 @@ export const Chart = ({
         layout: {
           autoPadding: !compact,
         },
+        //@ts-expect-error internal type checking is overly restrictive
+        onClick: onPointClick,
         scales: {
           x: {
             display: !compact,
@@ -630,30 +1052,10 @@ export const Chart = ({
           },
           tooltip: {
             enabled: false,
-            external: function (context) {
-              const tooltipModel = context.tooltip;
-              const position = context.chart.canvas.getBoundingClientRect();
-
-              // Tooltip Element
-              let tooltipEl = document.getElementById("chartjs-tooltip");
-
-              // Create element on first render
-              if (!tooltipEl) {
-                tooltipEl = document.createElement("div");
-                tooltipEl.id = "chartjs-tooltip";
-                document.body.appendChild(tooltipEl);
-                tooltipRoot = createRoot(tooltipEl!);
-              }
-
-              // Render ChartTooltip to the tooltipRoot react container
-              tooltipRoot?.render(
-                <ChartTooltip
-                  left={position.left}
-                  top={position.top}
-                  // @ts-expect-error type this later
-                  tooltip={tooltipModel}
-                />
-              );
+            xAlign: "left",
+            external: (tooltipModel) => {
+              //@ts-expect-error incorrect typings here from library again
+              renderTooltip(tooltipModel, missionProp, instrumentProp);
             },
 
             ...(chartEntity.chartOptions?.tooltip || {}),
@@ -679,6 +1081,7 @@ export const Chart = ({
                 onZoomComplete(
                   chartEntity.layers || [],
                   products,
+                  chartEntity,
                   chartEntity.syncWithPageDateRange
                 );
               },
@@ -690,6 +1093,7 @@ export const Chart = ({
                 onZoomComplete(
                   chartEntity.layers || [],
                   products,
+                  chartEntity,
                   chartEntity.syncWithPageDateRange
                 );
               },
@@ -792,6 +1196,8 @@ export const Chart = ({
     }
   };
 
+  const isLoading = typeof loadingProp === "boolean" ? loadingProp : loading;
+
   const renderChartOverlays = () => {
     if (!chartRef.current) {
       return;
@@ -820,7 +1226,7 @@ export const Chart = ({
             />
           </div>
         )}
-        {loading && (
+        {isLoading && (
           <div
             className={classNames(
               "chart-indicator-overlay chart-loading-indicator st-typography-medium",
@@ -840,7 +1246,7 @@ export const Chart = ({
             Loading
           </div>
         )}
-        {!loading && error && (
+        {!isLoading && error && (
           <div
             className={classNames(
               "chart-indicator-overlay chart-error-indicator st-typography-medium",

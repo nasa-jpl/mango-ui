@@ -10,7 +10,7 @@ import { DataResponse, Product } from "../../../types/api";
 import { DateRange } from "../../../types/time";
 import { MapEntity, MapLayer } from "../../../types/view";
 import { getData } from "../../../utilities/api";
-import { isAbortError } from "../../../utilities/generic";
+import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import { getProductForLayer } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
@@ -51,7 +51,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     startTime: string | undefined,
     endTime: string | undefined
   ): Promise<{ layer: MapLayer; result: DataResponse }> => {
-    const layerFullId = `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}`;
+    const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
@@ -93,7 +93,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         layer.dataset,
         layer.instrument,
         layer.version,
-        [layer.field],
+        layer.fields,
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,

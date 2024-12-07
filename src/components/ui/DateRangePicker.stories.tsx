@@ -22,8 +22,7 @@ export const Default: Story = {
   args: {
     startDate: new Date("2030"),
     endDate: new Date("2031"),
-    onStartDateChange: () => {},
-    onEndDateChange: () => {},
+    onChange: () => {},
   },
   render: ({ startDate, endDate, ...args }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -37,13 +36,10 @@ export const Default: Story = {
         {...args}
         startDate={startDateState}
         endDate={endDateState}
-        onStartDateChange={(date) => {
-          setStartDate(date);
-          console.log("Start Date Change:", date);
-        }}
-        onEndDateChange={(date) => {
-          setEndDate(date);
-          console.log("End Date Change:", date);
+        onChange={(startDate, endDate) => {
+          setStartDate(startDate);
+          setEndDate(endDate);
+          console.log("Date Range Changed:", startDate, endDate);
         }}
       />
     );

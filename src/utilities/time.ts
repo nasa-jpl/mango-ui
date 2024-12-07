@@ -19,3 +19,10 @@ export function toDatetimelocalStr(isoStr: string) {
 export function toUTCms(value: string) {
   return Date.parse(value + "Z");
 }
+
+/**
+ * Converts j2 (time since year 2000) to UTC ms
+ */
+export function j2ToMs(x: number) {
+  return x * 1000 + 946728000000;
+}

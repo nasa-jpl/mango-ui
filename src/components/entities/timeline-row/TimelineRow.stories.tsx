@@ -25,7 +25,7 @@ const timelineRowEntity: TimelineRowEntity = {
     layers: [
       {
         id: "3ewfsvd",
-        field: "ang_accl_x",
+        fields: ["ang_accl_x"],
         version: "04",
         mission: "GRACEFO",
         dataset: "ACC1A",
@@ -48,6 +48,7 @@ const timelineRowEntity: TimelineRowEntity = {
 
 export const Default: Story = {
   args: {
+    selectedPoint: null,
     marginLeft: 200,
     hoverDate: null,
     onSetProductPreview: () => {},

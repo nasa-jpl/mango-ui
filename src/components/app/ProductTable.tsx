@@ -36,6 +36,25 @@ export const ProductTable = ({
   const columnDefs: DataGridColumnDef<Product>[] = [
     {
       field: "id",
+      headerName: "",
+      width: 50,
+      cellRenderer: (params: { data: Product | undefined }) => {
+        const { data } = params;
+        if (data === undefined) return;
+        return (
+          <div className="product-preview-button">
+            <Button
+              variant="icon"
+              onClick={() => onSetProductPreview({ product: data })}
+            >
+              <ChartLine height={24} width={24} />
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      field: "id",
       filter: "string",
       headerName: "Name",
       resizable: true,
@@ -107,23 +126,6 @@ export const ProductTable = ({
       autoHeight: true,
       valueGetter: (params) =>
         params.data?.available_fields.map((f: ProductField) => f.name),
-    },
-    {
-      field: "id",
-      headerName: "",
-      width: 50,
-      cellRenderer: (params: { data: Product | undefined }) => {
-        const { data } = params;
-        if (data === undefined) return;
-        return (
-          <Button
-            variant="icon"
-            onClick={() => onSetProductPreview({ product: data })}
-          >
-            <ChartLine height={24} width={24} />
-          </Button>
-        );
-      },
     },
   ];
   return (

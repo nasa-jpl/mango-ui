@@ -27,13 +27,10 @@ test("page date-time selection yields expected API response", async ({
    * range defined by the page datepickers.
    */
   await page.getByLabel("Start").fill(startDateTime);
-  await page.getByLabel("Start").blur();
+  await page.getByLabel("End").fill(endDateTime);
+  await page.getByRole("button", { name: "Go" }).click();
   await page.waitForLoadState("networkidle");
 
-  await page.getByLabel("End").fill(endDateTime);
-  page.getByLabel("End").blur();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const response = await page.waitForResponse(
     (response) => {
       return (

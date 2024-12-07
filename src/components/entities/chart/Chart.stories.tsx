@@ -22,7 +22,7 @@ const chartEntity: ChartEntity = {
   layers: [
     {
       id: "234567",
-      field: "lin_accl_x",
+      fields: ["lin_accl_x"],
       mission: "GRACEFO",
       dataset: "ACT1A",
       instrument: "C",
@@ -42,6 +42,7 @@ const chartEntity: ChartEntity = {
 export const Default: Story = {
   args: {
     chartEntity,
+    selectedPoint: null,
     products: [generateTestProduct()],
     dateRange: {
       end: "",

@@ -7,7 +7,7 @@ test("getProductForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
   layer.dataset = "bar";
-  layer.field = "field1";
+  layer.fields = ["field1"];
 
   const dataset1 = generateTestProduct();
   dataset1.mission = "foo";
@@ -38,7 +38,7 @@ test("getProductForLayer", () => {
     { name: "y", supported_aggregations: [], type: "float", unit: null },
   ];
   expect(getProductForLayer(layer, [])).to.be.undefined;
-  expect(getProductForLayer(layer, [dataset2])).to.be.undefined;
+  expect(getProductForLayer(layer, [dataset3])).to.be.undefined;
   expect(getProductForLayer(layer, [dataset1, dataset2, dataset3])).to.deep.eq(
     dataset1
   );
@@ -48,7 +48,7 @@ test("getFieldMetadataForLayer", () => {
   const layer = generateTestChartLayer();
   layer.mission = "foo";
   layer.dataset = "bar";
-  layer.field = "field1";
+  layer.fields = ["field1"];
 
   const dataset1 = generateTestProduct();
   dataset1.mission = "foo";
@@ -57,8 +57,8 @@ test("getFieldMetadataForLayer", () => {
     { name: "field1", supported_aggregations: [], type: "float", unit: null },
     { name: "field2", supported_aggregations: [], type: "float", unit: null },
   ];
-  expect(getFieldMetadataForLayer(layer, [])).to.be.undefined;
-  expect(getFieldMetadataForLayer(layer, [dataset1])).to.deep.eq(
+  expect(getFieldMetadataForLayer("foo", layer, [])).to.be.undefined;
+  expect(getFieldMetadataForLayer("field1", layer, [dataset1])).to.deep.eq(
     dataset1.available_fields[0]
   );
 });

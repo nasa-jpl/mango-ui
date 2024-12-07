@@ -8,6 +8,7 @@ export type PageOptions = {
 export type ProductPreview = {
   dateRange?: DateRange;
   field?: string;
+  instrument?: string;
   product: Product | undefined;
   version?: string;
 };

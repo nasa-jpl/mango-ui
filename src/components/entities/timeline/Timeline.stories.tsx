@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TimelineEntity } from "../../../types/view";
 import Timeline from "./Timeline";
 
 const meta = {
@@ -18,27 +17,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const timelineEntity: TimelineEntity = {
-  type: "timeline",
-  id: "123",
-  title: "Timeline 1",
-  marginLeft: 100,
-  rows: [],
-  dateRange: {
-    end: "",
-    start: "",
-  },
-};
-
 export const Default: Story = {
   args: {
-    timelineEntity,
     hoverDate: null,
-    onSetProductPreview: () => {},
-    products: [],
+    marginLeft: 100,
     dateRange: {
-      end: "",
-      start: "",
+      end: "2022-03-02T00:26:00.000000Z",
+      start: "2022-03-03T00:26:00.000000Z",
     },
   },
 };

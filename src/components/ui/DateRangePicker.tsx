@@ -1,10 +1,11 @@
-import { DatePicker } from "@nasa-jpl/react-stellar";
+import { Button, DatePicker } from "@nasa-jpl/react-stellar";
 import { useEffect, useState } from "react";
+import { DateFormat } from "../../types/view";
 
 export declare type DateRangePickerProps = {
+  dateFormat?: DateFormat;
   endDate: Date;
-  onEndDateChange: (date: Date) => void;
-  onStartDateChange: (date: Date) => void;
+  onChange: (startDate: Date, endDate: Date) => void;
   startDate: Date;
 };
 
@@ -13,47 +14,67 @@ const isValidDateRange = (startDate: Date, endDate: Date): boolean => {
 };
 
 export const DateRangePicker = ({
+  dateFormat = "long",
   endDate,
   startDate,
-  onEndDateChange = () => {},
-  onStartDateChange = () => {},
+  onChange = () => {},
 }: DateRangePickerProps) => {
   const [internalStartDate, setInternalStartDate] = useState(startDate);
   const [internalEndDate, setInternalEndDate] = useState(endDate);
+  const [prevPropDateRange, setPrevPropDateRange] = useState("");
 
   useEffect(() => {
-    setInternalStartDate(startDate);
-    setInternalEndDate(endDate);
-  }, [startDate, endDate]);
+    const dateRangeString = `${startDate.toISOString()}_${endDate.toISOString()}`;
+    if (dateRangeString !== prevPropDateRange) {
+      setInternalStartDate(startDate);
+      setInternalEndDate(endDate);
+      setPrevPropDateRange(dateRangeString);
+    }
+  }, [startDate, endDate, prevPropDateRange]);
 
   const valid = isValidDateRange(internalStartDate, internalEndDate);
+  const formatString = dateFormat === "short" ? "MM/dd/yyyy" : undefined;
+  const minWidth = dateFormat === "short" ? 70 : 164;
+
+  const submit = () => {
+    if (!isValidDateRange(internalStartDate, internalEndDate)) {
+      return;
+    }
+    onChange(internalStartDate, internalEndDate);
+  };
+
   return (
     <div style={{ display: "flex", gap: "8px" }}>
       <DatePicker
+        formatString={formatString}
         label="Start"
-        date={startDate}
-        minWidth={164}
-        errorString={!valid ? "Start date is after end date" : ""}
+        date={internalStartDate}
+        minWidth={minWidth}
+        errorString={!valid ? "Start > end date" : ""}
         onChange={(date) => {
-          setInternalStartDate(date);
-          if (!isValidDateRange(date, internalEndDate)) {
-            return;
+          const finalDate = new Date(date.getTime());
+          if (dateFormat === "short") {
+            finalDate.setUTCHours(0, 0, 0, 0);
           }
-          onStartDateChange(date);
+          setInternalStartDate(finalDate);
         }}
       />
       <DatePicker
+        formatString={formatString}
         label="End"
-        date={endDate}
-        minWidth={164}
+        date={internalEndDate}
+        minWidth={minWidth}
         onChange={(date) => {
-          setInternalEndDate(date);
-          if (!isValidDateRange(internalStartDate, date)) {
-            return;
+          const finalDate = new Date(date.getTime());
+          if (dateFormat === "short") {
+            finalDate.setUTCHours(23, 59, 59, 999);
           }
-          onEndDateChange(date);
+          setInternalEndDate(finalDate);
         }}
       />
+      <Button variant="secondary" onClick={submit}>
+        Go
+      </Button>
     </div>
   );
 };

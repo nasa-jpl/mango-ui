@@ -13,20 +13,20 @@
           {
             "id": "3erwgdfnb",
             "type": "chart",
-            "title": "ACT1A",
+            "title": "ACC1A",
             "syncWithPageDateRange": true,
             "layers": [
               {
-                "id": "3regf",
+                "id": "dfgth",
                 "mission": "GRACEFO",
-                "dataset": "ACT1A",
-                "field": "lin_accl_x",
+                "dataset": "ACC1A",
+                "fields": ["lin_accl_x"],
+                "type": "line",
                 "version": "04",
                 "instrument": "C",
                 "startTime": "2022-03-02T00:26:00.000000Z",
                 "endTime": "2022-03-02T00:36:00.000000Z",
-                "yAxisId": "y1",
-                "color": "orange"
+                "yAxisId": "y1"
               }
             ],
             "yAxes": [
@@ -47,159 +47,102 @@
       "title": "Downlink & Product Generation",
       "pages": [
         {
-          "id": "abc",
+          "id": "123efg",
           "url": "dashboard",
           "title": "Downlink Dashboard",
+          "missions": [
+            { "mission": "GRACEFO", "instrument": "C" },
+            { "mission": "GRACEFO", "instrument": "D" }
+          ],
+          "dateFormat": "short",
           "sections": [
             {
-              "id": "sertryfdf",
+              "id": "htegw3re",
               "type": "section",
-              "title": "Examples",
+              "title": "",
               "enableHeader": false,
+              "resizable": false,
               "defaultOpen": true,
-              "layout": [{ "i": "efdgb", "x": 0, "y": 0, "w": 12, "h": 4 }],
+              "layout": [{ "i": "3r4gtrbgc", "x": 0, "y": 0, "w": 12, "h": 4 }],
               "entities": [
                 {
-                  "id": "efdgb",
-                  "type": "timeline",
-                  "title": "Timeline",
-                  "marginLeft": 160,
-                  "rows": [
+                  "dateRange": { "start": "", "end": "" },
+                  "id": "3r4gtrbgc",
+                  "title": "",
+                  "type": "downlink-dashboard",
+                  "version": "04",
+                  "instrument": "C",
+                  "defaultPassGapLimit": 2000,
+                  "defaultFields": [
+                    "file_name",
+                    "first_data_point_t_tag",
+                    "last_data_point_t_tag",
+                    "n_recs",
+                    "file_tag",
+                    "process_ttag",
+                    "time_gap_avg",
+                    "time_gap_var",
+                    "time_gap_min",
+                    "time_gap_max",
+                    "n_qual_bits",
+                    "bit_count_0",
+                    "bit_count_1",
+                    "bit_count_2",
+                    "bit_count_3",
+                    "bit_count_4",
+                    "bit_count_5",
+                    "bit_count_6",
+                    "bit_count_7"
+                  ],
+                  "gapField": "time_gap_max",
+                  "products": [
                     {
-                      "id": "sdfsdf",
-                      "type": "timeline-row",
-                      "title": "ACC1A",
-                      "syncWithPageDateRange": true,
-                      "entity": {
-                        "id": "aedfsrdvc",
-                        "type": "chart",
-                        "title": "Coalesced Angular Acceleration X (m/sec²)",
-                        "syncWithPageDateRange": true,
-                        "yAxes": [
-                          {
-                            "id": "y1",
-                            "label": "",
-                            "position": "left"
-                          }
-                        ],
-                        "layers": [
-                          {
-                            "id": "3ewfsvd",
-                            "field": "ang_accl_x",
-                            "version": "04",
-                            "mission": "GRACEFO",
-                            "dataset": "ACC1A",
-                            "instrument": "D",
-                            "startTime": "2022-03-02T00:26:00.000000Z",
-                            "endTime": "2022-03-02T00:36:00.000000Z",
-                            "yAxisId": "y1"
-                          }
-                        ]
-                      },
-                      "subrows": [
+                      "dataset": "ACC1A",
+                      "entities": [
                         {
-                          "id": "3r4wrfdv",
-                          "type": "text",
-                          "title": "Description",
-                          "text": "Level 1A accelerometer data"
-                        },
-                        {
-                          "id": "fghyjtyt4r",
-                          "type": "table",
-                          "title": "Values",
+                          "id": "aedfsrdvc",
+                          "type": "chart",
+                          "title": "Ang Acc X",
                           "syncWithPageDateRange": true,
-                          "columns": [
-                            { "field": "timestamp", "layerId": "48gne" },
-                            { "field": "ang_accl_x", "layerId": "48gne" },
-                            { "field": "ang_accl_y", "layerId": "48gne" },
-                            { "field": "ang_accl_z", "layerId": "48gne" }
+                          "expandable": true,
+                          "yAxes": [
+                            {
+                              "id": "y1",
+                              "label": "",
+                              "position": "left"
+                            }
                           ],
                           "layers": [
                             {
-                              "id": "48gne",
+                              "id": "5dfgdfgdfg",
+                              "type": "line",
+                              "fields": ["lin_accl_x"],
                               "version": "04",
                               "mission": "GRACEFO",
                               "dataset": "ACC1A",
                               "instrument": "D",
-                              "fields": [
-                                "ang_accl_x",
-                                "ang_accl_y",
-                                "ang_accl_z",
-                                "timestamp"
-                              ],
                               "startTime": "2022-03-02T00:26:00.000000Z",
-                              "endTime": "2022-03-02T00:36:00.000000Z"
+                              "endTime": "2022-03-02T00:36:00.000000Z",
+                              "yAxisId": "y1"
                             }
                           ]
                         }
                       ]
                     },
-                    {
-                      "id": "sdfsdf2",
-                      "type": "timeline-row",
-                      "title": "ACT1A",
-                      "syncWithPageDateRange": true,
-                      "entity": {
-                        "id": "aedfsrdvc",
-                        "type": "chart",
-                        "title": "Coalesced Angular Acceleration X (m/sec²)",
-                        "syncWithPageDateRange": true,
-                        "yAxes": [
-                          {
-                            "id": "y1",
-                            "label": "",
-                            "position": "left"
-                          }
-                        ],
-                        "layers": [
-                          {
-                            "id": "5dfgdfgdfg",
-                            "field": "lin_accl_x",
-                            "version": "04",
-                            "mission": "GRACEFO",
-                            "dataset": "ACT1A",
-                            "instrument": "D",
-                            "startTime": "2022-03-02T00:26:00.000000Z",
-                            "endTime": "2022-03-02T00:36:00.000000Z",
-                            "yAxisId": "y1"
-                          }
-                        ]
-                      },
-                      "subrows": []
-                    },
-                    {
-                      "id": "sdfsdf3",
-                      "type": "timeline-row",
-                      "title": "ACT1B",
-                      "syncWithPageDateRange": true,
-                      "entity": {
-                        "id": "aedfsrdvc",
-                        "type": "chart",
-                        "title": "Coalesced Angular Acceleration X (m/sec²)",
-                        "syncWithPageDateRange": true,
-                        "yAxes": [
-                          {
-                            "id": "y1",
-                            "label": "",
-                            "position": "left"
-                          }
-                        ],
-                        "layers": [
-                          {
-                            "id": "3rdfcf",
-                            "field": "lin_accl_x",
-                            "version": "04",
-                            "mission": "GRACEFO",
-                            "dataset": "ACT1B",
-                            "instrument": "D",
-                            "startTime": "2022-03-02T00:26:00.000000Z",
-                            "endTime": "2022-03-02T00:36:00.000000Z",
-                            "yAxisId": "y1"
-                          }
-                        ]
-                      },
-                      "subrows": []
-                    }
+                    { "dataset": "AHK1A" },
+                    { "dataset": "GNV1A" },
+                    { "dataset": "GPS1A" },
+                    { "dataset": "HRT1A" },
+                    { "dataset": "IHK1A" },
+                    { "dataset": "IMU1A" },
+                    { "dataset": "KBR1A" },
+                    { "dataset": "LHK1A" },
+                    { "dataset": "LRI1A" },
+                    { "dataset": "LSM1A" },
+                    { "dataset": "MAG1A" },
+                    { "dataset": "SCA1A" },
+                    { "dataset": "THR1A", "passGapLimit": 100000000 },
+                    { "dataset": "TNK1A" }
                   ]
                 }
               ]
@@ -245,7 +188,7 @@
                       "id": "3regf",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "location",
+                      "fields": ["location"],
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
@@ -263,25 +206,27 @@
                       "id": "3regf",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "orange"
+                      "color": "#4bb1ff"
                     },
                     {
                       "id": "3rwefrd",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "blue"
+                      "color": "#f14444"
                     }
                   ],
                   "yAxes": [
@@ -296,7 +241,7 @@
                       "id": "y2",
                       "label": "IHK1A Antenna phase center offset correction accl",
                       "position": "right",
-                      "color": "red"
+                      "color": "#4bb1ff"
                     }
                   ]
                 },
@@ -310,37 +255,40 @@
                       "id": "fdv",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "orange"
+                      "color": "#4bb1ff"
                     },
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "blue"
+                      "color": "#f14444"
                     },
                     {
                       "id": "2wedfg",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "ang_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
-                      "instrument": "C",
+                      "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y2",
-                      "color": "red"
+                      "color": "#11c12b"
                     }
                   ],
                   "yAxes": [
@@ -351,10 +299,10 @@
                     },
                     {
                       "id": "y2",
-                      "label": "IHK1A Antenna phase center offset correction accl",
+                      "label": "ACT1A Log Angular Acceleration X (m/sec²)",
                       "position": "right",
                       "type": "logarithmic",
-                      "color": "red"
+                      "color": "#11c12b"
                     }
                   ]
                 },
@@ -368,13 +316,14 @@
                       "id": "fdv",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
-                      "color": "orange",
+                      "color": "#4bb1ff",
                       "hideLines": true,
                       "pointRadius": 2
                     },
@@ -382,13 +331,14 @@
                       "id": "sdfe",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
-                      "color": "blue",
+                      "color": "#f14444",
                       "hidePoints": true,
                       "lineWidth": 8
                     },
@@ -396,13 +346,14 @@
                       "id": "2ed",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:33:25.000000Z",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "yAxisId": "y1",
-                      "color": "green"
+                      "color": "#11c12b"
                     }
                   ],
                   "yAxes": [
@@ -426,25 +377,27 @@
                       "id": "fdv",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "orange"
+                      "color": "#4bb1ff"
                     },
                     {
                       "id": "sdfe",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "blue"
+                      "color": "#f14444"
                     }
                   ],
                   "yAxes": [
@@ -465,40 +418,43 @@
                       "id": "adfsdghy",
                       "mission": "GRACEFO",
                       "dataset": "ACT1B",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "label": "GRACEFO D: lin_accl_y v04",
                       "version": "04",
                       "instrument": "D",
                       "startTime": "2020-03-02T00:26:00.000000Z",
                       "endTime": "2023-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "green"
+                      "color": "#4bb1ff"
                     },
                     {
-                      "id": "adfsdghy",
+                      "id": "uyjtyhrgefd",
                       "mission": "GRACEFO",
                       "dataset": "ACT1B",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "label": "GRACEFO D: lin_accl_y v00",
                       "version": "00",
                       "instrument": "D",
                       "startTime": "2020-03-02T00:26:00.000000Z",
                       "endTime": "2023-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "red"
+                      "color": "#f14444"
                     },
                     {
                       "id": "3r4etfnh",
                       "mission": "GRACEFO",
                       "dataset": "ACT1B",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "label": "GRACEFO D: lin_accl_y v00-v04",
                       "version": "00",
                       "instrument": "D",
                       "startTime": "2020-03-02T00:26:00.000000Z",
                       "endTime": "2023-03-02T00:36:00.000000Z",
                       "yAxisId": "y1",
-                      "color": "blue",
+                      "color": "#11c12b",
                       "transforms": [
                         {
                           "axis": "y",
@@ -527,7 +483,8 @@
                       "id": "asdasd",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
@@ -561,26 +518,37 @@
                   "type": "chart",
                   "title": "Coalesced Linear Acceleration X (m/sec²)",
                   "syncWithPageDateRange": true,
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "position": "left"
+                    }
+                  ],
                   "layers": [
                     {
                       "id": "234567",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1",
+                      "color": "#4bb1ff"
                     },
                     {
                       "id": "345678",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1"
                     }
                   ]
                 },
@@ -593,23 +561,27 @@
                   "layers": [
                     {
                       "id": "234567",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1"
                     },
                     {
                       "id": "2wdfgt4",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1"
                     }
                   ]
                 },
@@ -622,23 +594,27 @@
                   "layers": [
                     {
                       "id": "3wefsdv",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1"
                     },
                     {
                       "id": "3rwefv",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
                       "instrument": "D",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "yAxisId": "y1"
                     }
                   ]
                 }
@@ -665,7 +641,8 @@
                   "layers": [
                     {
                       "id": "r4redgbv",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -675,7 +652,8 @@
                     },
                     {
                       "id": "sfdr34red",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -694,7 +672,8 @@
                   "layers": [
                     {
                       "id": "sdfer4ed",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -704,7 +683,8 @@
                     },
                     {
                       "id": "ewfsvc",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -723,7 +703,8 @@
                   "layers": [
                     {
                       "id": "sdfxv",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -733,7 +714,8 @@
                     },
                     {
                       "id": "sdfsdfsf",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACC1A",
@@ -773,7 +755,8 @@
                   "layers": [
                     {
                       "id": "234567",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -783,7 +766,8 @@
                     },
                     {
                       "id": "345678",
-                      "field": "lin_accl_x",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -802,7 +786,8 @@
                   "layers": [
                     {
                       "id": "234567",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -812,7 +797,8 @@
                     },
                     {
                       "id": "2wdfgt4",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -831,7 +817,8 @@
                   "layers": [
                     {
                       "id": "32r4etrhyg",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -841,7 +828,8 @@
                     },
                     {
                       "id": "2eqsgdf",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -874,7 +862,8 @@
                   "layers": [
                     {
                       "id": "312ewfdg",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -884,7 +873,8 @@
                     },
                     {
                       "id": "2eqwfsdbg",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -903,7 +893,8 @@
                   "layers": [
                     {
                       "id": "3rwefrdgfgb",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -913,7 +904,8 @@
                     },
                     {
                       "id": "2eqwfsdb",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -932,7 +924,8 @@
                   "layers": [
                     {
                       "id": "srdgtfhtw3re",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -942,7 +935,8 @@
                     },
                     {
                       "id": "23rwegdfds",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -982,7 +976,8 @@
                   "layers": [
                     {
                       "id": "4erfdsf",
-                      "field": "on_time_att_ctrl_1_1",
+                      "fields": ["on_time_att_ctrl_1_1"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -992,7 +987,8 @@
                     },
                     {
                       "id": "srw34et",
-                      "field": "on_time_att_ctrl_1_2",
+                      "fields": ["on_time_att_ctrl_1_2"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -1002,7 +998,8 @@
                     },
                     {
                       "id": "t5rhyhtgrfe",
-                      "field": "on_time_att_ctrl_1_3",
+                      "fields": ["on_time_att_ctrl_1_3"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -1012,7 +1009,8 @@
                     },
                     {
                       "id": "2qerwegd",
-                      "field": "on_time_att_ctrl_1_4",
+                      "fields": ["on_time_att_ctrl_1_4"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -1022,7 +1020,8 @@
                     },
                     {
                       "id": "3rwedgf",
-                      "field": "on_time_att_ctrl_1_5",
+                      "fields": ["on_time_att_ctrl_1_5"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -1032,7 +1031,8 @@
                     },
                     {
                       "id": "esfdgfhter",
-                      "field": "on_time_att_ctrl_1_6",
+                      "fields": ["on_time_att_ctrl_1_6"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "THR1A",
@@ -1051,7 +1051,8 @@
                   "layers": [
                     {
                       "id": "234567",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1061,7 +1062,8 @@
                     },
                     {
                       "id": "2wdfgt4",
-                      "field": "lin_accl_y",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1080,7 +1082,8 @@
                   "layers": [
                     {
                       "id": "32r4etrhyg",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1090,7 +1093,8 @@
                     },
                     {
                       "id": "2eqsgdf",
-                      "field": "lin_accl_z",
+                      "fields": ["lin_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1123,7 +1127,8 @@
                   "layers": [
                     {
                       "id": "312ewfdg",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1133,7 +1138,8 @@
                     },
                     {
                       "id": "2eqwfsdbg",
-                      "field": "ang_accl_x",
+                      "fields": ["ang_accl_x"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1152,7 +1158,8 @@
                   "layers": [
                     {
                       "id": "3rwefrdgfgb",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1162,7 +1169,8 @@
                     },
                     {
                       "id": "2eqwfsdb",
-                      "field": "ang_accl_y",
+                      "fields": ["ang_accl_y"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1181,7 +1189,8 @@
                   "layers": [
                     {
                       "id": "srdgtfhtw3re",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",
@@ -1191,7 +1200,8 @@
                     },
                     {
                       "id": "23rwegdfds",
-                      "field": "ang_accl_z",
+                      "fields": ["ang_accl_z"],
+                      "type": "line",
                       "version": "04",
                       "mission": "GRACEFO",
                       "dataset": "ACT1A",

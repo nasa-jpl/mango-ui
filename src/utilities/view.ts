@@ -2,16 +2,18 @@ import { format } from "d3-format";
 import {
   ChartEntity,
   ChartLayer,
+  ChartLayerEvent,
+  ChartLayerLine,
   DataTransform,
   DataTransformDerived,
   DataTransformSelf,
+  DownlinkDashboardEntity,
   Entity,
   EntityType,
   MapEntity,
   TableEntity,
   TextEntity,
   TimeSeriesPoint,
-  TimelineEntity,
   TimelineRowEntity,
 } from "../types/view";
 
@@ -27,14 +29,24 @@ export function isTableEntity(entity: Entity): entity is TableEntity {
   return entity.type === "table";
 }
 
-export function isTimelineEntity(entity: Entity): entity is TimelineEntity {
-  return entity.type === "timeline";
+export function isDownlinkDashboardEntity(
+  entity: Entity
+): entity is DownlinkDashboardEntity {
+  return entity.type === "downlink-dashboard";
 }
 
 export function isTimelineRowEntity(
   entity: Entity
 ): entity is TimelineRowEntity {
   return entity.type === "timeline-row";
+}
+
+export function isChartLayerLine(layer: ChartLayer): layer is ChartLayerLine {
+  return layer.type === "line";
+}
+
+export function isChartLayerEvent(layer: ChartLayer): layer is ChartLayerEvent {
+  return layer.type === "event";
 }
 
 export function isTextEntity(entity: {
@@ -47,7 +59,11 @@ export function applyLayerTransform(
   value: number,
   point: TimeSeriesPoint,
   transform: DataTransform,
-  data: { layer: ChartLayer; points: TimeSeriesPoint[] }[],
+  field: string | undefined,
+  data: {
+    layer: ChartLayer;
+    pointsByField: Record<string, TimeSeriesPoint[]>;
+  }[],
   index: number = 0
 ): number {
   let newValue = value;
@@ -64,19 +80,19 @@ export function applyLayerTransform(
     const matchingLayer = data.find(
       ({ layer }) => layer.id === transformDerived.layerId
     );
-    if (matchingLayer) {
+    if (matchingLayer && field) {
       // Find matching value in time
-      const matchingPoint = matchingLayer.points[index];
+      const matchingPoint = matchingLayer.pointsByField[field][index];
       if (
         typeof matchingPoint === "object" &&
         // TODO would be nice to refactor this to take in a Point<number, number> where x is milliseconds
         // instead of a timestamp string
         new Date(matchingPoint.x).getTime() === new Date(point.x).getTime()
       ) {
-        newValue += transform.add ? matchingPoint.y : 0;
-        newValue -= transform.subtract ? matchingPoint.y : 0;
-        newValue *= transform.multiply ? matchingPoint.y : 1;
-        newValue /= transform.divide ? matchingPoint.y : 1;
+        newValue += transform.add ? (matchingPoint.y as number) : 0;
+        newValue -= transform.subtract ? (matchingPoint.y as number) : 0;
+        newValue *= transform.multiply ? (matchingPoint.y as number) : 1;
+        newValue /= transform.divide ? (matchingPoint.y as number) : 1;
       }
     }
   }
@@ -88,14 +104,19 @@ export function applyLayerTransform(
 export function applyLayerTransforms(
   point: TimeSeriesPoint,
   layer: ChartLayer,
-  data: { layer: ChartLayer; points: TimeSeriesPoint[] }[],
+  data: {
+    layer: ChartLayer;
+    pointsByField: Record<string, TimeSeriesPoint[]>;
+  }[],
   index: number
 ) {
   if (!layer.transforms || !layer.transforms.length) return point;
+  const field = layer.fields[0]; // TODO pass this in?
   let newPoint = { ...point };
   layer.transforms.forEach((transform) => {
     const value = newPoint[transform.axis];
     newPoint = {
+      ...newPoint,
       x:
         transform.axis === "x"
           ? new Date(
@@ -103,6 +124,7 @@ export function applyLayerTransforms(
                 new Date(value).getTime(),
                 newPoint,
                 transform,
+                field,
                 data,
                 index
               )
@@ -114,6 +136,7 @@ export function applyLayerTransforms(
               value as number,
               newPoint,
               transform,
+              field,
               data,
               index
             )

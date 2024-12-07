@@ -1,21 +1,29 @@
 import { IconCaretDown, IconCaretRight } from "@nasa-jpl/react-stellar";
 import classNames from "classnames";
 import { useState } from "react";
-import { Product } from "../../../types/api";
+import { DataResponseDataEntry, Product } from "../../../types/api";
 import { ProductPreview } from "../../../types/page";
+import { Status } from "../../../types/status";
 import { DateRange } from "../../../types/time";
 import { TimelineRowEntity } from "../../../types/view";
 import Entity from "../../page/Entity";
+import StatusBadge from "../../ui/StatusBadge";
 import "./TimelineRow.css";
 
 export declare type TimelineRowProps = {
   dateRange: DateRange;
   hoverDate: Date | null;
+  instrument?: string | null;
+  loading?: boolean;
   marginLeft: number;
+  mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onHoverDateChange?: (date: Date | null) => void;
+  onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
   products: Product[];
+  selectedPoint: DataResponseDataEntry | null;
+  status?: Status;
   timelineRowEntity: TimelineRowEntity;
 };
 
@@ -25,11 +33,20 @@ export function TimelineRow({
   marginLeft,
   products,
   hoverDate,
+  selectedPoint,
+  mission,
+  instrument,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
   onSetProductPreview = () => {},
+  onSelectPoint = () => {},
+  status,
+  loading,
 }: TimelineRowProps) {
   const [expanded, setExpanded] = useState(false);
+  const [subrowExpansionMap, setSubrowExpansionMap] = useState<
+    Record<string, boolean>
+  >({});
 
   return (
     <div
@@ -45,45 +62,78 @@ export function TimelineRow({
         >
           {!expanded && <IconCaretRight />}
           {expanded && <IconCaretDown />}
+          {status && <StatusBadge status={status} />}
           {timelineRowEntity.title}
         </button>
         <Entity
           className="timeline-row-entity"
+          loading={loading}
           entity={timelineRowEntity.entity}
           dateRange={dateRange}
           hoverDate={hoverDate}
           products={products}
           showHeader={false}
           compact
+          mission={mission}
+          instrument={instrument}
           onSetProductPreview={onSetProductPreview}
           onDateRangeChange={onDateRangeChange}
           onHoverDateChange={onHoverDateChange}
+          onSelectPoint={onSelectPoint}
+          selectedPoint={selectedPoint}
         />
       </div>
       {expanded && (
         <div>
           {timelineRowEntity.subrows.map((entity) => {
+            const subrowExpanded = subrowExpansionMap[entity.id];
             return (
-              <div className="timeline-row-subrow">
-                <div
-                  className="timeline-row-subrow-header st-typography-label"
-                  style={{ width: `${marginLeft}px` }}
-                >
-                  {entity.title}
+              <div className="timeline-row-subrow" key={entity.id}>
+                <div className="timeline-row-subrow-container">
+                  {entity.expandable && (
+                    <button
+                      style={{ width: `${marginLeft}px` }}
+                      className="timeline-row-subrow-title st-typography-medium st-button tertiary"
+                      onClick={() =>
+                        setSubrowExpansionMap({
+                          ...subrowExpansionMap,
+                          [entity.id]: !subrowExpansionMap[entity.id],
+                        })
+                      }
+                    >
+                      {!subrowExpanded && <IconCaretRight />}
+                      {subrowExpanded && <IconCaretDown />}
+                      {entity.title}
+                    </button>
+                  )}
+                  {!entity.expandable && (
+                    <div
+                      style={{ width: `${marginLeft}px` }}
+                      className="timeline-row-subrow-title st-typography-medium"
+                    >
+                      {entity.title}
+                    </div>
+                  )}
                 </div>
                 <Entity
                   className={classNames("timeline-subrow-entity", {
-                    "timeline-subrow-entity--padded": entity.type === "table",
+                    "timeline-subrow-entity--padded":
+                      entity.type === "table" && subrowExpanded,
                   })}
                   entity={entity}
+                  loading={loading}
                   dateRange={dateRange}
                   hoverDate={hoverDate}
                   products={products}
                   showHeader={false}
-                  compact
+                  compact={!subrowExpanded}
+                  mission={mission}
+                  instrument={instrument}
                   onSetProductPreview={onSetProductPreview}
                   onDateRangeChange={onDateRangeChange}
                   onHoverDateChange={onHoverDateChange}
+                  onSelectPoint={onSelectPoint}
+                  selectedPoint={selectedPoint}
                 />
               </div>
             );

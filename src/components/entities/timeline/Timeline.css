@@ -27,6 +27,7 @@
 
 .tick {
   position: absolute;
+  white-space: nowrap;
 }
 
 .tick-mark {
@@ -40,12 +41,35 @@
 .tick-label {
   color: var(--st-gray-70);
   transform: translateX(calc(-50%));
+  user-select: none;
 }
 
-.tick:last-of-type .tick-label {
-  transform: translateX(calc(-100% + -8px));
+.timeline-hover-date--tick .tick-mark {
+  background: rgba(0, 0, 0, 0.5);
+  height: 12.5px;
+  left: 0;
+  top: 6px;
 }
 
-.tick:last-of-type .tick-mark {
-  display: none;
+.timeline-hover-date--flipped .tick-mark {
+  left: unset;
+}
+
+.timeline-hover-date-container {
+  position: absolute;
+}
+
+.timeline-hover-date {
+  color: var(--st-gray-70);
+  font-size: 10px;
+  font-variant: tabular-nums;
+  letter-spacing: -0.3px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.timeline-hover-date--text {
+  background: white;
+  margin: -2px;
+  padding: 2px;
 }

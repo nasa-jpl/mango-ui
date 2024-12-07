@@ -2,17 +2,16 @@ import classNames from "classnames";
 import { useMemo, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
 
 import {
   Button,
   IconCaretDown,
   IconCaretRight,
 } from "@nasa-jpl/react-stellar/";
-import { Product } from "../../types/api";
+import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
-import { Section as SectionType } from "../../types/view";
+import { Entity as EntityType, Section as SectionType } from "../../types/view";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
@@ -20,12 +19,16 @@ import "./Section.css";
 export declare type SectionProps = {
   dateRange: DateRange;
   hoverDate: Date | null;
+  instrument?: string | null;
+  mission?: string | null;
   onDateRangeChange: (dateRange: DateRange) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
+  onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
   section: SectionType;
+  selectedPoint: DataResponseDataEntry | null;
 };
 
 export const Section = ({
@@ -33,8 +36,12 @@ export const Section = ({
   hoverDate,
   products,
   section,
+  selectedPoint,
+  instrument = null,
+  mission = null,
   onSectionChange,
   onDateRangeChange = () => {},
+  onSelectPoint = () => {},
   onHoverDateChange = () => {},
   onSetProductPreview = () => {},
 }: SectionProps) => {
@@ -46,6 +53,8 @@ export const Section = ({
     () => WidthProvider(ReactGridLayout),
     []
   );
+  const resizable =
+    typeof section.resizable === "boolean" ? section.resizable : true;
   const onLayoutChange = (layouts: Layout[]) => {
     const newSection = { ...section };
     newSection.layout = layouts.map((layout) => {
@@ -90,10 +99,28 @@ export const Section = ({
     }
   };
 
+  const renderEntity = (e: EntityType) => (
+    <Entity
+      products={products}
+      entity={e}
+      onDateRangeChange={onDateRangeChange}
+      onHoverDateChange={onHoverDateChange}
+      onSelectPoint={onSelectPoint}
+      onSetProductPreview={onSetProductPreview}
+      key={e.id}
+      className={entityClass}
+      dateRange={dateRange}
+      hoverDate={hoverDate}
+      selectedPoint={selectedPoint}
+      mission={mission}
+      instrument={instrument}
+    />
+  );
+
   return (
     <div className={classNames("section", { "section--open": open })}>
-      <div className="section-header">
-        {enableHeader && (
+      {enableHeader && (
+        <div className="section-header">
           <Button
             variant="tertiary"
             onClick={() => {
@@ -104,43 +131,36 @@ export const Section = ({
             {open ? <IconCaretDown /> : <IconCaretRight />}
             {title}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="section-content" ref={onGetWrapperDivRef}>
-        <MemoizedReactGridLayout
-          measureBeforeMount={false} // TODO not working right yet with true, existing bug with the library
-          draggableHandle=".entity-drag-handle"
-          compactType="horizontal"
-          margin={[8, 8]}
-          containerPadding={[0, 0]}
-          rowHeight={176}
-          className="layout"
-          layout={layout}
-          onLayoutChange={onLayoutChange}
-          onDragStart={onDragStart}
-          onDragStop={onDragStop}
-          onResizeStart={onResizeStart}
-          onResizeStop={onResizeStop}
-        >
-          {entities.map((e) => {
-            return (
-              // @ts-expect-error No typing available
-              <CustomGridItemComponent key={e.id}>
-                <Entity
-                  products={products}
-                  entity={e}
-                  onDateRangeChange={onDateRangeChange}
-                  onHoverDateChange={onHoverDateChange}
-                  onSetProductPreview={onSetProductPreview}
-                  key={e.id}
-                  className={entityClass}
-                  dateRange={dateRange}
-                  hoverDate={hoverDate}
-                />
-              </CustomGridItemComponent>
-            );
-          })}
-        </MemoizedReactGridLayout>
+        {!resizable && entities.map(renderEntity)}
+        {resizable && (
+          <MemoizedReactGridLayout
+            measureBeforeMount={false} // TODO not working right yet with true, existing bug with the library
+            draggableHandle=".entity-drag-handle"
+            compactType="horizontal"
+            margin={[8, 8]}
+            containerPadding={[0, 0]}
+            rowHeight={176}
+            className="layout"
+            layout={layout}
+            onLayoutChange={onLayoutChange}
+            onDragStart={onDragStart}
+            onDragStop={onDragStop}
+            onResizeStart={onResizeStart}
+            onResizeStop={onResizeStop}
+          >
+            {entities.map((e) => {
+              return (
+                // @ts-expect-error No typing available
+                <CustomGridItemComponent key={e.id}>
+                  {renderEntity(e)}
+                </CustomGridItemComponent>
+              );
+            })}
+          </MemoizedReactGridLayout>
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,8 @@
 }
 
 .chart .chart-canvas-container-compact {
+  flex: 0;
+  height: 24px;
   padding: 0;
 }
 
@@ -75,7 +77,6 @@
   pointer-events: none;
   position: relative;
   top: 0;
-  transform: translateX(-0.5px);
   width: 1px;
 }
 

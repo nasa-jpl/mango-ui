@@ -54,6 +54,7 @@ const tableEntity: TableEntity = {
 
 export const Default: Story = {
   args: {
+    selectedPoint: null,
     tableEntity,
     dateRange: { start: "", end: "" },
     products: [],

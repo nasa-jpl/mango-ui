@@ -1,5 +1,9 @@
 import { expect, test } from "vitest";
-import { generateTestChartLayer } from "../../e2e-tests/utilities/view";
+import {
+  generateTestChartLayer,
+  generateTestDataEntry,
+} from "../../e2e-tests/utilities/view";
+import { TimeSeriesPoint } from "../types/view";
 import {
   applyLayerTransform,
   applyLayerTransforms,
@@ -9,63 +13,125 @@ import {
 const chartLayer1 = generateTestChartLayer();
 const chartLayer2 = generateTestChartLayer();
 const chartLayer3 = generateTestChartLayer();
+const dummyPoint = generateTestDataEntry();
 const testData = [
   {
     layer: chartLayer1,
-    points: [
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
-      { x: "2030-01-02T00:00:00.000Z", y: 1 },
-      { x: "2030-01-03T00:00:00.000Z", y: 2 },
-    ],
+    pointsByField: {
+      field1: [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-02T00:00:00.000Z",
+          y: 1,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-03T00:00:00.000Z",
+          y: 2,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+    },
   },
   {
     layer: chartLayer2,
-    points: [
-      { x: "2030-01-01T00:00:00.000Z", y: 3 },
-      { x: "2030-01-02T00:00:00.000Z", y: 4 },
-      { x: "2030-01-03T00:00:00.000Z", y: 5 },
-    ],
+    pointsByField: {
+      field1: [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 3,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-02T00:00:00.000Z",
+          y: 4,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-03T00:00:00.000Z",
+          y: 5,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+    },
   },
   {
     layer: chartLayer3,
-    points: [
-      { x: "2031-01-01T00:00:00.000Z", y: 6 },
-      { x: "2031-01-02T00:00:00.000Z", y: 7 },
-      { x: "2031-01-03T00:00:00.000Z", y: 8 },
-    ],
+    pointsByField: {
+      field1: [
+        {
+          x: "2031-01-01T00:00:00.000Z",
+          y: 6,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2031-01-02T00:00:00.000Z",
+          y: 7,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2031-01-03T00:00:00.000Z",
+          y: 8,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+    },
   },
 ];
 
 test("applyLayerTransform", () => {
+  const point: TimeSeriesPoint = {
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: generateTestDataEntry(),
+    selected: false,
+  };
   expect(
     applyLayerTransform(
       0,
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       { add: 1, type: "self", axis: "y" },
+      undefined,
       testData
     )
   ).toBe(1);
   expect(
     applyLayerTransform(
       new Date("2030-01-01T00:00:00.000Z").getTime(),
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       { add: 500, type: "self", axis: "y" },
+      undefined,
       testData
     )
   ).toBe(new Date("2030-01-01T00:00:00.000Z").getTime() + 500);
   expect(
     applyLayerTransform(
       0,
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       { add: 1, subtract: 2, type: "self", axis: "y" },
+      undefined,
       testData
     )
   ).toBe(-1);
   expect(
     applyLayerTransform(
       0,
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       { add: true, type: "derived", axis: "y", layerId: chartLayer2.id },
+      "field1",
       testData,
       0
     )
@@ -73,35 +139,45 @@ test("applyLayerTransform", () => {
 });
 
 test("applyLayerTransforms", () => {
+  const point: TimeSeriesPoint = {
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: generateTestDataEntry(),
+    selected: false,
+  };
+  expect(applyLayerTransforms(point, chartLayer1, testData, 0)).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: point.raw,
+    selected: point.selected,
+  });
+  expect(
+    applyLayerTransforms(point, { ...chartLayer1, transforms: [] }, testData, 0)
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: point.raw,
+    selected: point.selected,
+  });
   expect(
     applyLayerTransforms(
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
-      chartLayer1,
-      testData,
-      0
-    )
-  ).to.deep.eq({ x: "2030-01-01T00:00:00.000Z", y: 0 });
-  expect(
-    applyLayerTransforms(
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
-      { ...chartLayer1, transforms: [] },
-      testData,
-      0
-    )
-  ).to.deep.eq({ x: "2030-01-01T00:00:00.000Z", y: 0 });
-  expect(
-    applyLayerTransforms(
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       { ...chartLayer1, transforms: [{ type: "self", add: 1, axis: "y" }] },
       testData,
       0
     )
-  ).to.deep.eq({ x: "2030-01-01T00:00:00.000Z", y: 1 });
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 1,
+    raw: point.raw,
+    selected: point.selected,
+  });
   expect(
     applyLayerTransforms(
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       {
         ...chartLayer1,
+        fields: ["field1"],
         transforms: [
           { type: "self", add: 1, axis: "y" },
           {
@@ -115,12 +191,18 @@ test("applyLayerTransforms", () => {
       testData,
       0
     )
-  ).to.deep.eq({ x: "2030-01-01T00:00:00.000Z", y: 3 });
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 3,
+    raw: point.raw,
+    selected: point.selected,
+  });
   expect(
     applyLayerTransforms(
-      { x: "2030-01-01T00:00:00.000Z", y: 0 },
+      point,
       {
         ...chartLayer1,
+        fields: ["field1"],
         transforms: [
           { type: "self", add: 1, axis: "y" },
           // Case where chartLayer1 is not time aligned with chartLayer3
@@ -135,7 +217,12 @@ test("applyLayerTransforms", () => {
       testData,
       0
     )
-  ).to.deep.eq({ x: "2030-01-01T00:00:00.000Z", y: 1 });
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 1,
+    raw: point.raw,
+    selected: point.selected,
+  });
 });
 
 test("formatYValue", () => {

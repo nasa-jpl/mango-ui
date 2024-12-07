@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { ChartLayer, TableLayer } from "../types/view";
+import { DataLayer } from "../types/view";
 
 /**
  * Generates unique ID
@@ -103,11 +103,7 @@ export function fetchWithProgress<T>(url: string) {
  * Returns unique identifier for a layer which currently comprises of:
  * mission, dataset, field, and instrument
  */
-export function getChartLayerId(layer: ChartLayer): string {
-  return `${layer.mission}_${layer.dataset}_${layer.field}_${layer.instrument}_${layer.version}_${layer.id}`;
-}
-
-export function getTableLayerId(layer: TableLayer): string {
+export function getDataLayerId(layer: DataLayer): string {
   return `${layer.mission}_${layer.dataset}_${layer.fields.join("_")}_${
     layer.instrument
   }_${layer.version}_${layer.id}`;
@@ -125,4 +121,31 @@ export function isAbortError(error: Error | unknown) {
  */
 export function pluralize(count: number): string {
   return count === 1 ? "" : "s";
+}
+
+/**
+ * Converts hex to rgba
+ * @see https://gist.github.com/danieliser/b4b24c9f772066bcf0a6
+ */
+export function convertHexToRGBA(hexCode: string, opacity: number = 1) {
+  try {
+    let hex = hexCode.replace("#", "");
+
+    if (hex.length === 3) {
+      hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+    }
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    /* Backward compatibility for whole number based opacity values. */
+    if (opacity > 1 && opacity <= 100) {
+      opacity = opacity / 100;
+    }
+
+    return `rgba(${r},${g},${b},${opacity})`;
+  } catch (err) {
+    return "#000000";
+  }
 }

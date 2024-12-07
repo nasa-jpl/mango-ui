@@ -1,41 +1,30 @@
-import { scaleTime } from "d3-scale";
-import { useCallback, useState } from "react";
+import classNames from "classnames";
+import { scaleUtc } from "d3-scale";
+import React, { useCallback, useState } from "react";
 import useResizeObserver from "../../../hooks/resizeObserver";
-import { Product } from "../../../types/api";
-import { ProductPreview } from "../../../types/page";
 import { DateRange } from "../../../types/time";
-import { TimelineEntity } from "../../../types/view";
-import TimelineRow from "../timeline-row/TimelineRow";
 import "./Timeline.css";
 
 export declare type TimelineProps = {
+  children?: React.ReactNode;
   dateRange: DateRange;
   hoverDate: Date | null;
-  onDateRangeChange?: (dateRange: DateRange) => void;
-  onHoverDateChange?: (date: Date | null) => void;
-  onSetProductPreview: (previewProduct: ProductPreview) => void;
-  products: Product[];
-  timelineEntity: TimelineEntity;
+  marginLeft: number;
 };
 
 export function Timeline({
-  timelineEntity,
-  dateRange,
-  products,
+  children,
+  marginLeft = 120,
   hoverDate,
-  onDateRangeChange = () => {},
-  onHoverDateChange = () => {},
-  onSetProductPreview = () => {},
+  dateRange,
 }: TimelineProps) {
   const [width, setWidth] = useState<number>(0);
-  const timeScale = scaleTime()
+  const timeScale = scaleUtc()
     .domain([new Date(dateRange.start), new Date(dateRange.end)])
     .range([0, width]);
-  const ticks = [
-    timeScale.nice().domain()[0],
-    ...timeScale.ticks(5).slice(1, -1),
-    timeScale.nice().domain()[1],
-  ];
+
+  const ticks = [...timeScale.ticks(5)];
+
   const tickFormat = timeScale.tickFormat();
 
   const onResize = useCallback((target: HTMLDivElement) => {
@@ -44,12 +33,26 @@ export function Timeline({
   }, []);
   const timeVisualizationRef = useResizeObserver(onResize);
 
+  const hoverDateStyles: React.CSSProperties = {};
+  let flip = false;
+  if (hoverDate) {
+    const left = timeScale(hoverDate);
+    if (left + 150 > width) {
+      flip = true;
+      hoverDateStyles.transform = "translateX(-100%)";
+    }
+  }
+  const hoverDateClasses = classNames(
+    "timeline-hover-date st-typography-medium",
+    { "timeline-hover-date--flipped": flip }
+  );
+
   return (
     <div className="timeline">
       <div className="timeline-time-visualization">
         <div
           className="timeline-time-visualization-label st-typography-medium"
-          style={{ width: `${timelineEntity.marginLeft}px` }}
+          style={{ width: `${marginLeft}px` }}
         >
           Date
         </div>
@@ -68,23 +71,31 @@ export function Timeline({
                 </div>
               );
             })}
+          {hoverDate && (
+            <>
+              <div
+                className={hoverDateClasses}
+                style={{
+                  position: "absolute",
+                  left: `${(timeScale(hoverDate) / width) * 100}%`,
+                  ...hoverDateStyles,
+                }}
+              >
+                <div className="timeline-hover-date--text">
+                  {hoverDate.toISOString()}
+                </div>
+              </div>
+              <div
+                className="tick timeline-hover-date--tick"
+                style={{ left: `${(timeScale(hoverDate) / width) * 100}%` }}
+              >
+                <div className="tick-mark" />
+              </div>
+            </>
+          )}
         </div>
       </div>
-      {timelineEntity.rows.map((row) => {
-        return (
-          <TimelineRow
-            key={row.id}
-            timelineRowEntity={row}
-            dateRange={dateRange}
-            marginLeft={timelineEntity.marginLeft}
-            products={products}
-            hoverDate={hoverDate}
-            onHoverDateChange={onHoverDateChange}
-            onDateRangeChange={onDateRangeChange}
-            onSetProductPreview={onSetProductPreview}
-          />
-        );
-      })}
+      {children}
     </div>
   );
 }

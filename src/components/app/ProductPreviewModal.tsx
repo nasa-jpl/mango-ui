@@ -15,13 +15,16 @@ import Chart from "../entities/chart/Chart";
 import DateRangePicker from "../ui/DateRangePicker";
 import "./ProductPreviewModal.css";
 
-const getProductDisplayName = (product: Product) => {
-  return `${product.mission} ${product.instruments[0]} ${product.id}`;
+const getProductDisplayName = (product: Product, instrument?: string) => {
+  return `${product.mission} ${instrument || product.instruments[0]} ${
+    product.id
+  }`;
 };
 
 export declare type ProductPreviewModalProps = {
   dateRange?: DateRange | undefined;
   field?: string;
+  instrument?: string;
   onClose: () => void;
   product?: Product;
   products: Product[];
@@ -32,6 +35,7 @@ export const ProductPreviewModal = ({
   onClose,
   product,
   products,
+  instrument,
   version: defaultVersion = "",
   dateRange: defaultDateRange,
   field: defaultField = "",
@@ -89,10 +93,10 @@ export const ProductPreviewModal = ({
         startTime: dateRange.start,
         endTime: dateRange.end,
         version,
-        field,
+        fields: [field],
         id: "layer1",
         mission: product.mission,
-        instrument: product.instruments[0],
+        instrument: instrument || product.instruments[0],
         yAxisId: "y1",
       },
     ],
@@ -113,7 +117,7 @@ export const ProductPreviewModal = ({
       className="product-preview-modal"
       onOpenChange={onClose}
       open
-      title={`${getProductDisplayName(product)} Preview`}
+      title={`${getProductDisplayName(product, instrument)} Preview`}
     >
       <ModalBody>
         <div className="product-preview-modal-content">
@@ -152,16 +156,10 @@ export const ProductPreviewModal = ({
               <DateRangePicker
                 startDate={new Date(dateRange.start)}
                 endDate={new Date(dateRange.end)}
-                onStartDateChange={(date) => {
+                onChange={(startDate, endDate) => {
                   setDateRange({
-                    end: dateRange.end,
-                    start: date.toISOString(),
-                  });
-                }}
-                onEndDateChange={(date) => {
-                  setDateRange({
-                    end: date.toISOString(),
-                    start: dateRange.start,
+                    end: endDate.toISOString(),
+                    start: startDate.toISOString(),
                   });
                 }}
               />
@@ -174,6 +172,7 @@ export const ProductPreviewModal = ({
             onDateRangeChange={setDateRange}
             hoverDate={null}
             onHoverDateChange={() => {}}
+            selectedPoint={null}
           />
         </div>
       </ModalBody>

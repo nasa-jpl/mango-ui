@@ -1,0 +1,14 @@
+.status-badge {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-width: 16px;
+}
+
+.status-badge--nominal {
+  color: #006e0b;
+}
+
+.status-badge--error {
+  color: #e67e77;
+}

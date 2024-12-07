@@ -1,5 +1,6 @@
 import type { ValueGetterParams } from "ag-grid-community";
-import { useEffect, useMemo, useState } from "react";
+import classNames from "classnames";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   DataResponse,
   DataResponseDataEntry,
@@ -8,9 +9,9 @@ import {
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
 import { DateRange } from "../../../types/time";
-import { TableEntity, TableLayer } from "../../../types/view";
+import { DataLayer, TableEntity } from "../../../types/view";
 import { getData } from "../../../utilities/api";
-import { getTableLayerId, isAbortError } from "../../../utilities/generic";
+import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
   getFieldMetadataForLayer,
   getProductForLayer,
@@ -20,21 +21,31 @@ import DataGrid from "../../ui/DataGrid/DataGrid";
 import "./Table.css";
 
 export declare type TableProps = {
+  compact?: boolean;
   dateRange: DateRange;
+  instrument?: string | null;
+  mission?: string | null;
+  onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
   products: Product[];
+  selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
   tableEntity: TableEntity;
 };
 
-export function Table({
+const Table = memo(function Table({
   dateRange,
   showHeader = true,
+  instrument,
+  mission,
   tableEntity,
   products,
+  selectedPoint,
   onSetProductPreview = () => {},
+  onSelectPoint = () => {},
+  compact = false,
 }: TableProps) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   // TODO pass error to DataGrid and have it make use of an error
   // const [error, setError] = useState<Error | null>();
   const [rowData, setRowData] = useState<
@@ -53,7 +64,9 @@ export function Table({
     fetchTableData(
       tableEntity.layers,
       computedDateRange.start,
-      computedDateRange.end
+      computedDateRange.end,
+      mission,
+      instrument
     );
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
@@ -63,6 +76,10 @@ export function Table({
     JSON.stringify(tableEntity.layers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(computedDateRange),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(tableEntity.data),
+    mission,
+    instrument,
   ]);
 
   const columnDefs: DataGridColumnDef[] = tableEntity.columns.map((column) => {
@@ -70,8 +87,17 @@ export function Table({
     if (!layer) {
       return {};
     }
-    const pseudoLayer = { ...layer, field: column.field };
-    const metadata = getFieldMetadataForLayer(pseudoLayer, products);
+    const pseudoLayer: DataLayer = {
+      ...layer,
+      fields: [column.field],
+      mission: mission ?? layer.mission,
+      instrument: instrument ?? layer.instrument,
+    };
+    const metadata = getFieldMetadataForLayer(
+      column.field,
+      pseudoLayer,
+      products
+    );
     const product = getProductForLayer(pseudoLayer, products);
     const fieldId = `${column.layerId}.${column.field}`;
     const col: DataGridColumnDef = {
@@ -83,7 +109,12 @@ export function Table({
       headerComponentParams: {
         onColumnPreview: () => {
           if (product) {
-            onSetProductPreview({ product, field: column.field, dateRange });
+            onSetProductPreview({
+              product,
+              field: column.field,
+              dateRange,
+              instrument: instrument || undefined,
+            });
           }
         },
       },
@@ -101,7 +132,7 @@ export function Table({
           !(column.layerId in params.data) ||
           !(column.field in params.data[column.layerId])
         ) {
-          return "Unk";
+          return "";
         }
         const fieldData = params.data[column.layerId][column.field];
         if (typeof fieldData !== "object") {
@@ -125,21 +156,25 @@ export function Table({
   });
 
   const fetchAllLayerData = async (
-    layers: TableLayer[],
+    layers: DataLayer[],
     startTime?: string,
-    endTime?: string
+    endTime?: string,
+    mission?: string | null,
+    instrument?: string | null
   ) => {
     setLoading(true);
     // setError(null);
     let results: {
-      layer: TableLayer;
+      layer: DataLayer;
       result: DataResponse;
     }[] = [];
     let aborted = false;
     let error = false;
     try {
       results = await Promise.all(
-        layers.map((layer) => fetchLayerData(layer, startTime, endTime))
+        layers.map((layer) =>
+          fetchLayerData(layer, startTime, endTime, mission, instrument)
+        )
       );
       setLoading(false);
     } catch (err) {
@@ -155,11 +190,13 @@ export function Table({
   };
 
   const fetchLayerData = (
-    layer: TableLayer,
+    layer: DataLayer,
     startTime: string | undefined,
-    endTime: string | undefined
-  ): Promise<{ layer: TableLayer; result: DataResponse }> => {
-    const layerFullId = getTableLayerId(layer);
+    endTime: string | undefined,
+    mission?: string | null,
+    instrument?: string | null
+  ): Promise<{ layer: DataLayer; result: DataResponse }> => {
+    const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
@@ -168,9 +205,9 @@ export function Table({
       const computedEndTime = endTime || layer.endTime;
 
       const { json, cancel } = getData(
-        layer.mission,
+        mission ?? layer.mission,
         layer.dataset,
-        layer.instrument,
+        instrument ?? layer.instrument,
         layer.version,
         layer.fields,
         computedStartTime,
@@ -195,21 +232,31 @@ export function Table({
   };
 
   const fetchTableData = async (
-    layers: TableLayer[],
+    layers: DataLayer[],
     startTime?: string,
-    endTime?: string
+    endTime?: string,
+    mission?: string | null,
+    instrument?: string | null
   ) => {
-    const { results, error, aborted } = await fetchAllLayerData(
-      layers,
-      startTime,
-      endTime
-    );
+    let finalResults = [];
+    if (tableEntity.data) {
+      finalResults = tableEntity.data;
+    } else {
+      const { results, error, aborted } = await fetchAllLayerData(
+        layers,
+        startTime,
+        endTime,
+        mission,
+        instrument
+      );
 
-    if (error || aborted) {
-      return;
+      if (error || aborted) {
+        return;
+      }
+      finalResults = results;
     }
     const rows: Record<string, DataResponseDataEntry>[] = [];
-    results.forEach(({ layer, result }) => {
+    finalResults.forEach(({ layer, result }) => {
       result.data.forEach((result, i) => {
         if (!rows[i]) {
           rows[i] = { [layer.id]: result };
@@ -221,12 +268,83 @@ export function Table({
     setRowData(rows);
   };
 
+  let selectedPointId;
+  let idField = "";
+  const tableEntityIdField = tableEntity.idField;
+  if (selectedPoint && typeof tableEntityIdField === "string") {
+    let idFieldKey = "";
+    const selectedRow = rowData.find((d) => {
+      // Check all layers
+      let found = false;
+      Object.entries(d).forEach(([key, value]) => {
+        if (
+          value[tableEntityIdField]?.value ===
+          selectedPoint[tableEntityIdField]?.value
+        ) {
+          found = true;
+          idField = `${key}.${tableEntityIdField}`;
+          idFieldKey = key;
+        }
+      });
+      return found;
+    });
+    if (
+      selectedRow &&
+      selectedRow[idFieldKey] &&
+      selectedRow[idFieldKey][tableEntityIdField]
+    ) {
+      selectedPointId =
+        selectedRow[idFieldKey][tableEntityIdField].value?.toString();
+    }
+  }
+
+  const onRowSelected = (row: Record<string, DataResponseDataEntry> | null) => {
+    if (!row) {
+      return;
+    }
+
+    // TODO think this through more in case of duplicated fields?
+    // construct a point by merging all of the nested layer data
+    const point = Object.values(row).reduce((p, value) => {
+      p = { ...p, ...value };
+      return p;
+    }, {}) as DataResponseDataEntry;
+    onSelectPoint(point);
+  };
+
   return (
-    <div className="table">
+    <div className={classNames("table", { "table-compact": compact })}>
       {showHeader && <EntityHeader title={tableEntity.title} />}
-      <DataGrid loading={loading} rowData={rowData} columnDefs={columnDefs} />
+      {!compact && (
+        <DataGrid
+          idKey={idField}
+          loading={loading}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          selectedItemId={selectedPointId}
+          onRowSelected={onRowSelected}
+        />
+      )}
+      {/* {compact && (
+        <div className="st-typography-label">Click to expand</div>
+      )} */}
     </div>
   );
+},
+arePropsEqual);
+
+function arePropsEqual(oldProps: TableProps, newProps: TableProps) {
+  const propsEqual =
+    oldProps.compact === newProps.compact &&
+    oldProps.dateRange.start === newProps.dateRange.start &&
+    oldProps.dateRange.end === newProps.dateRange.end &&
+    JSON.stringify(oldProps.selectedPoint) ===
+      JSON.stringify(newProps.selectedPoint) &&
+    oldProps.showHeader === newProps.showHeader &&
+    JSON.stringify(oldProps.tableEntity) ===
+      JSON.stringify(newProps.tableEntity);
+
+  return propsEqual;
 }
 
 export default Table;
