@@ -178,6 +178,7 @@
                   ],
                   "columns": [
                     {
+                      "dateFormat": "short",
                       "field": "timestamp",
                       "label": "Date",
                       "layerId": "48gnes"

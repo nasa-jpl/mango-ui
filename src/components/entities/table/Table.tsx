@@ -119,7 +119,9 @@ const Table = memo(function Table({
         },
       },
       valueFormatter: (params) => {
-        if (metadata?.type === "datetime") {
+        if (metadata?.type === "datetime" && column.dateFormat === "short") {
+          return params.value.split("T")[0];
+        } else if (metadata?.type === "datetime") {
           return params.value.split("+")[0];
         }
         return params.value;
