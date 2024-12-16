@@ -532,22 +532,24 @@ export const Chart = ({
       if (layer.transforms?.length) {
         Object.keys(newPointsByField).forEach((key) => {
           const existingData = newPointsByField[key];
-          newPointsByField[key] = existingData.map((point, j) => {
-            // Apply transforms to specified keys or all keys if none specified
-            if (
-              !layer.transformTargets ||
-              (layer.transformTargets &&
-                layer.transformTargets.indexOf(key) > -1)
-            ) {
-              return applyLayerTransforms(
-                point,
-                layer,
-                processedData,
-                j
-              ) as CustomChartData;
-            }
-            return point;
-          });
+          newPointsByField[key] = existingData
+            .map((point, j) => {
+              // Apply transforms to specified keys or all keys if none specified
+              if (
+                !layer.transformTargets ||
+                (layer.transformTargets &&
+                  layer.transformTargets.indexOf(key) > -1)
+              ) {
+                return applyLayerTransforms(
+                  point,
+                  layer,
+                  processedData,
+                  j
+                ) as CustomChartData;
+              }
+              return point;
+            })
+            .filter((point) => !!point); // filter out null points;
         });
       }
       processedData[i] = { layer, pointsByField: newPointsByField, ...rest };

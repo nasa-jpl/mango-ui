@@ -65,7 +65,7 @@ export function applyLayerTransform(
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
   index: number = 0
-): number {
+): number | null {
   let newValue = value;
   if (transform.type === "self") {
     // Transform using specified modifiers on the original data
@@ -82,22 +82,55 @@ export function applyLayerTransform(
     );
     if (matchingLayer && field) {
       // Find matching value in time
-      const matchingPoint = matchingLayer.pointsByField[field][index];
+      const matchingPoint = findMatchingPoint(
+        matchingLayer.pointsByField[field],
+        index,
+        point.x
+      );
       if (
-        typeof matchingPoint === "object" &&
+        matchingPoint
         // TODO would be nice to refactor this to take in a Point<number, number> where x is milliseconds
         // instead of a timestamp string
-        new Date(matchingPoint.x).getTime() === new Date(point.x).getTime()
       ) {
         newValue += transform.add ? (matchingPoint.y as number) : 0;
         newValue -= transform.subtract ? (matchingPoint.y as number) : 0;
         newValue *= transform.multiply ? (matchingPoint.y as number) : 1;
         newValue /= transform.divide ? (matchingPoint.y as number) : 1;
+      } else {
+        return null;
       }
     }
   }
 
   return newValue;
+}
+
+/* Find matching point starting at the given index where the point time matches the given ms.
+   Scan forwards and then backwards to find the point. If step count is exceeded, bail.
+*/
+export function findMatchingPoint(
+  points: TimeSeriesPoint[],
+  index = 0,
+  dateString = ""
+) {
+  const pointAtIndex = points[index];
+  if (pointAtIndex && pointAtIndex.x === dateString) {
+    return pointAtIndex;
+  }
+
+  let step = 0;
+  while (step < points.length) {
+    const leftPoint = points[index - step];
+    if (leftPoint && leftPoint.x === dateString) {
+      return leftPoint;
+    }
+    const rightPoint = points[index + step];
+    if (rightPoint && rightPoint.x === dateString) {
+      return rightPoint;
+    }
+    step++;
+  }
+  return null;
 }
 
 /* Apply layer transformations to a point at the given index */
@@ -109,40 +142,52 @@ export function applyLayerTransforms(
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
   index: number
-) {
+): TimeSeriesPoint | null {
   if (!layer.transforms || !layer.transforms.length) return point;
   const field = layer.fields[0]; // TODO pass this in?
   let newPoint = { ...point };
-  layer.transforms.forEach((transform) => {
+
+  for (let i = 0; i < layer.transforms.length; i++) {
+    const transform = layer.transforms[i];
     const value = newPoint[transform.axis];
+    let newX = newPoint.x;
+    if (transform.axis === "x") {
+      const transformedX = applyLayerTransform(
+        new Date(value).getTime(),
+        newPoint,
+        transform,
+        field,
+        data,
+        index
+      );
+      if (transformedX === null) {
+        return null;
+      }
+      newX = new Date(transformedX).toISOString().toString();
+    }
+    let newY = newPoint.y;
+    if (transform.axis === "y") {
+      const transformedY = applyLayerTransform(
+        value as number,
+        newPoint,
+        transform,
+        field,
+        data,
+        index
+      );
+      if (transformedY === null) {
+        return null;
+      }
+      newY = transformedY;
+    }
+
     newPoint = {
       ...newPoint,
-      x:
-        transform.axis === "x"
-          ? new Date(
-              applyLayerTransform(
-                new Date(value).getTime(),
-                newPoint,
-                transform,
-                field,
-                data,
-                index
-              )
-            ).toISOString()
-          : newPoint.x,
-      y:
-        transform.axis === "y"
-          ? applyLayerTransform(
-              value as number,
-              newPoint,
-              transform,
-              field,
-              data,
-              index
-            )
-          : newPoint.y,
+      x: newX,
+      y: newY,
     };
-  });
+  }
+
   return newPoint;
 }
 
