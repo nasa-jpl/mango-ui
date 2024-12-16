@@ -13,6 +13,7 @@ import { DataLayer, TableEntity } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
+  applyFieldThresholds,
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
@@ -136,6 +137,38 @@ const Table = memo(function Table({
             }
           },
         },
+        cellClass: (params) => {
+          if (
+            !params.data ||
+            !(column.layerId in params.data) ||
+            !(column.field in params.data[column.layerId])
+          ) {
+            return "";
+          }
+
+          if (metadata) {
+            const { limits, warnings } = applyFieldThresholds(
+              metadata,
+              params.data[column.layerId]
+            );
+
+            if (!limits.lower && !limits.upper) {
+              return "";
+            }
+
+            if (!warnings.lower && !warnings.upper) {
+              return "";
+            }
+
+            if (limits.lower || limits.upper) {
+              return "limit-cell";
+            }
+
+            if (warnings.lower || warnings.upper) {
+              return "warning-cell";
+            }
+          }
+        },
         valueFormatter: (params) => {
           if (metadata?.type === "datetime" && column.dateFormat === "short") {
             return params.value.split("T")[0];
@@ -154,7 +187,9 @@ const Table = memo(function Table({
           ) {
             return "";
           }
+
           const fieldData = params.data[column.layerId][column.field];
+
           if (typeof fieldData !== "object") {
             return fieldData;
           }
