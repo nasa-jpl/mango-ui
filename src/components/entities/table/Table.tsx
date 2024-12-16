@@ -187,9 +187,7 @@ const Table = memo(function Table({
           ) {
             return "";
           }
-
           const fieldData = params.data[column.layerId][column.field];
-
           if (typeof fieldData !== "object") {
             return fieldData;
           }
