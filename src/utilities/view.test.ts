@@ -7,6 +7,7 @@ import { TimeSeriesPoint } from "../types/view";
 import {
   applyLayerTransform,
   applyLayerTransforms,
+  findMatchingPoint,
   formatYValue,
 } from "./view";
 
@@ -217,12 +218,7 @@ test("applyLayerTransforms", () => {
       testData,
       0
     )
-  ).to.deep.eq({
-    x: "2030-01-01T00:00:00.000Z",
-    y: 1,
-    raw: point.raw,
-    selected: point.selected,
-  });
+  ).to.deep.eq(null);
 });
 
 test("formatYValue", () => {
@@ -233,4 +229,109 @@ test("formatYValue", () => {
   expect(formatYValue(0.00005000009)).toEqual("0.0000500001");
   expect(formatYValue(0.000480388100419)).toEqual("0.000480388");
   expect(formatYValue(199123812391823)).toEqual("1.99124e+14");
+});
+
+test("findMatchingPoint", () => {
+  expect(findMatchingPoint([], 0, "2030-01-01T00:00:00.000Z")).to.eq(null);
+  expect(
+    findMatchingPoint(
+      [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+      0,
+      "2030-01-01T00:00:00.000Z"
+    )
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: dummyPoint,
+    selected: false,
+  });
+  expect(
+    findMatchingPoint(
+      [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-02T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+      0,
+      "2030-01-01T00:00:00.000Z"
+    )
+  ).to.deep.eq({
+    x: "2030-01-01T00:00:00.000Z",
+    y: 0,
+    raw: dummyPoint,
+    selected: false,
+  });
+  expect(
+    findMatchingPoint(
+      [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-02T00:00:00.000Z",
+          y: 1,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-03T00:00:00.000Z",
+          y: 2,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+      0,
+      "2030-01-02T00:00:00.000Z"
+    )
+  ).to.deep.eq({
+    x: "2030-01-02T00:00:00.000Z",
+    y: 1,
+    raw: dummyPoint,
+    selected: false,
+  });
+  expect(
+    findMatchingPoint(
+      [
+        {
+          x: "2030-01-01T00:00:00.000Z",
+          y: 0,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-02T00:00:00.000Z",
+          y: 1,
+          raw: dummyPoint,
+          selected: false,
+        },
+        {
+          x: "2030-01-03T00:00:00.000Z",
+          y: 2,
+          raw: dummyPoint,
+          selected: false,
+        },
+      ],
+      0,
+      "2040-01-02T00:00:00.000Z"
+    )
+  ).to.deep.eq(null);
 });

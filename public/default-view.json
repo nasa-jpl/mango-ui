@@ -419,6 +419,7 @@
                 { "i": "3efgtre", "x": 8, "y": 1, "w": 6, "h": 2 },
                 { "i": "dfgdgfg", "x": 8, "y": 2, "w": 6, "h": 2 },
                 { "i": "sfrgtef", "x": 8, "y": 2, "w": 6, "h": 2 },
+                { "i": "hgjhnfgdfede", "x": 8, "y": 2, "w": 6, "h": 2 },
                 { "i": "sdfgrtrw", "x": 8, "y": 2, "w": 6, "h": 2 }
               ],
               "entities": [
@@ -655,56 +656,56 @@
                 {
                   "id": "sfrgtef",
                   "type": "chart",
-                  "title": "Data Transformations: Self and Derived",
+                  "title": "Data Transformations: KBR1B - LRI1B",
                   "syncWithPageDateRange": true,
                   "layers": [
                     {
-                      "id": "adfsdghy",
+                      "id": "3r4ethmhe",
                       "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_y"],
+                      "dataset": "KBR1B",
+                      "fields": ["range_accl"],
                       "type": "line",
-                      "label": "GRACEFO D: lin_accl_y v04",
+                      "label": "GRACEFO: KBR1A range_accl v04",
                       "version": "04",
-                      "instrument": "D",
-                      "startTime": "2020-03-02T00:26:00.000000Z",
-                      "endTime": "2023-03-02T00:36:00.000000Z",
+                      "instrument": "Y",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "yAxisId": "y1",
+                      "color": "#11c12b"
+                    },
+                    {
+                      "id": "yhgfew3reg",
+                      "mission": "GRACEFO",
+                      "dataset": "LRI1B",
+                      "fields": ["range_accl"],
+                      "type": "line",
+                      "label": "GRACEFO: LRI1B range_accl",
+                      "version": "04",
+                      "instrument": "Y",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
                       "yAxisId": "y1",
                       "color": "#4bb1ff"
                     },
                     {
-                      "id": "uyjtyhrgefd",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_y"],
-                      "type": "line",
-                      "label": "GRACEFO D: lin_accl_y v00",
-                      "version": "00",
-                      "instrument": "D",
-                      "startTime": "2020-03-02T00:26:00.000000Z",
-                      "endTime": "2023-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#f14444"
-                    },
-                    {
                       "id": "3r4etfnh",
                       "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_y"],
+                      "dataset": "KBR1B",
+                      "fields": ["range_accl"],
                       "type": "line",
-                      "label": "GRACEFO D: lin_accl_y v00-v04",
-                      "version": "00",
-                      "instrument": "D",
-                      "startTime": "2020-03-02T00:26:00.000000Z",
-                      "endTime": "2023-03-02T00:36:00.000000Z",
+                      "label": "GRACEFO: range_accl KBR1B-LRI1B",
+                      "version": "04",
+                      "instrument": "Y",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
                       "yAxisId": "y1",
-                      "color": "#11c12b",
+                      "color": "#f14444",
                       "transforms": [
                         {
                           "axis": "y",
                           "type": "derived",
                           "subtract": true,
-                          "layerId": "adfsdghy"
+                          "layerId": "yhgfew3reg"
                         }
                       ]
                     }
@@ -712,7 +713,76 @@
                   "yAxes": [
                     {
                       "id": "y1",
-                      "label": "ACC1A Linear Acceleration X (m/sec²)",
+                      "label": "range_accl",
+                      "position": "left"
+                    }
+                  ]
+                },
+                {
+                  "id": "hgjhnfgdfede",
+                  "type": "chart",
+                  "title": "Data Transformations: Coalesced ACT1B Linear Acceleration",
+                  "syncWithPageDateRange": true,
+                  "layers": [
+                    {
+                      "id": "jtynfgbfdfewr",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1B",
+                      "fields": ["lin_accl_y"],
+                      "type": "line",
+                      "label": "GRACEFO C: lin_accl_x v04",
+                      "version": "04",
+                      "instrument": "C",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "yAxisId": "y1",
+                      "color": "#4bb1ff"
+                    },
+                    {
+                      "id": "adfsdghy",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1B",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
+                      "label": "GRACEFO D: lin_accl_x v04",
+                      "version": "04",
+                      "instrument": "D",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "yAxisId": "y1",
+                      "color": "#11c12b"
+                    },
+                    {
+                      "id": "hnbvcdew345",
+                      "mission": "GRACEFO",
+                      "dataset": "ACT1B",
+                      "fields": ["lin_accl_x"],
+                      "type": "line",
+                      "label": "GRACEFO C: (lin_accl_x + 23000ms * -1.05) v04",
+                      "version": "04",
+                      "instrument": "C",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "yAxisId": "y1",
+                      "color": "#f14444",
+                      "transforms": [
+                        {
+                          "axis": "x",
+                          "type": "self",
+                          "subtract": 23000
+                        },
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": -1.05
+                        }
+                      ]
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "range_accl",
                       "position": "left"
                     }
                   ]
@@ -760,7 +830,7 @@
                 {
                   "id": "sdfghy4ter",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration X (m/sec²)",
+                  "title": "Linear Acceleration X (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [
                     {
@@ -799,7 +869,7 @@
                 {
                   "id": "dfgrt43rwe",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Y (m/sec²)",
+                  "title": "Linear Acceleration Y (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -832,7 +902,7 @@
                 {
                   "id": "dfg43er",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Z (m/sec²)",
+                  "title": "Linear Acceleration Z (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -879,7 +949,7 @@
                 {
                   "id": "sdfer34wefsd",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration X (m/sec²)",
+                  "title": "Angular Acceleration X (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -910,7 +980,7 @@
                 {
                   "id": "fsdr4efd",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Y (m/sec²)",
+                  "title": "Angular Acceleration Y (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -941,7 +1011,7 @@
                 {
                   "id": "sdfer4edf",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Z (m/sec²)",
+                  "title": "Angular Acceleration Z (m/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -993,7 +1063,7 @@
                 {
                   "id": "3rwegthfg",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration X (nm/sec²)",
+                  "title": "Linear Acceleration X (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1024,7 +1094,7 @@
                 {
                   "id": "r3wgdf",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Y (nm/sec²)",
+                  "title": "Linear Acceleration Y (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1055,7 +1125,7 @@
                 {
                   "id": "234retrhfg",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Z (nm/sec²)",
+                  "title": "Linear Acceleration Z (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1100,7 +1170,7 @@
                 {
                   "id": "32rwergdfn",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration X (nm/sec²)",
+                  "title": "Angular Acceleration X (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1131,7 +1201,7 @@
                 {
                   "id": "e23wfsdbc",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Y (nm/sec²)",
+                  "title": "Angular Acceleration Y (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1162,7 +1232,7 @@
                 {
                   "id": "32r4egtfnhb",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Z (nm/sec²)",
+                  "title": "Angular Acceleration Z (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1289,7 +1359,7 @@
                 {
                   "id": "r3wgdf",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Y (nm/sec²)",
+                  "title": "Linear Acceleration Y (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1320,7 +1390,7 @@
                 {
                   "id": "234retrhfg",
                   "type": "chart",
-                  "title": "Coalesced Linear Acceleration Z (nm/sec²)",
+                  "title": "Linear Acceleration Z (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1365,7 +1435,7 @@
                 {
                   "id": "32rwergdfn",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration X (nm/sec²)",
+                  "title": "Angular Acceleration X (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1396,7 +1466,7 @@
                 {
                   "id": "e23wfsdbc",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Y (nm/sec²)",
+                  "title": "Angular Acceleration Y (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
@@ -1427,7 +1497,7 @@
                 {
                   "id": "32r4egtfnhb",
                   "type": "chart",
-                  "title": "Coalesced Angular Acceleration Z (nm/sec²)",
+                  "title": "Angular Acceleration Z (nm/sec²)",
                   "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
