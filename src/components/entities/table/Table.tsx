@@ -1,4 +1,4 @@
-import type { ValueGetterParams } from "ag-grid-community";
+import type { ColGroupDef, ValueGetterParams } from "ag-grid-community";
 import classNames from "classnames";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
@@ -13,6 +13,7 @@ import { DataLayer, TableEntity } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
+  applyFieldThresholds,
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
@@ -82,78 +83,147 @@ const Table = memo(function Table({
     instrument,
   ]);
 
-  const columnDefs: DataGridColumnDef[] = tableEntity.columns.map((column) => {
-    const layer = tableEntity.layers.find((l) => l.id === column.layerId);
-    if (!layer) {
-      return {};
-    }
-    const pseudoLayer: DataLayer = {
-      ...layer,
-      fields: [column.field],
-      mission: mission ?? layer.mission,
-      instrument: instrument ?? layer.instrument,
-    };
-    const metadata = getFieldMetadataForLayer(
-      column.field,
-      pseudoLayer,
-      products
-    );
-    const product = getProductForLayer(pseudoLayer, products);
-    const fieldId = `${column.layerId}.${column.field}`;
-    const col: DataGridColumnDef = {
-      field: fieldId,
-      filter: "string",
-      headerName: column.field,
-      resizable: true,
-      sortable: true,
-      headerComponentParams: {
-        onColumnPreview: () => {
-          if (product) {
-            onSetProductPreview({
-              product,
-              field: column.field,
-              dateRange,
-              instrument: instrument || undefined,
-            });
+  const columnDefs: DataGridColumnDef[] = buildTableColumns();
+
+  function buildTableColumns() {
+    const tmpTableColumns: DataGridColumnDef[] = [];
+    const tableColumnGroups = new Map<string, ColGroupDef>();
+
+    // Create column groups if any were defined
+    tableEntity.columnGroups?.forEach((columnGroup) => {
+      if (columnGroup.id === undefined) {
+        return;
+      }
+      tableColumnGroups.set(columnGroup.id, {
+        headerName: columnGroup.name,
+        children: [],
+      });
+    });
+
+    tableEntity.columns.map((column) => {
+      const layer = tableEntity.layers.find((l) => l.id === column.layerId);
+      if (!layer) {
+        return {};
+      }
+
+      const pseudoLayer: DataLayer = {
+        ...layer,
+        fields: [column.field],
+        mission: mission ?? layer.mission,
+        instrument: instrument ?? layer.instrument,
+      };
+      const metadata = getFieldMetadataForLayer(
+        column.field,
+        pseudoLayer,
+        products
+      );
+      const product = getProductForLayer(pseudoLayer, products);
+      const fieldId = `${column.layerId}.${column.field}`;
+      const col: DataGridColumnDef = {
+        field: fieldId,
+        filter: "string",
+        headerName: column.label ?? column.field,
+        resizable: true,
+        sortable: true,
+        headerComponentParams: {
+          onColumnPreview: () => {
+            if (product) {
+              onSetProductPreview({
+                product,
+                field: column.field,
+                dateRange,
+                instrument: instrument || undefined,
+              });
+            }
+          },
+        },
+        cellClass: (params) => {
+          if (
+            !params.data ||
+            !(column.layerId in params.data) ||
+            !(column.field in params.data[column.layerId])
+          ) {
+            return "";
+          }
+
+          if (metadata) {
+            const { limits, warnings } = applyFieldThresholds(
+              metadata,
+              params.data[column.layerId]
+            );
+
+            if (!limits.lower && !limits.upper) {
+              return "";
+            }
+
+            if (!warnings.lower && !warnings.upper) {
+              return "";
+            }
+
+            if (limits.lower || limits.upper) {
+              return "limit-cell";
+            }
+
+            if (warnings.lower || warnings.upper) {
+              return "warning-cell";
+            }
           }
         },
-      },
-      valueFormatter: (params) => {
-        if (metadata?.type === "datetime") {
-          return params.value.split("+")[0];
-        }
-        return params.value;
-      },
-      valueGetter: (
-        params: ValueGetterParams<Record<string, DataResponseDataEntry>>
-      ) => {
-        if (
-          !params.data ||
-          !(column.layerId in params.data) ||
-          !(column.field in params.data[column.layerId])
-        ) {
-          return "";
-        }
-        const fieldData = params.data[column.layerId][column.field];
-        if (typeof fieldData !== "object") {
-          return fieldData;
-        }
-        if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
-          return fieldData.value;
-        }
-        if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
-          return fieldData.avg;
-        }
-        if (
-          Object.prototype.hasOwnProperty.call(fieldData, "min") &&
-          Object.prototype.hasOwnProperty.call(fieldData, "max")
-        ) {
-          return `${fieldData.min} – ${fieldData.max}`;
-        }
-      },
-    };
-    return col;
-  });
+        valueFormatter: (params) => {
+          if (metadata?.type === "datetime" && column.dateFormat === "short") {
+            return params.value.split("T")[0];
+          } else if (metadata?.type === "datetime") {
+            return params.value.split("+")[0];
+          }
+          return params.value;
+        },
+        valueGetter: (
+          params: ValueGetterParams<Record<string, DataResponseDataEntry>>
+        ) => {
+          if (
+            !params.data ||
+            !(column.layerId in params.data) ||
+            !(column.field in params.data[column.layerId])
+          ) {
+            return "";
+          }
+          const fieldData = params.data[column.layerId][column.field];
+          if (typeof fieldData !== "object") {
+            return fieldData;
+          }
+          if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
+            return fieldData.value;
+          }
+          if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
+            return fieldData.avg;
+          }
+          if (
+            Object.prototype.hasOwnProperty.call(fieldData, "min") &&
+            Object.prototype.hasOwnProperty.call(fieldData, "max")
+          ) {
+            return `${fieldData.min} – ${fieldData.max}`;
+          }
+        },
+      };
+
+      // If column has a group and group is defined, add it to the group's children;
+      // otherwise treat it as a standalone column.
+      if (column.columnGroupId && tableColumnGroups.has(column.columnGroupId)) {
+        tableColumnGroups.get(column.columnGroupId)!.children!.push(col);
+      } else {
+        tmpTableColumns.push(col);
+      }
+
+      return col;
+    });
+
+    // Add column groups to table column definition
+    tableColumnGroups.forEach((colGroup) => {
+      tmpTableColumns.push(colGroup);
+    });
+
+    return tmpTableColumns;
+  }
 
   const fetchAllLayerData = async (
     layers: DataLayer[],

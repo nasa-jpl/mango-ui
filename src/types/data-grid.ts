@@ -1,7 +1,9 @@
-import type { ColDef } from "ag-grid-community";
+import type { ColDef, ColGroupDef } from "ag-grid-community";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type DataGridColumnDef<TRowData = any> = ColDef<TRowData>;
+export type DataGridColumnDef<TRowData = any> =
+  | ColDef<TRowData>
+  | ColGroupDef<TRowData>;
 
 export interface DataGridRowSelection<TRowData> {
   data: TRowData;

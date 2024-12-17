@@ -148,6 +148,250 @@
               ]
             }
           ]
+        },
+        {
+          "id": "abcd",
+          "url": "performance_reports",
+          "title": "Performance Reports",
+          "dateFormat": "short",
+          "sections": [
+            {
+              "id": "sertryfdf",
+              "type": "section",
+              "title": "Examples",
+              "defaultOpen": true,
+              "layout": [
+                { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 4 }
+              ],
+              "entities": [
+                {
+                  "id": "fghyjqiqii",
+                  "type": "table",
+                  "title": "Table",
+                  "showHeader": false,
+                  "syncWithPageDateRange": true,
+                  "columnGroups": [
+                    { "id": "ocimaom", "name": "KBR-GPS Performance" },
+                    { "id": "nvjnjfk", "name": "GPS DD Clock Overlap" },
+                    { "id": "zxkzjkj", "name": "GPS Tracking Grace-FO C" },
+                    { "id": "qhwuwhh", "name": "GPS Tracking Grace-FO D" },
+                    { "id": "wwwhwiw", "name": "L-Overlap RMS" }
+                  ],
+                  "columns": [
+                    {
+                      "dateFormat": "short",
+                      "field": "timestamp",
+                      "label": "Date",
+                      "layerId": "48gnes"
+                    },
+                    {
+                      "field": "resid_rms",
+                      "label": "RMS (mm)",
+                      "layerId": "48gnes",
+                      "columnGroupId": "ocimaom"
+                    },
+                    {
+                      "field": "resid_nobs",
+                      "label": "#obs",
+                      "layerId": "48gnes",
+                      "columnGroupId": "ocimaom"
+                    },
+                    {
+                      "field": "arc_length",
+                      "label": "arc (hr)",
+                      "layerId": "48gnes",
+                      "columnGroupId": "ocimaom"
+                    },
+                    {
+                      "field": "clkdd_nobs",
+                      "label": "#obs",
+                      "layerId": "48gnes",
+                      "columnGroupId": "nvjnjfk"
+                    },
+                    {
+                      "field": "clkdd_mean",
+                      "label": "mean",
+                      "layerId": "48gnes",
+                      "columnGroupId": "nvjnjfk"
+                    },
+                    {
+                      "field": "clkdd_sigma",
+                      "label": "stddev",
+                      "layerId": "48gnes",
+                      "columnGroupId": "nvjnjfk"
+                    },
+                    {
+                      "field": "clkdd_rms",
+                      "label": "RMS",
+                      "layerId": "48gnes",
+                      "columnGroupId": "nvjnjfk"
+                    },
+                    {
+                      "field": "rms_phase",
+                      "label": "rms (mm)",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "n_phase",
+                      "label": "#obs phase",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "per_phase_rej",
+                      "label": "%edt phase",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "rms_range",
+                      "label": "rms (cm)",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "n_range",
+                      "label": "#obs range",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "per_range_rej",
+                      "label": "%edt range",
+                      "layerId": "48gnek",
+                      "columnGroupId": "zxkzjkj"
+                    },
+                    {
+                      "field": "rms_phase",
+                      "label": "rms (mm)",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "n_phase",
+                      "label": "#obs phase",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "per_phase_rej",
+                      "label": "%edt phase",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "rms_range",
+                      "label": "rms (cms)",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "n_range",
+                      "label": "#obs range",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "per_range_rej",
+                      "label": "%edt range",
+                      "layerId": "48gnep",
+                      "columnGroupId": "qhwuwhh"
+                    },
+                    {
+                      "field": "lpos_rms_start",
+                      "label": "GFO-C (mm)",
+                      "layerId": "48gnew",
+                      "columnGroupId": "wwwhwiw"
+                    },
+                    {
+                      "field": "lpos_rms_start",
+                      "label": "GFO-D (mm)",
+                      "layerId": "48gneq",
+                      "columnGroupId": "wwwhwiw"
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "48gnes",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "KBR1B_RPT",
+                      "instrument": "Y",
+                      "fields": [
+                        "resid_rms",
+                        "resid_nobs",
+                        "arc_length",
+                        "clkdd_nobs",
+                        "clkdd_mean",
+                        "clkdd_sigma",
+                        "clkdd_rms",
+                        "timestamp"
+                      ],
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "endTime": "2023-06-30T23:59:00.000000Z"
+                    },
+                    {
+                      "id": "48gnek",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "POE1A_RPT",
+                      "instrument": "C",
+                      "fields": [
+                        "rms_phase",
+                        "n_phase",
+                        "per_phase_rej",
+                        "rms_range",
+                        "n_range",
+                        "per_range_rej",
+                        "timestamp"
+                      ],
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "endTime": "2023-06-30T23:59:00.000000Z"
+                    },
+                    {
+                      "id": "48gnep",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "POE1A_RPT",
+                      "instrument": "D",
+                      "fields": [
+                        "rms_phase",
+                        "n_phase",
+                        "per_phase_rej",
+                        "rms_range",
+                        "n_range",
+                        "per_range_rej",
+                        "timestamp"
+                      ],
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "endTime": "2023-06-30T23:59:00.000000Z"
+                    },
+                    {
+                      "id": "48gnew",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "GNV1B_RPT",
+                      "instrument": "C",
+                      "fields": ["lpos_rms_start", "timestamp"],
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "endTime": "2023-06-30T23:59:00.000000Z"
+                    },
+                    {
+                      "id": "48gneq",
+                      "version": "04",
+                      "mission": "GRACEFO",
+                      "dataset": "GNV1B_RPT",
+                      "instrument": "D",
+                      "fields": ["lpos_rms_start", "timestamp"],
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "endTime": "2023-06-30T23:59:00.000000Z"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },

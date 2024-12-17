@@ -56,6 +56,7 @@ export type Entity = {
   dateRange?: DateRange;
   id: string;
   idField?: string;
+  showHeader?: boolean;
   syncWithPageDateRange?: boolean;
   title: string;
   type: EntityType;
@@ -209,11 +210,20 @@ export interface MapEntity extends Entity {
 }
 
 export type TableColumn = {
+  columnGroupId?: string;
+  dateFormat?: DateFormat;
   field: string;
+  label?: string;
   layerId: string;
 };
 
+export type TableColumnGroup = {
+  id: string;
+  name: string;
+};
+
 export interface TableEntity extends Entity {
+  columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
   layers: DataLayer[];
 }
