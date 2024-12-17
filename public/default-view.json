@@ -153,6 +153,7 @@
           "id": "abcd",
           "url": "performance_reports",
           "title": "Performance Reports",
+          "dateFormat": "short",
           "sections": [
             {
               "id": "sertryfdf",
