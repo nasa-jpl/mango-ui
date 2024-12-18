@@ -324,7 +324,6 @@ export function DownlinkDashboard({
           result: { ...result, data: gaps },
         };
       });
-      console.log("gapsBetweenPasses :>> ", gapsBetweenPasses);
       setData({
         passFiles,
         productReportFiles,

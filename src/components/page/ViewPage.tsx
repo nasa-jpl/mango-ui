@@ -6,7 +6,7 @@ import {
   Switch,
   Tooltip,
 } from "@nasa-jpl/react-stellar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
@@ -55,6 +55,15 @@ export const ViewPage = ({
   const [pageOptions, setPageOptions] = useState<PageOptions>({
     showHoverDate: true,
   });
+
+  useEffect(() => {
+    setMission(
+      viewPage?.missions ? viewPage?.missions[1].mission ?? null : null
+    );
+    setInstrument(
+      viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
+    );
+  }, [viewPage?.missions]);
 
   if (!viewPage) {
     return;
@@ -142,8 +151,8 @@ export const ViewPage = ({
             section={section}
             key={section.id}
             dateRange={dateRange}
-            mission={mission}
-            instrument={instrument}
+            mission={viewPage.missions ? mission : null}
+            instrument={viewPage.missions ? instrument : null}
             hoverDate={pageOptions.showHoverDate ? hoverDate : null}
             selectedPoint={selectedPoint}
             onDateRangeChange={setDateRange}

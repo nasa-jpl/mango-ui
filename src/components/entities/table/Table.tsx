@@ -406,6 +406,8 @@ arePropsEqual);
 function arePropsEqual(oldProps: TableProps, newProps: TableProps) {
   const propsEqual =
     oldProps.compact === newProps.compact &&
+    oldProps.mission === newProps.mission &&
+    oldProps.instrument === newProps.instrument &&
     oldProps.dateRange.start === newProps.dateRange.start &&
     oldProps.dateRange.end === newProps.dateRange.end &&
     JSON.stringify(oldProps.selectedPoint) ===
