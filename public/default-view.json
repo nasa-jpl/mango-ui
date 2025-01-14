@@ -170,6 +170,7 @@
                   "title": "Table",
                   "showHeader": false,
                   "syncWithPageDateRange": true,
+                  "applyThresholds": true,
                   "columnGroups": [
                     { "id": "ocimaom", "name": "KBR-GPS Performance" },
                     { "id": "nvjnjfk", "name": "GPS DD Clock Overlap" },

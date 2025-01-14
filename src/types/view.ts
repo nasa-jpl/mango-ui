@@ -223,6 +223,7 @@ export type TableColumnGroup = {
 };
 
 export interface TableEntity extends Entity {
+  applyThresholds?: boolean;
   columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
   layers: DataLayer[];

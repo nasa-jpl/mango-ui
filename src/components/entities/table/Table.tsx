@@ -146,7 +146,7 @@ const Table = memo(function Table({
             return "";
           }
 
-          if (metadata) {
+          if (metadata && tableEntity.applyThresholds) {
             const { limits, warnings } = applyFieldThresholds(
               metadata,
               params.data[column.layerId]
