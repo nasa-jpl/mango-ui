@@ -169,6 +169,33 @@ const Table = memo(function Table({
             }
           }
         },
+        tooltipValueGetter: (params) => {
+          // TODO: Potential refactoring to consolidate retrieval of threshold data.
+          // Also, per-entity tooltips?
+          if (
+            !params.data ||
+            !(column.layerId in params.data) ||
+            !(column.field in params.data[column.layerId])
+          ) {
+            return "";
+          }
+
+          if (metadata && tableEntity.applyThresholds) {
+            const { limits, warnings } = applyFieldThresholds(
+              metadata,
+              params.data[column.layerId]
+            );
+
+            // TODO: WIP currently returns whether or not threshold was met -- not the values themselves
+            const tooltipText =
+              `Limit upper: ${limits.upper ?? "-"} \n` +
+              `Limit lower: ${limits.lower ?? "-"} \n` +
+              `Warning upper: ${warnings.upper ?? "-"} \n` +
+              `Warning lower: ${warnings.upper ?? "-"} \n`;
+            return tooltipText;
+          }
+          return params.valueFormatted;
+        },
         valueFormatter: (params) => {
           if (metadata?.type === "datetime" && column.dateFormat === "short") {
             return params.value.split("T")[0];

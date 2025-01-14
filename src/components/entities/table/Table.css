@@ -26,3 +26,7 @@
   background-color: rgba(255, 239, 180, 0.6);
   color: rgb(112, 91, 19);
 }
+
+.ag-tooltip {
+  white-space: pre;
+}
