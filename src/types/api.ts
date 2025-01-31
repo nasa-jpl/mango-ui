@@ -38,24 +38,24 @@ export type ProductField = {
   constant_value?: (string | number)[];
   description?: string;
   name: string;
+  qc_thresholds?: ProductValueThreshold[]; // TODO is this actually optional or just missing in DB?
   supported_aggregations: ProductAggregation[];
   type: "int" | "bool" | "float" | "str" | "datetime" | "dict"; // TODO ask about complete set
   unit: string | null;
-  value_threshold_configurations?: ProductValueThreshold[]; // TODO is this actually optional or just missing in DB?
 };
 
 export type ProductValueThreshold = {
   /* Date threshold is effective from */
-  effective_from?: "string";
+  effective_since?: "string";
   /* Date threshold is effective through */
-  effective_to?: "string";
-  limits: ProductValueThresholdLimits;
-  warnings: ProductValueThresholdLimits;
+  effective_until?: "string";
+  limits?: ProductValueThresholdLimits;
+  warnings?: ProductValueThresholdLimits;
 };
 
 export type ProductValueThresholdLimits = {
-  lower: number;
-  upper: number;
+  lower?: number;
+  upper?: number;
 };
 
 export type ProductResolution = {

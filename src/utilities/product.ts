@@ -34,23 +34,24 @@ export function applyFieldThresholds(
     warnings: { lower: false, upper: false },
   };
   // Bail if field has no threshold configurations
-  if (!field.value_threshold_configurations) {
+  if (!field.qc_thresholds) {
     return result;
   }
 
   // Find matching threshold entry
-  const matchingThresholdConfig = field.value_threshold_configurations.find(
-    (threshold) => {
-      let inRange = true;
-      if (threshold.effective_from) {
-        inRange = threshold.effective_from >= data.timestamp;
-      }
-      if (threshold.effective_to) {
-        inRange = threshold.effective_to <= data.timestamp;
-      }
-      return inRange;
+  const matchingThresholdConfig = field.qc_thresholds.find((threshold) => {
+    if (!threshold.effective_since && !threshold.effective_until) {
+      return true;
     }
-  );
+    let inRange = false;
+    if (threshold.effective_since) {
+      inRange = threshold.effective_since <= data.timestamp;
+    }
+    if (threshold.effective_until) {
+      inRange = threshold.effective_until >= data.timestamp;
+    }
+    return inRange;
+  });
 
   if (!matchingThresholdConfig) {
     return result;
@@ -59,12 +60,25 @@ export function applyFieldThresholds(
   // Compute violations
   const value = data[field.name].value as number;
   result.limits = {
-    lower: value < matchingThresholdConfig.limits.lower,
-    upper: value > matchingThresholdConfig.limits.upper,
+    lower: matchingThresholdConfig.limits
+      ? value <
+        (matchingThresholdConfig.limits.lower ?? Number.NEGATIVE_INFINITY)
+      : false,
+    upper: matchingThresholdConfig.limits
+      ? value >
+        (matchingThresholdConfig.limits.upper ?? Number.POSITIVE_INFINITY)
+      : false,
   };
+
   result.warnings = {
-    lower: value < matchingThresholdConfig.warnings.lower,
-    upper: value > matchingThresholdConfig.warnings.upper,
+    lower: matchingThresholdConfig.warnings
+      ? value <
+        (matchingThresholdConfig.warnings.lower ?? Number.NEGATIVE_INFINITY)
+      : false,
+    upper: matchingThresholdConfig.warnings
+      ? value >
+        (matchingThresholdConfig.warnings.upper ?? Number.POSITIVE_INFINITY)
+      : false,
   };
   return result;
 }
