@@ -5,7 +5,12 @@ import {
   DataResponse,
   DataResponseDataEntry,
   Product,
+  ProductField,
 } from "../../../types/api";
+import {
+  ComputedThresholds,
+  ProcessedDataResponseDataEntry,
+} from "../../../types/app.ts";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
 import { DateRange } from "../../../types/time";
@@ -141,33 +146,30 @@ const Table = memo(function Table({
           if (
             !params.data ||
             !(column.layerId in params.data) ||
-            !(column.field in params.data[column.layerId])
+            !(column.field in params.data[column.layerId]) ||
+            !params.data[column.layerId][column.field] ||
+            !params.data[column.layerId][column.field]._thresholds
+          ) {
+            return "";
+          }
+          const { limits, warnings }: ComputedThresholds =
+            params.data[column.layerId][column.field]._thresholds;
+
+          if (
+            !limits.lower &&
+            !limits.upper &&
+            !warnings.lower &&
+            !warnings.upper
           ) {
             return "";
           }
 
-          if (metadata) {
-            const { limits, warnings } = applyFieldThresholds(
-              metadata,
-              params.data[column.layerId]
-            );
+          if (limits.lower || limits.upper) {
+            return "limit-cell";
+          }
 
-            if (
-              !limits.lower &&
-              !limits.upper &&
-              !warnings.lower &&
-              !warnings.upper
-            ) {
-              return "";
-            }
-
-            if (limits.lower || limits.upper) {
-              return "limit-cell";
-            }
-
-            if (warnings.lower || warnings.upper) {
-              return "warning-cell";
-            }
+          if (warnings.lower || warnings.upper) {
+            return "warning-cell";
           }
         },
         valueFormatter: (params) => {
@@ -326,13 +328,35 @@ const Table = memo(function Table({
       }
       finalResults = results;
     }
-    const rows: Record<string, DataResponseDataEntry>[] = [];
+
+    const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
     finalResults.forEach(({ layer, result }) => {
+      const metadataCache: Record<string, ProductField> = {};
+      if (layer.fields) {
+        layer.fields.forEach((field) => {
+          const metadata = getFieldMetadataForLayer(
+            field,
+            layer as DataLayer,
+            products
+          );
+          if (metadata) {
+            metadataCache[field] = metadata;
+          }
+        });
+      }
       result.data.forEach((result, i) => {
+        const processedResult: ProcessedDataResponseDataEntry = result;
+        Object.keys(result).forEach((key) => {
+          // Compute thresholds for result if metadata available for the field
+          if (key !== "timestamp" && metadataCache[key]) {
+            const thresholds = applyFieldThresholds(metadataCache[key], result);
+            processedResult[key]._thresholds = thresholds;
+          }
+        });
         if (!rows[i]) {
-          rows[i] = { [layer.id]: result };
+          rows[i] = { [layer.id]: processedResult };
         } else {
-          rows[i] = { ...rows[i], [layer.id]: result };
+          rows[i] = { ...rows[i], [layer.id]: processedResult };
         }
       });
     });
@@ -394,6 +418,48 @@ const Table = memo(function Table({
           columnDefs={columnDefs}
           selectedItemId={selectedPointId}
           onRowSelected={onRowSelected}
+          gridProps={{
+            getRowClass: (params) => {
+              console.log("params :>> ", params);
+              let rowClass = "";
+              for (let i = 0; i < tableEntity.columns.length; i++) {
+                const column = tableEntity.columns[i];
+
+                // For each column, see if the row has tripped any thresholds
+                if (
+                  !params.data ||
+                  !(column.layerId in params.data) ||
+                  !(column.field in params.data[column.layerId]) ||
+                  !params.data[column.layerId][column.field] ||
+                  !params.data[column.layerId][column.field]._thresholds
+                ) {
+                  continue;
+                }
+                const { limits, warnings }: ComputedThresholds =
+                  params.data[column.layerId][column.field]._thresholds;
+
+                if (
+                  !limits.lower &&
+                  !limits.upper &&
+                  !warnings.lower &&
+                  !warnings.upper
+                ) {
+                  continue;
+                }
+
+                if (limits.lower || limits.upper) {
+                  rowClass = "limit-row";
+                  break;
+                }
+
+                if (warnings.lower || warnings.upper) {
+                  rowClass = "warning-row";
+                  break;
+                }
+              }
+              return rowClass;
+            },
+          }}
         />
       )}
       {/* {compact && (

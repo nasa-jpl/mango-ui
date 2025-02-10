@@ -52,7 +52,10 @@ export type EntityType =
   | "downlink-dashboard";
 
 export type Entity = {
-  data?: { layer: { id: string }; result: { data: DataResponse["data"] } }[]; // TODO this is actually a list of {layer, result}
+  data?: {
+    layer: { id: string } & Partial<DataLayer>;
+    result: { data: DataResponse["data"] };
+  }[];
   dateRange?: DateRange;
   id: string;
   idField?: string;

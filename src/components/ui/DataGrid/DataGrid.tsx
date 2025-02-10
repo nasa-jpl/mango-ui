@@ -5,7 +5,7 @@ import {
 } from "@ag-grid-community/core";
 import { IRowNode } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
-import { AgGridReact } from "ag-grid-react"; // React Grid Logic
+import { AgGridReact, AgGridReactProps } from "ag-grid-react"; // React Grid Logic
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import CustomHeader from "../../entities/table/CustomHeader";
@@ -14,6 +14,7 @@ import "./ag-grid-stellar.css";
 export declare type DataGridProps<T> = {
   className?: string;
   columnDefs: DataGridColumnDef[];
+  gridProps?: AgGridReactProps;
   idKey?: keyof T | undefined;
   loading?: boolean;
   onRowSelected?: (row: T | null) => void;
@@ -29,6 +30,7 @@ export function DataGrid<T>({
   idKey,
   loading = true,
   className = "",
+  gridProps = {},
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
@@ -109,6 +111,7 @@ export function DataGrid<T>({
           const selectedNodes = gridRef.current?.api?.getSelectedNodes() ?? [];
           onRowSelected(selectedNodes[0]?.data ?? null);
         }}
+        {...gridProps}
       />
     </div>
   );

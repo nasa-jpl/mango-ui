@@ -1,4 +1,5 @@
 import { DataResponseDataEntry, Product, ProductField } from "../types/api";
+import { ComputedThresholds } from "../types/app";
 import { DataLayer } from "../types/view";
 
 export function getProductForLayer(
@@ -25,10 +26,7 @@ export function getFieldMetadataForLayer(
 export function applyFieldThresholds(
   field: ProductField,
   data: DataResponseDataEntry
-): {
-  limits: { lower: boolean; upper: boolean };
-  warnings: { lower: boolean; upper: boolean };
-} {
+): ComputedThresholds {
   const result = {
     limits: { lower: false, upper: false },
     warnings: { lower: false, upper: false },
