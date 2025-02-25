@@ -188,7 +188,7 @@ const Table = memo(function Table({
             !(column.layerId in params.data) ||
             !(column.field in params.data[column.layerId])
           ) {
-            return "";
+            return "-";
           }
           const fieldData = params.data[column.layerId][column.field];
           if (typeof fieldData !== "object") {
@@ -219,6 +219,21 @@ const Table = memo(function Table({
 
       return col;
     });
+
+    // Build derived timestamp column
+    const col: DataGridColumnDef = {
+      field: "timestamp",
+      filter: "string",
+      headerName: "Timestamp",
+      resizable: true,
+      sortable: true,
+      valueGetter: (params) => {
+        const rowData = params.data;
+        return rowData["timestamp"] ?? null;
+      },
+    };
+
+    tmpTableColumns.push(col);
 
     // Add column groups to table column definition
     tableColumnGroups.forEach((colGroup) => {
@@ -329,7 +344,11 @@ const Table = memo(function Table({
       finalResults = results;
     }
 
-    const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
+    // Iterate over all layers to retrieve unique timestamps
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const timestampMap = new Map<string, any[]>();
+
+    //const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
     finalResults.forEach(({ layer, result }) => {
       const metadataCache: Record<string, ProductField> = {};
       if (layer.fields) {
@@ -344,7 +363,7 @@ const Table = memo(function Table({
           }
         });
       }
-      result.data.forEach((result, i) => {
+      result.data.forEach((result) => {
         const processedResult: ProcessedDataResponseDataEntry = result;
         Object.keys(result).forEach((key) => {
           // Compute thresholds for result if metadata available for the field
@@ -353,13 +372,28 @@ const Table = memo(function Table({
             processedResult[key]._thresholds = thresholds;
           }
         });
-        if (!rows[i]) {
-          rows[i] = { [layer.id]: processedResult };
-        } else {
-          rows[i] = { ...rows[i], [layer.id]: processedResult };
-        }
+        const timestampEntry = timestampMap.get(result.timestamp) || [];
+        timestampEntry.push({ [layer.id]: processedResult });
+        timestampMap.set(result.timestamp, timestampEntry);
+        console.log("Timestamp entry map w/ thresholds: ", timestampEntry);
       });
     });
+
+    // Sort down chronologically
+    const sortedTimestampMap = new Map(
+      [...timestampMap.entries()].sort(
+        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+      )
+    );
+
+    // Merge entries with the same timestamp
+    const rows: Record<string, DataResponseDataEntry>[] = Array.from(
+      sortedTimestampMap.entries()
+    ).map(([timestamp, objects]) => ({
+      timestamp,
+      ...objects.reduce((acc, obj) => ({ ...acc, ...obj }), {}),
+    }));
+
     setRowData(rows);
   };
 

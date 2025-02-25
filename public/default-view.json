@@ -179,12 +179,6 @@
                   ],
                   "columns": [
                     {
-                      "dateFormat": "short",
-                      "field": "timestamp",
-                      "label": "Date",
-                      "layerId": "48gnes"
-                    },
-                    {
                       "field": "resid_rms",
                       "label": "RMS (mm)",
                       "layerId": "48gnes",
