@@ -178,6 +178,11 @@ const Table = memo(function Table({
           } else if (metadata?.type === "datetime") {
             return params.value.split("+")[0];
           }
+
+          if (params.value === "") {
+            return "-";
+          }
+
           return params.value;
         },
         valueGetter: (
@@ -188,7 +193,7 @@ const Table = memo(function Table({
             !(column.layerId in params.data) ||
             !(column.field in params.data[column.layerId])
           ) {
-            return "-";
+            return "";
           }
           const fieldData = params.data[column.layerId][column.field];
           if (typeof fieldData !== "object") {
@@ -348,7 +353,6 @@ const Table = memo(function Table({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timestampMap = new Map<string, any[]>();
 
-    //const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
     finalResults.forEach(({ layer, result }) => {
       const metadataCache: Record<string, ProductField> = {};
       if (layer.fields) {
@@ -375,7 +379,6 @@ const Table = memo(function Table({
         const timestampEntry = timestampMap.get(result.timestamp) || [];
         timestampEntry.push({ [layer.id]: processedResult });
         timestampMap.set(result.timestamp, timestampEntry);
-        console.log("Timestamp entry map w/ thresholds: ", timestampEntry);
       });
     });
 
