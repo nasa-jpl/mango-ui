@@ -1,9 +1,5 @@
-import {
-  IconExternalLink,
-  IconHelp,
-  IconSettings,
-} from "@nasa-jpl/react-stellar";
-import { Database, Flask, HouseLine, Planet } from "@phosphor-icons/react";
+import { IconHelp } from "@nasa-jpl/react-stellar";
+import { Database, HouseLine, Planet } from "@phosphor-icons/react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { config } from "../../../config";
@@ -63,7 +59,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
             variant="primary-link"
           />
         </NavLink>
-        <NavLink
+        {/* <NavLink
           className={(activeNav) =>
             getNavLinkClass(activeNav.isActive, "/sandbox")
           }
@@ -79,7 +75,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
             }
             variant="primary-link"
           />
-        </NavLink>
+        </NavLink> */}
       </div>
       {!view ? (
         <div>Loading</div>
@@ -110,7 +106,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
       <div className="sidebar-bottom-content">
         <div className="sidebar-divider" />
         <div className="sidebar-padded-content">
-          <SidebarLink title="Settings" icon={<IconSettings />} />
+          {/* <SidebarLink title="Settings" icon={<IconSettings />} /> */}
           <NavLink
             to={config.endpoints.docs}
             target="_blank"
@@ -118,7 +114,7 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
           >
             <SidebarLink title="Help" icon={<IconHelp />} />
           </NavLink>
-          <SidebarLink title="Sign Out" icon={<IconExternalLink />} />
+          {/* <SidebarLink title="Sign Out" icon={<IconExternalLink />} /> */}
         </div>
       </div>
     </SidebarContainer>

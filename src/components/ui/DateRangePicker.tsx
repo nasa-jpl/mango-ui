@@ -33,7 +33,7 @@ export const DateRangePicker = ({
   }, [startDate, endDate, prevPropDateRange]);
 
   const valid = isValidDateRange(internalStartDate, internalEndDate);
-  const formatString = dateFormat === "short" ? "MM/dd/yyyy" : undefined;
+  const formatString = dateFormat === "short" ? "yyyy/MM/dd" : undefined;
   const minWidth = dateFormat === "short" ? 70 : 164;
 
   const submit = () => {

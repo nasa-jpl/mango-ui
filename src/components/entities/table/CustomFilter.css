@@ -1,0 +1,50 @@
+.ag-floating-filter {
+  border-right: 1px solid rgb(235, 236, 236);
+  border-top: 1px solid rgb(235, 236, 236);
+  display: flex;
+  gap: 2px;
+  margin-left: -2px;
+}
+
+.ag-floating-filter-body {
+  align-items: center;
+  display: flex;
+  justify-content: end;
+}
+
+.ag-ltr .ag-floating-filter-button {
+  align-items: center;
+  border-radius: 4px;
+  height: 24px;
+  justify-content: center;
+  margin-left: 0;
+  opacity: 0.5;
+  width: 24px;
+}
+
+.ag-ltr .ag-floating-filter-button:hover {
+  background: var(--st-gray-20) !important;
+}
+
+.ag-header-cell-menu-button {
+  opacity: 0.5;
+}
+
+.ag-header-cell-menu-button,
+.ag-header-cell-menu-button:hover {
+  color: var(--ag-header-foreground-color) !important;
+}
+
+.ag-header-cell-menu-button:hover {
+  background: var(--st-gray-20) !important;
+  opacity: 1;
+}
+
+.ag-header-cell-menu-button.ag-has-popup-positioned-under {
+  display: flex;
+  opacity: 1;
+}
+
+.ag-header-cell-label svg {
+  flex-shrink: 0;
+}

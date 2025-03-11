@@ -34,6 +34,7 @@ export type Section = {
   defaultOpen?: boolean;
   enableHeader?: boolean;
   entities: Entity[];
+  fullHeight?: boolean;
   id: string;
   layout: SectionLayout[];
   resizable?: boolean;
@@ -228,5 +229,7 @@ export type TableColumnGroup = {
 export interface TableEntity extends Entity {
   columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
+  compact?: boolean;
+  fitToGridWidth?: boolean;
   layers: DataLayer[];
 }

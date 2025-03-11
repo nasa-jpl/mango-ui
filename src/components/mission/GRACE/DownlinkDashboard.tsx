@@ -402,11 +402,13 @@ export function DownlinkDashboard({
         },
       ];
 
+      const matchingProduct = products.find((p) => p.id === product.dataset);
+
       const textEntity: TimelineRowSubrowEntity<TextEntity> = {
         id: i.toString() + "text",
         type: "text",
         title: "Description",
-        text: "Level 1A accelerometer data",
+        text: matchingProduct?.description || "Description not found",
       };
       const gapsTable: TimelineRowSubrowEntity<TableEntity> = {
         id: i.toString() + "gapstable",
@@ -414,6 +416,7 @@ export function DownlinkDashboard({
         title: `Gaps (${allGapData[0].result.data.length})`,
         syncWithPageDateRange: true,
         expandable: true,
+        compact: true,
         idField: "id",
         data: allGapData,
         layers: [
@@ -477,6 +480,7 @@ export function DownlinkDashboard({
         type: "table",
         title: `Passes (${passes[0].result.data.length})`,
         syncWithPageDateRange: true,
+        compact: true,
         expandable: true,
         idField: "id",
         data: passes,

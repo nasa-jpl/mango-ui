@@ -9,7 +9,6 @@ import "./index.css";
 import HomePage from "./routes/HomePage";
 import ProductsPage from "./routes/ProductsPage";
 import RootPage from "./routes/RootPage";
-import SandboxPage from "./routes/SandboxPage";
 import ViewPage from "./routes/ViewPage";
 import { getView } from "./utilities/api";
 import "./variables.css";
@@ -41,10 +40,10 @@ const router = createBrowserRouter(
           path: "products",
           element: <ProductsPage />,
         },
-        {
-          path: "sandbox",
-          element: <SandboxPage />,
-        },
+        // {
+        //   path: "sandbox",
+        //   element: <SandboxPage />,
+        // },
         {
           path: "view/:pageGroupURL/:pageURL",
           element: <ViewPage />,

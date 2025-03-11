@@ -6,14 +6,16 @@ import {
 import { IRowNode } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import { AgGridReact, AgGridReactProps } from "ag-grid-react"; // React Grid Logic
+import classNames from "classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGridColumnDef } from "../../../types/data-grid";
-import CustomHeader from "../../entities/table/CustomHeader";
 import "./ag-grid-stellar.css";
 
 export declare type DataGridProps<T> = {
   className?: string;
   columnDefs: DataGridColumnDef[];
+  compact?: boolean;
+  fitToGridWidth?: boolean;
   gridProps?: AgGridReactProps;
   idKey?: keyof T | undefined;
   loading?: boolean;
@@ -28,19 +30,14 @@ export function DataGrid<T>({
   selectedItemId,
   onRowSelected = () => {},
   idKey,
+  compact = false,
+  fitToGridWidth = false,
   loading = true,
   className = "",
   gridProps = {},
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
-  const components = useMemo<{
-    [p: string]: unknown;
-  }>(() => {
-    return {
-      agColumnHeader: CustomHeader,
-    };
-  }, []);
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.api && gridReady) {
@@ -80,15 +77,21 @@ export function DataGrid<T>({
     | SizeColumnsToContentStrategy
   >(() => {
     return {
-      type: "fitCellContents",
-      defaultMinWidth: 100,
+      type: fitToGridWidth ? "fitGridWidth" : "fitCellContents",
     };
-  }, []);
+  }, [fitToGridWidth]);
 
   return (
-    <div className="ag-theme-stellar" style={{ height: "100%", width: "100%" }}>
+    <div
+      className={classNames("ag-theme-stellar", {
+        "ag-theme-stellar--compact": compact,
+      })}
+      style={{ height: "100%", width: "100%" }}
+    >
       <AgGridReact<T>
         ref={gridRef}
+        suppressColumnVirtualisation
+        headerHeight={32}
         className={className}
         rowData={rowData}
         rowSelection={{
@@ -97,7 +100,6 @@ export function DataGrid<T>({
           mode: "singleRow",
         }}
         loading={loading}
-        components={components}
         columnDefs={columnDefs}
         animateRows={false}
         suppressCellFocus

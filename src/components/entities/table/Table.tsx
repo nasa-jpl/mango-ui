@@ -24,6 +24,7 @@ import {
 } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
+import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 
 export declare type TableProps = {
@@ -38,6 +39,25 @@ export declare type TableProps = {
   showHeader?: boolean;
   tableEntity: TableEntity;
 };
+
+function getAGGridFilterType(type: ProductField["type"] | string) {
+  switch (type) {
+    case "int":
+      return "agNumberColumnFilter";
+    case "float":
+      return "agNumberColumnFilter";
+    case "str":
+      return "agTextColumnFilter";
+    case "bool":
+      return "agTextColumnFilter";
+    case "datetime":
+      return "agDateColumnFilter";
+    case "dict":
+      return "agTextColumnFilter";
+    default:
+      return true;
+  }
+}
 
 const Table = memo(function Table({
   dateRange,
@@ -126,11 +146,15 @@ const Table = memo(function Table({
       const fieldId = `${column.layerId}.${column.field}`;
       const col: DataGridColumnDef = {
         field: fieldId,
-        filter: "string",
+        flex: tableEntity.fitToGridWidth ? 1 : undefined,
+        minWidth: 50,
+        filter: getAGGridFilterType(metadata?.type || ""),
+        floatingFilter: true,
+        floatingFilterComponent: CustomFilter,
         headerName: column.label ?? column.field,
         resizable: true,
         sortable: true,
-        headerComponentParams: {
+        floatingFilterComponentParams: {
           onColumnPreview: () => {
             if (product) {
               onSetProductPreview({
@@ -183,6 +207,10 @@ const Table = memo(function Table({
             return "-";
           }
 
+          if (typeof params.value === "number") {
+            return parseFloat(params.value.toPrecision(4));
+          }
+
           return params.value;
         },
         valueGetter: (
@@ -200,6 +228,9 @@ const Table = memo(function Table({
             return fieldData;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
+            if (typeof fieldData.value === "number") {
+              return parseFloat(fieldData.value.toPrecision(4));
+            }
             return fieldData.value;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
@@ -228,13 +259,18 @@ const Table = memo(function Table({
     // Build derived timestamp column
     const col: DataGridColumnDef = {
       field: "timestamp",
-      filter: "string",
+      floatingFilter: false,
       headerName: "Timestamp",
+      minWidth: 80,
+      flex: 1,
       resizable: true,
       sortable: true,
       valueGetter: (params) => {
         const rowData = params.data;
         return rowData["timestamp"] ?? null;
+      },
+      valueFormatter: (params) => {
+        return params.value.split("+")[0];
       },
     };
 
@@ -450,6 +486,8 @@ const Table = memo(function Table({
       {!compact && (
         <DataGrid
           idKey={idField}
+          fitToGridWidth={!!tableEntity.fitToGridWidth}
+          compact={tableEntity.compact}
           loading={loading}
           rowData={rowData}
           columnDefs={columnDefs}
@@ -457,7 +495,6 @@ const Table = memo(function Table({
           onRowSelected={onRowSelected}
           gridProps={{
             getRowClass: (params) => {
-              console.log("params :>> ", params);
               let rowClass = "";
               for (let i = 0; i < tableEntity.columns.length; i++) {
                 const column = tableEntity.columns[i];
