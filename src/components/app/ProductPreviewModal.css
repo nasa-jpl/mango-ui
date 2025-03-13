@@ -6,6 +6,23 @@
   transform: unset;
 }
 
+.product-preview-modal .st-react-modal--header--title-row {
+  padding: 12px 0;
+  width: 100%;
+}
+
+.product-preview-modal .st-react-modal--header--text {
+  width: 100%;
+}
+
+.product-preview-modal-title {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  margin-right: 16px;
+}
+
 .product-preview-button {
   align-items: center;
   display: flex;
@@ -31,8 +48,7 @@
 }
 
 .product-preview-date {
-  display: flex;
-  gap: var(--st-react-formfield-horizontal-grid-unit);
+  height: 24px;
 }
 
 .product-preview-field {
