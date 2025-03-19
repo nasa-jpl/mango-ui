@@ -4,6 +4,7 @@ export const config = {
       missions: "/missions/",
       products: "/missions/{MISSION}/products",
       data: "/missions/{MISSION}/products/{DATASET}/versions/{VERSION}/instruments/{INSTRUMENT}/data",
+      jsonStore: "/ui/{METHOD}/{KEY}",
     },
   },
   endpoints: {

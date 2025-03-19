@@ -16,3 +16,14 @@
   justify-content: flex-end;
   padding-bottom: 8px;
 }
+
+button.st-button.sidebar-save-view-changes {
+  border-color: #007bff;
+  color: #007bff;
+  gap: 8px;
+  height: 30px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  padding: 8px 6px;
+  width: 100%;
+}

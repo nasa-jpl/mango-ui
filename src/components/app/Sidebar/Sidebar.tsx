@@ -1,9 +1,16 @@
-import { IconHelp } from "@nasa-jpl/react-stellar";
-import { Database, HouseLine, Planet } from "@phosphor-icons/react";
+import { Button, IconHelp } from "@nasa-jpl/react-stellar";
+import {
+  Database,
+  FloppyDisk,
+  Gear,
+  HouseLine,
+  Planet,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { config } from "../../../config";
 import { View } from "../../../types/view";
+import SaveViewModal from "../SaveViewModal";
 import "./Sidebar.css";
 import SidebarContainer from "./SidebarContainer";
 import SidebarGroup from "./SidebarGroup";
@@ -16,6 +23,7 @@ export declare type SidebarProps = {
 
 export const Sidebar = ({ title = "", view }: SidebarProps) => {
   const [active, setActive] = useState("home");
+  const [showSaveViewModal, setShowSaveViewModal] = useState(false);
 
   const getNavLinkClass = (isActive: boolean, path: string) => {
     if (isActive) {
@@ -107,6 +115,38 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
         <div className="sidebar-divider" />
         <div className="sidebar-padded-content">
           {/* <SidebarLink title="Settings" icon={<IconSettings />} /> */}
+          {view && (
+            <SaveViewModal
+              open={showSaveViewModal}
+              view={view}
+              onClose={() => setShowSaveViewModal(false)}
+            />
+          )}
+          <Button
+            icon={<FloppyDisk size={16} />}
+            variant="secondary"
+            className="sidebar-save-view-changes"
+            onClick={() => setShowSaveViewModal(true)}
+          >
+            Save View Changes
+          </Button>
+          <NavLink
+            className={(activeNav) =>
+              getNavLinkClass(activeNav.isActive, "/manage")
+            }
+            to="manage"
+          >
+            <SidebarLink
+              title="Manage"
+              icon={
+                <Gear
+                  weight={active === "/manage" ? "fill" : "bold"}
+                  size={16}
+                />
+              }
+              variant="primary-link"
+            />
+          </NavLink>
           <NavLink
             to={config.endpoints.docs}
             target="_blank"
@@ -114,7 +154,6 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
           >
             <SidebarLink title="Help" icon={<IconHelp />} />
           </NavLink>
-          {/* <SidebarLink title="Sign Out" icon={<IconExternalLink />} /> */}
         </div>
       </div>
     </SidebarContainer>

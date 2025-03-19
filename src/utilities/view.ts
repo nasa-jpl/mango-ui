@@ -11,11 +11,14 @@ import {
   Entity,
   EntityType,
   MapEntity,
+  Page,
+  PageGroup,
   TableEntity,
   TextEntity,
   TimeSeriesPoint,
   TimelineRowEntity,
 } from "../types/view";
+import { generateUUID } from "./generic";
 
 export function isChartEntity(entity: Entity): entity is ChartEntity {
   return entity.type === "chart";
@@ -197,4 +200,25 @@ export function formatYValue(tickValue: number | string): string {
     return tickValue;
   }
   return format("~g")(tickValue);
+}
+
+export function createViewPage(params: Partial<Page>): Page {
+  return {
+    dateFormat: "long",
+    id: generateUUID(),
+    sections: [],
+    title: "",
+    url: "",
+    ...params,
+  };
+}
+
+export function createViewPageGroup(params: Partial<PageGroup>): PageGroup {
+  return {
+    id: generateUUID(),
+    pages: [],
+    title: "",
+    url: "",
+    ...params,
+  };
 }

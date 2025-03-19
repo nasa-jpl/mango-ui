@@ -22,14 +22,6 @@ div[data-radix-popper-content-wrapper] {
   position: fixed;
 }
 
-.st-react-modal {
-  display: flex;
-  flex-direction: column;
-  left: unset;
-  top: unset;
-  transform: unset;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .st-react-modal {
     animation: unset !important;

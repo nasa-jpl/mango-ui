@@ -1,3 +1,11 @@
+.product-preview-modal {
+  display: flex;
+  flex-direction: column;
+  left: unset;
+  top: unset;
+  transform: unset;
+}
+
 .product-preview-button {
   align-items: center;
   display: flex;
