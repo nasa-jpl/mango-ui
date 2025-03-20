@@ -49,7 +49,6 @@ export function applyFieldThresholds(
 
   // Find matching threshold entry
   const matchingThresholdConfig = field.qc_thresholds.find((threshold) => {
-    console.log("Field: ", field);
     if (!threshold.effective_since && !threshold.effective_until) {
       return true;
     }
