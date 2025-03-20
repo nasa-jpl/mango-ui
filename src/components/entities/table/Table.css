@@ -18,15 +18,23 @@
 }
 
 .table .limit-cell {
-  background-color: rgba(255, 180, 180, 0.6);
+  background: rgba(255, 180, 180, 0.6);
   color: rgb(147, 0, 0);
 }
 
 .table .warning-cell {
-  background-color: rgba(255, 239, 180, 0.6);
+  background: rgba(255, 239, 180, 0.6);
   color: rgb(112, 91, 19);
 }
 
-.ag-tooltip {
-  white-space: pre;
+.table .limit-row,
+.table .ag-theme-stellar .ag-row-hover.limit-row:not(.ag-row-selected)::before {
+  background: rgba(255, 180, 180, 0.3);
+}
+
+.table .warning-row,
+.table
+  .ag-theme-stellar
+  .ag-row-hover.warning-row:not(.ag-row-selected)::before {
+  background: rgba(255, 239, 180, 0.3);
 }

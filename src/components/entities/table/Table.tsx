@@ -5,7 +5,12 @@ import {
   DataResponse,
   DataResponseDataEntry,
   Product,
+  ProductField,
 } from "../../../types/api";
+import {
+  ComputedThresholds,
+  ProcessedDataResponseDataEntry,
+} from "../../../types/app.ts";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
 import { DateRange } from "../../../types/time";
@@ -19,6 +24,7 @@ import {
 } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
+import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 
 export declare type TableProps = {
@@ -33,6 +39,25 @@ export declare type TableProps = {
   showHeader?: boolean;
   tableEntity: TableEntity;
 };
+
+function getAGGridFilterType(type: ProductField["type"] | string) {
+  switch (type) {
+    case "int":
+      return "agNumberColumnFilter";
+    case "float":
+      return "agNumberColumnFilter";
+    case "str":
+      return "agTextColumnFilter";
+    case "bool":
+      return "agTextColumnFilter";
+    case "datetime":
+      return "agDateColumnFilter";
+    case "dict":
+      return "agTextColumnFilter";
+    default:
+      return true;
+  }
+}
 
 const Table = memo(function Table({
   dateRange,
@@ -121,11 +146,15 @@ const Table = memo(function Table({
       const fieldId = `${column.layerId}.${column.field}`;
       const col: DataGridColumnDef = {
         field: fieldId,
-        filter: "string",
+        flex: tableEntity.fitToGridWidth ? 1 : undefined,
+        minWidth: 50,
+        filter: getAGGridFilterType(metadata?.type || ""),
+        floatingFilter: true,
+        floatingFilterComponent: CustomFilter,
         headerName: column.label ?? column.field,
         resizable: true,
         sortable: true,
-        headerComponentParams: {
+        floatingFilterComponentParams: {
           onColumnPreview: () => {
             if (product) {
               onSetProductPreview({
@@ -141,7 +170,20 @@ const Table = memo(function Table({
           if (
             !params.data ||
             !(column.layerId in params.data) ||
-            !(column.field in params.data[column.layerId])
+            !(column.field in params.data[column.layerId]) ||
+            !params.data[column.layerId][column.field] ||
+            !params.data[column.layerId][column.field]._thresholds
+          ) {
+            return "";
+          }
+          const { limits, warnings }: ComputedThresholds =
+            params.data[column.layerId][column.field]._thresholds;
+
+          if (
+            !limits.lower &&
+            !limits.upper &&
+            !warnings.lower &&
+            !warnings.upper
           ) {
             return "";
           }
@@ -170,8 +212,6 @@ const Table = memo(function Table({
           }
         },
         tooltipValueGetter: (params) => {
-          // TODO: Potential refactoring to consolidate retrieval of threshold data.
-          // Also, per-entity tooltips?
           if (
             !params.data ||
             !(column.layerId in params.data) ||
@@ -186,12 +226,12 @@ const Table = memo(function Table({
               params.data[column.layerId]
             );
 
-            // TODO: WIP currently returns whether or not threshold was met -- not the values themselves
             const tooltipText =
-              `Limit upper: ${limits.upper ?? "-"} \n` +
-              `Limit lower: ${limits.lower ?? "-"} \n` +
-              `Warning upper: ${warnings.upper ?? "-"} \n` +
-              `Warning lower: ${warnings.upper ?? "-"} \n`;
+              `Field: ${column.label} \n` +
+              `Lower limit value: ${limits.lower_value ?? "-"} \n` +
+              `Upper limit value: ${limits.upper_value ?? "-"} \n` +
+              `Lower warning value: ${warnings.lower_value ?? "-"} \n` +
+              `Upper warning value: ${warnings.upper_value ?? "-"} \n`;
             return tooltipText;
           }
           return params.valueFormatted;
@@ -202,6 +242,15 @@ const Table = memo(function Table({
           } else if (metadata?.type === "datetime") {
             return params.value.split("+")[0];
           }
+
+          if (params.value === "") {
+            return "-";
+          }
+
+          if (typeof params.value === "number") {
+            return parseFloat(params.value.toPrecision(4));
+          }
+
           return params.value;
         },
         valueGetter: (
@@ -219,6 +268,9 @@ const Table = memo(function Table({
             return fieldData;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
+            if (typeof fieldData.value === "number") {
+              return parseFloat(fieldData.value.toPrecision(4));
+            }
             return fieldData.value;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
@@ -243,6 +295,26 @@ const Table = memo(function Table({
 
       return col;
     });
+
+    // Build derived timestamp column
+    const col: DataGridColumnDef = {
+      field: "timestamp",
+      floatingFilter: false,
+      headerName: "Timestamp",
+      minWidth: 80,
+      flex: 1,
+      resizable: true,
+      sortable: true,
+      valueGetter: (params) => {
+        const rowData = params.data;
+        return rowData["timestamp"] ?? null;
+      },
+      valueFormatter: (params) => {
+        return params.value.split("+")[0];
+      },
+    };
+
+    tmpTableColumns.push(col);
 
     // Add column groups to table column definition
     tableColumnGroups.forEach((colGroup) => {
@@ -352,16 +424,55 @@ const Table = memo(function Table({
       }
       finalResults = results;
     }
-    const rows: Record<string, DataResponseDataEntry>[] = [];
+
+    // Iterate over all layers to retrieve unique timestamps
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const timestampMap = new Map<string, any[]>();
+
     finalResults.forEach(({ layer, result }) => {
-      result.data.forEach((result, i) => {
-        if (!rows[i]) {
-          rows[i] = { [layer.id]: result };
-        } else {
-          rows[i] = { ...rows[i], [layer.id]: result };
-        }
+      const metadataCache: Record<string, ProductField> = {};
+      if (layer.fields) {
+        layer.fields.forEach((field) => {
+          const metadata = getFieldMetadataForLayer(
+            field,
+            layer as DataLayer,
+            products
+          );
+          if (metadata) {
+            metadataCache[field] = metadata;
+          }
+        });
+      }
+      result.data.forEach((result) => {
+        const processedResult: ProcessedDataResponseDataEntry = result;
+        Object.keys(result).forEach((key) => {
+          // Compute thresholds for result if metadata available for the field
+          if (key !== "timestamp" && metadataCache[key]) {
+            const thresholds = applyFieldThresholds(metadataCache[key], result);
+            processedResult[key]._thresholds = thresholds;
+          }
+        });
+        const timestampEntry = timestampMap.get(result.timestamp) || [];
+        timestampEntry.push({ [layer.id]: processedResult });
+        timestampMap.set(result.timestamp, timestampEntry);
       });
     });
+
+    // Sort down chronologically
+    const sortedTimestampMap = new Map(
+      [...timestampMap.entries()].sort(
+        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+      )
+    );
+
+    // Merge entries with the same timestamp
+    const rows: Record<string, DataResponseDataEntry>[] = Array.from(
+      sortedTimestampMap.entries()
+    ).map(([timestamp, objects]) => ({
+      timestamp,
+      ...objects.reduce((acc, obj) => ({ ...acc, ...obj }), {}),
+    }));
+
     setRowData(rows);
   };
 
@@ -415,11 +526,54 @@ const Table = memo(function Table({
       {!compact && (
         <DataGrid
           idKey={idField}
+          fitToGridWidth={!!tableEntity.fitToGridWidth}
+          compact={tableEntity.compact}
           loading={loading}
           rowData={rowData}
           columnDefs={columnDefs}
           selectedItemId={selectedPointId}
           onRowSelected={onRowSelected}
+          gridProps={{
+            getRowClass: (params) => {
+              let rowClass = "";
+              for (let i = 0; i < tableEntity.columns.length; i++) {
+                const column = tableEntity.columns[i];
+
+                // For each column, see if the row has tripped any thresholds
+                if (
+                  !params.data ||
+                  !(column.layerId in params.data) ||
+                  !(column.field in params.data[column.layerId]) ||
+                  !params.data[column.layerId][column.field] ||
+                  !params.data[column.layerId][column.field]._thresholds
+                ) {
+                  continue;
+                }
+                const { limits, warnings }: ComputedThresholds =
+                  params.data[column.layerId][column.field]._thresholds;
+
+                if (
+                  !limits.lower &&
+                  !limits.upper &&
+                  !warnings.lower &&
+                  !warnings.upper
+                ) {
+                  continue;
+                }
+
+                if (limits.lower || limits.upper) {
+                  rowClass = "limit-row";
+                  break;
+                }
+
+                if (warnings.lower || warnings.upper) {
+                  rowClass = "warning-row";
+                  break;
+                }
+              }
+              return rowClass;
+            },
+          }}
         />
       )}
       {/* {compact && (

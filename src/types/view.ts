@@ -34,6 +34,7 @@ export type Section = {
   defaultOpen?: boolean;
   enableHeader?: boolean;
   entities: Entity[];
+  fullHeight?: boolean;
   id: string;
   layout: SectionLayout[];
   resizable?: boolean;
@@ -52,7 +53,10 @@ export type EntityType =
   | "downlink-dashboard";
 
 export type Entity = {
-  data?: { layer: { id: string }; result: { data: DataResponse["data"] } }[]; // TODO this is actually a list of {layer, result}
+  data?: {
+    layer: { id: string } & Partial<DataLayer>;
+    result: { data: DataResponse["data"] };
+  }[];
   dateRange?: DateRange;
   id: string;
   idField?: string;
@@ -226,5 +230,7 @@ export interface TableEntity extends Entity {
   applyThresholds?: boolean;
   columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
+  compact?: boolean;
+  fitToGridWidth?: boolean;
   layers: DataLayer[];
 }

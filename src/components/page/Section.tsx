@@ -118,7 +118,12 @@ export const Section = ({
   );
 
   return (
-    <div className={classNames("section", { "section--open": open })}>
+    <div
+      className={classNames("section", {
+        "section--open": open,
+        "section--full-height": !!section.fullHeight,
+      })}
+    >
       {enableHeader && (
         <div className="section-header">
           <Button

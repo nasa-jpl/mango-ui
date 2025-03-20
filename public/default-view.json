@@ -63,7 +63,7 @@
               "enableHeader": false,
               "resizable": false,
               "defaultOpen": true,
-              "layout": [{ "i": "3r4gtrbgc", "x": 0, "y": 0, "w": 12, "h": 4 }],
+              "layout": [],
               "entities": [
                 {
                   "dateRange": { "start": "", "end": "" },
@@ -160,8 +160,10 @@
               "type": "section",
               "title": "Examples",
               "defaultOpen": true,
+              "resizable": false,
+              "fullHeight": true,
               "layout": [
-                { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 4 }
+                { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 12 }
               ],
               "entities": [
                 {
@@ -171,6 +173,8 @@
                   "showHeader": false,
                   "syncWithPageDateRange": true,
                   "applyThresholds": true,
+                  "compact": true,
+                  "fitToGridWidth": true,
                   "columnGroups": [
                     { "id": "ocimaom", "name": "KBR-GPS Performance" },
                     { "id": "nvjnjfk", "name": "GPS DD Clock Overlap" },
@@ -179,12 +183,6 @@
                     { "id": "wwwhwiw", "name": "L-Overlap RMS" }
                   ],
                   "columns": [
-                    {
-                      "dateFormat": "short",
-                      "field": "timestamp",
-                      "label": "Date",
-                      "layerId": "48gnes"
-                    },
                     {
                       "field": "resid_rms",
                       "label": "RMS (mm)",

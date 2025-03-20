@@ -518,3 +518,13 @@
 .ag-theme-stellar .ag-header-cell-resize {
   z-index: 0;
 }
+
+.ag-theme-stellar--compact {
+  --ag-grid-size: 3px;
+  --ag-font-size: 10px;
+  --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
+}
+
+.ag-header-cell-text {
+  white-space: pre-wrap !important;
+}

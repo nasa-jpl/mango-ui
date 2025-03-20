@@ -1,4 +1,5 @@
 import { DataResponseDataEntry, Product, ProductField } from "../types/api";
+import { ComputedThresholds } from "../types/app";
 import { DataLayer } from "../types/view";
 
 export function getProductForLayer(
@@ -25,32 +26,42 @@ export function getFieldMetadataForLayer(
 export function applyFieldThresholds(
   field: ProductField,
   data: DataResponseDataEntry
-): {
-  limits: { lower: boolean; upper: boolean };
-  warnings: { lower: boolean; upper: boolean };
-} {
-  const result = {
-    limits: { lower: false, upper: false },
-    warnings: { lower: false, upper: false },
+): ComputedThresholds {
+  const result: ComputedThresholds = {
+    limits: {
+      lower: false,
+      lower_value: null,
+      upper: false,
+      upper_value: null,
+    },
+    warnings: {
+      lower: false,
+      lower_value: null,
+      upper: false,
+      upper_value: null,
+    },
   };
+
   // Bail if field has no threshold configurations
-  if (!field.value_threshold_configurations) {
+  if (!field.qc_thresholds) {
     return result;
   }
 
   // Find matching threshold entry
-  const matchingThresholdConfig = field.value_threshold_configurations.find(
-    (threshold) => {
-      let inRange = true;
-      if (threshold.effective_from) {
-        inRange = threshold.effective_from >= data.timestamp;
-      }
-      if (threshold.effective_to) {
-        inRange = threshold.effective_to <= data.timestamp;
-      }
-      return inRange;
+  const matchingThresholdConfig = field.qc_thresholds.find((threshold) => {
+    console.log("Field: ", field);
+    if (!threshold.effective_since && !threshold.effective_until) {
+      return true;
     }
-  );
+    let inRange = false;
+    if (threshold.effective_since) {
+      inRange = threshold.effective_since <= data.timestamp;
+    }
+    if (threshold.effective_until) {
+      inRange = threshold.effective_until >= data.timestamp;
+    }
+    return inRange;
+  });
 
   if (!matchingThresholdConfig) {
     return result;
@@ -59,12 +70,37 @@ export function applyFieldThresholds(
   // Compute violations
   const value = data[field.name].value as number;
   result.limits = {
-    lower: value < matchingThresholdConfig.limits.lower,
-    upper: value > matchingThresholdConfig.limits.upper,
+    lower: matchingThresholdConfig.limits
+      ? value <
+        (matchingThresholdConfig.limits.lower ?? Number.NEGATIVE_INFINITY)
+      : false,
+    upper: matchingThresholdConfig.limits
+      ? value >
+        (matchingThresholdConfig.limits.upper ?? Number.POSITIVE_INFINITY)
+      : false,
+    lower_value: matchingThresholdConfig.limits
+      ? matchingThresholdConfig.limits.lower ?? null
+      : null,
+    upper_value: matchingThresholdConfig.limits
+      ? matchingThresholdConfig.limits.upper ?? null
+      : null,
   };
+
   result.warnings = {
-    lower: value < matchingThresholdConfig.warnings.lower,
-    upper: value > matchingThresholdConfig.warnings.upper,
+    lower: matchingThresholdConfig.warnings
+      ? value <
+        (matchingThresholdConfig.warnings.lower ?? Number.NEGATIVE_INFINITY)
+      : false,
+    upper: matchingThresholdConfig.warnings
+      ? value >
+        (matchingThresholdConfig.warnings.upper ?? Number.POSITIVE_INFINITY)
+      : false,
+    lower_value: matchingThresholdConfig.warnings
+      ? matchingThresholdConfig.warnings.lower ?? null
+      : null,
+    upper_value: matchingThresholdConfig.warnings
+      ? matchingThresholdConfig.warnings.upper ?? null
+      : null,
   };
   return result;
 }
