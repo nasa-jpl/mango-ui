@@ -194,14 +194,6 @@ const Table = memo(function Table({
               params.data[column.layerId]
             );
 
-            if (!limits.lower && !limits.upper) {
-              return "";
-            }
-
-            if (!warnings.lower && !warnings.upper) {
-              return "";
-            }
-
             if (limits.lower || limits.upper) {
               return "limit-cell";
             }
