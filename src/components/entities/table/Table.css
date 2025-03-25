@@ -38,3 +38,8 @@
   .ag-row-hover.warning-row:not(.ag-row-selected)::before {
   background: rgba(255, 239, 180, 0.3);
 }
+
+.table .derived-column {
+  display: inline-flex;
+  gap: 8px;
+}

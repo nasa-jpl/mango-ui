@@ -13,6 +13,7 @@ import {
 } from "../../../types/app.ts";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
+import { Status } from "../../../types/status.ts";
 import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
 import { getData } from "../../../utilities/api";
@@ -24,6 +25,7 @@ import {
 } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
+import StatusBadge from "../../ui/StatusBadge.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 
@@ -223,7 +225,7 @@ const Table = memo(function Table({
               `Lower limit value: ${limits.lower_value ?? "-"} \n` +
               `Upper limit value: ${limits.upper_value ?? "-"} \n` +
               `Lower warning value: ${warnings.lower_value ?? "-"} \n` +
-              `Upper warning value: ${warnings.upper_value ?? "-"} \n`;
+              `Upper warning value: ${warnings.upper_value ?? "-"}`;
             return tooltipText;
           }
           return params.valueFormatted;
@@ -288,12 +290,12 @@ const Table = memo(function Table({
       return col;
     });
 
-    // Build derived timestamp column
+    // Build derived column
     const col: DataGridColumnDef = {
       field: "timestamp",
       floatingFilter: false,
       headerName: "Timestamp",
-      minWidth: 80,
+      minWidth: 150,
       flex: 1,
       resizable: true,
       sortable: true,
@@ -303,6 +305,54 @@ const Table = memo(function Table({
       },
       valueFormatter: (params) => {
         return params.value.split("+")[0];
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cellRenderer: (params: any) => {
+        if (!tableEntity.applyThresholds) {
+          return <>{params.valueFormatted}</>;
+        }
+
+        let tripped: Status = "nominal";
+        for (let i = 0; i < tableEntity.columns.length; i++) {
+          const column = tableEntity.columns[i];
+
+          // For each column, see if the row has tripped any thresholds
+          if (
+            !params.data ||
+            !(column.layerId in params.data) ||
+            !(column.field in params.data[column.layerId]) ||
+            !params.data[column.layerId][column.field] ||
+            !params.data[column.layerId][column.field]._thresholds
+          ) {
+            continue;
+          }
+          const { limits, warnings }: ComputedThresholds =
+            params.data[column.layerId][column.field]._thresholds;
+
+          if (
+            !limits.lower &&
+            !limits.upper &&
+            !warnings.lower &&
+            !warnings.upper
+          ) {
+            continue;
+          }
+
+          if (
+            limits.lower ||
+            limits.upper ||
+            warnings.lower ||
+            warnings.upper
+          ) {
+            tripped = "error";
+            break;
+          }
+        }
+        return (
+          <span className="derived-column">
+            <StatusBadge status={tripped} /> {params.valueFormatted}
+          </span>
+        );
       },
     };
 
