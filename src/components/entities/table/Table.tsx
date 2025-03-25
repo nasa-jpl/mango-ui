@@ -338,13 +338,13 @@ const Table = memo(function Table({
             continue;
           }
 
-          if (
-            limits.lower ||
-            limits.upper ||
-            warnings.lower ||
-            warnings.upper
-          ) {
+          if (limits.lower || limits.upper) {
             tripped = "error";
+            break;
+          }
+
+          if (warnings.lower || warnings.upper) {
+            tripped = "warning";
             break;
           }
         }
