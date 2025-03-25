@@ -1,11 +1,15 @@
 export type ComputedThresholds = {
   limits: {
     lower: boolean;
+    lower_value: number | null;
     upper: boolean;
+    upper_value: number | null;
   };
   warnings: {
     lower: boolean;
+    lower_value: number | null;
     upper: boolean;
+    upper_value: number | null;
   };
 };
 

@@ -172,6 +172,7 @@
                   "title": "Table",
                   "showHeader": false,
                   "syncWithPageDateRange": true,
+                  "applyThresholds": true,
                   "compact": true,
                   "fitToGridWidth": true,
                   "columnGroups": [

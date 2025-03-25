@@ -27,10 +27,21 @@ export function applyFieldThresholds(
   field: ProductField,
   data: DataResponseDataEntry
 ): ComputedThresholds {
-  const result = {
-    limits: { lower: false, upper: false },
-    warnings: { lower: false, upper: false },
+  const result: ComputedThresholds = {
+    limits: {
+      lower: false,
+      lower_value: null,
+      upper: false,
+      upper_value: null,
+    },
+    warnings: {
+      lower: false,
+      lower_value: null,
+      upper: false,
+      upper_value: null,
+    },
   };
+
   // Bail if field has no threshold configurations
   if (!field.qc_thresholds) {
     return result;
@@ -66,6 +77,12 @@ export function applyFieldThresholds(
       ? value >
         (matchingThresholdConfig.limits.upper ?? Number.POSITIVE_INFINITY)
       : false,
+    lower_value: matchingThresholdConfig.limits
+      ? matchingThresholdConfig.limits.lower ?? null
+      : null,
+    upper_value: matchingThresholdConfig.limits
+      ? matchingThresholdConfig.limits.upper ?? null
+      : null,
   };
 
   result.warnings = {
@@ -77,6 +94,12 @@ export function applyFieldThresholds(
       ? value >
         (matchingThresholdConfig.warnings.upper ?? Number.POSITIVE_INFINITY)
       : false,
+    lower_value: matchingThresholdConfig.warnings
+      ? matchingThresholdConfig.warnings.lower ?? null
+      : null,
+    upper_value: matchingThresholdConfig.warnings
+      ? matchingThresholdConfig.warnings.upper ?? null
+      : null,
   };
   return result;
 }

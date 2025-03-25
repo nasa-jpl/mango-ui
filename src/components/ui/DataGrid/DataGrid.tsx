@@ -101,6 +101,7 @@ export function DataGrid<T>({
         }}
         loading={loading}
         columnDefs={columnDefs}
+        enableBrowserTooltips={true}
         animateRows={false}
         suppressCellFocus
         autoSizeStrategy={autoSizeStrategy}
