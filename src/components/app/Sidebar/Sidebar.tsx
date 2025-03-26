@@ -1,5 +1,6 @@
 import { Button, IconHelp } from "@nasa-jpl/react-stellar";
 import {
+  Checks,
   Database,
   FloppyDisk,
   Gear,
@@ -19,9 +20,14 @@ import SidebarLink from "./SidebarLink";
 export declare type SidebarProps = {
   title?: string;
   view?: View;
+  viewSavingEnabled?: boolean;
 };
 
-export const Sidebar = ({ title = "", view }: SidebarProps) => {
+export const Sidebar = ({
+  title = "",
+  view,
+  viewSavingEnabled,
+}: SidebarProps) => {
   const [active, setActive] = useState("home");
   const [showSaveViewModal, setShowSaveViewModal] = useState(false);
 
@@ -114,7 +120,6 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
       <div className="sidebar-bottom-content">
         <div className="sidebar-divider" />
         <div className="sidebar-padded-content">
-          {/* <SidebarLink title="Settings" icon={<IconSettings />} /> */}
           {view && (
             <SaveViewModal
               open={showSaveViewModal}
@@ -122,14 +127,26 @@ export const Sidebar = ({ title = "", view }: SidebarProps) => {
               onClose={() => setShowSaveViewModal(false)}
             />
           )}
-          <Button
-            icon={<FloppyDisk size={16} />}
-            variant="secondary"
-            className="sidebar-save-view-changes"
-            onClick={() => setShowSaveViewModal(true)}
-          >
-            Save View Changes
-          </Button>
+          {viewSavingEnabled && (
+            <Button
+              icon={<FloppyDisk size={16} />}
+              variant="secondary"
+              className="sidebar-save-view-changes"
+              onClick={() => setShowSaveViewModal(true)}
+            >
+              Save View Changes
+            </Button>
+          )}
+          {!viewSavingEnabled && (
+            <Button
+              icon={<Checks size={16} />}
+              variant="tertiary"
+              className="sidebar-save-view-changes sidebar-no-view-changes"
+              disabled
+            >
+              View up-to-date
+            </Button>
+          )}
           <NavLink
             className={(activeNav) =>
               getNavLinkClass(activeNav.isActive, "/manage")

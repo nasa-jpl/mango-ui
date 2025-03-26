@@ -3,15 +3,18 @@ import {
   AlertAction,
   AlertCancel,
   Button,
+  Error,
+  FormField,
   Input,
 } from "@nasa-jpl/react-stellar";
-import { TrashSimple } from "@phosphor-icons/react";
+import { File, Folder, Link, TrashSimple } from "@phosphor-icons/react";
 import { useOutletContext } from "react-router-dom";
 import Page from "../components/ui/Page";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
-import { PageGroup, View } from "../types/view";
+import { PageGroup, Page as PageType, View } from "../types/view";
 import { createViewPage, createViewPageGroup } from "../utilities/view";
+import "./ManagementPage.css";
 
 export default function ManagementPage() {
   // TODO type outlet context instead of duplicating
@@ -69,6 +72,27 @@ export default function ManagementPage() {
     setView(newView);
   };
 
+  const updatePage = (updatedPage: PageType, pageGroupdId: string) => {
+    const newView = {
+      ...view,
+      pageGroups: view.pageGroups.map((pg) => {
+        if (pg.id === pageGroupdId) {
+          return {
+            ...pg,
+            pages: pg.pages.map((p) => {
+              if (p.id === updatedPage.id) {
+                return updatedPage;
+              }
+              return p;
+            }),
+          };
+        }
+        return pg;
+      }),
+    };
+    setView(newView);
+  };
+
   const deletePageGroup = (pageGroupId: string) => {
     const newView = {
       ...view,
@@ -79,15 +103,31 @@ export default function ManagementPage() {
     setView(newView);
   };
 
+  const deletePage = (pageGroupId: string, pageId: string) => {
+    const newView = {
+      ...view,
+      pageGroups: view.pageGroups.map((pg) => {
+        if (pg.id === pageGroupId) {
+          return { ...pg, pages: pg.pages.filter((p) => p.id !== pageId) };
+        }
+        return pg;
+      }),
+    };
+    setView(newView);
+  };
+
   const renderDeletionConfirmation = (item: string, onDelete: () => void) => {
     return (
       <Alert
         description={`This action cannot be undone, are you sure you want to delete this ${item}?`}
-        onOpenChange={function noRefCheck() {}}
         title="Are you sure?"
         trigger={
-          <Button variant="icon" size="medium">
-            <TrashSimple />
+          <Button
+            variant="icon"
+            size="medium"
+            className="management-page-delete-button"
+          >
+            <TrashSimple size={16} />
           </Button>
         }
       >
@@ -110,61 +150,86 @@ export default function ManagementPage() {
     );
   };
 
+  const validateUrl = (url: string) => {
+    if (!url) {
+      return "Value required";
+    } else if (url.toLowerCase() === "manage") {
+      return "'Manage' is not an allowed value";
+    } else if (url.toLowerCase() === "products") {
+      return "'Products' is not an allowed value";
+    }
+    return "";
+  };
+
+  const validateTitle = (title: string) => {
+    if (!title) {
+      return "Value required";
+    }
+    return "";
+  };
+
   return (
     <Page title="Manage" padBody>
-      <div
-        className=""
-        style={{ background: "white", padding: "16px", borderRadius: "4px" }}
-      >
+      <div className="entity management-page">
         <div className="st-typography-header">Configure Mango Pages</div>
         <div className="st-typography-body">
           {view.pageGroups.map((pageGroup) => {
+            const urlValid = validateUrl(pageGroup.url);
+            const titleValid = validateTitle(pageGroup.title);
             return (
-              <div>
+              <div className="management-page-page-group">
                 <div
                   style={{
                     display: "flex",
                     gap: "8px",
                     paddingTop: "16px",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                   }}
                 >
                   <div className="st-typography-medium">
-                    Title:{" "}
-                    <Input
-                      value={pageGroup.title}
-                      onInput={(evt) =>
-                        updatePageGroup({
-                          ...pageGroup,
-                          title: evt.target.value,
-                        })
-                      }
-                    />
+                    Page Group Title
+                    <FormField>
+                      <Input
+                        leftAdornment={<Folder size={16} />}
+                        className="management-page-input"
+                        value={pageGroup.title}
+                        error={!!titleValid}
+                        onInput={(evt) =>
+                          updatePageGroup({
+                            ...pageGroup,
+                            title: evt.target.value,
+                          })
+                        }
+                      />
+                      {titleValid && <Error>{titleValid}</Error>}
+                    </FormField>
                   </div>
                   <div className="st-typography-medium">
-                    URL:{" "}
-                    <Input
-                      value={pageGroup.url}
-                      onInput={(evt) =>
-                        updatePageGroup({
-                          ...pageGroup,
-                          url: evt.target.value,
-                        })
-                      }
-                    />
+                    URL
+                    <FormField>
+                      <Input
+                        leftAdornment={<Link size={16} />}
+                        className="management-page-input"
+                        value={pageGroup.url}
+                        error={!!urlValid}
+                        onInput={(evt) =>
+                          updatePageGroup({
+                            ...pageGroup,
+                            url: evt.target.value,
+                          })
+                        }
+                      />
+                      {urlValid && <Error>{urlValid}</Error>}
+                    </FormField>
                   </div>
                   {renderDeletionConfirmation("page group", () =>
                     deletePageGroup(pageGroup.id)
                   )}
                 </div>
-                <div
-                  className="st-typography-medium"
-                  style={{ padding: "8px 0" }}
-                >
-                  Pages
-                </div>
-                <div style={{ paddingLeft: "16px" }}>
+                <div className="management-page-pages">
                   {pageGroup.pages.map((page) => {
+                    const urlValid = validateUrl(page.url);
+                    const titleValid = validateTitle(page.title);
                     return (
                       <div
                         style={{
@@ -173,11 +238,50 @@ export default function ManagementPage() {
                         }}
                       >
                         <div className="st-typography-medium">
-                          Title: <Input value={page.title} />
+                          Page Title
+                          <FormField>
+                            <Input
+                              leftAdornment={<File size={16} />}
+                              className="management-page-input"
+                              value={page.title}
+                              error={!!titleValid}
+                              onInput={(evt) =>
+                                updatePage(
+                                  {
+                                    ...page,
+                                    title: evt.target.value,
+                                  },
+                                  pageGroup.id
+                                )
+                              }
+                            />
+                            {titleValid && <Error>{titleValid}</Error>}
+                          </FormField>
                         </div>
                         <div className="st-typography-medium">
-                          URL: <Input value={page.url} />
+                          URL
+                          <FormField>
+                            <Input
+                              leftAdornment={<Link size={16} />}
+                              className="management-page-input"
+                              value={page.url}
+                              error={!!urlValid}
+                              onInput={(evt) =>
+                                updatePage(
+                                  {
+                                    ...page,
+                                    url: evt.target.value,
+                                  },
+                                  pageGroup.id
+                                )
+                              }
+                            />
+                            {urlValid && <Error>{urlValid}</Error>}
+                          </FormField>
                         </div>
+                        {renderDeletionConfirmation("page", () =>
+                          deletePage(pageGroup.id, page.id)
+                        )}
                       </div>
                     );
                   })}
@@ -191,7 +295,11 @@ export default function ManagementPage() {
               </div>
             );
           })}
-          <Button variant="tertiary" onClick={onNewPageGroupClick}>
+          <Button
+            variant="tertiary"
+            onClick={onNewPageGroupClick}
+            style={{ marginTop: "16px" }}
+          >
             + New Page Group
           </Button>
         </div>

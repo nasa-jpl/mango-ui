@@ -1,0 +1,27 @@
+.management-page.entity {
+  overflow: auto;
+  padding: 16px;
+}
+
+.management-page-page-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.management-page-input {
+  min-width: 250px;
+}
+
+.management-page-delete-button {
+  margin-top: 16px;
+}
+
+.management-page-pages {
+  align-items: flex-start;
+  border-left: var(--app-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+}

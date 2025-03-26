@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { debounce } from "lodash-es";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
 import ProductPreviewModal from "../components/app/ProductPreviewModal";
 import Sidebar from "../components/app/Sidebar/Sidebar";
@@ -10,11 +11,25 @@ import { getMissions, getProducts, getView } from "../utilities/api";
 export default function RootPage() {
   const { view: initialView } = useLoaderData() as Record<"view", View>;
   const [view, setView] = useState<View>(initialView);
+  const [viewChanged, setViewChanged] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
   const [productPreview, setProductPreview] = useState<ProductPreview>({
     product: undefined,
   });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedDetectViewChanges = useCallback(
+    debounce((view, initialView) => detectViewChanges(view, initialView), 500, {
+      leading: true,
+      trailing: true,
+    }),
+    []
+  );
+
+  useEffect(() => {
+    debouncedDetectViewChanges(view, initialView);
+  }, [view, initialView, debouncedDetectViewChanges]);
 
   useEffect(() => {
     const initialize = () => {
@@ -38,6 +53,11 @@ export default function RootPage() {
     return abort;
   }, []);
 
+  const detectViewChanges = (view: View, initialView: View) => {
+    const changed = JSON.stringify(view) !== JSON.stringify(initialView);
+    setViewChanged(changed);
+  };
+
   const fetchView = async (signal: AbortSignal) => {
     const view = await getView(signal);
     setView(view);
@@ -53,13 +73,31 @@ export default function RootPage() {
   };
 
   const context = useMemo(
-    () => [view, setView, products, setProductPreview, loadingInitialData],
-    [view, setView, products, setProductPreview, loadingInitialData]
+    () => [
+      view,
+      setView,
+      products,
+      setProductPreview,
+      loadingInitialData,
+      initialView,
+    ],
+    [
+      view,
+      setView,
+      products,
+      setProductPreview,
+      loadingInitialData,
+      initialView,
+    ]
   );
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
-      <Sidebar view={view} title={import.meta.env.VITE_APP_TITLE} />
+      <Sidebar
+        view={view}
+        viewSavingEnabled={viewChanged}
+        title={import.meta.env.VITE_APP_TITLE}
+      />
       <Outlet context={context} />
       {!loadingInitialData && (
         <ProductPreviewModal

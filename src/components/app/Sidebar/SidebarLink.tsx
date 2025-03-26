@@ -22,7 +22,7 @@ export const SidebarLink = ({
     >
       {/* TODO integrate react-router */}
       {icon}
-      {title}
+      <div>{title}</div>
     </Button>
   );
 };

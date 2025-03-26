@@ -114,9 +114,6 @@ export const getData = (
 };
 
 export async function saveView(view: View) {
-  // Update view revision
-  const newView: View = { ...view, revision: view.revision + 1 };
-
   const url =
     config.endpoints.data +
     config.api.data.jsonStore
@@ -126,7 +123,7 @@ export async function saveView(view: View) {
   const response = await fetch(url, {
     credentials: "include",
     method: "POST",
-    body: JSON.stringify({ data: newView }),
+    body: JSON.stringify({ data: view }),
     headers: {
       "Content-Type": "application/json",
     },

@@ -27,3 +27,9 @@ button.st-button.sidebar-save-view-changes {
   padding: 8px 6px;
   width: 100%;
 }
+
+button.st-button.sidebar-no-view-changes {
+  color: var(--st-gray-50);
+  cursor: auto;
+  opacity: 1;
+}
