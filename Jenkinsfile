@@ -9,8 +9,8 @@ pipeline {
 
   environment {
     DOCKER_IMAGE_NAME = 'mango-ui'
-    ARTIFACTORY_URL = '***REMOVED***'
-    ARTIFACTORY_REPO = '***REMOVED***'
+    ARTIFACTORY_URL = ''
+    ARTIFACTORY_REPO = ''
     CERT_FILE = 'CERT_PEM'
     KEY_FILE = 'KEY_PEM'
   }

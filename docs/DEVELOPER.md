@@ -46,7 +46,7 @@ Your editor should follow the same settings found in [.vscode/settings.json](../
 [Clone](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) the mango-ui repository:
 
 ```shell
-git clone git@github.jpl.nasa.gov:Mass-Change/mango-ui.git
+git clone git@github.com:nasa-jpl/mango-ui.git
 cd mango-ui
 ```
 

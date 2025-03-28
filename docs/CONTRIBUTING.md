@@ -9,7 +9,7 @@ To contribute code, follow the guidelines below.
 
 1. Click `Fork` on Github to create your own fork e.g. `username/mango-ui`
 
-2. Clone your project: `git@github.jpl.nasa.gov:Mass-Change/mango-ui.git`
+2. Clone your project: `git@github.com:nasa-jpl/mango-ui.git`
 
 3. `cd mango-ui`
 
