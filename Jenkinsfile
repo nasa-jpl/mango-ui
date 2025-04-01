@@ -9,8 +9,6 @@ pipeline {
 
   environment {
     DOCKER_IMAGE_NAME = 'mango-ui'
-    ARTIFACTORY_URL = ''
-    ARTIFACTORY_REPO = ''
     CERT_FILE = 'CERT_PEM'
     KEY_FILE = 'KEY_PEM'
   }
@@ -27,6 +25,18 @@ pipeline {
     stage('Installation') {
       steps {
         sh 'npm ci'
+      }
+    }
+
+    stage('Read Config into env') {
+      steps {
+        script {
+          configFileProvider([configFile(fileId: "e094671f-4052-4346-b308-5ded6d3b9098	", variable: 'configFile')]) {
+            def props = readProperties file: "$configFile"
+            env.ARTIFACTORY_URL = props['ARTIFACTORY_URL']
+            env.ARTIFACTORY_REPO = props['ARTIFACTORY_REPO']
+          }
+        }
       }
     }
 
@@ -164,7 +174,7 @@ pipeline {
       steps {
         script {
           withCredentials([usernamePassword(credentialsId: 'artifactory-credentials', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-            sh "docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD} ${ARTIFACTORY_URL}"
+            sh "docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD} ${env.ARTIFACTORY_URL}"
             sh "docker push ${ARTIFACTORY_TAG}"
           }
         }
