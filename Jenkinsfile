@@ -31,7 +31,7 @@ pipeline {
     stage('Read Config into env') {
       steps {
         script {
-          configFileProvider([configFile(fileId: "e094671f-4052-4346-b308-5ded6d3b9098	", variable: 'configFile')]) {
+          configFileProvider([configFile(fileId: 'e094671f-4052-4346-b308-5ded6d3b9098', variable: 'configFile')]) {
             def props = readProperties file: "$configFile"
             env.ARTIFACTORY_URL = props['ARTIFACTORY_URL']
             env.ARTIFACTORY_REPO = props['ARTIFACTORY_REPO']
