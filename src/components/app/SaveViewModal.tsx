@@ -14,6 +14,7 @@ import "./SaveViewModal.css";
 
 export declare type SaveViewModalProps = {
   onClose: () => void;
+  onSave: (view: View) => void;
   open: boolean;
   view: View;
 };
@@ -24,6 +25,7 @@ export const SaveViewModal = ({
   view,
   open = false,
   onClose = () => {},
+  onSave = () => {},
 }: SaveViewModalProps) => {
   const [password, setPassword] = useState(supersecretpassword);
   const [saving, setSaving] = useState(false);
@@ -32,11 +34,12 @@ export const SaveViewModal = ({
   const allowSave =
     supersecretpassword.toLowerCase() === password.toLowerCase();
 
-  async function onSave() {
+  async function onSaveClick() {
     try {
       setSaving(true);
       await saveView(view);
       setError("");
+      onSave(view);
       requestClose();
     } catch (err) {
       console.log("Error saving view :>> ", err);
@@ -89,7 +92,7 @@ export const SaveViewModal = ({
         <Button onClick={requestClose} variant="secondary">
           Cancel
         </Button>
-        <Button disabled={!allowSave || saving} onClick={onSave}>
+        <Button disabled={!allowSave || saving} onClick={onSaveClick}>
           Save
         </Button>
       </ModalActionRow>

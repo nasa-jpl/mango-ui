@@ -177,7 +177,7 @@ export default function ManagementPage() {
             const urlValid = validateUrl(pageGroup.url);
             const titleValid = validateTitle(pageGroup.title);
             return (
-              <div className="management-page-page-group">
+              <div className="management-page-page-group" key={pageGroup.id}>
                 <div
                   style={{
                     display: "flex",
@@ -236,6 +236,7 @@ export default function ManagementPage() {
                           display: "flex",
                           gap: "8px",
                         }}
+                        key={page.id}
                       >
                         <div className="st-typography-medium">
                           Page Title

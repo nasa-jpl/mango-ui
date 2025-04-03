@@ -1,4 +1,4 @@
-import { debounce } from "lodash-es";
+import { debounce, isEqual } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
 import ProductPreviewModal from "../components/app/ProductPreviewModal";
@@ -9,8 +9,9 @@ import { View } from "../types/view";
 import { getMissions, getProducts, getView } from "../utilities/api";
 
 export default function RootPage() {
-  const { view: initialView } = useLoaderData() as Record<"view", View>;
-  const [view, setView] = useState<View>(initialView);
+  const { view: _initialView } = useLoaderData() as Record<"view", View>;
+  const [initialView, setInitialView] = useState<View>(_initialView);
+  const [view, setView] = useState<View>(_initialView);
   const [viewChanged, setViewChanged] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
@@ -54,7 +55,7 @@ export default function RootPage() {
   }, []);
 
   const detectViewChanges = (view: View, initialView: View) => {
-    const changed = JSON.stringify(view) !== JSON.stringify(initialView);
+    const changed = !isEqual(view, initialView);
     setViewChanged(changed);
   };
 
@@ -96,6 +97,7 @@ export default function RootPage() {
       <Sidebar
         view={view}
         viewSavingEnabled={viewChanged}
+        onViewSaved={(view) => setInitialView(view)}
         title={import.meta.env.VITE_APP_TITLE}
       />
       <Outlet context={context} />

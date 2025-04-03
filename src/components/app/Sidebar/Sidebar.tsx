@@ -18,12 +18,14 @@ import SidebarGroup from "./SidebarGroup";
 import SidebarLink from "./SidebarLink";
 
 export declare type SidebarProps = {
+  onViewSaved: (view: View) => void;
   title?: string;
   view?: View;
   viewSavingEnabled?: boolean;
 };
 
 export const Sidebar = ({
+  onViewSaved = () => {},
   title = "",
   view,
   viewSavingEnabled,
@@ -92,7 +94,9 @@ export const Sidebar = ({
         </NavLink> */}
       </div>
       {!view ? (
-        <div>Loading</div>
+        <div className="sidebar-padded-content st-typography-label">
+          Loading
+        </div>
       ) : (
         view.pageGroups.map((pageGroup) => {
           return (
@@ -125,6 +129,7 @@ export const Sidebar = ({
               open={showSaveViewModal}
               view={view}
               onClose={() => setShowSaveViewModal(false)}
+              onSave={onViewSaved}
             />
           )}
           {viewSavingEnabled && (
