@@ -41,15 +41,6 @@ Your editor should follow the same settings found in [.vscode/settings.json](../
 6. [Path Intellisense](https://marketplace.visualstudio.com/items?itemName=christian-kohler.path-intellisense)
 7. [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
 
-## Getting the Sources
-
-[Clone](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) the mango-ui repository:
-
-```shell
-git clone git@github.com:nasa-jpl/mango-ui.git
-cd mango-ui
-```
-
 ## Installing NPM Modules
 
 Install the JavaScript modules needed to build mango-ui:
