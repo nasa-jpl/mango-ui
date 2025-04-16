@@ -1,3 +1,10 @@
+@import "@nasa-jpl/stellar-react/theme";
+@import "@nasa-jpl/stellar-react/font";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body,
 #root {

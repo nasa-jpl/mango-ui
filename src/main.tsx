@@ -1,6 +1,5 @@
 import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
-import "@nasa-jpl/stellar/font/inter/inter.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
