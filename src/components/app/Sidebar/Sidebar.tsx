@@ -39,15 +39,15 @@ const logo = () => (
         y2="18.036"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#FFC700" />
-        <stop offset="1" stop-color="#FF3D00" />
+        <stop stopColor="#FFC700" />
+        <stop offset="1" stopColor="#FF3D00" />
       </linearGradient>
     </defs>
   </svg>
 );
 
 export const Sidebar = ({ title = "", view }: SidebarProps) => {
-  const [active, setActive] = useState("home");
+  const [, setActive] = useState("home");
 
   const getNavLinkClass = (isActive: boolean, path: string) => {
     if (isActive) {
