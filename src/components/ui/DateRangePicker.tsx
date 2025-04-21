@@ -1,4 +1,5 @@
-import { Button, DatePicker } from "@nasa-jpl/react-stellar";
+import { DatePicker } from "@nasa-jpl/react-stellar";
+import { Button } from "@nasa-jpl/stellar-react";
 import { useEffect, useState } from "react";
 import { DateFormat } from "../../types/view";
 
@@ -72,7 +73,7 @@ export const DateRangePicker = ({
           setInternalEndDate(finalDate);
         }}
       />
-      <Button variant="secondary" onClick={submit}>
+      <Button variant="outline" onClick={submit}>
         Go
       </Button>
     </div>
