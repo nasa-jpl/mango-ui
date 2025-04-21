@@ -2,15 +2,7 @@ import { config } from "../config";
 import { DataResponse, DataResponseError, Product } from "../types/api";
 import { View } from "../types/view";
 
-// export const getView = async (signal?: AbortSignal): Promise<View> => {
-//   const data = await fetch(import.meta.env.BASE_URL + "default-view.json", {
-//     signal,
-//   });
-//   const view = (await data.json()) as View;
-//   return view;
-// };
-
-export const getView = async (signal?: AbortSignal): Promise<View> => {
+export const getView = async (): Promise<View> => {
   const url =
     config.endpoints.data +
     config.api.data.jsonStore
