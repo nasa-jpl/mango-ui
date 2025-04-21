@@ -417,6 +417,7 @@
                 { "i": "sdf23edx", "x": 8, "y": 0, "w": 6, "h": 2 },
                 { "i": "3edfghtr", "x": 8, "y": 1, "w": 6, "h": 2 },
                 { "i": "3efgtre", "x": 8, "y": 1, "w": 6, "h": 2 },
+                { "i": "23eriufhdnjkw", "x": 8, "y": 1, "w": 6, "h": 2 },
                 { "i": "dfgdgfg", "x": 8, "y": 2, "w": 6, "h": 2 },
                 { "i": "sfrgtef", "x": 8, "y": 2, "w": 6, "h": 2 },
                 { "i": "hgjhnfgdfede", "x": 8, "y": 2, "w": 6, "h": 2 },
@@ -649,6 +650,89 @@
                     {
                       "id": "y1",
                       "label": "ACC1A Linear Acceleration X (m/sec²)",
+                      "position": "left"
+                    }
+                  ]
+                },
+                {
+                  "id": "23eriufhdnjkw",
+                  "type": "chart",
+                  "title": "TNK1A Channel Values Example",
+                  "syncWithPageDateRange": false,
+                  "layers": [
+                    {
+                      "id": "fdv",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 1 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#4bb1ff"
+                    },
+                    {
+                      "id": "2ergss",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 2 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#f14444"
+                    },
+                    {
+                      "id": "2ergss",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 3 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#11c12b"
+                    },
+                    {
+                      "id": "2ergss",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 4 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#494949"
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "ca_range",
                       "position": "left"
                     }
                   ]

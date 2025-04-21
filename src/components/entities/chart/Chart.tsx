@@ -583,9 +583,13 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${
-                  layer.fields[0]
-                }  (v${layer.version}) (${data_count} point${pluralize(
+                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]} ${
+                  layer.channels
+                    ? `(${layer.channels
+                        .map((c) => `${c.id}: ${c.value}`)
+                        .join(", ")})`
+                    : ""
+                } (v${layer.version}) (${data_count} point${pluralize(
                   data_count
                 )}, 1:${downsampling_factor} scale)`,
               // smooth the downsampling a tiny fraction to ease artifacting
