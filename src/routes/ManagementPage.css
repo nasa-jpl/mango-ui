@@ -1,0 +1,51 @@
+.management-page.entity {
+  overflow: auto;
+  padding: 16px;
+}
+
+.management-page-page-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.management-page-input {
+  min-width: 250px;
+}
+
+.management-page-button {
+  margin-top: 16px;
+}
+
+.management-page-buttons {
+  display: flex;
+}
+
+.management-page-pages {
+  align-items: flex-start;
+  border-left: var(--app-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+}
+
+.management-page-upload-view {
+  display: flex;
+  flex: 1;
+  margin-top: 24px;
+  width: 400px;
+}
+
+.management-page-upload-view--inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.management-page-view-download {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

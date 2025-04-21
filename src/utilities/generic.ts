@@ -149,3 +149,15 @@ export function convertHexToRGBA(hexCode: string, opacity: number = 1) {
     return "#000000";
   }
 }
+
+export function downloadJSON(obj: unknown, filename: string) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

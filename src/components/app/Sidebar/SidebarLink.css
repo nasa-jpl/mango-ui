@@ -5,8 +5,16 @@
   gap: 8px;
   height: 30px;
   justify-content: flex-start;
+  overflow: hidden;
   padding: 8px 6px;
+  white-space: nowrap;
   width: 100%;
+}
+
+.sidebar-link div {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-link--primary {

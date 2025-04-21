@@ -2,12 +2,28 @@ import { config } from "../config";
 import { DataResponse, DataResponseError, Product } from "../types/api";
 import { View } from "../types/view";
 
-export const getView = async (signal?: AbortSignal): Promise<View> => {
-  const data = await fetch(import.meta.env.BASE_URL + "default-view.json", {
-    signal,
+export const getView = async (): Promise<View> => {
+  const url =
+    config.endpoints.data +
+    config.api.data.jsonStore
+      .replace("{METHOD}", "fetch")
+      .replace("{KEY}", "default-view");
+
+  const response = await fetch(url, {
+    credentials: "include",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-  const view = (await data.json()) as View;
-  return view;
+
+  const json = await response.json();
+
+  if (response.status >= 200 && response.status <= 400) {
+    return json.data as View;
+  } else {
+    throw new Error(response.statusText);
+  }
 };
 
 export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
@@ -88,3 +104,26 @@ export const getData = (
   return { json, cancel };
   // return fetchWithProgress<DataResponse>(url);
 };
+
+export async function saveView(view: View) {
+  const url =
+    config.endpoints.data +
+    config.api.data.jsonStore
+      .replace("{METHOD}", "store")
+      .replace("{KEY}", "default-view");
+
+  const response = await fetch(url, {
+    credentials: "include",
+    method: "POST",
+    body: JSON.stringify({ data: view }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status >= 200 && response.status <= 400) {
+    return true;
+  } else {
+    throw new Error(response.statusText);
+  }
+}

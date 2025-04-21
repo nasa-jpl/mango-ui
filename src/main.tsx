@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import ErrorPage from "./error-page";
 import "./index.css";
 import HomePage from "./routes/HomePage";
+import ManagementPage from "./routes/ManagementPage";
 import ProductsPage from "./routes/ProductsPage";
 import RootPage from "./routes/RootPage";
 import ViewPage from "./routes/ViewPage";
@@ -39,6 +40,14 @@ const router = createBrowserRouter(
         {
           path: "products",
           element: <ProductsPage />,
+        },
+        // {
+        //   path: "sandbox",
+        //   element: <SandboxPage />,
+        // },
+        {
+          path: "manage",
+          element: <ManagementPage />,
         },
         // {
         //   path: "sandbox",
