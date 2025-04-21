@@ -175,7 +175,7 @@ export const ProductPreviewModal = ({
               options={product.available_fields
                 .filter(
                   (f) =>
-                    !f.is_channel_id && (f.type == "int" || f.type == "float")
+                    !f.is_channel_id && (f.type === "int" || f.type === "float")
                 )
                 .map((f) => ({
                   label: (
@@ -203,10 +203,12 @@ export const ProductPreviewModal = ({
                     // @ts-expect-error TODO fix from the react-stellar side
                     onChannelChange(selectedOption, channel)
                   }
-                  options={(matchingChannel?.enum_values || []).map((v) => ({
-                    label: v,
-                    value: v,
-                  }))}
+                  options={(matchingChannel?.enum_values || [])
+                    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
+                    .map((v) => ({
+                      label: v,
+                      value: v,
+                    }))}
                 />
               );
             })}
