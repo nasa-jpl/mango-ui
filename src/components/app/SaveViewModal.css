@@ -1,0 +1,10 @@
+.save-view-modal {
+  width: 500px;
+}
+
+.save-error {
+  color: var(--st-error-red);
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}

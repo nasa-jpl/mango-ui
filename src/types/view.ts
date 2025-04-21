@@ -10,6 +10,7 @@ import { DateRange } from "./time";
 export type View = {
   home: Page;
   pageGroups: PageGroup[];
+  version: number;
 };
 
 export type PageGroup = {
