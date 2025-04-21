@@ -256,7 +256,7 @@ export default function ManagementPage() {
   };
 
   const downloadView = async () => {
-    downloadJSON(view, "mango-view.json");
+    downloadJSON(view, "mango-view");
   };
 
   const onJSONViewInput = async (evt: FormEvent<HTMLInputElement>) => {
