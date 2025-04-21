@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "EditorConfig.EditorConfig",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker",
+    "csstools.postcss",
+    "bradlc.vscode-tailwindcss"
+  ]
+}
