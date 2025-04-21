@@ -150,20 +150,42 @@ export default function ManagementPage() {
     );
   };
 
-  const validateUrl = (url: string) => {
+  const validateUrl = (
+    url: string,
+    id: string,
+    thingsWithURL: { id: string; url: string }[]
+  ) => {
     if (!url) {
       return "Value required";
     } else if (url.toLowerCase() === "manage") {
       return "'Manage' is not an allowed value";
     } else if (url.toLowerCase() === "products") {
       return "'Products' is not an allowed value";
+    } else if (
+      thingsWithURL
+        .filter((p) => p.id !== id)
+        .map((p) => p.url.toLowerCase())
+        .indexOf(url.toLowerCase()) > -1
+    ) {
+      return "URL must be unique within grouping";
     }
     return "";
   };
 
-  const validateTitle = (title: string) => {
+  const validateTitle = (
+    title: string,
+    id: string,
+    thingsWithTitle: { id: string; title: string }[]
+  ) => {
     if (!title) {
       return "Value required";
+    } else if (
+      thingsWithTitle
+        .filter((p) => p.id !== id)
+        .map((p) => p.title.toLowerCase())
+        .indexOf(title.toLowerCase()) > -1
+    ) {
+      return "Title must be unique within grouping";
     }
     return "";
   };
@@ -174,8 +196,16 @@ export default function ManagementPage() {
         <div className="st-typography-header">Configure Mango Pages</div>
         <div className="st-typography-body">
           {view.pageGroups.map((pageGroup) => {
-            const urlValid = validateUrl(pageGroup.url);
-            const titleValid = validateTitle(pageGroup.title);
+            const urlValid = validateUrl(
+              pageGroup.url,
+              pageGroup.id,
+              view.pageGroups
+            );
+            const titleValid = validateTitle(
+              pageGroup.title,
+              pageGroup.id,
+              view.pageGroups
+            );
             return (
               <div className="management-page-page-group" key={pageGroup.id}>
                 <div
@@ -228,8 +258,16 @@ export default function ManagementPage() {
                 </div>
                 <div className="management-page-pages">
                   {pageGroup.pages.map((page) => {
-                    const urlValid = validateUrl(page.url);
-                    const titleValid = validateTitle(page.title);
+                    const urlValid = validateUrl(
+                      page.url,
+                      page.id,
+                      pageGroup.pages
+                    );
+                    const titleValid = validateTitle(
+                      page.title,
+                      page.id,
+                      pageGroup.pages
+                    );
                     return (
                       <div
                         style={{
