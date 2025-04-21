@@ -125,22 +125,13 @@ export const ProductPreviewModal = ({
 
   const onChannelChange = (selectedOption: OptionType, channel: Channel) => {
     const value = (selectedOption as OptionType).value;
-    console.log("selectedOption :>> ", selectedOption, channels);
     const newChannels = channels.map((c) => {
       if (c.id === channel.id) {
         return { ...c, value };
       }
       return c;
     });
-    console.log("newChannels :>> ", newChannels);
     setChannels(newChannels);
-    // setChannelId(value);
-
-    // const matchingChannel = product.available_fields.find((c) => c === value);
-    // if (matchingChannel) {
-    //   setChannelEnums(matchingChannel.enum_values || null);
-    //   setChannelEnum((matchingChannel.enum_values || [])[0] ?? "");
-    // }
   };
 
   const onVersionChange = (selectedOption: OptionType) => {
@@ -199,9 +190,9 @@ export const ProductPreviewModal = ({
                 }))}
             />
             {channels.map((channel) => {
-              // const matchingChannel = product.available_fields.find(
-              //   (f) => f.name === channel.id
-              // );
+              const matchingChannel = product.available_fields.find(
+                (f) => f.name === channel.id
+              );
               return (
                 <Dropdown
                   className="product-preview-field"
@@ -212,23 +203,10 @@ export const ProductPreviewModal = ({
                     // @ts-expect-error TODO fix from the react-stellar side
                     onChannelChange(selectedOption, channel)
                   }
-                  options={[
-                    { value: "0", label: "0" },
-                    { value: "1", label: "1" },
-                    { value: "2", label: "2" },
-                    { value: "3", label: "3" },
-                    { value: "4", label: "4" },
-                    { value: "5", label: "5" },
-                    { value: "6", label: "6" },
-                    { value: "7", label: "7" },
-                    { value: "8", label: "8" },
-                    { value: "9", label: "9" },
-                    { value: "10", label: "10" },
-                  ]}
-                  // options={(matchingChannel?.enum_values || []).map((v) => ({
-                  //   label: v,
-                  //   value: v,
-                  // }))}
+                  options={(matchingChannel?.enum_values || []).map((v) => ({
+                    label: v,
+                    value: v,
+                  }))}
                 />
               );
             })}
