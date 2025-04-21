@@ -13,8 +13,12 @@
   min-width: 250px;
 }
 
-.management-page-delete-button {
+.management-page-button {
   margin-top: 16px;
+}
+
+.management-page-buttons {
+  display: flex;
 }
 
 .management-page-pages {

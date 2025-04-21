@@ -6,8 +6,16 @@ import {
   Error,
   FormField,
   Input,
+  Tooltip,
 } from "@nasa-jpl/react-stellar";
-import { File, Folder, Link, TrashSimple } from "@phosphor-icons/react";
+import {
+  ArrowDown,
+  ArrowUp,
+  File,
+  Folder,
+  Link,
+  TrashSimple,
+} from "@phosphor-icons/react";
 import { useOutletContext } from "react-router-dom";
 import Page from "../components/ui/Page";
 import { Product } from "../types/api";
@@ -18,7 +26,7 @@ import "./ManagementPage.css";
 
 export default function ManagementPage() {
   // TODO type outlet context instead of duplicating
-  const [view, setView, products, setProductPreview, loadingInitialData] =
+  const [view, setView] =
     useOutletContext<
       [
         View,
@@ -122,13 +130,17 @@ export default function ManagementPage() {
         description={`This action cannot be undone, are you sure you want to delete this ${item}?`}
         title="Are you sure?"
         trigger={
-          <Button
-            variant="icon"
-            size="medium"
-            className="management-page-delete-button"
-          >
-            <TrashSimple size={16} />
-          </Button>
+          <div>
+            <Tooltip content={`Delete ${item}`}>
+              <Button
+                variant="icon"
+                size="medium"
+                className="management-page-button"
+              >
+                <TrashSimple size={16} />
+              </Button>
+            </Tooltip>
+          </div>
         }
       >
         <>
@@ -190,12 +202,60 @@ export default function ManagementPage() {
     return "";
   };
 
+  const movePageGroup = (pageGroup: PageGroup, direction: "up" | "down") => {
+    const newPageGroups = [...view.pageGroups];
+    const pgIndex = newPageGroups.findIndex((pg) => pg.id === pageGroup.id);
+    if (pgIndex < 0) {
+      return;
+    }
+    if (direction === "up") {
+      if (pgIndex > 0) {
+        const oldRow = newPageGroups[pgIndex - 1];
+        newPageGroups[pgIndex - 1] = pageGroup;
+        newPageGroups[pgIndex] = oldRow;
+      }
+    } else if (direction === "down") {
+      if (pgIndex < newPageGroups.length - 1) {
+        const oldRow = newPageGroups[pgIndex + 1];
+        newPageGroups[pgIndex + 1] = pageGroup;
+        newPageGroups[pgIndex] = oldRow;
+      }
+    }
+    setView({ ...view, pageGroups: newPageGroups });
+  };
+
+  const movePage = (
+    page: Page,
+    pageGroup: PageGroup,
+    direction: "up" | "down"
+  ) => {
+    const newPages = [...pageGroup.pages];
+    const pageIndex = newPages.findIndex((p) => p.id === page.id);
+    if (pageIndex < 0) {
+      return;
+    }
+    if (direction === "up") {
+      if (pageIndex > 0) {
+        const oldRow = newPages[pageIndex - 1];
+        newPages[pageIndex - 1] = page;
+        newPages[pageIndex] = oldRow;
+      }
+    } else if (direction === "down") {
+      if (pageIndex < newPages.length - 1) {
+        const oldRow = newPages[pageIndex + 1];
+        newPages[pageIndex + 1] = page;
+        newPages[pageIndex] = oldRow;
+      }
+    }
+    updatePageGroup({ ...pageGroup, pages: newPages });
+  };
+
   return (
     <Page title="Manage" padBody>
       <div className="entity management-page">
         <div className="st-typography-header">Configure Mango Pages</div>
         <div className="st-typography-body">
-          {view.pageGroups.map((pageGroup) => {
+          {view.pageGroups.map((pageGroup, i) => {
             const urlValid = validateUrl(
               pageGroup.url,
               pageGroup.id,
@@ -252,12 +312,36 @@ export default function ManagementPage() {
                       {urlValid && <Error>{urlValid}</Error>}
                     </FormField>
                   </div>
-                  {renderDeletionConfirmation("page group", () =>
-                    deletePageGroup(pageGroup.id)
-                  )}
+                  <div className="management-page-buttons">
+                    {renderDeletionConfirmation("page group", () =>
+                      deletePageGroup(pageGroup.id)
+                    )}
+                    <Tooltip content="Move up">
+                      <Button
+                        disabled={i === 0}
+                        variant="icon"
+                        size="medium"
+                        className="management-page-button"
+                        onClick={() => movePageGroup(pageGroup, "up")}
+                      >
+                        <ArrowUp size={16} />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content="Move down">
+                      <Button
+                        disabled={i === view.pageGroups.length - 1}
+                        variant="icon"
+                        size="medium"
+                        className="management-page-button"
+                        onClick={() => movePageGroup(pageGroup, "down")}
+                      >
+                        <ArrowDown size={16} />
+                      </Button>
+                    </Tooltip>
+                  </div>
                 </div>
                 <div className="management-page-pages">
-                  {pageGroup.pages.map((page) => {
+                  {pageGroup.pages.map((page, j) => {
                     const urlValid = validateUrl(
                       page.url,
                       page.id,
@@ -318,9 +402,33 @@ export default function ManagementPage() {
                             {urlValid && <Error>{urlValid}</Error>}
                           </FormField>
                         </div>
-                        {renderDeletionConfirmation("page", () =>
-                          deletePage(pageGroup.id, page.id)
-                        )}
+                        <div className="management-page-buttons">
+                          {renderDeletionConfirmation("page", () =>
+                            deletePage(pageGroup.id, page.id)
+                          )}
+                          <Tooltip content="Move up">
+                            <Button
+                              disabled={j === 0}
+                              variant="icon"
+                              size="medium"
+                              className="management-page-button"
+                              onClick={() => movePage(page, pageGroup, "up")}
+                            >
+                              <ArrowUp size={16} />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Move down">
+                            <Button
+                              disabled={j === pageGroup.pages.length - 1}
+                              variant="icon"
+                              size="medium"
+                              className="management-page-button"
+                              onClick={() => movePage(page, pageGroup, "down")}
+                            >
+                              <ArrowDown size={16} />
+                            </Button>
+                          </Tooltip>
+                        </div>
                       </div>
                     );
                   })}
