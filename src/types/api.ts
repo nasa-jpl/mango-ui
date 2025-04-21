@@ -27,7 +27,7 @@ export type Dataset = {
   /* time of last entry */
   data_end: string;
   /* ID of instrument */
-  instrument: string;
+  instrument_id: string;
   /* time of last update */
   last_updated: string;
   /* <mission>_<product_id> */
