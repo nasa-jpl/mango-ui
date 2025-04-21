@@ -1,3 +1,17 @@
+@import url("@nasa-jpl/stellar-react/theme");
+@import url("@nasa-jpl/stellar-react/font");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Override the focus ring color */
+    --ring: 212 99% 40%;
+  }
+}
+
 html,
 body,
 #root {
