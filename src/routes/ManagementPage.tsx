@@ -3,9 +3,10 @@ import {
   AlertAction,
   AlertCancel,
   Button,
-  Error,
   FormField,
   Input,
+  Error as InputError,
+  Label,
   Tooltip,
 } from "@nasa-jpl/react-stellar";
 import {
@@ -16,11 +17,13 @@ import {
   Link,
   TrashSimple,
 } from "@phosphor-icons/react";
+import { FormEvent, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import Page from "../components/ui/Page";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
 import { PageGroup, Page as PageType, View } from "../types/view";
+import { downloadJSON } from "../utilities/generic";
 import { createViewPage, createViewPageGroup } from "../utilities/view";
 import "./ManagementPage.css";
 
@@ -36,6 +39,8 @@ export default function ManagementPage() {
         boolean
       ]
     >();
+
+  const [uploadError, setUploadError] = useState<string>("");
 
   const onNewPageClick = (pageGroupId: string) => {
     const newView = {
@@ -225,7 +230,7 @@ export default function ManagementPage() {
   };
 
   const movePage = (
-    page: Page,
+    page: PageType,
     pageGroup: PageGroup,
     direction: "up" | "down"
   ) => {
@@ -250,18 +255,57 @@ export default function ManagementPage() {
     updatePageGroup({ ...pageGroup, pages: newPages });
   };
 
+  const downloadView = async () => {
+    downloadJSON(view, "mango-view.json");
+  };
+
+  const onJSONViewInput = async (evt: FormEvent<HTMLInputElement>) => {
+    const files = (evt.target as HTMLInputElement).files;
+    if (!files) {
+      return;
+    }
+    const file = files[0];
+    try {
+      const fileString = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          resolve(reader.result as string);
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsText(file);
+      });
+      const viewJSON = JSON.parse(fileString);
+      // TODO perform more validation
+      if (
+        !viewJSON.pageGroups ||
+        typeof viewJSON.version !== "number" ||
+        !viewJSON.home
+      ) {
+        throw new Error("View is invalid");
+      }
+      setView(viewJSON);
+      setUploadError("");
+    } catch (err) {
+      console.log("Error uploading view :>> ", err);
+      setUploadError((err as Error).message);
+    }
+  };
+
   return (
     <Page title="Manage" padBody>
       <div className="entity management-page">
         <div className="st-typography-header">Configure Mango Pages</div>
         <div className="st-typography-body">
           {view.pageGroups.map((pageGroup, i) => {
-            const urlValid = validateUrl(
+            const urlInvalid = validateUrl(
               pageGroup.url,
               pageGroup.id,
               view.pageGroups
             );
-            const titleValid = validateTitle(
+            const titleInvalid = validateTitle(
               pageGroup.title,
               pageGroup.id,
               view.pageGroups
@@ -283,15 +327,15 @@ export default function ManagementPage() {
                         leftAdornment={<Folder size={16} />}
                         className="management-page-input"
                         value={pageGroup.title}
-                        error={!!titleValid}
+                        error={!!titleInvalid}
                         onInput={(evt) =>
                           updatePageGroup({
                             ...pageGroup,
-                            title: evt.target.value,
+                            title: (evt.target as HTMLInputElement).value,
                           })
                         }
                       />
-                      {titleValid && <Error>{titleValid}</Error>}
+                      {titleInvalid && <InputError>{titleInvalid}</InputError>}
                     </FormField>
                   </div>
                   <div className="st-typography-medium">
@@ -301,15 +345,15 @@ export default function ManagementPage() {
                         leftAdornment={<Link size={16} />}
                         className="management-page-input"
                         value={pageGroup.url}
-                        error={!!urlValid}
+                        error={!!urlInvalid}
                         onInput={(evt) =>
                           updatePageGroup({
                             ...pageGroup,
-                            url: evt.target.value,
+                            url: (evt.target as HTMLInputElement).value,
                           })
                         }
                       />
-                      {urlValid && <Error>{urlValid}</Error>}
+                      {urlInvalid && <InputError>{urlInvalid}</InputError>}
                     </FormField>
                   </div>
                   <div className="management-page-buttons">
@@ -342,12 +386,12 @@ export default function ManagementPage() {
                 </div>
                 <div className="management-page-pages">
                   {pageGroup.pages.map((page, j) => {
-                    const urlValid = validateUrl(
+                    const urlInvalid = validateUrl(
                       page.url,
                       page.id,
                       pageGroup.pages
                     );
-                    const titleValid = validateTitle(
+                    const titleInvalid = validateTitle(
                       page.title,
                       page.id,
                       pageGroup.pages
@@ -367,18 +411,21 @@ export default function ManagementPage() {
                               leftAdornment={<File size={16} />}
                               className="management-page-input"
                               value={page.title}
-                              error={!!titleValid}
+                              error={!!titleInvalid}
                               onInput={(evt) =>
                                 updatePage(
                                   {
                                     ...page,
-                                    title: evt.target.value,
+                                    title: (evt.target as HTMLInputElement)
+                                      .value,
                                   },
                                   pageGroup.id
                                 )
                               }
                             />
-                            {titleValid && <Error>{titleValid}</Error>}
+                            {titleInvalid && (
+                              <InputError>{titleInvalid}</InputError>
+                            )}
                           </FormField>
                         </div>
                         <div className="st-typography-medium">
@@ -388,18 +435,20 @@ export default function ManagementPage() {
                               leftAdornment={<Link size={16} />}
                               className="management-page-input"
                               value={page.url}
-                              error={!!urlValid}
+                              error={!!urlInvalid}
                               onInput={(evt) =>
                                 updatePage(
                                   {
                                     ...page,
-                                    url: evt.target.value,
+                                    url: (evt.target as HTMLInputElement).value,
                                   },
                                   pageGroup.id
                                 )
                               }
                             />
-                            {urlValid && <Error>{urlValid}</Error>}
+                            {urlInvalid && (
+                              <InputError>{urlInvalid}</InputError>
+                            )}
                           </FormField>
                         </div>
                         <div className="management-page-buttons">
@@ -449,6 +498,35 @@ export default function ManagementPage() {
           >
             + New Page Group
           </Button>
+        </div>
+        <div className="management-page-upload-view">
+          <div className="management-page-upload-view--inner">
+            <FormField flow="vertical">
+              <Label htmlFor="json-input" className="st-typography-label">
+                Upload JSON View
+              </Label>
+              <Input
+                error={!!uploadError}
+                id="json-input"
+                type="file"
+                className="management-page-input"
+                onInput={onJSONViewInput}
+              />
+              {uploadError && <InputError>{uploadError}</InputError>}
+            </FormField>
+            <div className="management-page-view-download">
+              <Label htmlFor="view-download" className="st-typography-label">
+                Download JSON View
+              </Label>
+              <Button
+                id="view-download"
+                variant="secondary"
+                onClick={downloadView}
+              >
+                Download View
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </Page>

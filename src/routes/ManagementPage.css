@@ -29,3 +29,23 @@
   gap: 8px;
   padding-left: 16px;
 }
+
+.management-page-upload-view {
+  display: flex;
+  flex: 1;
+  margin-top: 24px;
+  width: 400px;
+}
+
+.management-page-upload-view--inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.management-page-view-download {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
