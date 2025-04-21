@@ -19,7 +19,7 @@ export declare type SaveViewModalProps = {
   view: View;
 };
 
-const supersecretpassword = "This will be a secret";
+const secret = "This will be a secret";
 
 export const SaveViewModal = ({
   view,
@@ -27,12 +27,11 @@ export const SaveViewModal = ({
   onClose = () => {},
   onSave = () => {},
 }: SaveViewModalProps) => {
-  const [password, setPassword] = useState(supersecretpassword);
+  const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const allowSave =
-    supersecretpassword.toLowerCase() === password.toLowerCase();
+  const allowSave = secret.toLowerCase() === password.toLowerCase();
 
   async function onSaveClick() {
     try {
