@@ -1,8 +1,9 @@
+import { toast } from "sonner";
 import { config } from "../config";
 import { DataResponse, DataResponseError, Product } from "../types/api";
 import { View } from "../types/view";
 
-export const getView = async (): Promise<View> => {
+export const getView = async (signal?: AbortSignal): Promise<View> => {
   const url =
     config.endpoints.data +
     config.api.data.jsonStore
@@ -15,6 +16,7 @@ export const getView = async (): Promise<View> => {
     headers: {
       "Content-Type": "application/json",
     },
+    signal,
   });
 
   const json = await response.json();
@@ -22,6 +24,7 @@ export const getView = async (): Promise<View> => {
   if (response.status >= 200 && response.status <= 400) {
     return json.data as View;
   } else {
+    toast.error("Unable to load view");
     throw new Error(response.statusText);
   }
 };
@@ -122,6 +125,7 @@ export async function saveView(view: View) {
   });
 
   if (response.status >= 200 && response.status <= 400) {
+    toast.success("View saved");
     return true;
   } else {
     throw new Error(response.statusText);

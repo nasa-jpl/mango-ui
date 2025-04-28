@@ -1,12 +1,13 @@
 import { debounce, isEqual } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
+import { toast } from "sonner";
 import ProductPreviewModal from "../components/app/ProductPreviewModal";
 import Sidebar from "../components/app/Sidebar/Sidebar";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
 import { View } from "../types/view";
-import { getMissions, getProducts, getView } from "../utilities/api";
+import { getMissions, getProducts } from "../utilities/api";
 
 export default function RootPage() {
   const { view: _initialView } = useLoaderData() as Record<"view", View>;
@@ -37,13 +38,11 @@ export default function RootPage() {
       const abortController = new AbortController();
       const fetchData = async () => {
         try {
-          await Promise.all([
-            fetchView(abortController.signal),
-            fetchProducts(abortController.signal),
-          ]);
+          await fetchProducts(abortController.signal);
         } catch (err) {
           if ((err as Error).name !== "AbortError") {
-            console.error("Error loading initial data", err);
+            console.error("Error loading products", err);
+            toast.error("Unable to load products", { duration: 999999999 });
           }
         }
       };
@@ -57,11 +56,6 @@ export default function RootPage() {
   const detectViewChanges = (view: View, initialView: View) => {
     const changed = !isEqual(view, initialView);
     setViewChanged(changed);
-  };
-
-  const fetchView = async (signal: AbortSignal) => {
-    const view = await getView(signal);
-    setView(view);
   };
 
   const fetchProducts = async (signal: AbortSignal) => {
