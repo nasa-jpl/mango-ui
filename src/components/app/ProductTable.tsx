@@ -27,7 +27,7 @@ export const ProductTable = ({
           return {
             ...product,
             datasets: [dataset],
-            instruments: [dataset.instrument],
+            instruments: [dataset.instrument_id],
           };
         })
         .flat();
