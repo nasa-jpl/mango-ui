@@ -131,7 +131,13 @@ export type YAxis = {
   type?: ChartTypeRegistry["line"]["scales"];
 };
 
+export type Channel = {
+  id: string;
+  value: string;
+};
+
 export type DataLayer = {
+  channels?: Channel[];
   dataset: string;
   endTime: string;
   fields: string[];

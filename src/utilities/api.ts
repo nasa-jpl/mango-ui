@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { config } from "../config";
 import { DataResponse, DataResponseError, Product } from "../types/api";
-import { View } from "../types/view";
+import { Channel, View } from "../types/view";
 
 export const getView = async (signal?: AbortSignal): Promise<View> => {
   const url =
@@ -56,10 +56,19 @@ export const getData = (
   instrumentId: string,
   version: string,
   fields: string[],
+  channels: Channel[],
   startTime: string,
   endTime: string,
   downsamplingFactor?: number
 ) => {
+  const fieldsString = fields.length
+    ? `${fields.map((f) => `&fields=${f}`).join("")}`
+    : "";
+  const filtersString = channels.length
+    ? channels
+        .map((channel) => `&filter=${channel.id}=${channel.value}`)
+        .join("")
+    : "";
   const url =
     config.endpoints.data +
     config.api.data.data
@@ -67,9 +76,7 @@ export const getData = (
       .replace("{INSTRUMENT}", instrumentId)
       .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +
-    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp${
-      fields.length ? `${fields.map((f) => `&fields=${f}`).join("")}` : ""
-    }${
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp${fieldsString}${filtersString}${
       typeof downsamplingFactor === "number"
         ? `&downsampling_factor=${downsamplingFactor}`
         : ""

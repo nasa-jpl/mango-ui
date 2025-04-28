@@ -106,6 +106,10 @@ export function fetchWithProgress<T>(url: string) {
 export function getDataLayerId(layer: DataLayer): string {
   return `${layer.mission}_${layer.dataset}_${layer.fields.join("_")}_${
     layer.instrument
+  }_${
+    layer.channels
+      ? layer.channels.map((c) => `${c.id}_${c.value}`).join("_")
+      : ""
   }_${layer.version}_${layer.id}`;
 }
 

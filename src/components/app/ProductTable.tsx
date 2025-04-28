@@ -27,7 +27,7 @@ export const ProductTable = ({
           return {
             ...product,
             datasets: [dataset],
-            instruments: [dataset.instrument],
+            instruments: [dataset.instrument_id],
           };
         })
         .flat();
@@ -84,7 +84,6 @@ export const ProductTable = ({
       width: 200,
       resizable: true,
       sortable: true,
-      wrapText: true,
       autoHeight: true,
       valueFormatter: ({ value: resolutions }) =>
         resolutions.map((r: ProductResolution) => r.downsampling_factor),
@@ -122,7 +121,6 @@ export const ProductTable = ({
       headerName: "Fields",
       resizable: true,
       flex: 1,
-      wrapText: true,
       autoHeight: true,
       valueGetter: (params) =>
         params.data?.available_fields.map((f: ProductField) => f.name),

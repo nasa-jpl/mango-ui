@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "home": {
     "title": "Home",
     "sections": [
@@ -7,181 +6,135 @@
         "id": "dsfgr23rwe",
         "type": "section",
         "title": "Examples",
-        "enableHeader": true,
-        "defaultOpen": true,
-        "layout": [{ "i": "3erwgdfnb", "x": 8, "y": 0, "w": 12, "h": 4 }],
+        "layout": [{ "h": 4, "i": "3erwgdfnb", "w": 12, "x": 8, "y": 0 }],
         "entities": [
           {
             "id": "3erwgdfnb",
             "type": "chart",
             "title": "ACC1A",
-            "syncWithPageDateRange": true,
+            "yAxes": [{ "id": "y1", "position": "left" }],
             "layers": [
               {
                 "id": "dfgth",
-                "mission": "GRACEFO",
-                "dataset": "ACC1A",
-                "fields": ["lin_accl_x"],
                 "type": "line",
-                "version": "04",
-                "instrument": "C",
-                "startTime": "2022-03-02T00:26:00.000000Z",
+                "fields": ["lin_accl_x"],
+                "dataset": "ACC1A",
                 "endTime": "2022-03-02T00:36:00.000000Z",
-                "yAxisId": "y1"
+                "mission": "GRACEFO",
+                "version": "04",
+                "yAxisId": "y1",
+                "startTime": "2022-03-02T00:26:00.000000Z",
+                "instrument": "C"
               }
             ],
-            "yAxes": [
-              {
-                "id": "y1",
-                "position": "left"
-              }
-            ]
+            "syncWithPageDateRange": true
           }
-        ]
+        ],
+        "defaultOpen": true,
+        "enableHeader": true
       }
     ]
   },
+  "version": 1,
+  "revision": 3,
   "pageGroups": [
     {
       "id": "345",
       "url": "downlink",
-      "title": "Downlink & Product Generation",
       "pages": [
-        {
-          "id": "123efg",
-          "url": "dashboard",
-          "title": "Downlink Dashboard",
-          "missions": [
-            { "mission": "GRACEFO", "instrument": "C" },
-            { "mission": "GRACEFO", "instrument": "D" }
-          ],
-          "dateFormat": "short",
-          "sections": [
-            {
-              "id": "htegw3re",
-              "type": "section",
-              "title": "",
-              "enableHeader": false,
-              "resizable": false,
-              "defaultOpen": true,
-              "layout": [],
-              "entities": [
-                {
-                  "dateRange": { "start": "", "end": "" },
-                  "id": "3r4gtrbgc",
-                  "title": "",
-                  "type": "downlink-dashboard",
-                  "version": "04",
-                  "instrument": "C",
-                  "defaultPassGapLimit": 2000,
-                  "defaultFields": [
-                    "file_name",
-                    "first_data_point_t_tag",
-                    "last_data_point_t_tag",
-                    "n_recs",
-                    "file_tag",
-                    "process_ttag",
-                    "time_gap_avg",
-                    "time_gap_var",
-                    "time_gap_min",
-                    "time_gap_max",
-                    "n_qual_bits",
-                    "bit_count_0",
-                    "bit_count_1",
-                    "bit_count_2",
-                    "bit_count_3",
-                    "bit_count_4",
-                    "bit_count_5",
-                    "bit_count_6",
-                    "bit_count_7"
-                  ],
-                  "gapField": "time_gap_max",
-                  "products": [
-                    {
-                      "dataset": "ACC1A",
-                      "entities": [
-                        {
-                          "id": "aedfsrdvc",
-                          "type": "chart",
-                          "title": "Ang Acc X",
-                          "syncWithPageDateRange": true,
-                          "expandable": true,
-                          "yAxes": [
-                            {
-                              "id": "y1",
-                              "label": "",
-                              "position": "left"
-                            }
-                          ],
-                          "layers": [
-                            {
-                              "id": "5dfgdfgdfg",
-                              "type": "line",
-                              "fields": ["lin_accl_x"],
-                              "version": "04",
-                              "mission": "GRACEFO",
-                              "dataset": "ACC1A",
-                              "instrument": "D",
-                              "startTime": "2022-03-02T00:26:00.000000Z",
-                              "endTime": "2022-03-02T00:36:00.000000Z",
-                              "yAxisId": "y1"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    { "dataset": "AHK1A" },
-                    { "dataset": "GNV1A" },
-                    { "dataset": "GPS1A" },
-                    { "dataset": "HRT1A" },
-                    { "dataset": "IHK1A" },
-                    { "dataset": "IMU1A" },
-                    { "dataset": "KBR1A" },
-                    { "dataset": "LHK1A" },
-                    { "dataset": "LRI1A" },
-                    { "dataset": "LSM1A" },
-                    { "dataset": "MAG1A" },
-                    { "dataset": "SCA1A" },
-                    { "dataset": "THR1A", "passGapLimit": 100000000 },
-                    { "dataset": "TNK1A" }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
         {
           "id": "abcd",
           "url": "performance_reports",
           "title": "Performance Reports",
-          "dateFormat": "short",
           "sections": [
             {
               "id": "sertryfdf",
               "type": "section",
               "title": "Examples",
-              "defaultOpen": true,
-              "resizable": false,
-              "fullHeight": true,
               "layout": [
-                { "i": "fghyjqiqii", "x": 0, "y": 0, "w": 12, "h": 12 }
+                { "h": 12, "i": "fghyjqiqii", "w": 12, "x": 0, "y": 0 }
               ],
               "entities": [
                 {
                   "id": "fghyjqiqii",
                   "type": "table",
                   "title": "Table",
-                  "showHeader": false,
-                  "syncWithPageDateRange": true,
-                  "applyThresholds": true,
-                  "compact": true,
-                  "fitToGridWidth": true,
-                  "columnGroups": [
-                    { "id": "ocimaom", "name": "KBR-GPS Performance" },
-                    { "id": "nvjnjfk", "name": "GPS DD Clock Overlap" },
-                    { "id": "zxkzjkj", "name": "GPS Tracking Grace-FO C" },
-                    { "id": "qhwuwhh", "name": "GPS Tracking Grace-FO D" },
-                    { "id": "wwwhwiw", "name": "L-Overlap RMS" }
+                  "layers": [
+                    {
+                      "id": "48gnes",
+                      "fields": [
+                        "resid_rms",
+                        "resid_nobs",
+                        "arc_length",
+                        "clkdd_nobs",
+                        "clkdd_mean",
+                        "clkdd_sigma",
+                        "clkdd_rms",
+                        "timestamp"
+                      ],
+                      "dataset": "KBR1B_RPT",
+                      "endTime": "2023-06-30T23:59:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "instrument": "Y"
+                    },
+                    {
+                      "id": "48gnek",
+                      "fields": [
+                        "rms_phase",
+                        "n_phase",
+                        "per_phase_rej",
+                        "rms_range",
+                        "n_range",
+                        "per_range_rej",
+                        "timestamp"
+                      ],
+                      "dataset": "POE1A_RPT",
+                      "endTime": "2023-06-30T23:59:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "48gnep",
+                      "fields": [
+                        "rms_phase",
+                        "n_phase",
+                        "per_phase_rej",
+                        "rms_range",
+                        "n_range",
+                        "per_range_rej",
+                        "timestamp"
+                      ],
+                      "dataset": "POE1A_RPT",
+                      "endTime": "2023-06-30T23:59:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "instrument": "D"
+                    },
+                    {
+                      "id": "48gnew",
+                      "fields": ["lpos_rms_start", "timestamp"],
+                      "dataset": "GNV1B_RPT",
+                      "endTime": "2023-06-30T23:59:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "48gneq",
+                      "fields": ["lpos_rms_start", "timestamp"],
+                      "dataset": "GNV1B_RPT",
+                      "endTime": "2023-06-30T23:59:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2023-06-30T00:00:00.000000Z",
+                      "instrument": "D"
+                    }
                   ],
                   "columns": [
                     {
@@ -311,231 +264,300 @@
                       "columnGroupId": "wwwhwiw"
                     }
                   ],
-                  "layers": [
+                  "compact": true,
+                  "showHeader": false,
+                  "columnGroups": [
                     {
-                      "id": "48gnes",
-                      "version": "04",
-                      "mission": "GRACEFO",
-                      "dataset": "KBR1B_RPT",
-                      "instrument": "Y",
-                      "fields": [
-                        "resid_rms",
-                        "resid_nobs",
-                        "arc_length",
-                        "clkdd_nobs",
-                        "clkdd_mean",
-                        "clkdd_sigma",
-                        "clkdd_rms",
-                        "timestamp"
-                      ],
-                      "startTime": "2023-06-30T00:00:00.000000Z",
-                      "endTime": "2023-06-30T23:59:00.000000Z"
+                      "id": "ocimaom",
+                      "name": "KBR-GPS Performance"
                     },
                     {
-                      "id": "48gnek",
-                      "version": "04",
-                      "mission": "GRACEFO",
-                      "dataset": "POE1A_RPT",
-                      "instrument": "C",
-                      "fields": [
-                        "rms_phase",
-                        "n_phase",
-                        "per_phase_rej",
-                        "rms_range",
-                        "n_range",
-                        "per_range_rej",
-                        "timestamp"
-                      ],
-                      "startTime": "2023-06-30T00:00:00.000000Z",
-                      "endTime": "2023-06-30T23:59:00.000000Z"
+                      "id": "nvjnjfk",
+                      "name": "GPS DD Clock Overlap"
                     },
                     {
-                      "id": "48gnep",
-                      "version": "04",
-                      "mission": "GRACEFO",
-                      "dataset": "POE1A_RPT",
-                      "instrument": "D",
-                      "fields": [
-                        "rms_phase",
-                        "n_phase",
-                        "per_phase_rej",
-                        "rms_range",
-                        "n_range",
-                        "per_range_rej",
-                        "timestamp"
-                      ],
-                      "startTime": "2023-06-30T00:00:00.000000Z",
-                      "endTime": "2023-06-30T23:59:00.000000Z"
+                      "id": "zxkzjkj",
+                      "name": "GPS Tracking Grace-FO C"
                     },
                     {
-                      "id": "48gnew",
-                      "version": "04",
-                      "mission": "GRACEFO",
-                      "dataset": "GNV1B_RPT",
-                      "instrument": "C",
-                      "fields": ["lpos_rms_start", "timestamp"],
-                      "startTime": "2023-06-30T00:00:00.000000Z",
-                      "endTime": "2023-06-30T23:59:00.000000Z"
+                      "id": "qhwuwhh",
+                      "name": "GPS Tracking Grace-FO D"
                     },
                     {
-                      "id": "48gneq",
-                      "version": "04",
-                      "mission": "GRACEFO",
-                      "dataset": "GNV1B_RPT",
-                      "instrument": "D",
-                      "fields": ["lpos_rms_start", "timestamp"],
-                      "startTime": "2023-06-30T00:00:00.000000Z",
-                      "endTime": "2023-06-30T23:59:00.000000Z"
+                      "id": "wwwhwiw",
+                      "name": "L-Overlap RMS"
                     }
-                  ]
+                  ],
+                  "fitToGridWidth": true,
+                  "syncWithPageDateRange": true
                 }
-              ]
+              ],
+              "resizable": false,
+              "fullHeight": true,
+              "defaultOpen": true
             }
-          ]
+          ],
+          "dateFormat": "short"
+        },
+        {
+          "id": "123efg",
+          "url": "dashboard",
+          "title": "Downlink Dashboard",
+          "missions": [
+            {
+              "mission": "GRACEFO",
+              "instrument": "C"
+            },
+            {
+              "mission": "GRACEFO",
+              "instrument": "D"
+            }
+          ],
+          "sections": [
+            {
+              "id": "htegw3re",
+              "type": "section",
+              "title": "",
+              "layout": [],
+              "entities": [
+                {
+                  "id": "3r4gtrbgc",
+                  "type": "downlink-dashboard",
+                  "title": "",
+                  "version": "04",
+                  "gapField": "time_gap_max",
+                  "products": [
+                    {
+                      "dataset": "ACC1A",
+                      "entities": [
+                        {
+                          "id": "aedfsrdvc",
+                          "type": "chart",
+                          "title": "Ang Acc X",
+                          "yAxes": [
+                            {
+                              "id": "y1",
+                              "label": "",
+                              "position": "left"
+                            }
+                          ],
+                          "layers": [
+                            {
+                              "id": "5dfgdfgdfg",
+                              "type": "line",
+                              "fields": ["lin_accl_x"],
+                              "dataset": "ACC1A",
+                              "endTime": "2022-03-02T00:36:00.000000Z",
+                              "mission": "GRACEFO",
+                              "version": "04",
+                              "yAxisId": "y1",
+                              "startTime": "2022-03-02T00:26:00.000000Z",
+                              "instrument": "D"
+                            }
+                          ],
+                          "expandable": true,
+                          "syncWithPageDateRange": true
+                        }
+                      ]
+                    },
+                    { "dataset": "AHK1A" },
+                    { "dataset": "GNV1A" },
+                    { "dataset": "GPS1A" },
+                    { "dataset": "HRT1A" },
+                    { "dataset": "IHK1A" },
+                    { "dataset": "IMU1A" },
+                    { "dataset": "KBR1A" },
+                    { "dataset": "LHK1A" },
+                    { "dataset": "LRI1A" },
+                    { "dataset": "LSM1A" },
+                    { "dataset": "MAG1A" },
+                    { "dataset": "SCA1A" },
+                    { "dataset": "THR1A", "passGapLimit": 100000000 },
+                    { "dataset": "TNK1A" }
+                  ],
+                  "dateRange": {
+                    "end": "",
+                    "start": ""
+                  },
+                  "instrument": "C",
+                  "defaultFields": [
+                    "file_name",
+                    "first_data_point_t_tag",
+                    "last_data_point_t_tag",
+                    "n_recs",
+                    "file_tag",
+                    "process_ttag",
+                    "time_gap_avg",
+                    "time_gap_var",
+                    "time_gap_min",
+                    "time_gap_max",
+                    "n_qual_bits",
+                    "bit_count_0",
+                    "bit_count_1",
+                    "bit_count_2",
+                    "bit_count_3",
+                    "bit_count_4",
+                    "bit_count_5",
+                    "bit_count_6",
+                    "bit_count_7"
+                  ],
+                  "defaultPassGapLimit": 2000
+                }
+              ],
+              "resizable": false,
+              "defaultOpen": true,
+              "enableHeader": false
+            }
+          ],
+          "dateFormat": "short"
         }
-      ]
+      ],
+      "title": "Downlink & Product Generation"
     },
     {
       "id": "123",
-      "url": "l1",
-      "title": "L1 Processing",
+      "url": "l1a",
       "pages": [
         {
           "id": "abc",
-          "url": "page1",
+          "url": "configuration_examples",
           "title": "Configuration Examples",
           "sections": [
             {
               "id": "dsfgr23rwe",
               "type": "section",
               "title": "Examples",
-              "enableHeader": true,
-              "defaultOpen": true,
               "layout": [
-                { "i": "hisudhis", "x": 8, "y": 0, "w": 6, "h": 2 },
-                { "i": "sdfdgfhg", "x": 8, "y": 0, "w": 6, "h": 2 },
-                { "i": "sdf23edx", "x": 8, "y": 0, "w": 6, "h": 2 },
-                { "i": "3edfghtr", "x": 8, "y": 1, "w": 6, "h": 2 },
-                { "i": "3efgtre", "x": 8, "y": 1, "w": 6, "h": 2 },
-                { "i": "dfgdgfg", "x": 8, "y": 2, "w": 6, "h": 2 },
-                { "i": "sfrgtef", "x": 8, "y": 2, "w": 6, "h": 2 },
-                { "i": "hgjhnfgdfede", "x": 8, "y": 2, "w": 6, "h": 2 },
-                { "i": "sdfgrtrw", "x": 8, "y": 2, "w": 6, "h": 2 }
+                {
+                  "i": "hisudhis",
+                  "x": 0,
+                  "y": 2,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "sdfdgfhg",
+                  "x": 6,
+                  "y": 0,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "sdf23edx",
+                  "x": 0,
+                  "y": 0,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "3edfghtr",
+                  "x": 0,
+                  "y": 4,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "3efgtre",
+                  "x": 6,
+                  "y": 2,
+                  "w": 6,
+                  "h": 2
+                },
+                { "i": "23eriufhdnjkw", "x": 8, "y": 1, "w": 6, "h": 2 },
+                {
+                  "i": "sfrgtef",
+                  "x": 6,
+                  "y": 6,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "hgjhnfgdfede",
+                  "x": 0,
+                  "y": 6,
+                  "w": 6,
+                  "h": 2
+                },
+                {
+                  "i": "sdfgrtrw",
+                  "x": 6,
+                  "y": 4,
+                  "w": 6,
+                  "h": 2
+                }
               ],
               "entities": [
                 {
                   "id": "hisudhis",
                   "type": "map",
                   "title": "Map",
-                  "syncWithPageDateRange": true,
                   "layers": [
                     {
                       "id": "3regf",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
                       "fields": ["location"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
                       "version": "04",
-                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "instrument": "C"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "sdfdgfhg",
                   "type": "chart",
                   "title": "Multiple Axes, Y1 Fixed Min/Max",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "id": "3regf",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#4bb1ff"
-                    },
-                    {
-                      "id": "3rwefrd",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#f14444"
-                    }
-                  ],
                   "yAxes": [
                     {
                       "id": "y1",
-                      "label": "ACT1A Linear Acceleration X (m/sec²)",
-                      "position": "left",
+                      "max": -0.00001,
                       "min": -0.000015,
-                      "max": -0.00001
+                      "label": "ACT1A Linear Acceleration X (m/sec²)",
+                      "position": "left"
                     },
                     {
                       "id": "y2",
+                      "color": "#4bb1ff",
                       "label": "IHK1A Antenna phase center offset correction accl",
-                      "position": "right",
-                      "color": "#4bb1ff"
+                      "position": "right"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "3regf",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "3rwefrd",
+                      "type": "line",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "sdf23edx",
                   "type": "chart",
                   "title": "Multiple Axes, Y2 Log Scale",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "id": "fdv",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#4bb1ff"
-                    },
-                    {
-                      "id": "sdfe",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#f14444"
-                    },
-                    {
-                      "id": "2wedfg",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
-                      "yAxisId": "y2",
-                      "color": "#11c12b"
-                    }
-                  ],
                   "yAxes": [
                     {
                       "id": "y1",
@@ -544,111 +566,239 @@
                     },
                     {
                       "id": "y2",
-                      "label": "ACT1A Log Angular Acceleration X (m/sec²)",
-                      "position": "right",
                       "type": "logarithmic",
-                      "color": "#11c12b"
+                      "color": "#11c12b",
+                      "label": "ACT1A Log Angular Acceleration X (m/sec²)",
+                      "position": "right"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "fdv",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "sdfe",
+                      "type": "line",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
+                    },
+                    {
+                      "id": "2wedfg",
+                      "type": "line",
+                      "color": "#11c12b",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y2",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "3edfghtr",
                   "type": "chart",
                   "title": "Hide Lines, Hide Points, Point Radius, Line Width",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "id": "fdv",
-                      "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:33:25.000000Z",
-                      "endTime": "2022-03-02T00:33:35.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#4bb1ff",
-                      "hideLines": true,
-                      "pointRadius": 2
-                    },
-                    {
-                      "id": "sdfe",
-                      "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "fields": ["lin_accl_x"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:33:25.000000Z",
-                      "endTime": "2022-03-02T00:33:35.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#f14444",
-                      "hidePoints": true,
-                      "lineWidth": 8
-                    },
-                    {
-                      "id": "2ed",
-                      "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "fields": ["lin_accl_z"],
-                      "type": "line",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:33:25.000000Z",
-                      "endTime": "2022-03-02T00:33:35.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#11c12b"
-                    }
-                  ],
                   "yAxes": [
                     {
                       "id": "y1",
                       "label": "ACC1A Linear Acceleration X (m/sec²)",
                       "position": "left"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "fdv",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "2022-03-02T00:33:35.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "hideLines": true,
+                      "startTime": "2022-03-02T00:33:25.000000Z",
+                      "instrument": "C",
+                      "pointRadius": 2
+                    },
+                    {
+                      "id": "sdfe",
+                      "type": "line",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "2022-03-02T00:33:35.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "lineWidth": 8,
+                      "startTime": "2022-03-02T00:33:25.000000Z",
+                      "hidePoints": true,
+                      "instrument": "D"
+                    },
+                    {
+                      "id": "2ed",
+                      "type": "line",
+                      "color": "#11c12b",
+                      "fields": ["lin_accl_z"],
+                      "dataset": "ACC1A",
+                      "endTime": "2022-03-02T00:33:35.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:33:25.000000Z",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "3efgtre",
                   "type": "chart",
                   "title": "Tooltip Intersection Off, Mode Index",
-                  "syncWithPageDateRange": true,
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "ACC1A Linear Acceleration X (m/sec²)",
+                      "position": "left"
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "fdv",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "sdfe",
+                      "type": "line",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
+                    }
+                  ],
                   "chartOptions": {
-                    "tooltip": { "intersect": false, "mode": "index" }
+                    "tooltip": {
+                      "mode": "index",
+                      "intersect": false
+                    }
                   },
+                  "syncWithPageDateRange": true
+                },
+                {
+                  "id": "23eriufhdnjkw",
+                  "type": "chart",
+                  "title": "TNK1A Channel Values Example",
+                  "syncWithPageDateRange": false,
                   "layers": [
                     {
                       "id": "fdv",
                       "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "fields": ["lin_accl_x"],
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
                       "type": "line",
                       "version": "04",
                       "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 1 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
                       "yAxisId": "y1",
                       "color": "#4bb1ff"
                     },
                     {
-                      "id": "sdfe",
+                      "id": "2ergss",
                       "mission": "GRACEFO",
-                      "dataset": "ACC1A",
-                      "fields": ["lin_accl_x"],
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
                       "type": "line",
                       "version": "04",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 2 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
                       "yAxisId": "y1",
                       "color": "#f14444"
+                    },
+                    {
+                      "id": "2ergss",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 3 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#11c12b"
+                    },
+                    {
+                      "id": "2ergss",
+                      "mission": "GRACEFO",
+                      "dataset": "GPS1A",
+                      "fields": ["ca_range"],
+                      "type": "line",
+                      "version": "04",
+                      "instrument": "C",
+                      "channels": [
+                        { "id": "ant_id", "value": 0 },
+                        { "id": "prn_id", "value": 4 }
+                      ],
+                      "startTime": "2022-05-31T23:13:11.780Z",
+                      "endTime": "2022-06-02T01:10:18.993Z",
+                      "yAxisId": "y1",
+                      "color": "#494949"
                     }
                   ],
                   "yAxes": [
                     {
                       "id": "y1",
-                      "label": "ACC1A Linear Acceleration X (m/sec²)",
+                      "label": "ca_range",
                       "position": "left"
                     }
                   ]
@@ -657,114 +807,120 @@
                   "id": "sfrgtef",
                   "type": "chart",
                   "title": "Data Transformations: KBR1B - LRI1B",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "id": "3r4ethmhe",
-                      "mission": "GRACEFO",
-                      "dataset": "KBR1B",
-                      "fields": ["range_accl"],
-                      "type": "line",
-                      "label": "GRACEFO: KBR1A range_accl v04",
-                      "version": "04",
-                      "instrument": "Y",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
-                      "endTime": "2023-06-01T23:59:58.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#11c12b"
-                    },
-                    {
-                      "id": "yhgfew3reg",
-                      "mission": "GRACEFO",
-                      "dataset": "LRI1B",
-                      "fields": ["range_accl"],
-                      "type": "line",
-                      "label": "GRACEFO: LRI1B range_accl",
-                      "version": "04",
-                      "instrument": "Y",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
-                      "endTime": "2023-06-01T23:59:58.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#4bb1ff"
-                    },
-                    {
-                      "id": "3r4etfnh",
-                      "mission": "GRACEFO",
-                      "dataset": "KBR1B",
-                      "fields": ["range_accl"],
-                      "type": "line",
-                      "label": "GRACEFO: range_accl KBR1B-LRI1B",
-                      "version": "04",
-                      "instrument": "Y",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
-                      "endTime": "2023-06-01T23:59:58.000000Z",
-                      "yAxisId": "y1",
-                      "color": "#f14444",
-                      "transforms": [
-                        {
-                          "axis": "y",
-                          "type": "derived",
-                          "subtract": true,
-                          "layerId": "yhgfew3reg"
-                        }
-                      ]
-                    }
-                  ],
                   "yAxes": [
                     {
                       "id": "y1",
                       "label": "range_accl",
                       "position": "left"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "3r4ethmhe",
+                      "type": "line",
+                      "color": "#11c12b",
+                      "label": "GRACEFO: KBR1A range_accl v04",
+                      "fields": ["range_accl"],
+                      "dataset": "KBR1B",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "Y"
+                    },
+                    {
+                      "id": "yhgfew3reg",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "label": "GRACEFO: LRI1B range_accl",
+                      "fields": ["range_accl"],
+                      "dataset": "LRI1B",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "Y"
+                    },
+                    {
+                      "id": "3r4etfnh",
+                      "type": "line",
+                      "color": "#f14444",
+                      "label": "GRACEFO: range_accl KBR1B-LRI1B",
+                      "fields": ["range_accl"],
+                      "dataset": "KBR1B",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "Y",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "derived",
+                          "layerId": "yhgfew3reg",
+                          "subtract": true
+                        }
+                      ]
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "hgjhnfgdfede",
                   "type": "chart",
                   "title": "Data Transformations: Coalesced ACT1B Linear Acceleration",
-                  "syncWithPageDateRange": true,
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "range_accl",
+                      "position": "left"
+                    }
+                  ],
                   "layers": [
                     {
                       "id": "jtynfgbfdfewr",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_y"],
                       "type": "line",
+                      "color": "#4bb1ff",
                       "label": "GRACEFO C: lin_accl_x v04",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "fields": ["lin_accl_y"],
+                      "dataset": "ACT1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#4bb1ff"
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "adfsdghy",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
+                      "color": "#11c12b",
                       "label": "GRACEFO D: lin_accl_x v04",
-                      "version": "04",
-                      "instrument": "D",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#11c12b"
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "D"
                     },
                     {
                       "id": "hnbvcdew345",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1B",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
-                      "label": "GRACEFO C: (lin_accl_x + 23000ms * -1.05) v04",
-                      "version": "04",
-                      "instrument": "C",
-                      "startTime": "2023-06-01T00:00:00.000000Z",
-                      "endTime": "2023-06-01T23:59:58.000000Z",
-                      "yAxisId": "y1",
                       "color": "#f14444",
+                      "label": "GRACEFO C: (lin_accl_x + 23000ms * -1.05) v04",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1B",
+                      "endTime": "2023-06-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2023-06-01T00:00:00.000000Z",
+                      "instrument": "C",
                       "transforms": [
                         {
                           "axis": "x",
@@ -779,34 +935,30 @@
                       ]
                     }
                   ],
-                  "yAxes": [
-                    {
-                      "id": "y1",
-                      "label": "range_accl",
-                      "position": "left"
-                    }
-                  ]
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "sdfgrtrw",
                   "type": "chart",
                   "title": "Page Date Sync Off",
-                  "syncWithPageDateRange": false,
                   "layers": [
                     {
                       "id": "asdasd",
-                      "mission": "GRACEFO",
-                      "dataset": "ACT1A",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
+                      "fields": ["lin_accl_x"],
+                      "dataset": "ACT1A",
+                      "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
                       "version": "04",
-                      "instrument": "C",
                       "startTime": "2022-03-02T00:26:00.000000Z",
-                      "endTime": "2022-03-02T00:36:00.000000Z"
+                      "instrument": "C"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": false
                 }
-              ]
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
             }
           ]
         },
@@ -819,19 +971,34 @@
               "id": "sdfdghty",
               "type": "section",
               "title": "GRACE-FO Linear Acceleration",
-              "enableHeader": true,
-              "defaultOpen": true,
               "layout": [
-                { "i": "sdfghy4ter", "x": 0, "y": 0, "w": 4, "h": 2 },
-                { "i": "dfgrt43rwe", "x": 4, "y": 0, "w": 4, "h": 2 },
-                { "i": "dfg43er", "x": 8, "y": 0, "w": 4, "h": 2 }
+                {
+                  "h": 2,
+                  "i": "sdfghy4ter",
+                  "w": 4,
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "dfgrt43rwe",
+                  "w": 4,
+                  "x": 4,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "dfg43er",
+                  "w": 4,
+                  "x": 8,
+                  "y": 0
+                }
               ],
               "entities": [
                 {
                   "id": "sdfghy4ter",
                   "type": "chart",
                   "title": "Linear Acceleration X (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [
                     {
                       "id": "y1",
@@ -841,216 +1008,237 @@
                   "layers": [
                     {
                       "id": "234567",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#4bb1ff"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "345678",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#f14444"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "dfgrt43rwe",
                   "type": "chart",
                   "title": "Linear Acceleration Y (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "234567",
-                      "fields": ["lin_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#4bb1ff"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "2wdfgt4",
-                      "fields": ["lin_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#f14444"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "dfg43er",
                   "type": "chart",
                   "title": "Linear Acceleration Z (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "3wefsdv",
-                      "fields": ["lin_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#4bb1ff"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "3rwefv",
-                      "fields": ["lin_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
                       "yAxisId": "y1",
-                      "color": "#f14444"
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 }
-              ]
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
             },
             {
               "id": "sdr4wdf",
               "type": "section",
               "title": "GRACE-FO Angular Acceleration",
-              "enableHeader": true,
-              "defaultOpen": true,
               "layout": [
-                { "i": "sdfer34wefsd", "x": 0, "y": 0, "w": 4, "h": 2 },
-                { "i": "fsdr4efd", "x": 4, "y": 0, "w": 4, "h": 2 },
-                { "i": "sdfer4edf", "x": 8, "y": 0, "w": 4, "h": 2 }
+                {
+                  "h": 2,
+                  "i": "sdfer34wefsd",
+                  "w": 4,
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "fsdr4efd",
+                  "w": 4,
+                  "x": 4,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "sdfer4edf",
+                  "w": 4,
+                  "x": 8,
+                  "y": 0
+                }
               ],
               "entities": [
                 {
                   "id": "sdfer34wefsd",
                   "type": "chart",
                   "title": "Angular Acceleration X (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "r4redgbv",
-                      "fields": ["ang_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "sfdr34red",
-                      "fields": ["ang_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "fsdr4efd",
                   "type": "chart",
                   "title": "Angular Acceleration Y (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "sdfer4ed",
-                      "fields": ["ang_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "ewfsvc",
-                      "fields": ["ang_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "sdfer4edf",
                   "type": "chart",
                   "title": "Angular Acceleration Z (m/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "sdfxv",
-                      "fields": ["ang_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACC1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "sdfsdfsf",
-                      "fields": ["ang_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACC1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 }
-              ]
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
             }
           ]
         },
@@ -1063,231 +1251,268 @@
               "id": "3r4egtf",
               "type": "section",
               "title": "GRACE-FO Linear Acceleration",
-              "enableHeader": true,
-              "defaultOpen": true,
               "layout": [
-                { "i": "3rwegthfg", "x": 0, "y": 0, "w": 4, "h": 2 },
-                { "i": "r3wgdf", "x": 4, "y": 0, "w": 4, "h": 2 },
-                { "i": "234retrhfg", "x": 8, "y": 0, "w": 4, "h": 2 }
+                {
+                  "h": 2,
+                  "i": "3rwegthfg",
+                  "w": 4,
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "r3wgdf",
+                  "w": 4,
+                  "x": 4,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "234retrhfg",
+                  "w": 4,
+                  "x": 8,
+                  "y": 0
+                }
               ],
               "entities": [
                 {
                   "id": "3rwegthfg",
                   "type": "chart",
                   "title": "Linear Acceleration X (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "234567",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "345678",
-                      "fields": ["lin_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "r3wgdf",
                   "type": "chart",
                   "title": "Linear Acceleration Y (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "234567",
-                      "fields": ["lin_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "2wdfgt4",
-                      "fields": ["lin_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "234retrhfg",
                   "type": "chart",
                   "title": "Linear Acceleration Z (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "32r4etrhyg",
-                      "fields": ["lin_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "2eqsgdf",
-                      "fields": ["lin_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 }
-              ]
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
             },
             {
               "id": "sdr4wdf",
               "type": "section",
               "title": "GRACE-FO Angular Acceleration",
-              "enableHeader": true,
-              "defaultOpen": true,
               "layout": [
-                { "i": "32rwergdfn", "x": 0, "y": 0, "w": 4, "h": 2 },
-                { "i": "e23wfsdbc", "x": 4, "y": 0, "w": 4, "h": 2 },
-                { "i": "32r4egtfnhb", "x": 8, "y": 0, "w": 4, "h": 2 }
+                {
+                  "h": 2,
+                  "i": "32rwergdfn",
+                  "w": 4,
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "e23wfsdbc",
+                  "w": 4,
+                  "x": 4,
+                  "y": 0
+                },
+                {
+                  "h": 2,
+                  "i": "32r4egtfnhb",
+                  "w": 4,
+                  "x": 8,
+                  "y": 0
+                }
               ],
               "entities": [
                 {
                   "id": "32rwergdfn",
                   "type": "chart",
                   "title": "Angular Acceleration X (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "312ewfdg",
-                      "fields": ["ang_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "2eqwfsdbg",
-                      "fields": ["ang_accl_x"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "e23wfsdbc",
                   "type": "chart",
                   "title": "Angular Acceleration Y (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "3rwefrdgfgb",
-                      "fields": ["ang_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "2eqwfsdb",
-                      "fields": ["ang_accl_y"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "32r4egtfnhb",
                   "type": "chart",
                   "title": "Angular Acceleration Z (nm/sec²)",
-                  "syncWithPageDateRange": true,
                   "yAxes": [],
                   "layers": [
                     {
                       "id": "srdgtfhtw3re",
-                      "fields": ["ang_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#4bb1ff",
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACT1A",
-                      "instrument": "C",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#4bb1ff"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "C"
                     },
                     {
                       "id": "23rwegdfds",
-                      "fields": ["ang_accl_z"],
                       "type": "line",
-                      "version": "04",
-                      "mission": "GRACEFO",
+                      "color": "#f14444",
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACT1A",
-                      "instrument": "D",
-                      "startTime": "2022-03-02T00:26:00.000000Z",
                       "endTime": "2022-03-02T00:36:00.000000Z",
-                      "color": "#f14444"
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "startTime": "2022-03-02T00:26:00.000000Z",
+                      "instrument": "D"
                     }
-                  ]
+                  ],
+                  "syncWithPageDateRange": true
                 }
-              ]
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
             }
           ]
         }
-      ]
+      ],
+      "title": "L1"
     }
   ]
 }

@@ -92,6 +92,7 @@ export function DataGrid<T>({
         ref={gridRef}
         suppressColumnVirtualisation
         headerHeight={32}
+        rowHeight={compact ? 24 : 33}
         className={className}
         rowData={rowData}
         rowSelection={{
