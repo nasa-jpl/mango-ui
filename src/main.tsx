@@ -12,6 +12,7 @@ import ProductsPage from "./routes/ProductsPage";
 import RootPage from "./routes/RootPage";
 import ViewPage from "./routes/ViewPage";
 import { getView } from "./utilities/api";
+import { createView } from "./utilities/view";
 import "./variables.css";
 
 export async function loader() {
@@ -19,8 +20,7 @@ export async function loader() {
   try {
     view = await getView();
   } catch (err) {
-    // TODO generate a default view
-    return {};
+    return { view: createView() };
   }
   return { view };
 }
@@ -66,7 +66,7 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <TooltipProvider>
-      <Toaster />
+      <Toaster richColors />
       <RouterProvider router={router} />
     </TooltipProvider>
   </React.StrictMode>

@@ -17,8 +17,11 @@ import {
   TextEntity,
   TimeSeriesPoint,
   TimelineRowEntity,
+  View,
 } from "../types/view";
 import { generateUUID } from "./generic";
+
+const VIEW_VERSION: number = 1;
 
 export function isChartEntity(entity: Entity): entity is ChartEntity {
   return entity.type === "chart";
@@ -200,6 +203,14 @@ export function formatYValue(tickValue: number | string): string {
     return tickValue;
   }
   return format("~g")(tickValue);
+}
+
+export function createView(): View {
+  return {
+    home: createViewPage({}),
+    pageGroups: [],
+    version: VIEW_VERSION,
+  };
 }
 
 export function createViewPage(params: Partial<Page>): Page {
