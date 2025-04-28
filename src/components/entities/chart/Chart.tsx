@@ -1,4 +1,4 @@
-import { Button, Tooltip } from "@nasa-jpl/react-stellar";
+import { Button } from "@nasa-jpl/react-stellar";
 import {
   ArrowCounterClockwise,
   ArrowsHorizontal,
@@ -55,6 +55,7 @@ import {
   isChartLayerLine,
 } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
+import { Tooltip } from "../../ui/Tooltip";
 import "./Chart.css";
 import ChartTooltip from "./ChartTooltip";
 

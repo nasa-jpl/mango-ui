@@ -1,5 +1,6 @@
-import { IconWarning, Tooltip } from "@nasa-jpl/react-stellar";
+import { IconWarning } from "@nasa-jpl/react-stellar";
 import { DotsSix } from "@phosphor-icons/react";
+import { Tooltip } from "../ui/Tooltip";
 import "./EntityHeader.css";
 
 export declare type EntityHeaderProps = {

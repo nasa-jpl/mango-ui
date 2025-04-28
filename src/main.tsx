@@ -1,5 +1,5 @@
-import { TooltipProvider } from "@nasa-jpl/react-stellar";
 import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
+import { TooltipProvider } from "@nasa-jpl/stellar-react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
@@ -66,7 +66,7 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <TooltipProvider>
-      <Toaster richColors />
+      <Toaster />
       <RouterProvider router={router} />
     </TooltipProvider>
   </React.StrictMode>

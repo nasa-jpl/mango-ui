@@ -4,7 +4,6 @@ import {
   Popover,
   PopoverContent,
   Switch,
-  Tooltip,
 } from "@nasa-jpl/react-stellar";
 import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
@@ -14,6 +13,7 @@ import { Page as PageType, Section as SectionType } from "../../types/view";
 import DateRangePicker from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
+import { Tooltip } from "../ui/Tooltip";
 import Section from "./Section";
 import "./ViewPage.css";
 

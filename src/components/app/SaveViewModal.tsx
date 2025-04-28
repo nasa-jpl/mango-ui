@@ -50,6 +50,7 @@ export const SaveViewModal = ({
 
   function requestClose() {
     if (!saving) {
+      setPassword("");
       onClose();
     }
   }
