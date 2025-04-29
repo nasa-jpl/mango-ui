@@ -1,57 +1,4 @@
-.product-preview-modal {
-  display: flex;
-  flex-direction: column;
-  left: unset;
-  top: unset;
-  transform: unset;
-}
-
-.product-preview-modal .st-react-modal--header--title-row {
-  padding: 12px 0;
-  width: 100%;
-}
-
-.product-preview-modal .st-react-modal--header--text {
-  width: 100%;
-}
-
-.product-preview-modal-title {
-  align-items: center;
-  display: flex;
-  flex: 1;
-  justify-content: space-between;
-  margin-right: 16px;
-}
-
-.product-preview-button {
-  align-items: center;
-  display: flex;
-}
-
-.product-preview-modal-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  height: 70vh;
-  width: 80vw;
-}
-
-.product-preview-modal-content .chart {
-  border: var(--app-border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.product-preview-controls {
-  display: flex;
-  gap: 16px;
-}
-
-.product-preview-date {
-  height: 24px;
-}
-
-.product-preview-field {
+/* .product-preview-field {
   flex: 1;
   max-width: 400px;
   min-width: 100px;
@@ -59,7 +6,7 @@
 
 .product-preview-field .st-react-form-field {
   flex: 1;
-}
+} */
 
 .product-preview-field--label {
   align-items: center;

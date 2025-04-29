@@ -1,12 +1,18 @@
 import {
-  Button,
+  // Button,
   Dropdown,
-  Modal,
-  ModalActionRow,
-  ModalBody,
-  ModalClose,
+  // Modal,
+  // ModalActionRow,
+  // ModalBody,
+  // ModalClose,
   OptionType,
 } from "@nasa-jpl/react-stellar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@nasa-jpl/stellar-react";
 import { useEffect, useState } from "react";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
@@ -140,33 +146,31 @@ export const ProductPreviewModal = ({
   };
 
   return (
-    <Modal
-      className="product-preview-modal"
-      onOpenChange={onClose}
-      open
-      title={
-        <div className="product-preview-modal-title">
-          {getProductDisplayName(product, instrument)}
-          <div className="product-preview-date">
-            <DateRangePicker
-              startDate={new Date(dateRange.start)}
-              endDate={new Date(dateRange.end)}
-              onChange={(startDate, endDate) => {
-                setDateRange({
-                  end: endDate.toISOString(),
-                  start: startDate.toISOString(),
-                });
-              }}
-            />
+    <Dialog onOpenChange={onClose} open>
+      <DialogContent className="w-[80vw] h-[80vh] max-w-none max-h-none">
+        <DialogHeader>
+          <div className="items-center flex flex-1 justify-between mr-4">
+            <DialogTitle>
+              {getProductDisplayName(product, instrument)}
+            </DialogTitle>
+            <div className="h-6">
+              <DateRangePicker
+                startDate={new Date(dateRange.start)}
+                endDate={new Date(dateRange.end)}
+                onChange={(startDate, endDate) => {
+                  setDateRange({
+                    end: endDate.toISOString(),
+                    start: startDate.toISOString(),
+                  });
+                }}
+              />
+            </div>
           </div>
-        </div>
-      }
-    >
-      <ModalBody>
-        <div className="product-preview-modal-content">
-          <div className="product-preview-controls">
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-4">
             <Dropdown
-              className="product-preview-field"
+              className="flex-1 max-w-96 min-w-24"
               value={{ value: field, label: field }}
               label="Field"
               labelPosition="left"
@@ -224,23 +228,20 @@ export const ProductPreviewModal = ({
               }))}
             />
           </div>
-          <Chart
-            chartEntity={chartEntity}
-            products={products}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            hoverDate={null}
-            onHoverDateChange={() => {}}
-            selectedPoint={null}
-          />
+          <div className="flex flex-1 flex-col h-0 border rounded overflow-hidden">
+            <Chart
+              chartEntity={chartEntity}
+              products={products}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              hoverDate={null}
+              onHoverDateChange={() => {}}
+              selectedPoint={null}
+            />
+          </div>
         </div>
-      </ModalBody>
-      <ModalActionRow>
-        <ModalClose asChild>
-          <Button variant="secondary">Close</Button>
-        </ModalClose>
-      </ModalActionRow>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

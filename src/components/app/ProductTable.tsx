@@ -1,10 +1,10 @@
-import { Button } from "@nasa-jpl/react-stellar";
-import { ChartLine } from "@phosphor-icons/react";
+import { Button } from "@nasa-jpl/stellar-react";
+import { ChartLine } from "lucide-react";
 import { Product, ProductField, ProductResolution } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
 import { ProductPreview } from "../../types/page";
 import DataGrid from "../ui/DataGrid/DataGrid";
-import "./ProductTable.css";
+import { Tooltip } from "../ui/Tooltip";
 
 export declare type ProductTableProps = {
   loading?: boolean;
@@ -42,13 +42,17 @@ export const ProductTable = ({
         const { data } = params;
         if (data === undefined) return;
         return (
-          <div className="product-preview-button">
-            <Button
-              variant="icon"
-              onClick={() => onSetProductPreview({ product: data })}
-            >
-              <ChartLine height={24} width={24} />
-            </Button>
+          <div className="flex items-center h-[inherit] min-h-[30px] product-preview-button">
+            <Tooltip content="Preview">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => onSetProductPreview({ product: data })}
+                aria-label="Open product preview"
+              >
+                <ChartLine size={24} />
+              </Button>
+            </Tooltip>
           </div>
         );
       },
@@ -131,7 +135,7 @@ export const ProductTable = ({
       rowData={productEntries}
       columnDefs={columnDefs}
       loading={loading}
-      className="product-table"
+      className="[&_div[role='row']:not(:hover)_.product-preview-button]:opacity-0 [&_div[role='row']:not(:hover)_.product-preview-button]:pointer-events-none"
     />
   );
 };
