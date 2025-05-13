@@ -49,7 +49,7 @@ jobs:
     environment: mango_ui
     runs-on: ubuntu-latest
     needs: [build_mango_ui]
-    if: github.ref == 'refs/heads/feature/cicd &&  ${{ needs.build_mango_ui.result == 'success''
+    if: github.ref == 'refs/heads/feature/cicd' &&  ${{ needs.build_mango_ui.result == 'success'
     steps:
       - name: Create env variable of lowercase GitHub repo name
         run: |
