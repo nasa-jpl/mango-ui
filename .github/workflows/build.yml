@@ -29,6 +29,13 @@ jobs:
           npm ci
         shell: bash
 
+      - name: Import certificates and keys
+        run: |
+          mkdir -p ~/.cert
+          echo "${{ secrets.KEY }}" > ~/.cert/key.pem
+          echo "${{ secrets.CERTIFICATE }}" > ~/.cert/cert.pem
+          chmod 600 ~/.cert/key.pem ~/.cert/cert.pem
+
       - name: Build application
         run: |
           npm run build
