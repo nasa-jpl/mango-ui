@@ -12,8 +12,8 @@ on:
       default: "mango_ui"
 
 jobs:
-  build_mango_ui:
-    name: Build & Test MANGO UI
+  test_mango_ui:
+    name: Test MANGO UI
     environment: mango_ui
     runs-on: ubuntu-latest
     steps:
@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+          npx playwright install --with-deps
         shell: bash
 
       - name: Import certificates and keys
@@ -41,20 +42,38 @@ jobs:
       - name: Build application
         run: |
           npm run build
-          printenv
         shell: bash
+
+      - name: Run lint
+        run: |
+          npm run lint
+          npm run lint:css
+        shell: bash
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run e2e tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   build_docker_image:
     name: Build Docker Image
     environment: mango_ui
     runs-on: ubuntu-latest
-    needs: [build_mango_ui]
-    if: github.ref == 'refs/heads/feature/cicd' &&  ${{ needs.build_mango_ui.result == 'success' }}
+    needs: [test_mango_ui]
+    if: github.ref == 'refs/heads/feature/cicd' &&  ${{ needs.test_mango_ui.result == 'success' }}
     steps:
       - name: Checkout repo content
         uses: actions/checkout@v4
 
-      - name: Import certificates and keys
+      - name: Inject certificates and keys
         run: |
           mkdir -p .cert
           echo "${{ secrets.KEY }}" > .cert/key.pem
