@@ -31,10 +31,12 @@ jobs:
 
       - name: Import certificates and keys
         run: |
-          mkdir -p ~/.cert
+          mkdir -p .cert
           echo "${{ secrets.KEY }}" > ~/.cert/key.pem
           echo "${{ secrets.CERTIFICATE }}" > ~/.cert/cert.pem
           chmod 600 ~/.cert/key.pem ~/.cert/cert.pem
+          ls -a
+        shell: bash
 
       - name: Build application
         run: |
