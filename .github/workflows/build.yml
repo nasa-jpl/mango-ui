@@ -43,6 +43,11 @@ jobs:
           printenv
         shell: bash
 
+  build_docker_image:
+    environment: mango_ui
+    runs-on: ubuntu-latest
+    if: github.ref == 'feature/cicd'
+    steps:
       - name: Create env variable of lowercase GitHub repo name
         run: |
           GITHUB_REPO_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
