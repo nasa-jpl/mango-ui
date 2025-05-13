@@ -77,7 +77,7 @@ export const SaveViewModal = ({
         </ModalDescription>
         <Input
           placeholder="Enter password..."
-          onInput={(v) => setPassword(v.target.value)}
+          onInput={(v) => setPassword((v.target as HTMLInputElement).value)}
           value={password}
         />
         {error && (
