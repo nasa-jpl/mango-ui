@@ -40,9 +40,7 @@ jobs:
         shell: bash
 
       - name: Build application
-        run: |
-          npm run build
-        shell: bash
+        run: npm run build
 
       - name: Run lint
         run: |
