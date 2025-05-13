@@ -5,7 +5,7 @@ export const generateTestDataset = (): Dataset => {
   return {
     data_begin: "2022-01-01T00:00:00.037430+00:00",
     data_end: "2023-01-01T00:00:00.037430+00:00",
-    instrument: "C",
+    instrument_id: "C",
     last_updated: "2024-01-01T00:00:00.037430+00:00",
     product: generateUniqueName(),
   };
@@ -19,6 +19,7 @@ export const generateTestProduct = (): Product => {
         supported_aggregations: [{ field_name: "name_avg", type: "avg" }],
         unit: null,
         type: "float",
+        is_channel_id: false,
       },
       {
         name: generateUniqueName(),
@@ -28,6 +29,7 @@ export const generateTestProduct = (): Product => {
         ],
         unit: "m/s",
         type: "float",
+        is_channel_id: false,
       },
     ],
     available_resolutions: [
