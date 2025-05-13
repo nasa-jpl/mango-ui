@@ -41,3 +41,8 @@ div[data-radix-popper-content-wrapper] {
     animation: unset !important;
   }
 }
+
+.date-picker--calendar-container,
+.date-picker--calendar-container > * {
+  pointer-events: auto;
+}
