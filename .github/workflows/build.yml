@@ -12,7 +12,7 @@ on:
       default: "mango_ui"
 
 jobs:
-  build_mango_docs:
+  build_mango_ui:
     environment: mango_ui
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.20
+          node-version: 18.18
 
       - name: Install dependencies
         run: |
