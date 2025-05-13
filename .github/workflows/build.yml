@@ -54,6 +54,14 @@ jobs:
       - name: Checkout repo content
         uses: actions/checkout@v4
 
+      - name: Import certificates and keys
+        run: |
+          mkdir -p .cert
+          echo "${{ secrets.KEY }}" > .cert/key.pem
+          echo "${{ secrets.CERTIFICATE }}" > .cert/cert.pem
+          chmod 600 .cert/key.pem .cert/cert.pem
+        shell: bash
+
       - name: Create env variable of lowercase GitHub repo name
         run: |
           GITHUB_REPO_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
