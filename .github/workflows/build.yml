@@ -51,6 +51,9 @@ jobs:
     needs: [build_mango_ui]
     if: github.ref == 'refs/heads/feature/cicd' &&  ${{ needs.build_mango_ui.result == 'success' }}
     steps:
+      - name: Checkout repo content
+        uses: actions/checkout@v4
+
       - name: Create env variable of lowercase GitHub repo name
         run: |
           GITHUB_REPO_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
