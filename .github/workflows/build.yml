@@ -1,7 +1,10 @@
 on:
   push:
-    pull_request:
-      types: [opened, edited]
+    branches:
+      - develop
+      - main
+  pull_request:
+    types: [opened, reopened, edited]
     tags:
       - "*"
   workflow_dispatch:
