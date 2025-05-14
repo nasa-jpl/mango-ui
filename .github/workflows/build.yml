@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - develop
-      - feature/cicd
+      - main
     tags:
       - "*"
   workflow_dispatch:
@@ -59,7 +59,7 @@ jobs:
         with:
           name: e2e-test-results
           path: e2e-test-results/
-          retention-days: 30
+          retention-days: 2 # limit imposed by GitHub organization
 
   build_docker_image:
     name: Build Docker Image
