@@ -4,6 +4,7 @@ on:
       - develop
       - main
   pull_request:
+    branches: ["**"]
     types: [opened, reopened, edited]
     tags:
       - "*"
