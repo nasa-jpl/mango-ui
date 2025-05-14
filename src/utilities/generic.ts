@@ -110,7 +110,7 @@ export function getDataLayerId(layer: DataLayer): string {
     layer.channels
       ? layer.channels.map((c) => `${c.id}_${c.value}`).join("_")
       : ""
-  }_${layer.version}_${layer.id}`;
+  }${layer.version}_${layer.id}`;
 }
 
 /**

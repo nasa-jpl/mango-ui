@@ -1,4 +1,6 @@
-# mango-ui [![Build Status](https://cae-jenkins2.jpl.nasa.gov/buildStatus/icon?job=Mass-Change-Viz%2FUI2%2Fdevelop)](https://cae-jenkins2.jpl.nasa.gov/job/Mass-Change-Viz/job/UI2/job/develop/)
+[![.github/workflows/build.yml](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml)
+
+# mango-ui
 
 The client application for the MANGO system (Monitoring and ANalysis for Gravity Operations).
 
