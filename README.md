@@ -1,6 +1,6 @@
-# mango-ui
+[![.github/workflows/build.yml](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml)
 
-[![.github/workflows/build](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml)
+# mango-ui
 
 The client application for the MANGO system (Monitoring and ANalysis for Gravity Operations).
 
