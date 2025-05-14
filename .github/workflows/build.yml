@@ -1,13 +1,13 @@
 on:
   push:
+    tags:
+      - "*"
     branches:
       - develop
       - main
   pull_request:
     branches: ["**"]
     types: [opened, reopened, edited]
-    tags:
-      - "*"
   workflow_dispatch:
     inputs:
     environment:
