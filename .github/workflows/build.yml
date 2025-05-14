@@ -1,8 +1,6 @@
 on:
   push:
-    branches:
-      - develop
-      - main
+    pull_request:
     tags:
       - "*"
   workflow_dispatch:
