@@ -50,7 +50,8 @@ export type EntityType =
   | "timeline"
   | "timeline-row"
   | "text"
-  | "downlink-dashboard";
+  | "downlink-dashboard"
+  | "llm";
 
 export type Entity = {
   data?: {
@@ -80,6 +81,10 @@ export type TimelineRowSubrowEntity<EntityType> = EntityType & {
 
 export interface TextEntity extends Omit<Entity, "dateRange"> {
   text: string;
+}
+
+export interface LLMPlotGenerationEntity extends Entity {
+  text?: string;
 }
 
 export interface ChartEntity extends Entity {

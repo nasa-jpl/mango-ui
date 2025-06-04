@@ -10,6 +10,7 @@ import {
   DownlinkDashboardEntity,
   Entity,
   EntityType,
+  LLMPlotGenerationEntity,
   MapEntity,
   TableEntity,
   TextEntity,
@@ -27,6 +28,12 @@ export function isMapEntity(entity: Entity): entity is MapEntity {
 
 export function isTableEntity(entity: Entity): entity is TableEntity {
   return entity.type === "table";
+}
+
+export function isLLMPlotGenerationEntity(
+  entity: Entity
+): entity is LLMPlotGenerationEntity {
+  return entity.type === "llm";
 }
 
 export function isDownlinkDashboardEntity(

@@ -6,12 +6,14 @@ import { DateRange } from "../../types/time";
 import {
   DownlinkDashboardEntity,
   Entity as EntityType,
+  LLMPlotGenerationEntity,
   TableEntity,
   TextEntity,
 } from "../../types/view";
 import {
   isChartEntity,
   isDownlinkDashboardEntity,
+  isLLMPlotGenerationEntity,
   isMapEntity,
   isTableEntity,
   isTextEntity,
@@ -21,6 +23,7 @@ import Map from "../entities/map/Map";
 import Table from "../entities/table/Table";
 import Text from "../entities/text/Text";
 import { DownlinkDashboard } from "../mission/GRACE/DownlinkDashboard";
+import LLMPlotGeneration from "../mission/GRACE/LLMPlotGeneration";
 import "./Entity.css";
 
 export declare type EntityProps = {
@@ -107,6 +110,12 @@ export const Entity = (props: EntityProps) => {
         <Text
           showHeader={showHeader}
           textEntity={entity as unknown as TextEntity}
+        />
+      )}
+
+      {isLLMPlotGenerationEntity(entity) && (
+        <LLMPlotGeneration
+          llmPlotGenerationEntity={entity as unknown as LLMPlotGenerationEntity}
         />
       )}
       {/* {isTimelineEntity(entity) && (
