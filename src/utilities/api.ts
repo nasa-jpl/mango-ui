@@ -1,13 +1,32 @@
+import { toast } from "sonner";
 import { config } from "../config";
 import { DataResponse, DataResponseError, Product } from "../types/api";
-import { View } from "../types/view";
+import { Channel, View } from "../types/view";
 
 export const getView = async (signal?: AbortSignal): Promise<View> => {
-  const data = await fetch(import.meta.env.BASE_URL + "default-view.json", {
+  const url =
+    config.endpoints.data +
+    config.api.data.jsonStore
+      .replace("{METHOD}", "fetch")
+      .replace("{KEY}", "default-view");
+
+  const response = await fetch(url, {
+    credentials: "include",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
     signal,
   });
-  const view = (await data.json()) as View;
-  return view;
+
+  const json = await response.json();
+
+  if (response.status >= 200 && response.status <= 400) {
+    return json.data as View;
+  } else {
+    toast.error("Unable to load view");
+    throw new Error(response.statusText);
+  }
 };
 
 export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
@@ -37,10 +56,19 @@ export const getData = (
   instrumentId: string,
   version: string,
   fields: string[],
+  channels: Channel[],
   startTime: string,
   endTime: string,
   downsamplingFactor?: number
 ) => {
+  const fieldsString = fields.length
+    ? `${fields.map((f) => `&fields=${f}`).join("")}`
+    : "";
+  const filtersString = channels.length
+    ? channels
+        .map((channel) => `&filter=${channel.id}=${channel.value}`)
+        .join("")
+    : "";
   const url =
     config.endpoints.data +
     config.api.data.data
@@ -48,9 +76,7 @@ export const getData = (
       .replace("{INSTRUMENT}", instrumentId)
       .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +
-    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp${
-      fields.length ? `${fields.map((f) => `&fields=${f}`).join("")}` : ""
-    }${
+    `?from_isotimestamp=${startTime}&to_isotimestamp=${endTime}&fields=timestamp${fieldsString}${filtersString}${
       typeof downsamplingFactor === "number"
         ? `&downsampling_factor=${downsamplingFactor}`
         : ""
@@ -88,3 +114,27 @@ export const getData = (
   return { json, cancel };
   // return fetchWithProgress<DataResponse>(url);
 };
+
+export async function saveView(view: View) {
+  const url =
+    config.endpoints.data +
+    config.api.data.jsonStore
+      .replace("{METHOD}", "store")
+      .replace("{KEY}", "default-view");
+
+  const response = await fetch(url, {
+    credentials: "include",
+    method: "POST",
+    body: JSON.stringify({ data: view }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status >= 200 && response.status <= 400) {
+    toast.success("View saved");
+    return true;
+  } else {
+    throw new Error(response.statusText);
+  }
+}

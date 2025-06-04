@@ -13,29 +13,77 @@ test("getProductForLayer", () => {
   dataset1.mission = "foo";
   dataset1.id = "bar";
   dataset1.available_fields = [
-    { name: "field1", supported_aggregations: [], type: "float", unit: null },
-    { name: "field2", supported_aggregations: [], type: "float", unit: null },
+    {
+      name: "field1",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
+    {
+      name: "field2",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
   ];
   const dataset2 = generateTestProduct();
   dataset2.mission = "foo";
   dataset2.id = "bar";
   dataset2.available_fields = [
-    { name: "x", supported_aggregations: [], type: "float", unit: null },
-    { name: "y", supported_aggregations: [], type: "float", unit: null },
+    {
+      name: "x",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
+    {
+      name: "y",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
   ];
   const dataset3 = generateTestProduct();
   dataset3.mission = "foo";
   dataset3.id = "bat";
   dataset3.available_fields = [
-    { name: "x", supported_aggregations: [], type: "float", unit: null },
-    { name: "y", supported_aggregations: [], type: "float", unit: null },
+    {
+      name: "x",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
+    {
+      name: "y",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
   ];
   const dataset4 = generateTestProduct();
   dataset4.mission = "cat";
   dataset4.id = "bat";
   dataset4.available_fields = [
-    { name: "x", supported_aggregations: [], type: "float", unit: null },
-    { name: "y", supported_aggregations: [], type: "float", unit: null },
+    {
+      name: "x",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
+    {
+      name: "y",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
   ];
   expect(getProductForLayer(layer, [])).to.be.undefined;
   expect(getProductForLayer(layer, [dataset3])).to.be.undefined;
@@ -54,8 +102,20 @@ test("getFieldMetadataForLayer", () => {
   dataset1.mission = "foo";
   dataset1.id = "bar";
   dataset1.available_fields = [
-    { name: "field1", supported_aggregations: [], type: "float", unit: null },
-    { name: "field2", supported_aggregations: [], type: "float", unit: null },
+    {
+      name: "field1",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
+    {
+      name: "field2",
+      supported_aggregations: [],
+      type: "float",
+      unit: null,
+      is_channel_id: false,
+    },
   ];
   expect(getFieldMetadataForLayer("foo", layer, [])).to.be.undefined;
   expect(getFieldMetadataForLayer("field1", layer, [dataset1])).to.deep.eq(

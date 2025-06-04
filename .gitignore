@@ -34,4 +34,5 @@ e2e-test-results/
 # Cert
 /.cert/
 
+# env
 .env

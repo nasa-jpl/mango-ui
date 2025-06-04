@@ -106,7 +106,11 @@ export function fetchWithProgress<T>(url: string) {
 export function getDataLayerId(layer: DataLayer): string {
   return `${layer.mission}_${layer.dataset}_${layer.fields.join("_")}_${
     layer.instrument
-  }_${layer.version}_${layer.id}`;
+  }_${
+    layer.channels
+      ? layer.channels.map((c) => `${c.id}_${c.value}`).join("_")
+      : ""
+  }${layer.version}_${layer.id}`;
 }
 
 /**
@@ -148,4 +152,16 @@ export function convertHexToRGBA(hexCode: string, opacity: number = 1) {
   } catch (err) {
     return "#000000";
   }
+}
+
+export function downloadJSON(obj: unknown, filename: string) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }

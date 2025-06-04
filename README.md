@@ -1,27 +1,20 @@
-# mango-ui [![Build Status](https://cae-jenkins2.jpl.nasa.gov/buildStatus/icon?job=Mass-Change-Viz%2FUI2%2Fdevelop)](https://cae-jenkins2.jpl.nasa.gov/job/Mass-Change-Viz/job/UI2/job/develop/)
+[![build](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nasa-jpl/mango-ui/actions/workflows/build.yml)
 
-The client application for the MANGO system (Monitoring and ANalysis for Gravity Operations).
+# MANGO UI
 
-## Directory Structure
+MANGO (Monitoring and ANalysis for Gravity Operations) is a downlink and telemetry monitoring tool for the GRACE missions. It enables users to quickly assess data quality and availability, compare data measurements across the GRACE missions, and export data for further analysis.
 
-```sh
-.
-├── .storybook      # Storybook config
-├── .vscode         # VS Code settings
-├── docs            # Documentation
-├── e2e-tests       # End-to-end tests
-├── public          # Public resources
-└── src             # The source code
-    ├── assets      # Additional assets
-    ├── components  # React components
-    ├── hooks       # React hooks
-    ├── routes      # React-router routes
-    ├── types       # TypeScript types
-    └── utilities   # Functions and constant values
-```
+![MANGO](public/mango.png)
+
+Highlighted features of MANGO:
+
+- Dynamic and interactive plotting of data measurements
+- Full-resolution plotting on sub-daily time ranges
+- Performant plotting of data measurements for time ranges of weeks, months, and years
+- Ability to compare data measurements across different orbits and GRACE missions
 
 ## Want to help?
 
-If you are a developer you can get started quickly by reading the [developer documentation][dev].
+If you are a developer, you can get started quickly by reading the [developer documentation][dev].
 
 [dev]: ./docs/DEVELOPER.md

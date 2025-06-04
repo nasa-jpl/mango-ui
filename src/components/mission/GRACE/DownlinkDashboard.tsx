@@ -119,6 +119,7 @@ export function DownlinkDashboard({
         instrument,
         downlinkDashboardEntity.version,
         downlinkDashboardEntity.defaultFields.concat(additionalFields),
+        [],
         start,
         end
       );
