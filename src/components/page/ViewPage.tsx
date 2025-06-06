@@ -38,7 +38,7 @@ export const ViewPage = ({
   // so that we can store dateRange, hoverDate, pageOptions, and preview product + initial values in a store
   // and not have to pass individual callbacks down through components? Or could have dispatch be on the entity level?
   const startDate = new Date("2023-06-03T00:00:00Z").toISOString();
-  const endDate = new Date("2023-06-10T23:59:59Z").toISOString();
+  const endDate = new Date("2023-06-10T23:59:59.999Z").toISOString();
   const [dateRange, setDateRange] = useState<DateRange>({
     end: endDate,
     start: startDate,
