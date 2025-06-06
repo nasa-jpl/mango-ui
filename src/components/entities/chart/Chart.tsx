@@ -1,11 +1,4 @@
-import { Button } from "@nasa-jpl/react-stellar";
-import {
-  ArrowCounterClockwise,
-  ArrowsHorizontal,
-  ArrowsVertical,
-  BoundingBox,
-  VectorTwo,
-} from "@phosphor-icons/react";
+import { Button } from "@nasa-jpl/stellar-react";
 import ChartJS, {
   ActiveElement,
   BarOptions,
@@ -23,6 +16,13 @@ import zoomPlugin from "chartjs-plugin-zoom";
 import { Mode } from "chartjs-plugin-zoom/types/options";
 import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
+import {
+  Move3D,
+  MoveHorizontal,
+  MoveVertical,
+  RotateCcw,
+  SquareDashedMousePointer,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
 import {
@@ -1284,30 +1284,32 @@ export const Chart = ({
         <EntityHeader
           title={chartEntity.title}
           rightContent={
-            <div className="chart-header-buttons">
+            <div className="chart-header-buttons border-r">
               <Tooltip content="Reset Y Axis">
                 <Button
-                  className="chart-button"
+                  className="h-full w-[28px] rounded-none"
                   onClick={resetPan}
-                  variant="icon"
-                  icon={<ArrowCounterClockwise weight="regular" size={16} />}
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  <RotateCcw size={16} className="select-none" />
+                </Button>
               </Tooltip>
               <Tooltip content={`Cycle Pan & Zoom Axis (${interactionAxes})`}>
                 <Button
-                  className="chart-button"
+                  className="h-full w-[28px] rounded-none"
                   onClick={cycleInteractionModes}
-                  variant="icon"
-                  icon={
-                    interactionAxes === "x" ? (
-                      <ArrowsHorizontal weight="regular" size={16} />
-                    ) : interactionAxes === "xy" ? (
-                      <VectorTwo weight="regular" size={16} />
-                    ) : (
-                      <ArrowsVertical weight="regular" size={16} />
-                    )
-                  }
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  {interactionAxes === "x" ? (
+                    <MoveHorizontal size={16} className="select-none" />
+                  ) : interactionAxes === "xy" ? (
+                    <Move3D size={16} className="select-none" />
+                  ) : (
+                    <MoveVertical size={16} className="select-none" />
+                  )}
+                </Button>
               </Tooltip>
               <Tooltip
                 content={
@@ -1315,15 +1317,18 @@ export const Chart = ({
                 }
               >
                 <Button
-                  className={
+                  className={classNames(
+                    "h-full w-[28px] rounded-none",
                     boxZoomEnabled
-                      ? "chart-button chart-button-active"
-                      : "chart-button"
-                  }
+                      ? "text-primary hover:text-primary border-b border-b-primary"
+                      : ""
+                  )}
                   onClick={toggleBoxZoom}
-                  variant="icon"
-                  icon={<BoundingBox weight="regular" size={16} />}
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  <SquareDashedMousePointer size={16} className="select-none" />
+                </Button>
               </Tooltip>
             </div>
           }

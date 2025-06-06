@@ -7,7 +7,6 @@
 }
 
 .chart-tooltip-content {
-  background: var(--st-gray-90);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -28,14 +27,7 @@
   gap: 4px;
 }
 
-.chart-tooltip-header,
-.chart-tooltip-point,
-.chart-tooltip-x {
-  color: var(--st-gray-10);
-}
-
 .chart-tooltip-color {
-  border: 1px solid var(--st-gray-80);
   border-radius: 2px;
   flex-shrink: 0;
   height: 12px;

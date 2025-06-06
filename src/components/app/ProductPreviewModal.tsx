@@ -15,7 +15,7 @@ import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Channel, ChartEntity } from "../../types/view";
 import Chart from "../entities/chart/Chart";
-import DateRangePicker from "../ui/DateRangePicker";
+import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
   return `${product.mission} ${instrument || product.instruments[0]} ${
@@ -50,6 +50,7 @@ export const ProductPreviewModal = ({
       start: new Date("2020").toISOString(),
     }
   );
+  console.log("dateRange :>> ", dateRange);
   const [channels, setChannels] = useState<Channel[]>([]);
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export const ProductPreviewModal = ({
           </div>
         </DialogHeader>
         <div className="flex flex-col gap-4 flex-1 overflow-hidden">
-          <div className="flex gap-5 items-center flex-wrap align-baseline">
+          <div className="flex gap-5 flex-wrap items-baseline py-0.5">
             <div className="flex gap-2 items-center">
               <Label size="sm">Field</Label>
               <Select onValueChange={setField} value={field}>

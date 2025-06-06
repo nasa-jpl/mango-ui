@@ -119,7 +119,7 @@ export async function saveView(view: View) {
   const url =
     config.endpoints.data +
     config.api.data.jsonStore
-      .replace("{METHOD}", "store")
+      .replace("{METHOsD}", "store")
       .replace("{KEY}", "default-view");
 
   const response = await fetch(url, {

@@ -32,9 +32,7 @@
   },
   "devDependencies": {
     "@ag-grid-community/core": "^32.1.0",
-    "@nasa-jpl/react-stellar": "^1.1.11",
-    "@nasa-jpl/stellar-react": "2.0.0-alpha.64",
-    "@phosphor-icons/react": "^2.1.0",
+    "@nasa-jpl/stellar-react": "2.0.0-alpha.66",
     "@playwright/test": "^1.49.0",
     "@radix-ui/react-tabs": "^1.1.1",
     "@storybook/addon-essentials": "^7.6.4",

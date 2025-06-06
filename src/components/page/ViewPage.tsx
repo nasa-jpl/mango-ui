@@ -1,19 +1,20 @@
 import {
   Button,
-  IconSettings,
+  Label,
   Popover,
   PopoverContent,
+  PopoverTrigger,
   Switch,
-} from "@nasa-jpl/react-stellar";
+} from "@nasa-jpl/stellar-react";
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
-import DateRangePicker from "../ui/DateRangePicker";
+import { DateRangePicker } from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
-import { Tooltip } from "../ui/Tooltip";
 import Section from "./Section";
 import "./ViewPage.css";
 
@@ -86,32 +87,26 @@ export const ViewPage = ({
             }}
           />
 
-          <Popover
-            contentProps={{ sideOffset: 41 }}
-            trigger={
-              <div>
-                <Tooltip content="Settings">
-                  <Button variant="icon">
-                    <IconSettings />
-                  </Button>
-                </Tooltip>
-              </div>
-            }
-          >
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings size={16} />
+              </Button>
+            </PopoverTrigger>
             <PopoverContent collisionPadding={{ right: 16 }}>
-              <div
-                className="st-typography-medium"
-                style={{ marginBottom: "8px" }}
-              >
-                Settings
+              <div className="leading-none font-medium mb-2">Settings</div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="show-time-cursor"
+                  checked={pageOptions.showHoverDate}
+                  onCheckedChange={(checked) =>
+                    setPageOptions({ ...pageOptions, showHoverDate: checked })
+                  }
+                />
+                <Label size="sm" htmlFor="show-time-cursor">
+                  Show time cursor
+                </Label>
               </div>
-              <Switch
-                label="Show time cursor"
-                checked={pageOptions.showHoverDate}
-                onCheckedChange={(checked) =>
-                  setPageOptions({ ...pageOptions, showHoverDate: checked })
-                }
-              />
             </PopoverContent>
           </Popover>
         </>

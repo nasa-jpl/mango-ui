@@ -1,4 +1,4 @@
-import { Button } from "@nasa-jpl/react-stellar";
+import { Button } from "@nasa-jpl/stellar-react";
 import {
   CheckCheck,
   Database,
@@ -12,7 +12,6 @@ import { NavLink } from "react-router-dom";
 import { config } from "../../../config";
 import { View } from "../../../types/view";
 import SaveViewModal from "../SaveViewModal";
-import "./Sidebar.css";
 import SidebarContainer from "./SidebarContainer";
 import SidebarGroup from "./SidebarGroup";
 import SidebarLink from "./SidebarLink";
@@ -84,12 +83,14 @@ export const Sidebar = ({
         setActive(path);
       }, 0);
     }
-    return isActive ? "sidebar-link--active" : "";
+    return isActive
+      ? "[&_button]:bg-blue-100 [&_button]:text-primary [&_button]:hover:bg-blue-100 [&_button]:hover:text-primary"
+      : "";
   };
 
   return (
     <SidebarContainer title={title} logo={logo}>
-      <div className="sidebar-padded-content">
+      <div className="px-2 ">
         <NavLink
           className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
           to="/"
@@ -131,36 +132,36 @@ export const Sidebar = ({
         </NavLink> */}
       </div>
       {!view ? (
-        <div className="sidebar-padded-content st-typography-label">
-          Loading
-        </div>
+        <div className="px-4 text-muted-foreground">Loading</div>
       ) : (
-        view.pageGroups.map((pageGroup) => {
-          return (
-            <div key={pageGroup.id} className="sidebar-padded-content">
-              <SidebarGroup title={pageGroup.title}>
-                {pageGroup.pages.map((page) => (
-                  <NavLink
-                    className={(activeNav) =>
-                      getNavLinkClass(
-                        activeNav.isActive,
-                        `view/${pageGroup.url}/${page.url}`
-                      )
-                    }
-                    to={`view/${pageGroup.url}/${page.url}`}
-                    key={page.id}
-                  >
-                    <SidebarLink title={page.title} />
-                  </NavLink>
-                ))}
-              </SidebarGroup>
-            </div>
-          );
-        })
+        <div className="gap-4 flex flex-col overflow-auto">
+          {view.pageGroups.map((pageGroup) => {
+            return (
+              <div key={pageGroup.id} className="px-2">
+                <SidebarGroup title={pageGroup.title}>
+                  {pageGroup.pages.map((page) => (
+                    <NavLink
+                      className={(activeNav) =>
+                        getNavLinkClass(
+                          activeNav.isActive,
+                          `view/${pageGroup.url}/${page.url}`
+                        )
+                      }
+                      to={`view/${pageGroup.url}/${page.url}`}
+                      key={page.id}
+                    >
+                      <SidebarLink title={page.title} className="pl-7" />
+                    </NavLink>
+                  ))}
+                </SidebarGroup>
+              </div>
+            );
+          })}
+        </div>
       )}
-      <div className="sidebar-bottom-content">
-        <div className="sidebar-divider" />
-        <div className="sidebar-padded-content">
+      <div className="flex flex-col justify-end pb-2 flex-1">
+        <div className="border-t flex-shrink-0 px-0 py-1 w-full" />
+        <div className="px-2 py-0">
           {view && (
             <SaveViewModal
               open={showSaveViewModal}
@@ -171,21 +172,18 @@ export const Sidebar = ({
           )}
           {viewSavingEnabled && (
             <Button
-              icon={<Save size={16} />}
-              variant="secondary"
-              className="sidebar-save-view-changes"
+              variant="outline"
+              size="lg"
+              className="w-full text-xs text-blue-500 border-blue-500 hover:bg-blue-50 hover:text-blue-500 mb-2"
               onClick={() => setShowSaveViewModal(true)}
             >
+              <Save size={16} />
               Save View Changes
             </Button>
           )}
           {!viewSavingEnabled && (
-            <Button
-              icon={<CheckCheck size={16} />}
-              variant="tertiary"
-              className="sidebar-save-view-changes sidebar-no-view-changes"
-              disabled
-            >
+            <Button variant="ghost" className="cursor-auto mb-2 h-8" disabled>
+              <CheckCheck size={16} />
               View up-to-date
             </Button>
           )}

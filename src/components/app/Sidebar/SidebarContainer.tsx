@@ -1,5 +1,3 @@
-import "./SidebarContainer.css";
-
 export declare type SidebarContainerProps = {
   children?: React.ReactNode;
   logo?: React.ReactNode;
@@ -13,10 +11,12 @@ export const SidebarContainer = ({
 }: SidebarContainerProps) => {
   return (
     /* TODO merge with Sidebar.tsx */
-    <div className="sidebar">
-      <div className="sidebar-branding">
-        {logo && <div className="sidebar-logo">{logo}</div>}
-        <div className="st-typography-medium sidebar-title">{title}</div>
+    <div className="border-r flex flex-col flex-shrink-0 gap-4 h-full w-[208px]">
+      <div className="items-center flex gap-2 px-2 pt-4 pb-0">
+        {logo && <div className="[&>svg]:h-8 [&>svg]:w-8">{logo}</div>}
+        <div className="text-lg cursor-default select-none font-medium">
+          {title}
+        </div>
       </div>
       {children}
     </div>

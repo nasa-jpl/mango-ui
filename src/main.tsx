@@ -1,4 +1,3 @@
-import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
 import { TooltipProvider } from "@nasa-jpl/stellar-react";
 import React from "react";
 import ReactDOM from "react-dom/client";

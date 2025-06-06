@@ -1,5 +1,5 @@
-import { IconCaretDown, IconCaretRight } from "@nasa-jpl/react-stellar";
 import classNames from "classnames";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { DataResponseDataEntry, Product } from "../../../types/api";
 import { ProductPreview } from "../../../types/page";
@@ -60,8 +60,8 @@ export function TimelineRow({
           className="timeline-row-header st-typography-medium st-button tertiary"
           onClick={() => setExpanded(!expanded)}
         >
-          {!expanded && <IconCaretRight />}
-          {expanded && <IconCaretDown />}
+          {!expanded && <ChevronRight size={16} />}
+          {expanded && <ChevronDown size={16} />}
           {status && <StatusBadge status={status} />}
           {timelineRowEntity.title}
         </button>
@@ -101,8 +101,8 @@ export function TimelineRow({
                         })
                       }
                     >
-                      {!subrowExpanded && <IconCaretRight />}
-                      {subrowExpanded && <IconCaretDown />}
+                      {!subrowExpanded && <ChevronRight size={16} />}
+                      {subrowExpanded && <ChevronDown size={16} />}
                       {entity.title}
                     </button>
                   )}

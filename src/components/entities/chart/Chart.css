@@ -57,7 +57,6 @@
 }
 
 .chart-header-buttons {
-  border-right: 1px solid var(--st-gray-20);
   height: 100%;
   visibility: hidden;
 }
@@ -78,22 +77,6 @@
   position: relative;
   top: 0;
   width: 1px;
-}
-
-.st-button.icon.chart-button.chart-button-active {
-  border-bottom: 1px solid var(--st-primary);
-  color: var(--st-primary);
-}
-
-.st-button.icon.chart-button {
-  border-radius: 0;
-  color: var(--st-gray-60);
-  height: 100%;
-  width: 28px;
-}
-
-.st-button.icon.chart-button:hover {
-  background: var(--st-gray-15);
 }
 
 @keyframes delay-visibility {
