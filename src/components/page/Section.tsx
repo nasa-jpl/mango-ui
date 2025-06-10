@@ -18,6 +18,7 @@ export declare type SectionProps = {
   instrument?: string | null;
   mission?: string | null;
   onDateRangeChange: (dateRange: DateRange) => void;
+  onEntityEdit: (entity: EntityType, section: SectionType) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
@@ -37,6 +38,10 @@ export const Section = ({
   mission = null,
   onSectionChange,
   onDateRangeChange = () => {},
+  onDateRangeChange = () => {},
+  onEntityDelete = () => {},
+  onEntityDuplicate = () => {},
+  onEntityEdit = () => {},
   onSelectPoint = () => {},
   onHoverDateChange = () => {},
   onSetProductPreview = () => {},
@@ -100,6 +105,9 @@ export const Section = ({
       products={products}
       entity={e}
       onDateRangeChange={onDateRangeChange}
+      onDelete={() => onEntityDelete(e, section)}
+      onDuplicate={() => onEntityDuplicate(e, section)}
+      onEdit={() => onEntityEdit(e, section)}
       onHoverDateChange={onHoverDateChange}
       onSelectPoint={onSelectPoint}
       onSetProductPreview={onSetProductPreview}

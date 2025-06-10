@@ -1,4 +1,10 @@
-import { Button } from "@nasa-jpl/stellar-react";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@nasa-jpl/stellar-react";
 import ChartJS, {
   ActiveElement,
   BarOptions,
@@ -17,11 +23,17 @@ import { Mode } from "chartjs-plugin-zoom/types/options";
 import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import {
+  Camera,
+  CopyPlus,
+  Download,
+  MoreVertical,
   Move3D,
   MoveHorizontal,
   MoveVertical,
+  Pencil,
   RotateCcw,
   SquareDashedMousePointer,
+  Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
@@ -72,6 +84,9 @@ export declare type ChartProps = {
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  onEdit?: () => void;
   onHoverDateChange?: (date: Date | null) => void;
   onSelectPoint?: (point: DataResponseDataEntry | null) => void;
   // TODO could pass in only the list of products that this Chart cares about?
@@ -1330,6 +1345,37 @@ export const Chart = ({
                   <SquareDashedMousePointer size={16} className="select-none" />
                 </Button>
               </Tooltip>
+              <DropdownMenu>
+                <Tooltip content="More options">
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="h-full w-[28px] rounded-none"
+                      onClick={toggleBoxZoom}
+                      variant="ghost"
+                      size="icon"
+                    >
+                      <MoreVertical size={16} className="select-none" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </Tooltip>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem>
+                    <Pencil /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <CopyPlus /> Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Trash2 /> Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Download /> Download Data
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Camera /> Snapshot
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           }
         />
