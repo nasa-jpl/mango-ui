@@ -1237,7 +1237,7 @@ export const Chart = ({
         {isLoading && (
           <div
             className={classNames(
-              "chart-indicator-overlay chart-loading-indicator st-typography-medium",
+              "chart-loading-indicator font-medium bg-gray-50 border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground",
               { "chart-indicator-overlay--compact": compact }
             )}
             style={{
@@ -1254,10 +1254,10 @@ export const Chart = ({
             Loading
           </div>
         )}
-        {!isLoading && error && (
+        {isLoading && error && (
           <div
             className={classNames(
-              "chart-indicator-overlay chart-error-indicator st-typography-medium",
+              "font-medium border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px]",
               { "chart-indicator-overlay--compact": compact }
             )}
             style={{

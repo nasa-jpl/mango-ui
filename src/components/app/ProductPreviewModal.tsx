@@ -50,7 +50,6 @@ export const ProductPreviewModal = ({
       start: new Date("2020").toISOString(),
     }
   );
-  console.log("dateRange :>> ", dateRange);
   const [channels, setChannels] = useState<Channel[]>([]);
 
   useEffect(() => {

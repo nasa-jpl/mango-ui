@@ -49,12 +49,10 @@
 
 .timeline-row-subrow-title {
   align-items: center;
-  color: var(--st-button-tertiary-color);
   display: flex;
   gap: 8px;
   justify-content: flex-end;
   min-height: 24px;
-  padding: 0 var(--st-grid-unit);
 }
 
 .timeline-row-subrow-title.tertiary.st-button:hover {
@@ -67,20 +65,4 @@
   display: flex;
   justify-content: flex-end;
   padding: 4px;
-}
-
-.timeline-subrow-entity.entity {
-  background: var(--st-gray-10);
-  border: none;
-  border-radius: 0;
-}
-
-.timeline-subrow-entity--padded.entity {
-  padding: 8px;
-}
-
-.timeline-subrow-entity--padded.entity .table {
-  border: var(--app-border);
-  border-radius: 4px;
-  overflow: hidden;
 }

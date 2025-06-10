@@ -66,6 +66,7 @@ export const Entity = (props: EntityProps) => {
     "bg-background border rounded flex flex-1 flex-col overflow-hidden": true,
     [className]: !!className,
   });
+  console.log("entityClass :>> ", entityClass, "???", className);
   return (
     <div className={entityClass}>
       {isChartEntity(entity) && (

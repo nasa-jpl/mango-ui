@@ -1,3 +1,4 @@
+import { Button } from "@nasa-jpl/stellar-react";
 import classNames from "classnames";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -55,18 +56,19 @@ export function TimelineRow({
       })}
     >
       <div className="timeline-row-entity-container">
-        <button
+        <Button
+          variant="ghost"
           style={{ width: `${marginLeft}px` }}
-          className="timeline-row-header st-typography-medium st-button tertiary"
+          className="timeline-row-header font-medium py-0 px-2"
           onClick={() => setExpanded(!expanded)}
         >
           {!expanded && <ChevronRight size={16} />}
           {expanded && <ChevronDown size={16} />}
           {status && <StatusBadge status={status} />}
           {timelineRowEntity.title}
-        </button>
+        </Button>
         <Entity
-          className="timeline-row-entity"
+          className="border-none rounded-none"
           loading={loading}
           entity={timelineRowEntity.entity}
           dateRange={dateRange}
@@ -89,11 +91,12 @@ export function TimelineRow({
             const subrowExpanded = subrowExpansionMap[entity.id];
             return (
               <div className="timeline-row-subrow" key={entity.id}>
-                <div className="timeline-row-subrow-container">
+                <div className="shadow-[inset_-1px_0_0_0_currentcolor] shadow-border">
                   {entity.expandable && (
-                    <button
+                    <Button
+                      variant="ghost"
                       style={{ width: `${marginLeft}px` }}
-                      className="timeline-row-subrow-title st-typography-medium st-button tertiary"
+                      className="timeline-row-subrow-title py-0 px-2 "
                       onClick={() =>
                         setSubrowExpansionMap({
                           ...subrowExpansionMap,
@@ -104,22 +107,25 @@ export function TimelineRow({
                       {!subrowExpanded && <ChevronRight size={16} />}
                       {subrowExpanded && <ChevronDown size={16} />}
                       {entity.title}
-                    </button>
+                    </Button>
                   )}
                   {!entity.expandable && (
                     <div
                       style={{ width: `${marginLeft}px` }}
-                      className="timeline-row-subrow-title st-typography-medium"
+                      className="timeline-row-subrow-title font-medium py-0 px-2"
                     >
                       {entity.title}
                     </div>
                   )}
                 </div>
                 <Entity
-                  className={classNames("timeline-subrow-entity", {
-                    "timeline-subrow-entity--padded":
-                      entity.type === "table" && subrowExpanded,
-                  })}
+                  className={classNames(
+                    "bg-secondary border-none rounded-none",
+                    {
+                      "p-2 [&_.ag-theme-stellar]:border rounded overflow-hidden":
+                        entity.type === "table" && subrowExpanded,
+                    }
+                  )}
                   entity={entity}
                   loading={loading}
                   dateRange={dateRange}

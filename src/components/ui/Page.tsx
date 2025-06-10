@@ -19,9 +19,9 @@ export const Page = ({
       <PageHeader title={title}>{pageHeaderChildren}</PageHeader>
       <div
         className={classNames(
-          "flex flex-col h-full w-full overflow-auto border-t bg-secondary",
+          "flex flex-col h-full w-full overflow-auto bg-secondary",
           {
-            "p-4": padBody,
+            "p-4 border-t": padBody,
           }
         )}
       >

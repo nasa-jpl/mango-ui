@@ -16,7 +16,6 @@ import { DateRangePicker } from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
 import Section from "./Section";
-import "./ViewPage.css";
 
 export declare type PageProps = {
   loadingInitialData: boolean;
@@ -113,10 +112,12 @@ export const ViewPage = ({
       }
     >
       {loadingInitialData && (
-        <div className="st-typography-label loading-indicator">Loading</div>
+        <div className="text-muted-foreground font-medium flex flex-1 justify-center items-center">
+          Loading
+        </div>
       )}
       {!loadingInitialData && viewPage.missions && viewPage.missions.length && (
-        <div className="view-page-tabs">
+        <div className="left-0 sticky top-0 z-[1]">
           <Tabs.Root
             value={`${mission}_${instrument}`}
             onValueChange={(value) => {
