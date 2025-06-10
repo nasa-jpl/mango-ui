@@ -18,7 +18,7 @@ jobs:
   test_mango_ui:
     name: Test MANGO UI
     environment: mango_ui
-    runs-on: ubuntu-24.04.02
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repo content
         uses: actions/checkout@v4
