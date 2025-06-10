@@ -36,7 +36,7 @@
     "@nasa-jpl/react-stellar": "^1.1.11",
     "@nasa-jpl/stellar-react": "2.0.0-alpha.58",
     "@phosphor-icons/react": "^2.1.0",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.53.0",
     "@radix-ui/react-tabs": "^1.1.1",
     "@storybook/addon-essentials": "^7.6.4",
     "@storybook/addon-interactions": "^7.6.4",
