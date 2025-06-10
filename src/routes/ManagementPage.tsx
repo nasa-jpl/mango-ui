@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-  Button as ButtonNext,
+  Button,
   Form,
   FormControl,
   FormField as FormFieldNext,
@@ -140,9 +140,9 @@ export default function ManagementPage() {
         <AlertDialogTrigger asChild>
           <div>
             <Tooltip content={`Delete ${item}`}>
-              <ButtonNext variant="ghost" size="icon">
+              <Button variant="ghost" size="icon">
                 <Trash2 />
-              </ButtonNext>
+              </Button>
             </Tooltip>
           </div>
         </AlertDialogTrigger>
@@ -158,13 +158,13 @@ export default function ManagementPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction asChild>
               {/* TODO why isn't variant overriding base tw classes in here with asChild? */}
-              <ButtonNext
+              <Button
                 variant="destructive"
                 onClick={onDelete}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete
-              </ButtonNext>
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -262,7 +262,7 @@ export default function ManagementPage() {
   return (
     <Page title="Manage" padBody>
       <div className="overflow-auto p-4 bg-background border rounded">
-        <div className="st-typography-header">Configure Mango Pages</div>
+        <div className="text-lg font-medium">Configure Mango Pages</div>
         <div className="st-typography-body">
           {view.pageGroups.map((pageGroup, i) => {
             const otherPageGroups = view.pageGroups.filter(
@@ -339,24 +339,24 @@ export default function ManagementPage() {
                       deletePageGroup(pageGroup.id)
                     )}
                     <Tooltip content="Move up">
-                      <ButtonNext
+                      <Button
                         disabled={i === 0}
                         variant="ghost"
                         size="icon"
                         onClick={() => movePageGroup(pageGroup, "up")}
                       >
                         <ArrowUp size={16} />
-                      </ButtonNext>
+                      </Button>
                     </Tooltip>
                     <Tooltip content="Move down">
-                      <ButtonNext
+                      <Button
                         disabled={i === view.pageGroups.length - 1}
                         variant="ghost"
                         size="icon"
                         onClick={() => movePageGroup(pageGroup, "down")}
                       >
                         <ArrowDown size={16} />
-                      </ButtonNext>
+                      </Button>
                     </Tooltip>
                   </div>
                 </div>
@@ -440,46 +440,46 @@ export default function ManagementPage() {
                             deletePage(pageGroup.id, page.id)
                           )}
                           <Tooltip content="Move up">
-                            <ButtonNext
+                            <Button
                               disabled={j === 0}
                               variant="ghost"
                               size="icon"
                               onClick={() => movePage(page, pageGroup, "up")}
                             >
                               <ArrowUp size={16} />
-                            </ButtonNext>
+                            </Button>
                           </Tooltip>
                           <Tooltip content="Move down">
-                            <ButtonNext
+                            <Button
                               disabled={j === pageGroup.pages.length - 1}
                               variant="ghost"
                               size="icon"
                               onClick={() => movePage(page, pageGroup, "down")}
                             >
                               <ArrowDown size={16} />
-                            </ButtonNext>
+                            </Button>
                           </Tooltip>
                         </div>
                       </div>
                     );
                   })}
-                  <ButtonNext
+                  <Button
                     variant="secondary"
                     onClick={() => onNewPageClick(pageGroup.id)}
                   >
                     + New Page
-                  </ButtonNext>
+                  </Button>
                 </div>
               </div>
             );
           })}
-          <ButtonNext
+          <Button
             variant="secondary"
             className="mt-4"
             onClick={onNewPageGroupClick}
           >
             + New Page Group
-          </ButtonNext>
+          </Button>
         </div>
         <div className="flex flex-1 mt-6 w-[400px]">
           <div className="flex flex-1 flex-col gap-4">
@@ -504,13 +504,13 @@ export default function ManagementPage() {
               <Label htmlFor="view-download" size="sm">
                 Download JSON View
               </Label>
-              <ButtonNext
+              <Button
                 id="view-download"
                 variant="secondary"
                 onClick={downloadView}
               >
                 Download View
-              </ButtonNext>
+              </Button>
             </div>
           </div>
         </div>
