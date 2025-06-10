@@ -263,7 +263,7 @@ export default function ManagementPage() {
     <Page title="Manage" padBody>
       <div className="overflow-auto p-4 bg-background border rounded">
         <div className="text-lg font-medium">Configure Mango Pages</div>
-        <div className="st-typography-body">
+        <div>
           {view.pageGroups.map((pageGroup, i) => {
             const otherPageGroups = view.pageGroups.filter(
               (p) => p.id !== pageGroup.id
