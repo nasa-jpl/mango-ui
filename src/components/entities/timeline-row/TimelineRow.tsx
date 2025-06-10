@@ -96,7 +96,7 @@ export function TimelineRow({
                     <Button
                       variant="ghost"
                       style={{ width: `${marginLeft}px` }}
-                      className="timeline-row-subrow-title py-0 px-2 "
+                      className="timeline-row-subrow-title py-0 px-2 hover:bg-transparent"
                       onClick={() =>
                         setSubrowExpansionMap({
                           ...subrowExpansionMap,
