@@ -12,7 +12,7 @@ import {
   Button,
   Form,
   FormControl,
-  FormField as FormFieldNext,
+  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -553,7 +553,7 @@ export function InputForm({
         onChange={form.handleSubmit(onFormChange)}
         onSubmit={(evt) => evt.preventDefault()}
       >
-        <FormFieldNext
+        <FormField
           control={form.control}
           name={name}
           render={({ field }) => (

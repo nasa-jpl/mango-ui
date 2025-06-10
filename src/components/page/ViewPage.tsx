@@ -1,10 +1,10 @@
 import {
   Button,
+  Checkbox,
   Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Switch,
 } from "@nasa-jpl/stellar-react";
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import { Page as PageType, Section as SectionType } from "../../types/view";
 import { DateRangePicker } from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
+import { Tooltip } from "../ui/Tooltip";
 import Section from "./Section";
 
 export declare type PageProps = {
@@ -87,19 +88,24 @@ export const ViewPage = ({
           />
 
           <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Settings size={16} />
-              </Button>
-            </PopoverTrigger>
+            <Tooltip content="Settings">
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings size={16} />
+                </Button>
+              </PopoverTrigger>
+            </Tooltip>
             <PopoverContent collisionPadding={{ right: 16 }}>
-              <div className="leading-none font-medium mb-2">Settings</div>
+              <div className="leading-none font-medium mb-4">Settings</div>
               <div className="flex items-center gap-2">
-                <Switch
+                <Checkbox
                   id="show-time-cursor"
                   checked={pageOptions.showHoverDate}
                   onCheckedChange={(checked) =>
-                    setPageOptions({ ...pageOptions, showHoverDate: checked })
+                    setPageOptions({
+                      ...pageOptions,
+                      showHoverDate: checked as boolean,
+                    })
                   }
                 />
                 <Label size="sm" htmlFor="show-time-cursor">
