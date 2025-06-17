@@ -7,11 +7,17 @@ import {
   PopoverTrigger,
 } from "@nasa-jpl/stellar-react";
 import { Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
-import { Page as PageType, Section as SectionType } from "../../types/view";
+import {
+  Entity,
+  Page as PageType,
+  SectionLayout,
+  Section as SectionType,
+} from "../../types/view";
+import { generateUUID } from "../../utilities/generic";
 import { DateRangePicker } from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
@@ -65,6 +71,68 @@ export const ViewPage = ({
       viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
     );
   }, [viewPage?.missions]);
+
+  const onEntityDelete = useCallback(
+    (entity: Entity, section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            const newEntities: Entity[] = [];
+            const newLayout = [...s.layout];
+            s.entities.forEach((e, i) => {
+              if (e.id === entity.id) {
+                newLayout.splice(i, 1);
+              } else {
+                newEntities.push(e);
+              }
+            });
+            return {
+              ...s,
+              entities: newEntities,
+              layout: newLayout,
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+    },
+    [viewPage, onPageChange]
+  );
+
+  const onEntityDuplicate = useCallback(
+    (entity: Entity, section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            const newId = generateUUID();
+            const newEntity = { ...entity, id: newId };
+            const newEntities: Entity[] = s.entities.concat(newEntity);
+            const newLayout: SectionLayout[] = [
+              ...s.layout,
+              { i: newId, w: 4, h: 2, x: 0, y: 0 },
+            ];
+            return {
+              ...s,
+              entities: newEntities,
+              layout: newLayout,
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+    },
+    [viewPage, onPageChange]
+  );
 
   if (!viewPage) {
     return;
@@ -161,6 +229,9 @@ export const ViewPage = ({
             onHoverDateChange={setHoverDate}
             onSelectPoint={setSelectedPoint}
             onSetProductPreview={onSetProductPreview}
+            onEntityDelete={onEntityDelete}
+            onEntityDuplicate={onEntityDuplicate}
+            onEntityEdit={() => {}}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,

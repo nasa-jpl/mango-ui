@@ -126,6 +126,8 @@ export const Chart = ({
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
   onSelectPoint = () => {},
+  onDelete = () => {},
+  onDuplicate = () => {},
   hoverDate,
   selectedPoint,
   loading: loadingProp,
@@ -1362,10 +1364,10 @@ export const Chart = ({
                   <DropdownMenuItem>
                     <Pencil /> Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicate()}>
                     <CopyPlus /> Duplicate
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete()}>
                     <Trash2 /> Delete
                   </DropdownMenuItem>
                   <DropdownMenuItem>

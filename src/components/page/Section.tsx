@@ -18,6 +18,8 @@ export declare type SectionProps = {
   instrument?: string | null;
   mission?: string | null;
   onDateRangeChange: (dateRange: DateRange) => void;
+  onEntityDelete: (entity: EntityType, section: SectionType) => void;
+  onEntityDuplicate: (entity: EntityType, section: SectionType) => void;
   onEntityEdit: (entity: EntityType, section: SectionType) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
@@ -37,7 +39,6 @@ export const Section = ({
   instrument = null,
   mission = null,
   onSectionChange,
-  onDateRangeChange = () => {},
   onDateRangeChange = () => {},
   onEntityDelete = () => {},
   onEntityDuplicate = () => {},
