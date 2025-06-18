@@ -128,6 +128,7 @@ export const Chart = ({
   onSelectPoint = () => {},
   onDelete = () => {},
   onDuplicate = () => {},
+  onEdit = () => {},
   hoverDate,
   selectedPoint,
   loading: loadingProp,
@@ -408,6 +409,9 @@ export const Chart = ({
       };
     });
     chartRef.current.config.options.scales = newAxes;
+
+    // Trigger a chartJS update
+    chartRef.current.update();
   };
 
   const visualizeChartLayers = async (
@@ -1361,7 +1365,7 @@ export const Chart = ({
                   </DropdownMenuTrigger>
                 </Tooltip>
                 <DropdownMenuContent className="w-56">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit()}>
                     <Pencil /> Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicate()}>

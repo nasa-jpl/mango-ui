@@ -1,17 +1,22 @@
 import {
   Button,
   Checkbox,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@nasa-jpl/stellar-react";
-import { Settings } from "lucide-react";
+import { ChartLine, ChevronDown, Folder, Settings } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import {
+  ChartEntity,
   Entity,
   Page as PageType,
   SectionLayout,
@@ -19,6 +24,7 @@ import {
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
 import { DateRangePicker } from "../ui/DateRangePicker";
+import EntityEditor from "../ui/EntityEditor";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
 import { Tooltip } from "../ui/Tooltip";
@@ -55,6 +61,7 @@ export const ViewPage = ({
   const [instrument, setInstrument] = useState<string | null>(
     viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
   );
+  const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
 
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
   const [selectedPoint, setSelectedPoint] =
@@ -134,6 +141,97 @@ export const ViewPage = ({
     [viewPage, onPageChange]
   );
 
+  const onEntitySave = useCallback(
+    (entity: Entity) => {
+      if (!viewPage) {
+        return;
+      }
+      // Find section containing entity
+      const section = viewPage.sections.find((s) =>
+        s.entities.find((s) => s.id === entity.id)
+      );
+      if (!section) {
+        return;
+      }
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            return {
+              ...s,
+              entities: s.entities.map((e) => {
+                if (e.id === entity.id) {
+                  return entity;
+                }
+                return e;
+              }),
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+      setEntityToEdit(null);
+    },
+    [viewPage, onPageChange]
+  );
+
+  const onAddSection = useCallback(() => {
+    if (!viewPage) {
+      return;
+    }
+    const newSection: SectionType = {
+      entities: [],
+      id: generateUUID(),
+      layout: [],
+      enableHeader: true,
+      defaultOpen: true,
+      title: "New Section",
+    };
+    const updatedViewPage: PageType = {
+      ...viewPage,
+      sections: viewPage?.sections.concat(newSection),
+    };
+    onPageChange(updatedViewPage);
+    setEntityToEdit(null);
+  }, [viewPage, onPageChange]);
+
+  const onAddEntity = useCallback(
+    (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const newEntity: ChartEntity = {
+        id: generateUUID(),
+        title: "New Entity",
+        type: "chart",
+        syncWithPageDateRange: true,
+      };
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.map((s) => {
+          if (s.id === section.id) {
+            // TODO need to compute the next available spot for the new item instead of
+            // letting the library append it to the bottom
+            const newLayout: SectionLayout[] = [
+              ...s.layout,
+              { i: newEntity.id, w: 4, h: 2, x: 0, y: 0 },
+            ];
+            return {
+              ...s,
+              entities: s.entities.concat(newEntity),
+              layout: s.layout.concat(newLayout),
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+      setEntityToEdit(null);
+    },
+    [viewPage, onPageChange]
+  );
+
   if (!viewPage) {
     return;
   }
@@ -154,6 +252,22 @@ export const ViewPage = ({
               });
             }}
           />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="select-none">
+                Add <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem onClick={onAddSection}>
+                <Folder /> Add Section
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {}}>
+                <ChartLine /> Add Entity
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Popover>
             <Tooltip content="Settings">
@@ -214,7 +328,18 @@ export const ViewPage = ({
           </Tabs.Root>
         </div>
       )}
+      {!loadingInitialData && entityToEdit && (
+        <EntityEditor
+          entity={entityToEdit}
+          onCancel={() => setEntityToEdit(null)}
+          onSave={onEntitySave}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          products={products}
+        />
+      )}
       {!loadingInitialData &&
+        !entityToEdit &&
         viewPage.sections.map((section) => (
           <Section
             products={products}
@@ -225,13 +350,14 @@ export const ViewPage = ({
             instrument={viewPage.missions ? instrument : null}
             hoverDate={pageOptions.showHoverDate ? hoverDate : null}
             selectedPoint={selectedPoint}
+            onAddEntity={() => onAddEntity(section)}
             onDateRangeChange={setDateRange}
             onHoverDateChange={setHoverDate}
             onSelectPoint={setSelectedPoint}
             onSetProductPreview={onSetProductPreview}
             onEntityDelete={onEntityDelete}
             onEntityDuplicate={onEntityDuplicate}
-            onEntityEdit={() => {}}
+            onEntityEdit={(entity) => setEntityToEdit(entity)}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,

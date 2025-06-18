@@ -1,6 +1,6 @@
 import { Button } from "@nasa-jpl/stellar-react";
 import classNames from "classnames";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, MoreVertical, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -8,6 +8,7 @@ import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, Section as SectionType } from "../../types/view";
+import { Tooltip } from "../ui/Tooltip";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
@@ -17,6 +18,7 @@ export declare type SectionProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   mission?: string | null;
+  onAddEntity: () => void;
   onDateRangeChange: (dateRange: DateRange) => void;
   onEntityDelete: (entity: EntityType, section: SectionType) => void;
   onEntityDuplicate: (entity: EntityType, section: SectionType) => void;
@@ -39,6 +41,7 @@ export const Section = ({
   instrument = null,
   mission = null,
   onSectionChange,
+  onAddEntity = () => {},
   onDateRangeChange = () => {},
   onEntityDelete = () => {},
   onEntityDuplicate = () => {},
@@ -142,6 +145,16 @@ export const Section = ({
             {open ? <ChevronDown /> : <ChevronRight />}
             {title}
           </Button>
+          <div className="absolute right-4 top-2 flex justify-center gap-2">
+            <Tooltip content="Add Entity">
+              <Button variant="ghost" size="icon" onClick={onAddEntity}>
+                <Plus />
+              </Button>
+            </Tooltip>
+            <Button variant="ghost" size="icon">
+              <MoreVertical />
+            </Button>
+          </div>
         </div>
       )}
       <div className="section-content" ref={onGetWrapperDivRef}>
