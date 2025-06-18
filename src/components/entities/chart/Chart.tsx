@@ -1038,9 +1038,9 @@ export const Chart = ({
             time: {
               displayFormats: {
                 millisecond: "HH:mm:ss.SSS",
-                second: "HH:mm:ss",
-                minute: "HH:mm",
-                hour: "HH",
+                second: "HH:mm:ss.SSS",
+                minute: "HH:mm:ss.SSS",
+                hour: "HH:mm:ss.SSS",
               },
             },
             ticks: {
