@@ -43,10 +43,13 @@ jobs:
         shell: bash
 
       - name: Build application
-        run: npm run build
+        run: |
+          npm run build
+          ls dist/assets
         env:
           VITE_APP_TITLE: ${{ vars.VITE_APP_TITLE}}
           VITE_APP_PATH: ${{ vars.VITE_APP_PATH}}
+        shell: bash
 
       - name: Run lint
         run: |
