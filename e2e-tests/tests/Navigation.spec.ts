@@ -1,7 +1,8 @@
 import { test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/mango/");
+  //await page.goto("/mango/");
+  await page.goto("/mango/", { waitUntil: "networkidle", timeout: 30000 });
 });
 
 // test("has title", async ({ page }) => {
@@ -10,6 +11,12 @@ test.beforeEach(async ({ page }) => {
 // });
 
 test("navigates to page", async ({ page }) => {
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      console.log(`ERROR ${response.status()}: ${response.url()}`);
+    }
+  });
+
   // Navigate to page
   await page.getByRole("button", { name: "Products" }).click();
 
