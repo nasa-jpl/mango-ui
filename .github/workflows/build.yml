@@ -44,6 +44,9 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          VITE_APP_TITLE: ${{ vars.VITE_APP_TITLE}}
+          VITE_APP_PATH: ${{ vars.VITE_APP_PATH}}
 
       - name: Run lint
         run: |
