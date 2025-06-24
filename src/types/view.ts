@@ -8,6 +8,9 @@ import { DataResponse, DataResponseDataEntry } from "./api";
 import { DateRange } from "./time";
 
 export type View = {
+  config?: {
+    sidebarWidth?: number;
+  };
   home: Page;
   pageGroups: PageGroup[];
   version: number;
