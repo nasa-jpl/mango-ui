@@ -2,6 +2,9 @@ import {
   Button,
   Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -13,8 +16,9 @@ import {
   TabsTrigger,
 } from "@nasa-jpl/stellar-react";
 import { debounce } from "lodash-es";
-import { Database, Plus, Trash2 } from "lucide-react";
+import { Layers2, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { z } from "zod";
 import useResizeObserver from "../../hooks/resizeObserver";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
@@ -25,11 +29,14 @@ import {
   DataLayer,
   EntityType as EntityPlotType,
   Entity as EntityType,
+  MapEntity,
+  MapLayer,
   Section,
   YAxis,
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
 import Entity from "../page/Entity";
+import { InputForm } from "./InputForm";
 import { ProductsSelector } from "./ProductsSelector";
 import { Tooltip } from "./Tooltip";
 
@@ -58,9 +65,9 @@ const getLabelForSelectedProductOrLayer = (
 ) => {
   return `${thing.mission} ${thing.instrument} ${
     thing.dataset
-  } ${thing.fields.join(", ")} ${(thing.channels || [])?.join(",")} (v${
-    thing.version
-  })`;
+  } ${thing.fields.join(", ")} ${(thing.channels || [])
+    ?.map((c) => `(${c.id}: ${c.value})`)
+    .join(" ")} (v${thing.version})`;
 };
 
 const getMatchingSelectedProductForLayer = (
@@ -118,22 +125,69 @@ export const EntityEditor = ({
   ];
 
   const debouncedColorChange = debounce((color: string, layer: ChartLayer) => {
+    return updateChartLayer({ ...layer, color });
+  }, 100);
+
+  const updateChartLayer = (layer: ChartLayer) => {
     const chartEntity: ChartEntity = newEntity;
     const updatedEntity: ChartEntity = {
       ...chartEntity,
       layers: (chartEntity.layers || [])?.map((l) => {
         if (l.id === layer.id) {
-          return {
-            ...layer,
-            color,
-          };
+          return layer;
         }
         return l;
       }),
     };
     setNewEntity(updatedEntity);
-  }, 100);
+  };
 
+  const onSelectedProductsChange = (newSelectedProducts: SelectedProduct[]) => {
+    // Reassign layer products to new selected products
+    const entityWithLayers = newEntity as ChartEntity | MapEntity;
+    const newLayers: (ChartLayer | MapLayer)[] = [];
+    (entityWithLayers.layers || []).forEach((layer) => {
+      const oldSelectedProduct = getMatchingSelectedProductForLayer(
+        layer,
+        selectedProducts
+      );
+      const newSelectedProduct = getMatchingSelectedProductForLayer(
+        layer,
+        newSelectedProducts
+      );
+      // If an old matching selected product exists and a new one does not,
+      // check for the existence of the old selected product and if found,
+      // update layer to use this new product
+      if (oldSelectedProduct && !newSelectedProduct) {
+        const matchingNewProduct = newSelectedProducts.find(
+          (p) => p.id === oldSelectedProduct.id
+        );
+        if (matchingNewProduct) {
+          newLayers.push({
+            ...layer,
+            ...matchingNewProduct,
+            id: layer.id,
+          });
+        }
+      } else if (newSelectedProduct) {
+        // If the layer matches a new selected product, use the new product
+        newLayers.push({
+          ...layer,
+          ...newSelectedProduct,
+          id: layer.id,
+        });
+      }
+      // Otherwise we can delete the layer since the associatated product has been deleted
+    });
+    const updatedEntity = {
+      ...entityWithLayers,
+      layers: newLayers,
+    };
+    setNewEntity(updatedEntity);
+    setSelectedProducts(newSelectedProducts);
+  };
+
+  // TODO break various parts of this component into subcomponents when refactoring to handle multiple entity types
   return (
     <div
       className="flex flex-col flex-1 overflow-hidden"
@@ -177,8 +231,10 @@ export const EntityEditor = ({
             >
               <TabsList className="w-min">
                 <TabsTrigger value="products">Products</TabsTrigger>
-                <TabsTrigger value="events">Events</TabsTrigger>
-                <TabsTrigger value="transformations">
+                <TabsTrigger disabled value="events">
+                  Events
+                </TabsTrigger>
+                <TabsTrigger disabled value="transformations">
                   Transformations
                 </TabsTrigger>
               </TabsList>
@@ -191,19 +247,21 @@ export const EntityEditor = ({
                     Select any number of products to include in this chart.
                   </div>
                   <ProductsSelector
-                    onChange={(newSelectedProducts) => {
-                      setSelectedProducts(newSelectedProducts);
-                    }}
+                    onChange={onSelectedProductsChange}
                     products={products}
                     selectedProducts={selectedProducts}
                   />
                 </div>
               </TabsContent>
               <TabsContent value="events">
-                <div>Events</div>
+                <div className="pt-2 text-sm text-muted-foreground">
+                  Coming Soon
+                </div>
               </TabsContent>
               <TabsContent value="transformations">
-                <div>Transformations</div>
+                <div className="pt-2 text-sm text-muted-foreground">
+                  Coming Soon
+                </div>
               </TabsContent>
             </Tabs>
           </div>
@@ -220,13 +278,13 @@ export const EntityEditor = ({
               <Label size="sm" htmlFor="entity-type">
                 Entity Type
               </Label>
-              <Select onValueChange={() => {}} value={entity.type}>
+              <Select onValueChange={() => {}} value={entity.type} disabled>
                 <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
                   <SelectValue id="entity-type" placeholder="Select field" />
                 </SelectTrigger>
                 <SelectContent size="xs">
                   {entityTypes.sort().map(({ value, label }) => (
-                    <SelectItem size="xs" value={value}>
+                    <SelectItem size="xs" value={value} key={label}>
                       {label}
                     </SelectItem>
                   ))}
@@ -257,7 +315,7 @@ export const EntityEditor = ({
                         const chartEntity: ChartEntity = newEntity;
                         const newYAxis: YAxis = {
                           id: generateUUID(),
-                          label: "New Axis",
+                          label: "",
                         };
                         const updatedEntity: ChartEntity = {
                           ...chartEntity,
@@ -272,13 +330,13 @@ export const EntityEditor = ({
                 </div>
                 <div className="flex justify-between gap-20 items-center">
                   {((newEntity as ChartEntity).yAxes === undefined ||
-                    (newEntity as ChartEntity).yAxes.length < 1) && (
-                    <div>No y axes</div>
+                    ((newEntity as ChartEntity).yAxes || []).length < 1) && (
+                    <div className="text-muted-foreground">No y axes</div>
                   )}
                   {(newEntity as ChartEntity).yAxes !== undefined && (
                     <div className="flex-1 flex flex-col gap-6">
                       {(newEntity as ChartEntity).yAxes?.map((yAxis) => (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1" key={yAxis.id}>
                           <div className="flex items-center flex-1 gap-1">
                             <Input
                               placeholder="Units used as axis name by default"
@@ -304,7 +362,7 @@ export const EntityEditor = ({
                                 setNewEntity(updatedEntity);
                               }}
                             />
-                            <Tooltip content="Add Product">
+                            <Tooltip content="Add Layer">
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -315,6 +373,7 @@ export const EntityEditor = ({
                                     endTime: "",
                                     fields: [],
                                     id: generateUUID(),
+                                    color: "#002AFA", // TODO implement smart next color selection here
                                     instrument: "",
                                     type: "line",
                                     mission: "",
@@ -332,7 +391,7 @@ export const EntityEditor = ({
                                   setNewEntity(updatedEntity);
                                 }}
                               >
-                                <Database />
+                                <Layers2 />
                               </Button>
                             </Tooltip>
                             <Tooltip content="Remove Y Axis">
@@ -346,6 +405,9 @@ export const EntityEditor = ({
                                     ...chartEntity,
                                     yAxes: (chartEntity.yAxes || []).filter(
                                       (axis) => axis.id !== yAxis.id
+                                    ),
+                                    layers: (chartEntity.layers || []).filter(
+                                      (layer) => layer.yAxisId !== yAxis.id
                                     ),
                                   };
                                   setNewEntity(updatedEntity);
@@ -406,6 +468,7 @@ export const EntityEditor = ({
                                         .sort()
                                         .map((selectedProduct) => (
                                           <SelectItem
+                                            key={selectedProduct.id}
                                             size="xs"
                                             value={selectedProduct.id}
                                           >
@@ -429,7 +492,7 @@ export const EntityEditor = ({
                                       }}
                                     />
                                   </div>
-                                  <Tooltip content="Remove Product">
+                                  <Tooltip content="Remove Layer">
                                     <Button
                                       variant="ghost"
                                       size="icon"
@@ -448,12 +511,92 @@ export const EntityEditor = ({
                                       <Trash2 />
                                     </Button>
                                   </Tooltip>
+                                  <Popover>
+                                    <Tooltip content="Settings">
+                                      <PopoverTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                          <MoreVertical size={16} />
+                                        </Button>
+                                      </PopoverTrigger>
+                                    </Tooltip>
+                                    <PopoverContent
+                                      collisionPadding={{ right: 16 }}
+                                    >
+                                      <div className="leading-none font-medium mb-4">
+                                        Layer Settings
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-col">
+                                        <InputForm
+                                          inlineLabelWidth={72}
+                                          layout="inline"
+                                          formSchema={z.object({
+                                            lineWidth: z.coerce
+                                              .number()
+                                              .min(0)
+                                              .max(10),
+                                          })}
+                                          inputProps={{
+                                            type: "number",
+                                            step: 0.25,
+                                          }}
+                                          defaultValue={
+                                            (
+                                              layer as ChartLayerLine
+                                            ).lineWidth?.toString() ?? "1"
+                                          }
+                                          name="lineWidth"
+                                          label="Line Width"
+                                          onChange={(value) => {
+                                            const chartLayer =
+                                              layer as ChartLayerLine;
+                                            updateChartLayer({
+                                              ...chartLayer,
+                                              lineWidth: parseFloat(value),
+                                            });
+                                          }}
+                                        />
+                                        <InputForm
+                                          inlineLabelWidth={72}
+                                          layout="inline"
+                                          inputProps={{
+                                            type: "number",
+                                            step: 0.25,
+                                          }}
+                                          formSchema={z.object({
+                                            pointRadius: z.coerce
+                                              .number()
+                                              .min(0)
+                                              .max(10),
+                                          })}
+                                          defaultValue={
+                                            (
+                                              layer as ChartLayerLine
+                                            ).pointRadius?.toString() ?? "1.25"
+                                          }
+                                          name="pointRadius"
+                                          label="Point Width"
+                                          onChange={(value) => {
+                                            const chartLayer =
+                                              layer as ChartLayerLine;
+                                            updateChartLayer({
+                                              ...chartLayer,
+                                              pointRadius: parseFloat(value),
+                                            });
+                                          }}
+                                        />
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
                                 </div>
                               ))}
                           </div>
                           {((newEntity as ChartEntity).layers || []).filter(
                             (l) => l.yAxisId === yAxis.id
-                          ).length === 0 && <div>No layers on axis</div>}
+                          ).length === 0 && (
+                            <div className="text-muted-foreground">
+                              No layers on axis
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

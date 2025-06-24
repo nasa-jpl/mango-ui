@@ -10,8 +10,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@nasa-jpl/stellar-react";
-import { ChartLine, ChevronDown, Folder, Settings } from "lucide-react";
+import { ChevronDown, Folder, Settings } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
@@ -23,6 +24,7 @@ import {
   Section as SectionType,
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
+import { useConfirm } from "../ui/AlertDialogProvider";
 import { DateRangePicker } from "../ui/DateRangePicker";
 import EntityEditor from "../ui/EntityEditor";
 import Page from "../ui/Page";
@@ -70,6 +72,8 @@ export const ViewPage = ({
     showHoverDate: true,
   });
 
+  const confirm = useConfirm();
+
   useEffect(() => {
     setMission(
       viewPage?.missions ? viewPage?.missions[1].mission ?? null : null
@@ -79,11 +83,32 @@ export const ViewPage = ({
     );
   }, [viewPage?.missions]);
 
+  // TODO would be an improvement to prevent user navigation while editing an
+  // entity to prevent accidental deletion of work but this will need to be controlled
+  // from higher up in the routing
+  const location = useLocation();
+  useEffect(() => {
+    setEntityToEdit(null);
+  }, [location]);
+
   const onEntityDelete = useCallback(
-    (entity: Entity, section: SectionType) => {
+    async (entity: Entity, section: SectionType) => {
       if (!viewPage) {
         return;
       }
+
+      const confirmed = await confirm({
+        title: "Are you sure?",
+        body: "This action will only be persisted upon saving view changes.",
+        cancelButton: "Cancel",
+        actionButtonVariant: "destructive",
+        actionButton: "Delete",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
       const updatedViewPage: PageType = {
         ...viewPage,
         sections: viewPage?.sections.map((s) => {
@@ -232,6 +257,45 @@ export const ViewPage = ({
     [viewPage, onPageChange]
   );
 
+  const onSectionDelete = useCallback(
+    async (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const confirmed = await confirm({
+        title: "Are you sure?",
+        body: "This action will only be persisted upon saving view changes.",
+        cancelButton: "Cancel",
+        actionButtonVariant: "destructive",
+        actionButton: "Delete",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+      const newViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.filter((s) => s.id !== section.id),
+      };
+      onPageChange(newViewPage);
+    },
+    [viewPage, onPageChange, confirm]
+  );
+
+  const onSectionDuplicate = useCallback(
+    async (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const newViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.concat({ ...section, id: generateUUID() }),
+      };
+      onPageChange(newViewPage);
+    },
+    [viewPage, onPageChange]
+  );
+
   if (!viewPage) {
     return;
   }
@@ -255,7 +319,11 @@ export const ViewPage = ({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="select-none">
+              <Button
+                variant="outline"
+                className="select-none ml-2"
+                disabled={!!entityToEdit}
+              >
                 Add <ChevronDown size={16} />
               </Button>
             </DropdownMenuTrigger>
@@ -263,9 +331,9 @@ export const ViewPage = ({
               <DropdownMenuItem onClick={onAddSection}>
                 <Folder /> Add Section
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {}}>
+              {/* <DropdownMenuItem onClick={() => {}}>
                 <ChartLine /> Add Entity
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -358,14 +426,16 @@ export const ViewPage = ({
             onEntityDelete={onEntityDelete}
             onEntityDuplicate={onEntityDuplicate}
             onEntityEdit={(entity) => setEntityToEdit(entity)}
+            onSectionDelete={onSectionDelete}
+            onSectionDuplicate={onSectionDuplicate}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,
-                sections: viewPage.sections.map((e) => {
-                  if (e.id === newSection.id) {
+                sections: viewPage.sections.map((s) => {
+                  if (s.id === newSection.id) {
                     return newSection;
                   }
-                  return e;
+                  return s;
                 }),
               };
               onPageChange(newViewPage);

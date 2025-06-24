@@ -21,7 +21,7 @@ export const ProductsSelector = ({
   return (
     <div className="flex flex-col gap-4">
       {selectedProducts.map((product, i) => (
-        <div className="flex gap-2 items-end">
+        <div className="flex gap-2 items-end" key={product.id}>
           <ProductSelector
             selectedProduct={product}
             products={products}

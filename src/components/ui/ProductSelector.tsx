@@ -42,6 +42,8 @@ export const ProductSelector = ({
     }
     setNewSelectedProduct(updatedSelectedProduct);
   };
+
+  // TODO memoize these
   const missions = [...new Set(products.map((product) => product.mission))];
   const instruments = [
     ...new Set(
@@ -61,15 +63,23 @@ export const ProductSelector = ({
         .map((product) => product.id)
     ),
   ];
+
+  const product = products.find(
+    (product) =>
+      product.id === newSelectedProduct.dataset &&
+      product.mission === newSelectedProduct.mission &&
+      product.instruments.indexOf(newSelectedProduct.instrument) > -1
+  );
+
   const fields =
-    products
-      .find(
-        (product) =>
-          product.id === newSelectedProduct.dataset &&
-          product.mission === newSelectedProduct.mission &&
-          product.instruments.indexOf(newSelectedProduct.instrument) > -1
-      )
-      ?.available_fields.filter((field) => field.type === "float") || [];
+    product?.available_fields.filter(
+      (field) =>
+        (!field.is_channel_id && field.type === "float") || field.type === "int"
+    ) || [];
+
+  const channels = product?.available_fields
+    .filter((f) => f.is_channel_id)
+    .map((f) => ({ id: f.name, values: f.enum_values || [] }));
 
   const versions =
     products.find(
@@ -94,7 +104,7 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {missions.sort().map((mission) => (
-                <SelectItem size="xs" value={mission}>
+                <SelectItem size="xs" value={mission} key={mission}>
                   {mission}
                 </SelectItem>
               ))}
@@ -117,7 +127,7 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {instruments.sort().map((instrument) => (
-                <SelectItem size="xs" value={instrument}>
+                <SelectItem size="xs" value={instrument} key={instrument}>
                   {instrument}
                 </SelectItem>
               ))}
@@ -131,6 +141,9 @@ export const ProductSelector = ({
               updateSelectedProduct({
                 ...newSelectedProduct,
                 dataset: value,
+                fields: [],
+                channels: [],
+                version: "",
               })
             }
             value={newSelectedProduct.dataset}
@@ -140,7 +153,7 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {datasets.sort().map((dataset) => (
-                <SelectItem size="xs" value={dataset}>
+                <SelectItem size="xs" value={dataset} key={dataset}>
                   {dataset}
                 </SelectItem>
               ))}
@@ -167,13 +180,59 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {fields.map((field) => (
-                <SelectItem size="xs" value={field.name}>
+                <SelectItem size="xs" value={field.name} key={field.name}>
                   {field.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+        {(channels || []).map((channel) => {
+          const matchingChannel = (selectedProduct.channels || []).find(
+            (c) => c.id === channel.id
+          );
+          return (
+            <div className="flex flex-col gap-1">
+              <Label size="sm">{channel.id}</Label>
+              <Select
+                onValueChange={(value) =>
+                  updateSelectedProduct({
+                    ...newSelectedProduct,
+                    channels: (channels || []).map((c) => {
+                      // Update this channel
+                      if (c.id === channel.id) {
+                        return { id: c.id, value };
+                      }
+                      // Update all other channels
+                      const matchingSelectedProductChannel = (
+                        newSelectedProduct.channels || []
+                      ).find((_c) => _c.id === c.id);
+                      return {
+                        id: c.id,
+                        value: "",
+                        ...matchingSelectedProductChannel,
+                      };
+                    }),
+                  })
+                }
+                value={matchingChannel?.value}
+              >
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue id="entity-type" placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  {channel.values
+                    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
+                    .map((c) => (
+                      <SelectItem size="xs" value={c} key={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        })}
         <div className="flex flex-col gap-1">
           <Label size="sm">Version</Label>
           <Select
@@ -190,7 +249,7 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {versions.map((version) => (
-                <SelectItem size="xs" value={version}>
+                <SelectItem size="xs" value={version} key={version}>
                   {version}
                 </SelectItem>
               ))}
