@@ -23,9 +23,7 @@ import { Mode } from "chartjs-plugin-zoom/types/options";
 import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import {
-  Camera,
   CopyPlus,
-  Download,
   MoreVertical,
   Move3D,
   MoveHorizontal,
@@ -1374,12 +1372,12 @@ export const Chart = ({
                   <DropdownMenuItem onClick={() => onDelete()}>
                     <Trash2 /> Delete
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <Download /> Download Data
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Camera /> Snapshot
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
