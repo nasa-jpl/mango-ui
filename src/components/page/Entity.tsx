@@ -21,7 +21,6 @@ import Map from "../entities/map/Map";
 import Table from "../entities/table/Table";
 import Text from "../entities/text/Text";
 import { DownlinkDashboard } from "../mission/GRACE/DownlinkDashboard";
-import "./Entity.css";
 
 export declare type EntityProps = {
   className?: string;
@@ -64,7 +63,7 @@ export const Entity = (props: EntityProps) => {
     selectedPoint,
   } = props;
   const entityClass = classNames({
-    entity: true,
+    "bg-background border rounded flex flex-1 flex-col overflow-hidden": true,
     [className]: !!className,
   });
   return (

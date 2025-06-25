@@ -1,21 +1,22 @@
 import {
   Button,
-  IconSettings,
+  Checkbox,
+  Label,
   Popover,
   PopoverContent,
-  Switch,
-  Tooltip,
-} from "@nasa-jpl/react-stellar";
+  PopoverTrigger,
+} from "@nasa-jpl/stellar-react";
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Page as PageType, Section as SectionType } from "../../types/view";
-import DateRangePicker from "../ui/DateRangePicker";
+import { DateRangePicker } from "../ui/DateRangePicker";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
+import { Tooltip } from "../ui/Tooltip";
 import Section from "./Section";
-import "./ViewPage.css";
 
 export declare type PageProps = {
   loadingInitialData: boolean;
@@ -37,7 +38,7 @@ export const ViewPage = ({
   // so that we can store dateRange, hoverDate, pageOptions, and preview product + initial values in a store
   // and not have to pass individual callbacks down through components? Or could have dispatch be on the entity level?
   const startDate = new Date("2023-06-03T00:00:00Z").toISOString();
-  const endDate = new Date("2023-06-10T23:59:59Z").toISOString();
+  const endDate = new Date("2023-06-10T23:59:59.999Z").toISOString();
   const [dateRange, setDateRange] = useState<DateRange>({
     end: endDate,
     start: startDate,
@@ -86,42 +87,43 @@ export const ViewPage = ({
             }}
           />
 
-          <Popover
-            contentProps={{ sideOffset: 41 }}
-            trigger={
-              <div>
-                <Tooltip content="Settings">
-                  <Button variant="icon">
-                    <IconSettings />
-                  </Button>
-                </Tooltip>
-              </div>
-            }
-          >
+          <Popover>
+            <Tooltip content="Settings">
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings size={16} />
+                </Button>
+              </PopoverTrigger>
+            </Tooltip>
             <PopoverContent collisionPadding={{ right: 16 }}>
-              <div
-                className="st-typography-medium"
-                style={{ marginBottom: "8px" }}
-              >
-                Settings
+              <div className="leading-none font-medium mb-4">Settings</div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="show-time-cursor"
+                  checked={pageOptions.showHoverDate}
+                  onCheckedChange={(checked) =>
+                    setPageOptions({
+                      ...pageOptions,
+                      showHoverDate: checked as boolean,
+                    })
+                  }
+                />
+                <Label size="sm" htmlFor="show-time-cursor">
+                  Show time cursor
+                </Label>
               </div>
-              <Switch
-                label="Show time cursor"
-                checked={pageOptions.showHoverDate}
-                onCheckedChange={(checked) =>
-                  setPageOptions({ ...pageOptions, showHoverDate: checked })
-                }
-              />
             </PopoverContent>
           </Popover>
         </>
       }
     >
       {loadingInitialData && (
-        <div className="st-typography-label loading-indicator">Loading</div>
+        <div className="text-muted-foreground font-medium flex flex-1 justify-center items-center">
+          Loading
+        </div>
       )}
       {!loadingInitialData && viewPage.missions && viewPage.missions.length && (
-        <div className="view-page-tabs">
+        <div className="left-0 sticky top-0 z-[1]">
           <Tabs.Root
             value={`${mission}_${instrument}`}
             onValueChange={(value) => {

@@ -1,13 +1,9 @@
+import { Button } from "@nasa-jpl/stellar-react";
 import classNames from "classnames";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
-
-import {
-  Button,
-  IconCaretDown,
-  IconCaretRight,
-} from "@nasa-jpl/react-stellar/";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
@@ -68,7 +64,7 @@ export const Section = ({
   const onResizeStart = () => setResizing(true);
   const onResizeStop = () => setResizing(false);
   const entityClass = classNames({
-    "entity-prevent-highlight": dragging || resizing,
+    "select-none": dragging || resizing,
   });
 
   let wrapperRef: HTMLDivElement | null = null;
@@ -119,21 +115,22 @@ export const Section = ({
 
   return (
     <div
-      className={classNames("section", {
+      className={classNames({
         "section--open": open,
         "section--full-height": !!section.fullHeight,
       })}
     >
       {enableHeader && (
-        <div className="section-header">
+        <div className="border-t border-b sticky top-0 w-full bg-background">
           <Button
-            variant="tertiary"
+            className="w-full rounded-none gap-1 h-10 justify-start px-2 py-3 hover:bg-gray-50"
+            variant="ghost"
             onClick={() => {
               enableMoveAnimations(false);
               setOpen(!open);
             }}
           >
-            {open ? <IconCaretDown /> : <IconCaretRight />}
+            {open ? <ChevronDown /> : <ChevronRight />}
             {title}
           </Button>
         </div>
@@ -144,7 +141,6 @@ export const Section = ({
           <MemoizedReactGridLayout
             measureBeforeMount={false} // TODO not working right yet with true, existing bug with the library
             draggableHandle=".entity-drag-handle"
-            compactType="horizontal"
             margin={[8, 8]}
             containerPadding={[0, 0]}
             rowHeight={176}

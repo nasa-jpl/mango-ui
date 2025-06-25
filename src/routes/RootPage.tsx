@@ -42,7 +42,10 @@ export default function RootPage() {
         } catch (err) {
           if ((err as Error).name !== "AbortError") {
             console.error("Error loading products", err);
-            toast.error("Unable to load products", { duration: 999999999 });
+            toast.error("Unable to load products", {
+              duration: 999999999,
+              richColors: true,
+            });
           }
         }
       };

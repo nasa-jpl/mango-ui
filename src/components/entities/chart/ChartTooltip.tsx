@@ -88,8 +88,8 @@ export const ChartTooltip = ({
         top: top + window.scrollY - dimensions.height - -tooltip.caretY - 12,
       }}
     >
-      <div className="chart-tooltip-content">
-        <div className="chart-tooltip-x st-typography-bold">
+      <div className="chart-tooltip-content bg-foreground">
+        <div className="chart-tooltip-x text-white font-bold">
           {new Date(
             tooltip.dataPoints[0].parsed.x as unknown as number
           ).toISOString()}
@@ -102,15 +102,15 @@ export const ChartTooltip = ({
                 key={`${i}_${point.dataset.layer.id}`}
               >
                 <div
-                  className="chart-tooltip-color"
+                  className="chart-tooltip-color border-foreground"
                   style={{
                     background: tooltip.labelColors[i].borderColor.toString(),
                   }}
                 />
-                <div className="chart-tooltip-header st-typography-medium">
+                <div className="chart-tooltip-header font-medium text-white">
                   {renderHeader(point)}
                 </div>
-                <div className="chart-tooltip-point st-typography-medium">
+                <div className="chart-tooltip-point font-medium text-white">
                   {renderLabel(point)}
                 </div>
               </div>

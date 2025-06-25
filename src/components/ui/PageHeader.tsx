@@ -8,7 +8,7 @@ export declare type PageHeaderProps = {
 export const PageHeader = ({ title = "", children }: PageHeaderProps) => {
   return (
     <header className="page-header">
-      <div className="page-header-title st-typography-displayBody">{title}</div>
+      <div className="page-header-title text-lg">{title}</div>
       <div className="page-header-children">{children}</div>
     </header>
   );

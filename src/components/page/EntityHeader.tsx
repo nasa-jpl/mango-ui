@@ -1,6 +1,5 @@
-import { IconWarning, Tooltip } from "@nasa-jpl/react-stellar";
-import { DotsSix } from "@phosphor-icons/react";
-import "./EntityHeader.css";
+import { GripHorizontal, TriangleAlert } from "lucide-react";
+import { Tooltip } from "../ui/Tooltip";
 
 export declare type EntityHeaderProps = {
   children?: React.ReactNode;
@@ -18,23 +17,27 @@ export const EntityHeader = ({
   rightContent,
 }: EntityHeaderProps) => {
   return (
-    <div className="entity-header">
-      <div className="entity-header-title st-typography-label">{title}</div>
+    <div className="items-center bg-gray-50 border-b flex flex-shrink-0 h-8 justify-between pl-[10px]">
+      <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+        {title}
+      </div>
       {children}
-      <div className="entity-header-right-content">
+      <div className="items-center flex h-full">
         {rightContent}
         {loading && (
-          <div className="entity-loading st-typography-label">Loading</div>
+          <div className="items-center text-muted-foreground text-[10px] select-none">
+            Loading
+          </div>
         )}
         {error && (
           <Tooltip content={error.message}>
-            <div className="entity-error st-typography-label">
-              <IconWarning />
+            <div className="text-red-500 flex">
+              <TriangleAlert size={16} />
             </div>
           </Tooltip>
         )}
-        <div className="entity-drag-handle">
-          <DotsSix weight="bold" />
+        <div className="cursor-move flex justify-center w-[28px] entity-drag-handle text-muted-foreground">
+          <GripHorizontal size={16} />
         </div>
       </div>
     </div>

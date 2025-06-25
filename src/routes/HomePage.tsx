@@ -8,10 +8,9 @@ export default function HomePage() {
     useOutletContext<[View, never, Product[], never, boolean]>();
   return (
     <Page title="Home" padBody>
-      <div className="entity text-base">
-        <div className="entity-header !justify-start">
-          MANGO (
-          <i>Monitoring and ANalysis for Gravity Operations (MANGO) Tool</i>)
+      <div className="text-base bg-background flex flex-1 flex-col rounded border overflow-hidden">
+        <div className="px-2 py-1 !justify-start border-b bg-gray-50">
+          Monitoring and ANalysis for Gravity Operations (MANGO) Tool
         </div>
         <div className="p-4">
           <div>
