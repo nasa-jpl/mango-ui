@@ -213,6 +213,7 @@ export const EntityEditor = ({
         >
           <div className="h-[50%]">
             <Entity
+              isEditing
               className="h-full"
               entity={newEntity}
               products={products}
@@ -460,7 +461,7 @@ export const EntityEditor = ({
                                     >
                                       <SelectValue
                                         id="entity-type"
-                                        placeholder="Select field"
+                                        placeholder="Select product"
                                       />
                                     </SelectTrigger>
                                     <SelectContent size="xs">

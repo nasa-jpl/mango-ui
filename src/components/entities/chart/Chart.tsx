@@ -79,6 +79,7 @@ export declare type ChartProps = {
   dateRange: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
+  isEditing?: boolean;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
@@ -121,6 +122,7 @@ export const Chart = ({
   mission: missionProp,
   compact = false,
   showHeader = true,
+  isEditing = false,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
   onSelectPoint = () => {},
@@ -1363,13 +1365,22 @@ export const Chart = ({
                   </DropdownMenuTrigger>
                 </Tooltip>
                 <DropdownMenuContent className="w-56">
-                  <DropdownMenuItem onClick={() => onEdit()}>
+                  <DropdownMenuItem
+                    onClick={() => onEdit()}
+                    disabled={isEditing}
+                  >
                     <Pencil /> Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDuplicate()}>
+                  <DropdownMenuItem
+                    onClick={() => onDuplicate()}
+                    disabled={isEditing}
+                  >
                     <CopyPlus /> Duplicate
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDelete()}>
+                  <DropdownMenuItem
+                    onClick={() => onDelete()}
+                    disabled={isEditing}
+                  >
                     <Trash2 /> Delete
                   </DropdownMenuItem>
                   {/* <DropdownMenuItem>

@@ -185,7 +185,7 @@ export const ProductPreviewModal = ({
                       size="xs"
                       className="flex-1 max-w-96 min-w-24"
                     >
-                      <SelectValue placeholder="Select field" />
+                      <SelectValue placeholder="Select value" />
                     </SelectTrigger>
                     <SelectContent size="xs">
                       {(matchingChannel?.enum_values || [])
@@ -206,7 +206,7 @@ export const ProductPreviewModal = ({
               <Label size="sm">Version</Label>
               <Select onValueChange={setVersion} value={version}>
                 <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-                  <SelectValue placeholder="Select field" />
+                  <SelectValue placeholder="Select Version" />
                 </SelectTrigger>
                 <SelectContent size="xs">
                   {product.available_versions.map((v) => (

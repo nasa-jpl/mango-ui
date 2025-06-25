@@ -100,7 +100,7 @@ export const ProductSelector = ({
             value={newSelectedProduct.mission}
           >
             <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-              <SelectValue id="entity-type" placeholder="Select field" />
+              <SelectValue id="entity-type" placeholder="Select mission" />
             </SelectTrigger>
             <SelectContent size="xs">
               {missions.sort().map((mission) => (
@@ -123,7 +123,7 @@ export const ProductSelector = ({
             value={newSelectedProduct.instrument}
           >
             <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-              <SelectValue id="entity-type" placeholder="Select field" />
+              <SelectValue id="entity-type" placeholder="Select instrument" />
             </SelectTrigger>
             <SelectContent size="xs">
               {instruments.sort().map((instrument) => (
@@ -149,7 +149,7 @@ export const ProductSelector = ({
             value={newSelectedProduct.dataset}
           >
             <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-              <SelectValue id="entity-type" placeholder="Select field" />
+              <SelectValue id="entity-type" placeholder="Select dataset" />
             </SelectTrigger>
             <SelectContent size="xs">
               {datasets.sort().map((dataset) => (
@@ -218,7 +218,7 @@ export const ProductSelector = ({
                 value={matchingChannel?.value}
               >
                 <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-                  <SelectValue id="entity-type" placeholder="Select field" />
+                  <SelectValue id="entity-type" placeholder="Select value" />
                 </SelectTrigger>
                 <SelectContent size="xs">
                   {channel.values
@@ -245,7 +245,7 @@ export const ProductSelector = ({
             value={newSelectedProduct.version}
           >
             <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-              <SelectValue id="entity-type" placeholder="Select field" />
+              <SelectValue id="entity-type" placeholder="Select version" />
             </SelectTrigger>
             <SelectContent size="xs">
               {versions.map((version) => (
