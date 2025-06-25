@@ -64,13 +64,6 @@ jobs:
           path: e2e-test-results/
           retention-days: 2 # limit imposed by GitHub organization
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: dist
-          path: dist/
-          retention-days: 2 # limit imposed by GitHub organization
-
   build_docker_image:
     name: Build Docker Image
     environment: mango_ui
