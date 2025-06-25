@@ -133,7 +133,7 @@ export const ViewPage = ({
       };
       onPageChange(updatedViewPage);
     },
-    [viewPage, onPageChange]
+    [viewPage, onPageChange, confirm]
   );
 
   const onEntityDuplicate = useCallback(
