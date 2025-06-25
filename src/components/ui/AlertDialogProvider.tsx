@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // Adapted from https://gist.github.com/alexanderson1993/623bf0324f740ec4e33f33b59487dda7
 import {
   AlertDialog,
