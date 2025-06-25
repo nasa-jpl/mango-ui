@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import "./Page.css";
 import PageHeader from "./PageHeader";
 
 export declare type PageHeaderProps = {
@@ -16,9 +15,18 @@ export const Page = ({
   children,
 }: PageHeaderProps) => {
   return (
-    <div className={classNames("page", { "page--padded": padBody })}>
+    <div className={classNames("flex flex-col overflow-auto w-full")}>
       <PageHeader title={title}>{pageHeaderChildren}</PageHeader>
-      <div className="page-body">{children}</div>
+      <div
+        className={classNames(
+          "flex flex-col h-full w-full overflow-auto bg-secondary",
+          {
+            "p-4 border-t": padBody,
+          }
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 };

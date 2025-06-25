@@ -1,5 +1,4 @@
-import { TooltipProvider } from "@nasa-jpl/react-stellar";
-import "@nasa-jpl/react-stellar/dist/esm/stellar.css";
+import { TooltipProvider } from "@nasa-jpl/stellar-react";
 import type { Preview } from "@storybook/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";

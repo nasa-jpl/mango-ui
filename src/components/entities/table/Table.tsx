@@ -619,9 +619,6 @@ const Table = memo(function Table({
           }}
         />
       )}
-      {/* {compact && (
-        <div className="st-typography-label">Click to expand</div>
-      )} */}
     </div>
   );
 },

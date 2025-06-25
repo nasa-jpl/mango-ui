@@ -1,19 +1,21 @@
 import {
-  Button,
-  Dropdown,
-  Modal,
-  ModalActionRow,
-  ModalBody,
-  ModalClose,
-  OptionType,
-} from "@nasa-jpl/react-stellar";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@nasa-jpl/stellar-react";
 import { useEffect, useState } from "react";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Channel, ChartEntity } from "../../types/view";
 import Chart from "../entities/chart/Chart";
-import DateRangePicker from "../ui/DateRangePicker";
-import "./ProductPreviewModal.css";
+import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
   return `${product.mission} ${instrument || product.instruments[0]} ${
@@ -118,13 +120,7 @@ export const ProductPreviewModal = ({
     ],
   };
 
-  const onFieldChange = (selectedOption: OptionType) => {
-    const value = (selectedOption as OptionType).value;
-    setField(value);
-  };
-
-  const onChannelChange = (selectedOption: OptionType, channel: Channel) => {
-    const value = (selectedOption as OptionType).value;
+  const onChannelChange = (value: string, channel: Channel) => {
     const newChannels = channels.map((c) => {
       if (c.id === channel.id) {
         return { ...c, value };
@@ -134,20 +130,93 @@ export const ProductPreviewModal = ({
     setChannels(newChannels);
   };
 
-  const onVersionChange = (selectedOption: OptionType) => {
-    const value = (selectedOption as OptionType).value;
-    setVersion(value);
-  };
-
   return (
-    <Modal
-      className="product-preview-modal"
-      onOpenChange={onClose}
-      open
-      title={
-        <div className="product-preview-modal-title">
-          {getProductDisplayName(product, instrument)}
-          <div className="product-preview-date">
+    <Dialog onOpenChange={onClose} open>
+      <DialogContent className="w-[80vw] h-[80vh] max-w-none max-h-none flex flex-col">
+        <DialogHeader>
+          <div className="items-center flex flex-1 justify-between mr-4">
+            <DialogTitle>
+              {getProductDisplayName(product, instrument)}
+            </DialogTitle>
+          </div>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 flex-1 overflow-hidden">
+          <div className="flex gap-5 flex-wrap items-baseline py-0.5">
+            <div className="flex gap-2 items-center">
+              <Label size="sm">Field</Label>
+              <Select onValueChange={setField} value={field}>
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  {product.available_fields
+                    .filter(
+                      (f) =>
+                        !f.is_channel_id &&
+                        (f.type === "int" || f.type === "float")
+                    )
+                    .map((f) => {
+                      return (
+                        <SelectItem size="xs" value={f.name}>
+                          <div className="flex gap-1">
+                            {f.name}
+                            <div className="text-muted-foreground">
+                              {f.unit} ({f.type})
+                            </div>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                </SelectContent>
+              </Select>
+            </div>
+            {channels.map((channel) => {
+              const matchingChannel = product.available_fields.find(
+                (f) => f.name === channel.id
+              );
+              return (
+                <div className="flex gap-2 items-center">
+                  <Label size="sm">{channel.id}</Label>
+                  <Select
+                    onValueChange={(value) => onChannelChange(value, channel)}
+                    value={channel.value}
+                  >
+                    <SelectTrigger
+                      size="xs"
+                      className="flex-1 max-w-96 min-w-24"
+                    >
+                      <SelectValue placeholder="Select field" />
+                    </SelectTrigger>
+                    <SelectContent size="xs">
+                      {(matchingChannel?.enum_values || [])
+                        .sort((a, b) =>
+                          a.localeCompare(b, "en", { numeric: true })
+                        )
+                        .map((v) => (
+                          <SelectItem size="xs" value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })}
+            <div className="flex gap-2 items-center">
+              <Label size="sm">Version</Label>
+              <Select onValueChange={setVersion} value={version}>
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  {product.available_versions.map((v) => (
+                    <SelectItem size="xs" value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <DateRangePicker
               startDate={new Date(dateRange.start)}
               endDate={new Date(dateRange.end)}
@@ -159,88 +228,20 @@ export const ProductPreviewModal = ({
               }}
             />
           </div>
-        </div>
-      }
-    >
-      <ModalBody>
-        <div className="product-preview-modal-content">
-          <div className="product-preview-controls">
-            <Dropdown
-              className="product-preview-field"
-              value={{ value: field, label: field }}
-              label="Field"
-              labelPosition="left"
-              // @ts-expect-error TODO fix from the react-stellar side
-              onChange={onFieldChange}
-              options={product.available_fields
-                .filter(
-                  (f) =>
-                    !f.is_channel_id && (f.type === "int" || f.type === "float")
-                )
-                .map((f) => ({
-                  label: (
-                    <div className="product-preview-field--label">
-                      {f.name}
-                      <div>
-                        {f.unit} ({f.type})
-                      </div>
-                    </div>
-                  ),
-                  value: f.name,
-                }))}
-            />
-            {channels.map((channel) => {
-              const matchingChannel = product.available_fields.find(
-                (f) => f.name === channel.id
-              );
-              return (
-                <Dropdown
-                  className="product-preview-field"
-                  value={{ value: channel.value, label: channel.value }}
-                  label={channel.id}
-                  labelPosition="left"
-                  onChange={(selectedOption) =>
-                    // @ts-expect-error TODO fix from the react-stellar side
-                    onChannelChange(selectedOption, channel)
-                  }
-                  options={(matchingChannel?.enum_values || [])
-                    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
-                    .map((v) => ({
-                      label: v,
-                      value: v,
-                    }))}
-                />
-              );
-            })}
-            <Dropdown
-              value={{ value: version, label: version }}
-              label="Version"
-              labelPosition="left"
-              // @ts-expect-error TODO fix from the react-stellar side
-              onChange={onVersionChange}
-              options={product.available_versions.map((v) => ({
-                label: v,
-                value: v,
-              }))}
+          <div className="flex flex-1 flex-col h-0 border rounded overflow-hidden">
+            <Chart
+              chartEntity={chartEntity}
+              products={products}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              hoverDate={null}
+              onHoverDateChange={() => {}}
+              selectedPoint={null}
             />
           </div>
-          <Chart
-            chartEntity={chartEntity}
-            products={products}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            hoverDate={null}
-            onHoverDateChange={() => {}}
-            selectedPoint={null}
-          />
         </div>
-      </ModalBody>
-      <ModalActionRow>
-        <ModalClose asChild>
-          <Button variant="secondary">Close</Button>
-        </ModalClose>
-      </ModalActionRow>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

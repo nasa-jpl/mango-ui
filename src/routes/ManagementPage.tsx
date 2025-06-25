@@ -1,31 +1,36 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Alert,
-  AlertAction,
-  AlertCancel,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
   Button,
+  Form,
+  FormControl,
   FormField,
-  Input,
-  Error as InputError,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input as InputNext,
   Label,
-  Tooltip,
-} from "@nasa-jpl/react-stellar";
-import {
-  ArrowDown,
-  ArrowUp,
-  File,
-  Folder,
-  Link,
-  TrashSimple,
-} from "@phosphor-icons/react";
+} from "@nasa-jpl/stellar-react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useOutletContext } from "react-router-dom";
+import { z } from "zod";
 import Page from "../components/ui/Page";
+import { Tooltip } from "../components/ui/Tooltip";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
 import { PageGroup, Page as PageType, View } from "../types/view";
 import { downloadJSON } from "../utilities/generic";
 import { createViewPage, createViewPageGroup } from "../utilities/view";
-import "./ManagementPage.css";
 
 export default function ManagementPage() {
   // TODO type outlet context instead of duplicating
@@ -131,80 +136,40 @@ export default function ManagementPage() {
 
   const renderDeletionConfirmation = (item: string, onDelete: () => void) => {
     return (
-      <Alert
-        description={`This action cannot be undone, are you sure you want to delete this ${item}?`}
-        title="Are you sure?"
-        trigger={
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
           <div>
             <Tooltip content={`Delete ${item}`}>
-              <Button
-                variant="icon"
-                size="medium"
-                className="management-page-button"
-              >
-                <TrashSimple size={16} />
+              <Button variant="ghost" size="icon">
+                <Trash2 />
               </Button>
             </Tooltip>
           </div>
-        }
-      >
-        <>
-          <AlertCancel asChild>
-            <Button variant="secondary">Cancel</Button>
-          </AlertCancel>
-          <AlertAction asChild>
-            <Button
-              onClick={onDelete}
-              style={{
-                background: "var(--st-error-red)",
-              }}
-            >
-              Delete
-            </Button>
-          </AlertAction>
-        </>
-      </Alert>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone, are you sure you want to delete this{" "}
+              {item}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              {/* TODO why isn't variant overriding base tw classes in here with asChild? */}
+              <Button
+                variant="destructive"
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
-  };
-
-  const validateUrl = (
-    url: string,
-    id: string,
-    thingsWithURL: { id: string; url: string }[]
-  ) => {
-    if (!url) {
-      return "Value required";
-    } else if (url.toLowerCase() === "manage") {
-      return "'Manage' is not an allowed value";
-    } else if (url.toLowerCase() === "products") {
-      return "'Products' is not an allowed value";
-    } else if (
-      thingsWithURL
-        .filter((p) => p.id !== id)
-        .map((p) => p.url.toLowerCase())
-        .indexOf(url.toLowerCase()) > -1
-    ) {
-      return "URL must be unique within grouping";
-    }
-    return "";
-  };
-
-  const validateTitle = (
-    title: string,
-    id: string,
-    thingsWithTitle: { id: string; title: string }[]
-  ) => {
-    if (!title) {
-      return "Value required";
-    } else if (
-      thingsWithTitle
-        .filter((p) => p.id !== id)
-        .map((p) => p.title.toLowerCase())
-        .indexOf(title.toLowerCase()) > -1
-    ) {
-      return "Title must be unique within grouping";
-    }
-    return "";
   };
 
   const movePageGroup = (pageGroup: PageGroup, direction: "up" | "down") => {
@@ -261,7 +226,7 @@ export default function ManagementPage() {
 
   const onJSONViewInput = async (evt: FormEvent<HTMLInputElement>) => {
     const files = (evt.target as HTMLInputElement).files;
-    if (!files) {
+    if (!files || !files.length) {
       return;
     }
     const file = files[0];
@@ -296,22 +261,47 @@ export default function ManagementPage() {
 
   return (
     <Page title="Manage" padBody>
-      <div className="entity management-page">
-        <div className="st-typography-header">Configure Mango Pages</div>
-        <div className="st-typography-body">
+      <div className="overflow-auto p-4 bg-background border rounded">
+        <div className="text-lg font-medium">Configure Mango Pages</div>
+        <div>
           {view.pageGroups.map((pageGroup, i) => {
-            const urlInvalid = validateUrl(
-              pageGroup.url,
-              pageGroup.id,
-              view.pageGroups
+            const otherPageGroups = view.pageGroups.filter(
+              (p) => p.id !== pageGroup.id
             );
-            const titleInvalid = validateTitle(
-              pageGroup.title,
-              pageGroup.id,
-              view.pageGroups
-            );
+            const PageGroupURLFormSchema = z.object({
+              url: z
+                .string()
+                .min(1, "URL must be defined")
+                .refine(
+                  (s) => s.toLowerCase() !== "manage",
+                  "'Manage' is not an allowed value"
+                )
+                .refine(
+                  (s) => s.toLowerCase() !== "products",
+                  "'Products' is not an allowed value"
+                )
+                .refine(
+                  (s) =>
+                    otherPageGroups
+                      .map((p) => p.url.toLowerCase())
+                      .indexOf(s.toLowerCase()) < 0,
+                  "URL used by another Page Group"
+                ),
+            });
+            const PageGroupTitleFormSchema = z.object({
+              title: z
+                .string()
+                .min(1, "Title must be defined")
+                .refine(
+                  (s) =>
+                    otherPageGroups
+                      .map((p) => p.title.toLowerCase())
+                      .indexOf(s.toLowerCase()) < 0,
+                  "Title used by another Page Group"
+                ),
+            });
             return (
-              <div className="management-page-page-group" key={pageGroup.id}>
+              <div className="flex flex-col gap-2" key={pageGroup.id}>
                 <div
                   style={{
                     display: "flex",
@@ -320,52 +310,39 @@ export default function ManagementPage() {
                     alignItems: "flex-start",
                   }}
                 >
-                  <div className="st-typography-medium">
-                    Page Group Title
-                    <FormField>
-                      <Input
-                        leftAdornment={<Folder size={16} />}
-                        className="management-page-input"
-                        value={pageGroup.title}
-                        error={!!titleInvalid}
-                        onInput={(evt) =>
-                          updatePageGroup({
-                            ...pageGroup,
-                            title: (evt.target as HTMLInputElement).value,
-                          })
-                        }
-                      />
-                      {titleInvalid && <InputError>{titleInvalid}</InputError>}
-                    </FormField>
-                  </div>
-                  <div className="st-typography-medium">
-                    URL
-                    <FormField>
-                      <Input
-                        leftAdornment={<Link size={16} />}
-                        className="management-page-input"
-                        value={pageGroup.url}
-                        error={!!urlInvalid}
-                        onInput={(evt) =>
-                          updatePageGroup({
-                            ...pageGroup,
-                            url: (evt.target as HTMLInputElement).value,
-                          })
-                        }
-                      />
-                      {urlInvalid && <InputError>{urlInvalid}</InputError>}
-                    </FormField>
-                  </div>
-                  <div className="management-page-buttons">
+                  <InputForm
+                    formSchema={PageGroupTitleFormSchema}
+                    defaultValue={pageGroup.title}
+                    name="title"
+                    label="Page Group Title"
+                    onChange={(value) =>
+                      updatePageGroup({
+                        ...pageGroup,
+                        title: value,
+                      })
+                    }
+                  />
+                  <InputForm
+                    formSchema={PageGroupURLFormSchema}
+                    defaultValue={pageGroup.url}
+                    name="url"
+                    label="URL"
+                    onChange={(value) =>
+                      updatePageGroup({
+                        ...pageGroup,
+                        url: value,
+                      })
+                    }
+                  />
+                  <div className="flex self-end">
                     {renderDeletionConfirmation("page group", () =>
                       deletePageGroup(pageGroup.id)
                     )}
                     <Tooltip content="Move up">
                       <Button
                         disabled={i === 0}
-                        variant="icon"
-                        size="medium"
-                        className="management-page-button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => movePageGroup(pageGroup, "up")}
                       >
                         <ArrowUp size={16} />
@@ -374,9 +351,8 @@ export default function ManagementPage() {
                     <Tooltip content="Move down">
                       <Button
                         disabled={i === view.pageGroups.length - 1}
-                        variant="icon"
-                        size="medium"
-                        className="management-page-button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => movePageGroup(pageGroup, "down")}
                       >
                         <ArrowDown size={16} />
@@ -384,18 +360,43 @@ export default function ManagementPage() {
                     </Tooltip>
                   </div>
                 </div>
-                <div className="management-page-pages">
+                <div className="items-start border-l-[var(--app-border-color)] flex flex-col gap-2 pl-4 border-l">
                   {pageGroup.pages.map((page, j) => {
-                    const urlInvalid = validateUrl(
-                      page.url,
-                      page.id,
-                      pageGroup.pages
+                    const otherPages = pageGroup.pages.filter(
+                      (p) => p.id !== page.id
                     );
-                    const titleInvalid = validateTitle(
-                      page.title,
-                      page.id,
-                      pageGroup.pages
-                    );
+                    const PageURLFormSchema = z.object({
+                      url: z
+                        .string()
+                        .min(1, "URL must be defined")
+                        .refine(
+                          (s) => s.toLowerCase() !== "manage",
+                          "'Manage' is not an allowed value"
+                        )
+                        .refine(
+                          (s) => s.toLowerCase() !== "products",
+                          "'Products' is not an allowed value"
+                        )
+                        .refine(
+                          (s) =>
+                            otherPages
+                              .map((p) => p.url.toLowerCase())
+                              .indexOf(s.toLowerCase()) < 0,
+                          "URL used by another Page"
+                        ),
+                    });
+                    const PageTitleFormSchema = z.object({
+                      title: z
+                        .string()
+                        .min(1, "Title must be defined")
+                        .refine(
+                          (s) =>
+                            otherPages
+                              .map((p) => p.title.toLowerCase())
+                              .indexOf(s.toLowerCase()) < 0,
+                          "Title used by another Page"
+                        ),
+                    });
                     return (
                       <div
                         style={{
@@ -404,63 +405,45 @@ export default function ManagementPage() {
                         }}
                         key={page.id}
                       >
-                        <div className="st-typography-medium">
-                          Page Title
-                          <FormField>
-                            <Input
-                              leftAdornment={<File size={16} />}
-                              className="management-page-input"
-                              value={page.title}
-                              error={!!titleInvalid}
-                              onInput={(evt) =>
-                                updatePage(
-                                  {
-                                    ...page,
-                                    title: (evt.target as HTMLInputElement)
-                                      .value,
-                                  },
-                                  pageGroup.id
-                                )
-                              }
-                            />
-                            {titleInvalid && (
-                              <InputError>{titleInvalid}</InputError>
-                            )}
-                          </FormField>
-                        </div>
-                        <div className="st-typography-medium">
-                          URL
-                          <FormField>
-                            <Input
-                              leftAdornment={<Link size={16} />}
-                              className="management-page-input"
-                              value={page.url}
-                              error={!!urlInvalid}
-                              onInput={(evt) =>
-                                updatePage(
-                                  {
-                                    ...page,
-                                    url: (evt.target as HTMLInputElement).value,
-                                  },
-                                  pageGroup.id
-                                )
-                              }
-                            />
-                            {urlInvalid && (
-                              <InputError>{urlInvalid}</InputError>
-                            )}
-                          </FormField>
-                        </div>
-                        <div className="management-page-buttons">
+                        <InputForm
+                          formSchema={PageURLFormSchema}
+                          defaultValue={page.url}
+                          name="url"
+                          label="URL"
+                          onChange={(value) =>
+                            updatePage(
+                              {
+                                ...page,
+                                url: value,
+                              },
+                              pageGroup.id
+                            )
+                          }
+                        />
+                        <InputForm
+                          formSchema={PageTitleFormSchema}
+                          defaultValue={page.title}
+                          name="title"
+                          label="Title"
+                          onChange={(value) =>
+                            updatePage(
+                              {
+                                ...page,
+                                title: value,
+                              },
+                              pageGroup.id
+                            )
+                          }
+                        />
+                        <div className="flex self-end">
                           {renderDeletionConfirmation("page", () =>
                             deletePage(pageGroup.id, page.id)
                           )}
                           <Tooltip content="Move up">
                             <Button
                               disabled={j === 0}
-                              variant="icon"
-                              size="medium"
-                              className="management-page-button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => movePage(page, pageGroup, "up")}
                             >
                               <ArrowUp size={16} />
@@ -469,9 +452,8 @@ export default function ManagementPage() {
                           <Tooltip content="Move down">
                             <Button
                               disabled={j === pageGroup.pages.length - 1}
-                              variant="icon"
-                              size="medium"
-                              className="management-page-button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => movePage(page, pageGroup, "down")}
                             >
                               <ArrowDown size={16} />
@@ -482,7 +464,7 @@ export default function ManagementPage() {
                     );
                   })}
                   <Button
-                    variant="tertiary"
+                    variant="secondary"
                     onClick={() => onNewPageClick(pageGroup.id)}
                   >
                     + New Page
@@ -492,30 +474,34 @@ export default function ManagementPage() {
             );
           })}
           <Button
-            variant="tertiary"
+            variant="secondary"
+            className="mt-4"
             onClick={onNewPageGroupClick}
-            style={{ marginTop: "16px" }}
           >
             + New Page Group
           </Button>
         </div>
-        <div className="management-page-upload-view">
-          <div className="management-page-upload-view--inner">
-            <FormField flow="vertical">
-              <Label htmlFor="json-input" className="st-typography-label">
+        <div className="flex flex-1 mt-6 w-[400px]">
+          <div className="flex flex-1 flex-col gap-4">
+            <div className="space-y-1">
+              <Label size="sm" htmlFor="upload">
                 Upload JSON View
               </Label>
-              <Input
-                error={!!uploadError}
-                id="json-input"
+              <InputNext
+                sizeVariant="xs"
+                id="upload"
                 type="file"
-                className="management-page-input"
+                accept=".json"
                 onInput={onJSONViewInput}
               />
-              {uploadError && <InputError>{uploadError}</InputError>}
-            </FormField>
-            <div className="management-page-view-download">
-              <Label htmlFor="view-download" className="st-typography-label">
+              {uploadError && (
+                <div className="text-destructive text-xs font-normal">
+                  {uploadError}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <Label htmlFor="view-download" size="sm">
                 Download JSON View
               </Label>
               <Button
@@ -530,5 +516,57 @@ export default function ManagementPage() {
         </div>
       </div>
     </Page>
+  );
+}
+
+declare type InputFormProps = {
+  defaultValue: string;
+  formSchema: z.ZodTypeAny;
+  label: string;
+  name: string;
+  onChange: (value: string) => void;
+};
+
+export function InputForm({
+  defaultValue = "",
+  formSchema,
+  label,
+  name,
+  onChange,
+}: InputFormProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      [name]: defaultValue,
+    },
+    mode: "onChange",
+  });
+
+  function onFormChange(data: z.infer<typeof formSchema>) {
+    onChange(data[name]);
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        className="space-y-6 w-80"
+        onChange={form.handleSubmit(onFormChange)}
+        onSubmit={(evt) => evt.preventDefault()}
+      >
+        <FormField
+          control={form.control}
+          name={name}
+          render={({ field }) => (
+            <FormItem size="sm">
+              <FormLabel size="sm">{label}</FormLabel>
+              <FormControl>
+                <InputNext sizeVariant="xs" autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage size="sm" />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 }

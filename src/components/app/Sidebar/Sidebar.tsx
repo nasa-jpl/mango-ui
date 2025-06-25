@@ -1,4 +1,4 @@
-import { Button } from "@nasa-jpl/react-stellar";
+import { Button } from "@nasa-jpl/stellar-react";
 import {
   CheckCheck,
   Database,
@@ -12,7 +12,6 @@ import { NavLink } from "react-router-dom";
 import { config } from "../../../config";
 import { View } from "../../../types/view";
 import SaveViewModal from "../SaveViewModal";
-import "./Sidebar.css";
 import SidebarContainer from "./SidebarContainer";
 import SidebarGroup from "./SidebarGroup";
 import SidebarLink from "./SidebarLink";
@@ -24,35 +23,46 @@ export declare type SidebarProps = {
   viewSavingEnabled?: boolean;
 };
 
-const logo = () => (
+const logo = (
   <svg
     width="31"
-    height="24"
-    viewBox="0 0 31 24"
+    height="30"
+    viewBox="0 0 31 30"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      opacity="0.6"
-      d="M26.5391 12.001C26.5391 14.1766 25.8939 16.3033 24.6852 18.1123C23.4765 19.9212 21.7586 21.3311 19.7486 22.1637C17.7386 22.9962 15.5269 23.2141 13.3931 22.7896C11.2593 22.3652 9.29927 21.3175 7.76089 19.7792C6.22252 18.2408 5.17487 16.2808 4.75043 14.147C4.32599 12.0132 4.54383 9.80145 5.37639 7.79146C6.20896 5.78147 7.61885 4.06351 9.42779 2.85481C11.2367 1.64612 13.3635 1.00098 15.5391 1.00098C18.4564 1.00098 21.2543 2.1599 23.3172 4.2228C25.3801 6.2857 26.5391 9.0836 26.5391 12.001Z"
-      fill="url(#paint0_linear_3680_3166)"
-    />
-    <path
-      d="M30.1778 3.58561C29.2215 1.93686 26.6978 1.56561 22.8653 2.50311C21.091 1.13117 18.9675 0.284335 16.736 0.0588216C14.5045 -0.166692 12.2545 0.238153 10.2415 1.22736C8.22862 2.21658 6.53347 3.7505 5.34867 5.65488C4.16387 7.55926 3.53692 9.75776 3.53904 12.0006C3.53919 12.5151 3.57176 13.029 3.63654 13.5394C0.175287 17.1256 0.225287 19.2506 0.901537 20.4156C1.53904 21.5206 2.86904 22.0006 4.61904 22.0006C5.83406 21.9755 7.04193 21.8077 8.21779 21.5006C9.9923 22.8712 12.1156 23.7169 14.3465 23.9415C16.5774 24.1661 18.8266 23.7607 20.8388 22.7714C22.8509 21.7821 24.5453 20.2484 25.7297 18.3445C26.9141 16.4406 27.5409 14.2428 27.539 12.0006C27.5393 11.4887 27.5071 10.9772 27.4428 10.4694C29.0053 8.84436 30.0453 7.30061 30.399 5.97936C30.6428 5.06436 30.569 4.25936 30.1778 3.58561ZM15.539 2.00061C17.804 2.00294 20.0012 2.77303 21.772 4.18515C23.5429 5.59727 24.7827 7.56801 25.289 9.77561C23.1565 11.7831 20.2703 13.8419 17.5303 15.4169C14.0865 17.3931 11.099 18.6256 8.71654 19.3006C7.24913 17.932 6.22775 16.1533 5.78537 14.1961C5.34298 12.2389 5.50009 10.1939 6.23624 8.3272C6.97238 6.46053 8.25346 4.85873 9.9127 3.73033C11.5719 2.60193 13.5325 1.9992 15.539 2.00061ZM2.63154 19.4119C2.44904 19.0981 2.55029 18.5069 2.90904 17.7869C3.2638 17.1123 3.69542 16.481 4.19529 15.9056C4.69079 17.3412 5.4543 18.6698 6.44529 19.8206C4.28904 20.1831 2.94404 19.9519 2.63154 19.4119ZM15.539 22.0006C13.8529 22.0023 12.1942 21.5747 10.719 20.7581C13.4267 19.8005 16.0392 18.5928 18.5228 17.1506C21.2203 15.6019 23.6078 13.9231 25.5315 12.2656C25.4603 14.8696 24.3767 17.3431 22.5108 19.1609C20.645 20.9787 18.144 21.9974 15.539 22.0006ZM28.4665 5.46186C28.254 6.25061 27.6928 7.15311 26.8878 8.10311C26.3936 6.66577 25.63 5.3358 24.6378 4.18436C26.414 3.89061 28.059 3.91311 28.4503 4.58936C28.5628 4.78561 28.569 5.07936 28.4665 5.46186Z"
-      fill="black"
-    />
+    <g clipPath="url(#clip0_3745_2433)">
+      <path
+        id="circle"
+        d="M26.5392 15.0029C26.5392 17.1785 25.8941 19.3053 24.6854 21.1142C23.4767 22.9231 21.7587 24.333 19.7487 25.1656C17.7387 25.9982 15.527 26.216 13.3932 25.7916C11.2594 25.3671 9.29939 24.3195 7.76102 22.7811C6.22264 21.2427 5.17499 19.2827 4.75055 17.1489C4.32611 15.0151 4.54395 12.8034 5.37651 10.7934C6.20908 8.78343 7.61898 7.06546 9.42792 5.85676C11.2369 4.64807 13.3636 4.00293 15.5392 4.00293C18.4566 4.00293 21.2545 5.16186 23.3174 7.22476C25.3803 9.28766 26.5392 12.0855 26.5392 15.0029Z"
+        fill="url(#paint0_linear_3745_2433)"
+      />
+      <path
+        id="border"
+        d="M30.1779 6.58757C29.2217 4.93882 26.6979 4.56757 22.8654 5.50507C21.0911 4.13312 18.9676 3.28629 16.7361 3.06077C14.5046 2.83526 12.2546 3.24011 10.2417 4.22932C8.22874 5.21853 6.53359 6.75246 5.34879 8.65684C4.164 10.5612 3.53704 12.7597 3.53916 15.0026C3.53932 15.517 3.57188 16.031 3.63666 16.5413C0.175409 20.1276 0.225409 22.2526 0.901659 23.4176C1.53916 24.5226 2.86916 25.0026 4.61916 25.0026C5.83419 24.9774 7.04205 24.8096 8.21791 24.5026C9.99242 25.8732 12.1157 26.7188 14.3466 26.9434C16.5775 27.1681 18.8267 26.7627 20.8389 25.7734C22.851 24.784 24.5455 23.2503 25.7298 21.3465C26.9142 19.4426 27.541 17.2448 27.5392 15.0026C27.5394 14.4906 27.5073 13.9792 27.4429 13.4713C29.0054 11.8463 30.0454 10.3026 30.3992 8.98132C30.6429 8.06632 30.5692 7.26132 30.1779 6.58757ZM15.5392 5.00257C17.8041 5.00489 20.0013 5.77498 21.7722 7.1871C23.543 8.59923 24.7828 10.57 25.2892 12.7776C23.1567 14.7851 20.2704 16.8438 17.5304 18.4188C14.0867 20.3951 11.0992 21.6276 8.71666 22.3026C7.24925 20.934 6.22787 19.1553 5.78549 17.1981C5.3431 15.2409 5.50021 13.1958 6.23636 11.3292C6.9725 9.46249 8.25359 7.86068 9.91282 6.73228C11.5721 5.60388 13.5326 5.00115 15.5392 5.00257ZM2.63166 22.4138C2.44916 22.1001 2.55041 21.5088 2.90916 20.7888C3.26392 20.1142 3.69554 19.4829 4.19541 18.9076C4.69091 20.3432 5.45442 21.6717 6.44541 22.8226C4.28916 23.1851 2.94416 22.9538 2.63166 22.4138ZM15.5392 25.0026C13.8531 25.0043 12.1943 24.5767 10.7192 23.7601C13.4268 22.8025 16.0393 21.5948 18.5229 20.1526C21.2204 18.6038 23.6079 16.9251 25.5317 15.2676C25.4604 17.8715 24.3768 20.3451 22.5109 22.1628C20.6451 23.9806 18.1441 24.9993 15.5392 25.0026ZM28.4667 8.46382C28.2542 9.25257 27.6929 10.1551 26.8879 11.1051C26.3937 9.66773 25.6301 8.33775 24.6379 7.18632C26.4142 6.89257 28.0592 6.91507 28.4504 7.59132C28.5629 7.78757 28.5692 8.08132 28.4667 8.46382Z"
+        fill="black"
+      />
+    </g>
     <defs>
       <linearGradient
-        id="paint0_linear_3680_3166"
-        x1="10.5762"
-        y1="3.93042"
-        x2="21.7686"
-        y2="18.036"
+        id="paint0_linear_3745_2433"
+        x1="10.5763"
+        y1="6.93237"
+        x2="21.7687"
+        y2="21.0379"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#FFC700" />
-        <stop offset="1" stopColor="#FF3D00" />
+        <stop stopColor="#FBDA63" />
+        <stop offset="1" stopColor="#FB8763" />
       </linearGradient>
+      <clipPath id="clip0_3745_2433">
+        <rect
+          width="30"
+          height="30"
+          fill="white"
+          transform="translate(0.539185 0.00195312)"
+        />
+      </clipPath>
     </defs>
   </svg>
 );
@@ -73,12 +83,14 @@ export const Sidebar = ({
         setActive(path);
       }, 0);
     }
-    return isActive ? "sidebar-link--active" : "";
+    return isActive
+      ? "[&_button]:bg-blue-100 [&_button]:text-primary [&_button]:hover:bg-blue-100 [&_button]:hover:text-primary"
+      : "";
   };
 
   return (
-    <SidebarContainer title={title} logo={logo()}>
-      <div className="sidebar-padded-content">
+    <SidebarContainer title={title} logo={logo}>
+      <div className="px-2 ">
         <NavLink
           className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
           to="/"
@@ -120,36 +132,36 @@ export const Sidebar = ({
         </NavLink> */}
       </div>
       {!view ? (
-        <div className="sidebar-padded-content st-typography-label">
-          Loading
-        </div>
+        <div className="px-4 text-muted-foreground">Loading</div>
       ) : (
-        view.pageGroups.map((pageGroup) => {
-          return (
-            <div key={pageGroup.id} className="sidebar-padded-content">
-              <SidebarGroup title={pageGroup.title}>
-                {pageGroup.pages.map((page) => (
-                  <NavLink
-                    className={(activeNav) =>
-                      getNavLinkClass(
-                        activeNav.isActive,
-                        `view/${pageGroup.url}/${page.url}`
-                      )
-                    }
-                    to={`view/${pageGroup.url}/${page.url}`}
-                    key={page.id}
-                  >
-                    <SidebarLink title={page.title} />
-                  </NavLink>
-                ))}
-              </SidebarGroup>
-            </div>
-          );
-        })
+        <div className="gap-4 flex flex-col overflow-auto">
+          {view.pageGroups.map((pageGroup) => {
+            return (
+              <div key={pageGroup.id} className="px-2">
+                <SidebarGroup title={pageGroup.title}>
+                  {pageGroup.pages.map((page) => (
+                    <NavLink
+                      className={(activeNav) =>
+                        getNavLinkClass(
+                          activeNav.isActive,
+                          `view/${pageGroup.url}/${page.url}`
+                        )
+                      }
+                      to={`view/${pageGroup.url}/${page.url}`}
+                      key={page.id}
+                    >
+                      <SidebarLink title={page.title} className="pl-7" />
+                    </NavLink>
+                  ))}
+                </SidebarGroup>
+              </div>
+            );
+          })}
+        </div>
       )}
-      <div className="sidebar-bottom-content">
-        <div className="sidebar-divider" />
-        <div className="sidebar-padded-content">
+      <div className="flex flex-col justify-end pb-2 flex-1">
+        <div className="border-t flex-shrink-0 px-0 py-1 w-full" />
+        <div className="px-2 py-0">
           {view && (
             <SaveViewModal
               open={showSaveViewModal}
@@ -160,21 +172,18 @@ export const Sidebar = ({
           )}
           {viewSavingEnabled && (
             <Button
-              icon={<Save size={16} />}
-              variant="secondary"
-              className="sidebar-save-view-changes"
+              variant="outline"
+              size="lg"
+              className="w-full text-xs text-blue-500 border-blue-500 hover:bg-blue-50 hover:text-blue-500 mb-2"
               onClick={() => setShowSaveViewModal(true)}
             >
+              <Save size={16} />
               Save View Changes
             </Button>
           )}
           {!viewSavingEnabled && (
-            <Button
-              icon={<CheckCheck size={16} />}
-              variant="tertiary"
-              className="sidebar-save-view-changes sidebar-no-view-changes"
-              disabled
-            >
+            <Button variant="ghost" className="cursor-auto mb-2 h-8" disabled>
+              <CheckCheck size={16} />
               View up-to-date
             </Button>
           )}

@@ -1,6 +1,6 @@
-import { Button } from "@nasa-jpl/react-stellar";
-import { ChartLine } from "@phosphor-icons/react";
+import { Button } from "@nasa-jpl/stellar-react";
 import { CustomFloatingFilterProps } from "ag-grid-react";
+import { ChartLine } from "lucide-react";
 import "./CustomFilter.css";
 
 export interface CustomProps extends CustomFloatingFilterProps {
@@ -12,14 +12,15 @@ export function CustomFilter({ onColumnPreview }: CustomProps) {
     onColumnPreview && (
       <Button
         className="ag-header-cell-menu-button ag-header-menu-always-show"
-        variant="icon"
+        variant="ghost"
+        size="icon"
         onClick={() => {
           if (onColumnPreview) {
             onColumnPreview();
           }
         }}
       >
-        <ChartLine width={16} height={16} />
+        <ChartLine size={16} />
       </Button>
     )
   );

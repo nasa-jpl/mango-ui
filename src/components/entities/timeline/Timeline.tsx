@@ -43,20 +43,22 @@ export function Timeline({
     }
   }
   const hoverDateClasses = classNames(
-    "timeline-hover-date st-typography-medium",
-    { "timeline-hover-date--flipped": flip }
+    "timeline-hover-date font-medium text-gray-600",
+    {
+      "timeline-hover-date--flipped": flip,
+    }
   );
 
   return (
     <div className="timeline">
-      <div className="timeline-time-visualization">
+      <div className="timeline-time-visualization border-b">
         <div
-          className="timeline-time-visualization-label st-typography-medium"
+          className="timeline-time-visualization-label font-medium"
           style={{ width: `${marginLeft}px` }}
         >
           Date
         </div>
-        <div className="st-typography-medium ticks" ref={timeVisualizationRef}>
+        <div className="font-medium ticks" ref={timeVisualizationRef}>
           {width > 0 &&
             ticks.map((tick, i) => {
               const x = timeScale(tick);
@@ -66,7 +68,9 @@ export function Timeline({
                   style={{ left: `${(x / width) * 100}%` }}
                   key={`${x}_${i}`}
                 >
-                  <div className="tick-label">{tickFormat(tick)}</div>
+                  <div className="tick-label text-secondary-foreground">
+                    {tickFormat(tick)}
+                  </div>
                   <div className="tick-mark" />
                 </div>
               );

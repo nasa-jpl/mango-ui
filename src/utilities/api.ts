@@ -24,7 +24,7 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
   if (response.status >= 200 && response.status <= 400) {
     return json.data as View;
   } else {
-    toast.error("Unable to load view");
+    toast.error("Unable to load view", { richColors: true });
     throw new Error(response.statusText);
   }
 };
