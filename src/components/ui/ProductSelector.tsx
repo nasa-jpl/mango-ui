@@ -27,7 +27,7 @@ export const ProductSelector = ({
 
   useEffect(() => {
     setNewSelectedProduct(selectedProduct);
-  }, [JSON.stringify(selectedProduct)]);
+  }, [selectedProduct]);
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
