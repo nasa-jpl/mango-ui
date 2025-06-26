@@ -1036,6 +1036,14 @@ export const Chart = ({
               },
             },
             type: "time",
+            time: {
+              displayFormats: {
+                millisecond: "HH:mm:ss.SSS",
+                second: "HH:mm:ss",
+                minute: "HH:mm:ss",
+                hour: "HH:mm:ss",
+              },
+            },
             ticks: {
               autoSkip: true,
               autoSkipPadding: 50,
