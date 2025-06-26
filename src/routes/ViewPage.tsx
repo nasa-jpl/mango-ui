@@ -21,11 +21,19 @@ export default function ViewPage() {
     (pageGroup) => pageGroup.url === pageGroupURL
   );
   if (!pageGroup) {
-    return <div>Error no page group</div>;
+    return (
+      <div className="w-full h-full items-center justify-center flex font-medium text-red-500">
+        Page group not found
+      </div>
+    );
   }
   const page = pageGroup.pages.find((p) => p.url === pageURL);
   if (!page) {
-    return <div>Error no page</div>;
+    return (
+      <div className="w-full h-full items-center justify-center flex font-medium text-red-500">
+        Page not found
+      </div>
+    );
   }
   return (
     <Page

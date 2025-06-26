@@ -1,6 +1,6 @@
-import { Button, IconCaretDown, IconCaretRight } from "@nasa-jpl/react-stellar";
+import { Button } from "@nasa-jpl/stellar-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import "./SidebarGroup.css";
 
 export declare type SidebarGroupProps = {
   children?: React.ReactNode;
@@ -15,16 +15,16 @@ export const SidebarGroup = ({
 }: SidebarGroupProps) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="sidebar-group">
+    <div className="w-full">
       <Button
-        className="sidebar-group-button st-typography-bold"
-        variant="tertiary"
+        className="justify-start pl-2 text-[10px] text-gray-600 gap-1 w-full font-bold"
+        variant="ghost"
         onClick={() => setOpen(!open)}
       >
-        {open ? <IconCaretDown /> : <IconCaretRight />}
+        {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         {title}
       </Button>
-      {open && <div className="sidebar-group-content">{children}</div>}
+      {open && children}
     </div>
   );
 };
