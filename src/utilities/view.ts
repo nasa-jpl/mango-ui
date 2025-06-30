@@ -207,6 +207,7 @@ export function formatYValue(tickValue: number | string): string {
 
 export function createView(): View {
   return {
+    config: { sidebarWidth: 200 },
     home: createViewPage({}),
     pageGroups: [],
     version: VIEW_VERSION,

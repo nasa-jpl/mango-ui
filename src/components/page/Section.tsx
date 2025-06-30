@@ -1,6 +1,20 @@
-import { Button } from "@nasa-jpl/stellar-react";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@nasa-jpl/stellar-react";
 import classNames from "classnames";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  CopyPlus,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -8,6 +22,8 @@ import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, Section as SectionType } from "../../types/view";
+import { usePrompt } from "../ui/AlertDialogProvider";
+import { Tooltip } from "../ui/Tooltip";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
@@ -17,9 +33,15 @@ export declare type SectionProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   mission?: string | null;
+  onAddEntity: () => void;
   onDateRangeChange: (dateRange: DateRange) => void;
+  onEntityDelete: (entity: EntityType, section: SectionType) => void;
+  onEntityDuplicate: (entity: EntityType, section: SectionType) => void;
+  onEntityEdit: (entity: EntityType, section: SectionType) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
+  onSectionDelete: (section: SectionType) => void;
+  onSectionDuplicate: (section: SectionType) => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
@@ -35,8 +57,14 @@ export const Section = ({
   selectedPoint,
   instrument = null,
   mission = null,
-  onSectionChange,
+  onSectionChange = () => {},
+  onSectionDuplicate = () => {},
+  onSectionDelete = () => {},
+  onAddEntity = () => {},
   onDateRangeChange = () => {},
+  onEntityDelete = () => {},
+  onEntityDuplicate = () => {},
+  onEntityEdit = () => {},
   onSelectPoint = () => {},
   onHoverDateChange = () => {},
   onSetProductPreview = () => {},
@@ -66,6 +94,7 @@ export const Section = ({
   const entityClass = classNames({
     "select-none": dragging || resizing,
   });
+  const prompt = usePrompt();
 
   let wrapperRef: HTMLDivElement | null = null;
 
@@ -95,11 +124,28 @@ export const Section = ({
     }
   };
 
+  const onRenameSection = async () => {
+    const title = await prompt({
+      defaultValue: section.title,
+      inputProps: {
+        placeholder: "Enter a new name for this section",
+        autoComplete: "off",
+      },
+      title: "Rename Section",
+    });
+    if (typeof title === "string") {
+      onSectionChange({ ...section, title });
+    }
+  };
+
   const renderEntity = (e: EntityType) => (
     <Entity
       products={products}
       entity={e}
       onDateRangeChange={onDateRangeChange}
+      onDelete={() => onEntityDelete(e, section)}
+      onDuplicate={() => onEntityDuplicate(e, section)}
+      onEdit={() => onEntityEdit(e, section)}
       onHoverDateChange={onHoverDateChange}
       onSelectPoint={onSelectPoint}
       onSetProductPreview={onSetProductPreview}
@@ -121,7 +167,12 @@ export const Section = ({
       })}
     >
       {enableHeader && (
-        <div className="border-t border-b sticky top-0 w-full bg-background">
+        <div
+          className={classNames(
+            "border-t sticky top-0 w-full bg-background z-[1] shadow-[0_1px_0_0_hsl(var(--border))]",
+            { "": open }
+          )}
+        >
           <Button
             className="w-full rounded-none gap-1 h-10 justify-start px-2 py-3 hover:bg-gray-50"
             variant="ghost"
@@ -133,9 +184,39 @@ export const Section = ({
             {open ? <ChevronDown /> : <ChevronRight />}
             {title}
           </Button>
+          <div className="absolute right-4 top-2 flex justify-center gap-2">
+            <Tooltip content="Add Entity">
+              <Button variant="ghost" size="icon" onClick={onAddEntity}>
+                <Plus />
+              </Button>
+            </Tooltip>
+            <DropdownMenu>
+              <Tooltip content="More options">
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical size={16} className="select-none" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </Tooltip>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem onClick={onRenameSection}>
+                  <Pencil /> Rename
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSectionDuplicate(section)}>
+                  <CopyPlus /> Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSectionDelete(section)}>
+                  <Trash2 /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       )}
       <div className="section-content" ref={onGetWrapperDivRef}>
+        {entities.length === 0 && (
+          <div className="text-muted-foreground">No entities added</div>
+        )}
         {!resizable && entities.map(renderEntity)}
         {resizable && (
           <MemoizedReactGridLayout

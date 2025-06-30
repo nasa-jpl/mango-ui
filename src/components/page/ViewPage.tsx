@@ -1,18 +1,32 @@
 import {
   Button,
   Checkbox,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@nasa-jpl/stellar-react";
-import { Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown, Folder, Settings } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { PageOptions, ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
-import { Page as PageType, Section as SectionType } from "../../types/view";
+import {
+  ChartEntity,
+  Entity,
+  Page as PageType,
+  SectionLayout,
+  Section as SectionType,
+} from "../../types/view";
+import { generateUUID } from "../../utilities/generic";
+import { useConfirm } from "../ui/AlertDialogProvider";
 import { DateRangePicker } from "../ui/DateRangePicker";
+import EntityEditor from "../ui/EntityEditor";
 import Page from "../ui/Page";
 import * as Tabs from "../ui/Tabs";
 import { Tooltip } from "../ui/Tooltip";
@@ -49,6 +63,7 @@ export const ViewPage = ({
   const [instrument, setInstrument] = useState<string | null>(
     viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
   );
+  const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
 
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
   const [selectedPoint, setSelectedPoint] =
@@ -56,6 +71,8 @@ export const ViewPage = ({
   const [pageOptions, setPageOptions] = useState<PageOptions>({
     showHoverDate: true,
   });
+
+  const confirm = useConfirm();
 
   useEffect(() => {
     setMission(
@@ -65,6 +82,219 @@ export const ViewPage = ({
       viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
     );
   }, [viewPage?.missions]);
+
+  // TODO would be an improvement to prevent user navigation while editing an
+  // entity to prevent accidental deletion of work but this will need to be controlled
+  // from higher up in the routing
+  const location = useLocation();
+  useEffect(() => {
+    setEntityToEdit(null);
+  }, [location]);
+
+  const onEntityDelete = useCallback(
+    async (entity: Entity, section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+
+      const confirmed = await confirm({
+        title: "Are you sure?",
+        body: "This action will only be persisted upon saving view changes.",
+        cancelButton: "Cancel",
+        actionButtonVariant: "destructive",
+        actionButton: "Delete",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            const newEntities: Entity[] = [];
+            const newLayout = [...s.layout];
+            s.entities.forEach((e, i) => {
+              if (e.id === entity.id) {
+                newLayout.splice(i, 1);
+              } else {
+                newEntities.push(e);
+              }
+            });
+            return {
+              ...s,
+              entities: newEntities,
+              layout: newLayout,
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+    },
+    [viewPage, onPageChange, confirm]
+  );
+
+  const onEntityDuplicate = useCallback(
+    (entity: Entity, section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            const newId = generateUUID();
+            const newEntity = { ...entity, id: newId };
+            const newEntities: Entity[] = s.entities.concat(newEntity);
+            const newLayout: SectionLayout[] = [
+              ...s.layout,
+              { i: newId, w: 4, h: 2, x: 0, y: 0 },
+            ];
+            return {
+              ...s,
+              entities: newEntities,
+              layout: newLayout,
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+    },
+    [viewPage, onPageChange]
+  );
+
+  const onEntitySave = useCallback(
+    (entity: Entity) => {
+      if (!viewPage) {
+        return;
+      }
+      // Find section containing entity
+      const section = viewPage.sections.find((s) =>
+        s.entities.find((s) => s.id === entity.id)
+      );
+      if (!section) {
+        return;
+      }
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage?.sections.map((s) => {
+          if (s.id === section.id) {
+            return {
+              ...s,
+              entities: s.entities.map((e) => {
+                if (e.id === entity.id) {
+                  return entity;
+                }
+                return e;
+              }),
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+      setEntityToEdit(null);
+    },
+    [viewPage, onPageChange]
+  );
+
+  const onAddSection = useCallback(() => {
+    if (!viewPage) {
+      return;
+    }
+    const newSection: SectionType = {
+      entities: [],
+      id: generateUUID(),
+      layout: [],
+      enableHeader: true,
+      defaultOpen: true,
+      title: "New Section",
+    };
+    const updatedViewPage: PageType = {
+      ...viewPage,
+      sections: viewPage?.sections.concat(newSection),
+    };
+    onPageChange(updatedViewPage);
+    setEntityToEdit(null);
+  }, [viewPage, onPageChange]);
+
+  const onAddEntity = useCallback(
+    (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const newEntity: ChartEntity = {
+        id: generateUUID(),
+        title: "New Entity",
+        type: "chart",
+        syncWithPageDateRange: true,
+      };
+      const updatedViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.map((s) => {
+          if (s.id === section.id) {
+            // TODO need to compute the next available spot for the new item instead of
+            // letting the library append it to the bottom
+            const newLayout: SectionLayout[] = [
+              ...s.layout,
+              { i: newEntity.id, w: 4, h: 2, x: 0, y: 0 },
+            ];
+            return {
+              ...s,
+              entities: s.entities.concat(newEntity),
+              layout: s.layout.concat(newLayout),
+            };
+          }
+          return s;
+        }),
+      };
+      onPageChange(updatedViewPage);
+      setEntityToEdit(null);
+    },
+    [viewPage, onPageChange]
+  );
+
+  const onSectionDelete = useCallback(
+    async (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const confirmed = await confirm({
+        title: "Are you sure?",
+        body: "This action will only be persisted upon saving view changes.",
+        cancelButton: "Cancel",
+        actionButtonVariant: "destructive",
+        actionButton: "Delete",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+      const newViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.filter((s) => s.id !== section.id),
+      };
+      onPageChange(newViewPage);
+    },
+    [viewPage, onPageChange, confirm]
+  );
+
+  const onSectionDuplicate = useCallback(
+    async (section: SectionType) => {
+      if (!viewPage) {
+        return;
+      }
+      const newViewPage: PageType = {
+        ...viewPage,
+        sections: viewPage.sections.concat({ ...section, id: generateUUID() }),
+      };
+      onPageChange(newViewPage);
+    },
+    [viewPage, onPageChange]
+  );
 
   if (!viewPage) {
     return;
@@ -86,6 +316,26 @@ export const ViewPage = ({
               });
             }}
           />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="select-none ml-2"
+                disabled={!!entityToEdit}
+              >
+                Add <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem onClick={onAddSection}>
+                <Folder /> Add Section
+              </DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => {}}>
+                <ChartLine /> Add Entity
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Popover>
             <Tooltip content="Settings">
@@ -146,7 +396,18 @@ export const ViewPage = ({
           </Tabs.Root>
         </div>
       )}
+      {!loadingInitialData && entityToEdit && (
+        <EntityEditor
+          entity={entityToEdit}
+          onCancel={() => setEntityToEdit(null)}
+          onSave={onEntitySave}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          products={products}
+        />
+      )}
       {!loadingInitialData &&
+        !entityToEdit &&
         viewPage.sections.map((section) => (
           <Section
             products={products}
@@ -157,18 +418,24 @@ export const ViewPage = ({
             instrument={viewPage.missions ? instrument : null}
             hoverDate={pageOptions.showHoverDate ? hoverDate : null}
             selectedPoint={selectedPoint}
+            onAddEntity={() => onAddEntity(section)}
             onDateRangeChange={setDateRange}
             onHoverDateChange={setHoverDate}
             onSelectPoint={setSelectedPoint}
             onSetProductPreview={onSetProductPreview}
+            onEntityDelete={onEntityDelete}
+            onEntityDuplicate={onEntityDuplicate}
+            onEntityEdit={(entity) => setEntityToEdit(entity)}
+            onSectionDelete={onSectionDelete}
+            onSectionDuplicate={onSectionDuplicate}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,
-                sections: viewPage.sections.map((e) => {
-                  if (e.id === newSection.id) {
+                sections: viewPage.sections.map((s) => {
+                  if (s.id === newSection.id) {
                     return newSection;
                   }
-                  return e;
+                  return s;
                 }),
               };
               onPageChange(newViewPage);

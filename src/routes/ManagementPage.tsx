@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,20 +9,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
   Button,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input as InputNext,
+  Input,
   Label,
 } from "@nasa-jpl/stellar-react";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { useForm } from "react-hook-form";
 import { useOutletContext } from "react-router-dom";
 import { z } from "zod";
+import { InputForm } from "../components/ui/InputForm";
 import Page from "../components/ui/Page";
 import { Tooltip } from "../components/ui/Tooltip";
 import { Product } from "../types/api";
@@ -259,11 +252,31 @@ export default function ManagementPage() {
     }
   };
 
+  const SidebarWidthFormSchema = z.object({
+    sidebarWidth: z.coerce.number().min(180).max(500).int(),
+  });
+
   return (
     <Page title="Manage" padBody>
       <div className="overflow-auto p-4 bg-background border rounded">
-        <div className="text-lg font-medium">Configure Mango Pages</div>
-        <div>
+        <div className="text-lg font-medium">Configure Mango</div>
+        <div className="mt-4 w-[600px]">
+          <InputForm
+            inputProps={{
+              type: "number",
+            }}
+            formSchema={SidebarWidthFormSchema}
+            defaultValue={view.config?.sidebarWidth?.toString() ?? "200"}
+            name="sidebarWidth"
+            label="Sidebar Width"
+            onChange={(value) => {
+              const config = view.config || {};
+              setView({
+                ...view,
+                config: { ...config, sidebarWidth: parseInt(value) },
+              });
+            }}
+          />
           {view.pageGroups.map((pageGroup, i) => {
             const otherPageGroups = view.pageGroups.filter(
               (p) => p.id !== pageGroup.id
@@ -360,7 +373,7 @@ export default function ManagementPage() {
                     </Tooltip>
                   </div>
                 </div>
-                <div className="items-start border-l-[var(--app-border-color)] flex flex-col gap-2 pl-4 border-l">
+                <div className="items-start border-l-[var(--app-border-color)] flex flex-col gap-2 pl-4 border-l w-full">
                   {pageGroup.pages.map((page, j) => {
                     const otherPages = pageGroup.pages.filter(
                       (p) => p.id !== page.id
@@ -398,13 +411,7 @@ export default function ManagementPage() {
                         ),
                     });
                     return (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                        }}
-                        key={page.id}
-                      >
+                      <div className="flex gap-2 w-full" key={page.id}>
                         <InputForm
                           formSchema={PageURLFormSchema}
                           defaultValue={page.url}
@@ -487,7 +494,7 @@ export default function ManagementPage() {
               <Label size="sm" htmlFor="upload">
                 Upload JSON View
               </Label>
-              <InputNext
+              <Input
                 sizeVariant="xs"
                 id="upload"
                 type="file"
@@ -516,57 +523,5 @@ export default function ManagementPage() {
         </div>
       </div>
     </Page>
-  );
-}
-
-declare type InputFormProps = {
-  defaultValue: string;
-  formSchema: z.ZodTypeAny;
-  label: string;
-  name: string;
-  onChange: (value: string) => void;
-};
-
-export function InputForm({
-  defaultValue = "",
-  formSchema,
-  label,
-  name,
-  onChange,
-}: InputFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      [name]: defaultValue,
-    },
-    mode: "onChange",
-  });
-
-  function onFormChange(data: z.infer<typeof formSchema>) {
-    onChange(data[name]);
-  }
-
-  return (
-    <Form {...form}>
-      <form
-        className="space-y-6 w-80"
-        onChange={form.handleSubmit(onFormChange)}
-        onSubmit={(evt) => evt.preventDefault()}
-      >
-        <FormField
-          control={form.control}
-          name={name}
-          render={({ field }) => (
-            <FormItem size="sm">
-              <FormLabel size="sm">{label}</FormLabel>
-              <FormControl>
-                <InputNext sizeVariant="xs" autoComplete="off" {...field} />
-              </FormControl>
-              <FormMessage size="sm" />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
   );
 }

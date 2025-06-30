@@ -89,7 +89,11 @@ export const Sidebar = ({
   };
 
   return (
-    <SidebarContainer title={title} logo={logo}>
+    <SidebarContainer
+      title={title}
+      logo={logo}
+      width={view?.config?.sidebarWidth}
+    >
       <div className="px-2 ">
         <NavLink
           className={(activeNav) => getNavLinkClass(activeNav.isActive, "/")}
