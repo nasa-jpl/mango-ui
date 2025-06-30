@@ -29,9 +29,13 @@ export declare type EntityProps = {
   entity: EntityType;
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?
   instrument?: string | null;
+  isEditing?: boolean;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
+  onDelete?: (entity: EntityType) => void;
+  onDuplicate?: (entity: EntityType) => void;
+  onEdit?: (entity: EntityType) => void;
   onHoverDateChange?: (date: Date | null) => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
@@ -55,9 +59,13 @@ export const Entity = (props: EntityProps) => {
     className = "",
     showHeader = entity.showHeader ?? true,
     compact = false,
+    isEditing = false,
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
     onSelectPoint = () => {},
+    onDelete = () => {},
+    onDuplicate = () => {},
+    onEdit = () => {},
     onSetProductPreview = () => {},
     loading,
     selectedPoint,
@@ -70,6 +78,7 @@ export const Entity = (props: EntityProps) => {
     <div className={entityClass}>
       {isChartEntity(entity) && (
         <Chart
+          isEditing={isEditing}
           loading={loading}
           chartEntity={entity}
           dateRange={dateRange}
@@ -78,6 +87,9 @@ export const Entity = (props: EntityProps) => {
           mission={mission}
           products={products}
           onDateRangeChange={onDateRangeChange}
+          onDelete={() => onDelete(entity)}
+          onDuplicate={() => onDuplicate(entity)}
+          onEdit={() => onEdit(entity)}
           onHoverDateChange={onHoverDateChange}
           onSelectPoint={onSelectPoint}
           selectedPoint={selectedPoint}

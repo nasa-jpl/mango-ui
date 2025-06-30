@@ -68,6 +68,11 @@ export const SaveViewModal = ({
           <Input
             placeholder="Enter password..."
             onInput={(v) => setPassword((v.target as HTMLInputElement).value)}
+            onKeyUp={(e) => {
+              if (e.key === "Enter" && allowSave && !saving) {
+                onSaveClick();
+              }
+            }}
             value={password}
             type="password"
           />
