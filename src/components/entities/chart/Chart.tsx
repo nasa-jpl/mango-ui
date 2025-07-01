@@ -1069,6 +1069,7 @@ export const Chart = ({
               autoSkip: true,
               autoSkipPadding: 50,
               maxRotation: 0,
+              major: { enabled: true },
             },
             grid: {
               display: !compact,
