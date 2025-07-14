@@ -173,7 +173,7 @@ export const ViewPage = ({
       }
       // Find section containing entity
       const section = viewPage.sections.find((s) =>
-        s.entities.find((s) => s.id === entity.id)
+        s.entities.find((e) => e.id === entity.id)
       );
       if (!section) {
         return;
@@ -287,9 +287,21 @@ export const ViewPage = ({
       if (!viewPage) {
         return;
       }
+      const newSection = structuredClone(section);
+      newSection.id = generateUUID();
+      newSection.entities.forEach((entity) => {
+        const newId = generateUUID();
+        // Find matching entity within layout and map new ID
+        newSection.layout.forEach((l) => {
+          if (l.i === entity.id) {
+            l.i = newId;
+          }
+        });
+        entity.id = newId;
+      });
       const newViewPage: PageType = {
         ...viewPage,
-        sections: viewPage.sections.concat({ ...section, id: generateUUID() }),
+        sections: viewPage.sections.concat(newSection),
       };
       onPageChange(newViewPage);
     },
