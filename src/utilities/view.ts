@@ -13,6 +13,8 @@ import {
   MapEntity,
   Page,
   PageGroup,
+  Section,
+  SectionLayout,
   TableEntity,
   TextEntity,
   TimeSeriesPoint,
@@ -233,4 +235,36 @@ export function createViewPageGroup(params: Partial<PageGroup>): PageGroup {
     url: "",
     ...params,
   };
+}
+
+export function duplicateEntity(entity: Entity, section: Section): Section {
+  const newId = generateUUID();
+  const newEntity = structuredClone(entity);
+  newEntity.id = newId;
+  const newEntities: Entity[] = section.entities.concat(newEntity);
+  const newLayout: SectionLayout[] = [
+    ...section.layout,
+    { i: newId, w: 4, h: 2, x: 0, y: 0 },
+  ];
+  return {
+    ...section,
+    entities: newEntities,
+    layout: newLayout,
+  };
+}
+
+export function duplicateSection(section: Section): Section {
+  const newSection = structuredClone(section);
+  newSection.id = generateUUID();
+  newSection.entities.forEach((entity) => {
+    const newId = generateUUID();
+    // Find matching entity within layout and map new ID
+    newSection.layout.forEach((l) => {
+      if (l.i === entity.id) {
+        l.i = newId;
+      }
+    });
+    entity.id = newId;
+  });
+  return newSection;
 }

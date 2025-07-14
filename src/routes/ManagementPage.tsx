@@ -23,7 +23,11 @@ import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
 import { PageGroup, Page as PageType, View } from "../types/view";
 import { downloadJSON, generateUUID } from "../utilities/generic";
-import { createViewPage, createViewPageGroup } from "../utilities/view";
+import {
+  createViewPage,
+  createViewPageGroup,
+  duplicateSection,
+} from "../utilities/view";
 
 export default function ManagementPage() {
   // TODO type outlet context instead of duplicating
@@ -115,11 +119,15 @@ export default function ManagementPage() {
   };
 
   const duplicatePageGroup = (pageGroup: PageGroup, insertAfter: number) => {
-    const newPageGroup = {
+    const newPageGroup: PageGroup = {
       ...pageGroup,
       id: generateUUID(),
       title: `${pageGroup.title} Copy`,
       url: `${pageGroup.url}_copy`,
+      pages: pageGroup.pages.map((page) => ({
+        ...page,
+        sections: page.sections.map(duplicateSection),
+      })),
     };
     const newView = {
       ...view,
@@ -210,11 +218,12 @@ export default function ManagementPage() {
     pageGroup: PageGroup,
     insertAfter: number
   ) => {
-    const newPage = {
+    const newPage: PageType = {
       ...page,
       id: generateUUID(),
       title: `${page.title} Copy`,
       url: `${page.url}_copy`,
+      sections: page.sections.map(duplicateSection),
     };
     const newPageGroup: PageGroup = {
       ...pageGroup,
