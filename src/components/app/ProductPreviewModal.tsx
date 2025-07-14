@@ -230,6 +230,7 @@ export const ProductPreviewModal = ({
           </div>
           <div className="flex flex-1 flex-col h-0 border rounded overflow-hidden">
             <Chart
+              enableEditing={false}
               chartEntity={chartEntity}
               products={products}
               dateRange={dateRange}

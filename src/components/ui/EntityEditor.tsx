@@ -213,7 +213,7 @@ export const EntityEditor = ({
         >
           <div className="h-[50%]">
             <Entity
-              isEditing
+              enableEditing={false}
               className="h-full"
               entity={newEntity}
               products={products}
