@@ -12,7 +12,7 @@ import {
   Input,
   Label,
 } from "@nasa-jpl/stellar-react";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Trash2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { z } from "zod";
@@ -22,7 +22,7 @@ import { Tooltip } from "../components/ui/Tooltip";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
 import { PageGroup, Page as PageType, View } from "../types/view";
-import { downloadJSON } from "../utilities/generic";
+import { downloadJSON, generateUUID } from "../utilities/generic";
 import { createViewPage, createViewPageGroup } from "../utilities/view";
 
 export default function ManagementPage() {
@@ -114,6 +114,24 @@ export default function ManagementPage() {
     setView(newView);
   };
 
+  const duplicatePageGroup = (pageGroup: PageGroup, insertAfter: number) => {
+    const newPageGroup = {
+      ...pageGroup,
+      id: generateUUID(),
+      title: `${pageGroup.title} Copy`,
+      url: `${pageGroup.url}_copy`,
+    };
+    const newView = {
+      ...view,
+      pageGroups: [
+        ...view.pageGroups.slice(0, insertAfter + 1),
+        newPageGroup,
+        ...view.pageGroups.slice(insertAfter + 1),
+      ],
+    };
+    setView(newView);
+  };
+
   const deletePage = (pageGroupId: string, pageId: string) => {
     const newView = {
       ...view,
@@ -185,6 +203,28 @@ export default function ManagementPage() {
       }
     }
     setView({ ...view, pageGroups: newPageGroups });
+  };
+
+  const duplicatePage = (
+    page: PageType,
+    pageGroup: PageGroup,
+    insertAfter: number
+  ) => {
+    const newPage = {
+      ...page,
+      id: generateUUID(),
+      title: `${page.title} Copy`,
+      url: `${page.url}_copy`,
+    };
+    const newPageGroup: PageGroup = {
+      ...pageGroup,
+      pages: [
+        ...pageGroup.pages.slice(0, insertAfter + 1),
+        newPage,
+        ...pageGroup.pages.slice(insertAfter + 1),
+      ],
+    };
+    updatePageGroup(newPageGroup);
   };
 
   const movePage = (
@@ -348,6 +388,15 @@ export default function ManagementPage() {
                     }
                   />
                   <div className="flex self-end">
+                    <Tooltip content="Duplicate Page">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => duplicatePageGroup(pageGroup, i)}
+                      >
+                        <Copy size={16} />
+                      </Button>
+                    </Tooltip>
                     {renderDeletionConfirmation("page group", () =>
                       deletePageGroup(pageGroup.id)
                     )}
@@ -443,6 +492,15 @@ export default function ManagementPage() {
                           }
                         />
                         <div className="flex self-end">
+                          <Tooltip content="Duplicate Page Group">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => duplicatePage(page, pageGroup, j)}
+                            >
+                              <Copy size={16} />
+                            </Button>
+                          </Tooltip>
                           {renderDeletionConfirmation("page", () =>
                             deletePage(pageGroup.id, page.id)
                           )}
