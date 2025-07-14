@@ -77,9 +77,9 @@ export declare type ChartProps = {
   chartEntity: ChartEntity;
   compact?: boolean;
   dateRange: DateRange;
+  enableEditing?: boolean;
   hoverDate: Date | null;
   instrument?: string | null;
-  isEditing?: boolean;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
@@ -122,7 +122,7 @@ export const Chart = ({
   mission: missionProp,
   compact = false,
   showHeader = true,
-  isEditing = false,
+  enableEditing = true,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
   onSelectPoint = () => {},
@@ -605,9 +605,9 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]} ${
-                  layer.channels
-                    ? `(${layer.channels
+                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                  layer.channels && layer.channels.length > 0
+                    ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
                         .join(", ")})`
                     : ""
@@ -1376,19 +1376,19 @@ export const Chart = ({
                 <DropdownMenuContent className="w-56">
                   <DropdownMenuItem
                     onClick={() => onEdit()}
-                    disabled={isEditing}
+                    disabled={!enableEditing}
                   >
                     <Pencil /> Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => onDuplicate()}
-                    disabled={isEditing}
+                    disabled={!enableEditing}
                   >
                     <CopyPlus /> Duplicate
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => onDelete()}
-                    disabled={isEditing}
+                    disabled={!enableEditing}
                   >
                     <Trash2 /> Delete
                   </DropdownMenuItem>

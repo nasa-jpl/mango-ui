@@ -26,10 +26,10 @@ export declare type EntityProps = {
   className?: string;
   compact?: boolean;
   dateRange: DateRange;
+  enableEditing?: boolean;
   entity: EntityType;
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?
   instrument?: string | null;
-  isEditing?: boolean;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
@@ -59,7 +59,7 @@ export const Entity = (props: EntityProps) => {
     className = "",
     showHeader = entity.showHeader ?? true,
     compact = false,
-    isEditing = false,
+    enableEditing = true,
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
     onSelectPoint = () => {},
@@ -78,7 +78,7 @@ export const Entity = (props: EntityProps) => {
     <div className={entityClass}>
       {isChartEntity(entity) && (
         <Chart
-          isEditing={isEditing}
+          enableEditing={enableEditing}
           loading={loading}
           chartEntity={entity}
           dateRange={dateRange}

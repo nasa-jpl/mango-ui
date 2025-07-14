@@ -24,6 +24,7 @@ import {
   Section as SectionType,
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
+import { duplicateEntity, duplicateSection } from "../../utilities/view";
 import { useConfirm } from "../ui/AlertDialogProvider";
 import { DateRangePicker } from "../ui/DateRangePicker";
 import EntityEditor from "../ui/EntityEditor";
@@ -145,18 +146,7 @@ export const ViewPage = ({
         ...viewPage,
         sections: viewPage?.sections.map((s) => {
           if (s.id === section.id) {
-            const newId = generateUUID();
-            const newEntity = { ...entity, id: newId };
-            const newEntities: Entity[] = s.entities.concat(newEntity);
-            const newLayout: SectionLayout[] = [
-              ...s.layout,
-              { i: newId, w: 4, h: 2, x: 0, y: 0 },
-            ];
-            return {
-              ...s,
-              entities: newEntities,
-              layout: newLayout,
-            };
+            return duplicateEntity(entity, section);
           }
           return s;
         }),
@@ -173,7 +163,7 @@ export const ViewPage = ({
       }
       // Find section containing entity
       const section = viewPage.sections.find((s) =>
-        s.entities.find((s) => s.id === entity.id)
+        s.entities.find((e) => e.id === entity.id)
       );
       if (!section) {
         return;
@@ -283,13 +273,18 @@ export const ViewPage = ({
   );
 
   const onSectionDuplicate = useCallback(
-    async (section: SectionType) => {
+    async (section: SectionType, insertAfter: number) => {
       if (!viewPage) {
         return;
       }
+      const newSection = duplicateSection(section);
       const newViewPage: PageType = {
         ...viewPage,
-        sections: viewPage.sections.concat({ ...section, id: generateUUID() }),
+        sections: [
+          ...viewPage.sections.slice(0, insertAfter + 1),
+          newSection,
+          ...viewPage.sections.slice(insertAfter + 1),
+        ],
       };
       onPageChange(newViewPage);
     },
@@ -408,7 +403,7 @@ export const ViewPage = ({
       )}
       {!loadingInitialData &&
         !entityToEdit &&
-        viewPage.sections.map((section) => (
+        viewPage.sections.map((section, i) => (
           <Section
             products={products}
             section={section}
@@ -427,7 +422,7 @@ export const ViewPage = ({
             onEntityDuplicate={onEntityDuplicate}
             onEntityEdit={(entity) => setEntityToEdit(entity)}
             onSectionDelete={onSectionDelete}
-            onSectionDuplicate={onSectionDuplicate}
+            onSectionDuplicate={() => onSectionDuplicate(section, i)}
             onSectionChange={(newSection: SectionType) => {
               const newViewPage: PageType = {
                 ...viewPage,
