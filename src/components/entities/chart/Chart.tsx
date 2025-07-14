@@ -605,9 +605,9 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]} ${
-                  layer.channels
-                    ? `(${layer.channels
+                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                  layer.channels && layer.channels.length > 0
+                    ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
                         .join(", ")})`
                     : ""
