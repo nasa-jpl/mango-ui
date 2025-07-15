@@ -2,19 +2,17 @@ import { useOutletContext } from "react-router-dom";
 import Page from "../components/ui/Page";
 import { Product } from "../types/api";
 import { View } from "../types/view";
-import "./HomePage.css";
 
 export default function HomePage() {
   const [, , products, , loadingInitialData] =
     useOutletContext<[View, never, Product[], never, boolean]>();
   return (
     <Page title="Home" padBody>
-      <div className="entity st-typography-displayBody">
-        <div className="entity-header home-page-header">
-          MANGO (
-          <i>Monitoring and ANalysis for Gravity Operations (MANGO) Tool</i>)
+      <div className="text-base bg-background flex flex-1 flex-col rounded border overflow-hidden">
+        <div className="px-2 py-1 !justify-start border-b bg-gray-50">
+          Monitoring and ANalysis for Gravity Operations (MANGO) Tool
         </div>
-        <div className="home-page-content">
+        <div className="p-4">
           <div>
             This tool enables users to monitor and interactively analyze L1 and
             L2 science data from GRACE-FO and GRACE-C. This tool is currently in
@@ -22,10 +20,10 @@ export default function HomePage() {
             <a href="mailto:mango.dev@jpl.nasa.gov">mango.dev@jpl.nasa.gov</a>
           </div>
           <br />
-          <div>
+          <div className="text">
             Product Count: {loadingInitialData ? "Loading..." : products.length}
           </div>
-          <div>Version: 0.2 alpha</div>
+          <div>Version: {APP_VERSION}</div>
         </div>
       </div>
     </Page>

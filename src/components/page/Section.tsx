@@ -1,17 +1,29 @@
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@nasa-jpl/stellar-react";
 import classNames from "classnames";
+import {
+  ChevronDown,
+  ChevronRight,
+  CopyPlus,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
-
-import {
-  Button,
-  IconCaretDown,
-  IconCaretRight,
-} from "@nasa-jpl/react-stellar/";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, Section as SectionType } from "../../types/view";
+import { usePrompt } from "../ui/AlertDialogProvider";
+import { Tooltip } from "../ui/Tooltip";
 import CustomGridItemComponent from "./CustomGridItem";
 import Entity from "./Entity";
 import "./Section.css";
@@ -21,9 +33,15 @@ export declare type SectionProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   mission?: string | null;
+  onAddEntity: () => void;
   onDateRangeChange: (dateRange: DateRange) => void;
+  onEntityDelete: (entity: EntityType, section: SectionType) => void;
+  onEntityDuplicate: (entity: EntityType, section: SectionType) => void;
+  onEntityEdit: (entity: EntityType, section: SectionType) => void;
   onHoverDateChange: (date: Date | null) => void;
   onSectionChange: (section: SectionType) => void;
+  onSectionDelete: (section: SectionType) => void;
+  onSectionDuplicate: (section: SectionType) => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
@@ -39,8 +57,14 @@ export const Section = ({
   selectedPoint,
   instrument = null,
   mission = null,
-  onSectionChange,
+  onSectionChange = () => {},
+  onSectionDuplicate = () => {},
+  onSectionDelete = () => {},
+  onAddEntity = () => {},
   onDateRangeChange = () => {},
+  onEntityDelete = () => {},
+  onEntityDuplicate = () => {},
+  onEntityEdit = () => {},
   onSelectPoint = () => {},
   onHoverDateChange = () => {},
   onSetProductPreview = () => {},
@@ -68,8 +92,9 @@ export const Section = ({
   const onResizeStart = () => setResizing(true);
   const onResizeStop = () => setResizing(false);
   const entityClass = classNames({
-    "entity-prevent-highlight": dragging || resizing,
+    "select-none": dragging || resizing,
   });
+  const prompt = usePrompt();
 
   let wrapperRef: HTMLDivElement | null = null;
 
@@ -99,11 +124,28 @@ export const Section = ({
     }
   };
 
+  const onRenameSection = async () => {
+    const title = await prompt({
+      defaultValue: section.title,
+      inputProps: {
+        placeholder: "Enter a new name for this section",
+        autoComplete: "off",
+      },
+      title: "Rename Section",
+    });
+    if (typeof title === "string") {
+      onSectionChange({ ...section, title });
+    }
+  };
+
   const renderEntity = (e: EntityType) => (
     <Entity
       products={products}
       entity={e}
       onDateRangeChange={onDateRangeChange}
+      onDelete={() => onEntityDelete(e, section)}
+      onDuplicate={() => onEntityDuplicate(e, section)}
+      onEdit={() => onEntityEdit(e, section)}
       onHoverDateChange={onHoverDateChange}
       onSelectPoint={onSelectPoint}
       onSetProductPreview={onSetProductPreview}
@@ -119,32 +161,67 @@ export const Section = ({
 
   return (
     <div
-      className={classNames("section", {
+      className={classNames({
         "section--open": open,
         "section--full-height": !!section.fullHeight,
       })}
     >
       {enableHeader && (
-        <div className="section-header">
+        <div
+          className={classNames(
+            "border-t sticky top-0 w-full bg-background z-[1] shadow-[0_1px_0_0_hsl(var(--border))]",
+            { "": open }
+          )}
+        >
           <Button
-            variant="tertiary"
+            className="w-full rounded-none gap-1 h-10 justify-start px-2 py-3 hover:bg-gray-50"
+            variant="ghost"
             onClick={() => {
               enableMoveAnimations(false);
               setOpen(!open);
             }}
           >
-            {open ? <IconCaretDown /> : <IconCaretRight />}
+            {open ? <ChevronDown /> : <ChevronRight />}
             {title}
           </Button>
+          <div className="absolute right-4 top-2 flex justify-center gap-2">
+            <Tooltip content="Add Entity">
+              <Button variant="ghost" size="icon" onClick={onAddEntity}>
+                <Plus />
+              </Button>
+            </Tooltip>
+            <DropdownMenu>
+              <Tooltip content="More options">
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical size={16} className="select-none" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </Tooltip>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem onClick={onRenameSection}>
+                  <Pencil /> Rename
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSectionDuplicate(section)}>
+                  <CopyPlus /> Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSectionDelete(section)}>
+                  <Trash2 /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       )}
       <div className="section-content" ref={onGetWrapperDivRef}>
+        {entities.length === 0 && (
+          <div className="text-muted-foreground">No entities added</div>
+        )}
         {!resizable && entities.map(renderEntity)}
         {resizable && (
           <MemoizedReactGridLayout
             measureBeforeMount={false} // TODO not working right yet with true, existing bug with the library
             draggableHandle=".entity-drag-handle"
-            compactType="horizontal"
             margin={[8, 8]}
             containerPadding={[0, 0]}
             rowHeight={176}

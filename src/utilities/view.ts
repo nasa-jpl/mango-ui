@@ -11,11 +11,19 @@ import {
   Entity,
   EntityType,
   MapEntity,
+  Page,
+  PageGroup,
+  Section,
+  SectionLayout,
   TableEntity,
   TextEntity,
   TimeSeriesPoint,
   TimelineRowEntity,
+  View,
 } from "../types/view";
+import { generateUUID } from "./generic";
+
+const VIEW_VERSION: number = 1;
 
 export function isChartEntity(entity: Entity): entity is ChartEntity {
   return entity.type === "chart";
@@ -197,4 +205,66 @@ export function formatYValue(tickValue: number | string): string {
     return tickValue;
   }
   return format("~g")(tickValue);
+}
+
+export function createView(): View {
+  return {
+    config: { sidebarWidth: 200 },
+    home: createViewPage({}),
+    pageGroups: [],
+    version: VIEW_VERSION,
+  };
+}
+
+export function createViewPage(params: Partial<Page>): Page {
+  return {
+    dateFormat: "long",
+    id: generateUUID(),
+    sections: [],
+    title: "",
+    url: "",
+    ...params,
+  };
+}
+
+export function createViewPageGroup(params: Partial<PageGroup>): PageGroup {
+  return {
+    id: generateUUID(),
+    pages: [],
+    title: "",
+    url: "",
+    ...params,
+  };
+}
+
+export function duplicateEntity(entity: Entity, section: Section): Section {
+  const newId = generateUUID();
+  const newEntity = structuredClone(entity);
+  newEntity.id = newId;
+  const newEntities: Entity[] = section.entities.concat(newEntity);
+  const newLayout: SectionLayout[] = [
+    ...section.layout,
+    { i: newId, w: 4, h: 2, x: 0, y: 0 },
+  ];
+  return {
+    ...section,
+    entities: newEntities,
+    layout: newLayout,
+  };
+}
+
+export function duplicateSection(section: Section): Section {
+  const newSection = structuredClone(section);
+  newSection.id = generateUUID();
+  newSection.entities.forEach((entity) => {
+    const newId = generateUUID();
+    // Find matching entity within layout and map new ID
+    newSection.layout.forEach((l) => {
+      if (l.i === entity.id) {
+        l.i = newId;
+      }
+    });
+    entity.id = newId;
+  });
+  return newSection;
 }

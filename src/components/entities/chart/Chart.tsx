@@ -1,11 +1,10 @@
-import { Button, Tooltip } from "@nasa-jpl/react-stellar";
 import {
-  ArrowCounterClockwise,
-  ArrowsHorizontal,
-  ArrowsVertical,
-  BoundingBox,
-  VectorTwo,
-} from "@phosphor-icons/react";
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@nasa-jpl/stellar-react";
 import ChartJS, {
   ActiveElement,
   BarOptions,
@@ -23,6 +22,17 @@ import zoomPlugin from "chartjs-plugin-zoom";
 import { Mode } from "chartjs-plugin-zoom/types/options";
 import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
+import {
+  CopyPlus,
+  MoreVertical,
+  Move3D,
+  MoveHorizontal,
+  MoveVertical,
+  Pencil,
+  RotateCcw,
+  SquareDashedMousePointer,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
 import {
@@ -55,6 +65,7 @@ import {
   isChartLayerLine,
 } from "../../../utilities/view";
 import EntityHeader from "../../page/EntityHeader";
+import { Tooltip } from "../../ui/Tooltip";
 import "./Chart.css";
 import ChartTooltip from "./ChartTooltip";
 
@@ -66,11 +77,15 @@ export declare type ChartProps = {
   chartEntity: ChartEntity;
   compact?: boolean;
   dateRange: DateRange;
+  enableEditing?: boolean;
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  onEdit?: () => void;
   onHoverDateChange?: (date: Date | null) => void;
   onSelectPoint?: (point: DataResponseDataEntry | null) => void;
   // TODO could pass in only the list of products that this Chart cares about?
@@ -107,9 +122,13 @@ export const Chart = ({
   mission: missionProp,
   compact = false,
   showHeader = true,
+  enableEditing = true,
   onDateRangeChange = () => {},
   onHoverDateChange = () => {},
   onSelectPoint = () => {},
+  onDelete = () => {},
+  onDuplicate = () => {},
+  onEdit = () => {},
   hoverDate,
   selectedPoint,
   loading: loadingProp,
@@ -390,6 +409,9 @@ export const Chart = ({
       };
     });
     chartRef.current.config.options.scales = newAxes;
+
+    // Trigger a chartJS update
+    chartRef.current.update();
   };
 
   const visualizeChartLayers = async (
@@ -583,9 +605,13 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${
-                  layer.fields[0]
-                }  (v${layer.version}) (${data_count} point${pluralize(
+                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                  layer.channels && layer.channels.length > 0
+                    ? ` (${layer.channels
+                        .map((c) => `${c.id}: ${c.value}`)
+                        .join(", ")})`
+                    : ""
+                } (v${layer.version}) (${data_count} point${pluralize(
                   data_count
                 )}, 1:${downsampling_factor} scale)`,
               // smooth the downsampling a tiny fraction to ease artifacting
@@ -866,6 +892,7 @@ export const Chart = ({
         instrument ?? layer.instrument,
         layer.version,
         layer.fields,
+        layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
@@ -1030,10 +1057,19 @@ export const Chart = ({
               },
             },
             type: "time",
+            time: {
+              displayFormats: {
+                millisecond: "HH:mm:ss.SSS",
+                second: "HH:mm:ss",
+                minute: "HH:mm:ss",
+                hour: "HH:mm:ss",
+              },
+            },
             ticks: {
               autoSkip: true,
               autoSkipPadding: 50,
               maxRotation: 0,
+              major: { enabled: true },
             },
             grid: {
               display: !compact,
@@ -1231,7 +1267,7 @@ export const Chart = ({
         {isLoading && (
           <div
             className={classNames(
-              "chart-indicator-overlay chart-loading-indicator st-typography-medium",
+              "chart-loading-indicator font-medium bg-gray-50 border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground",
               { "chart-indicator-overlay--compact": compact }
             )}
             style={{
@@ -1248,10 +1284,10 @@ export const Chart = ({
             Loading
           </div>
         )}
-        {!isLoading && error && (
+        {isLoading && error && (
           <div
             className={classNames(
-              "chart-indicator-overlay chart-error-indicator st-typography-medium",
+              "font-medium border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px]",
               { "chart-indicator-overlay--compact": compact }
             )}
             style={{
@@ -1278,30 +1314,32 @@ export const Chart = ({
         <EntityHeader
           title={chartEntity.title}
           rightContent={
-            <div className="chart-header-buttons">
+            <div className="chart-header-buttons border-r">
               <Tooltip content="Reset Y Axis">
                 <Button
-                  className="chart-button"
+                  className="h-full w-[28px] rounded-none"
                   onClick={resetPan}
-                  variant="icon"
-                  icon={<ArrowCounterClockwise weight="regular" size={16} />}
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  <RotateCcw size={16} className="select-none" />
+                </Button>
               </Tooltip>
               <Tooltip content={`Cycle Pan & Zoom Axis (${interactionAxes})`}>
                 <Button
-                  className="chart-button"
+                  className="h-full w-[28px] rounded-none"
                   onClick={cycleInteractionModes}
-                  variant="icon"
-                  icon={
-                    interactionAxes === "x" ? (
-                      <ArrowsHorizontal weight="regular" size={16} />
-                    ) : interactionAxes === "xy" ? (
-                      <VectorTwo weight="regular" size={16} />
-                    ) : (
-                      <ArrowsVertical weight="regular" size={16} />
-                    )
-                  }
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  {interactionAxes === "x" ? (
+                    <MoveHorizontal size={16} className="select-none" />
+                  ) : interactionAxes === "xy" ? (
+                    <Move3D size={16} className="select-none" />
+                  ) : (
+                    <MoveVertical size={16} className="select-none" />
+                  )}
+                </Button>
               </Tooltip>
               <Tooltip
                 content={
@@ -1309,16 +1347,59 @@ export const Chart = ({
                 }
               >
                 <Button
-                  className={
+                  className={classNames(
+                    "h-full w-[28px] rounded-none",
                     boxZoomEnabled
-                      ? "chart-button chart-button-active"
-                      : "chart-button"
-                  }
+                      ? "text-primary hover:text-primary border-b border-b-primary"
+                      : ""
+                  )}
                   onClick={toggleBoxZoom}
-                  variant="icon"
-                  icon={<BoundingBox weight="regular" size={16} />}
-                />
+                  variant="ghost"
+                  size="icon"
+                >
+                  <SquareDashedMousePointer size={16} className="select-none" />
+                </Button>
               </Tooltip>
+              <DropdownMenu>
+                <Tooltip content="More options">
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="h-full w-[28px] rounded-none"
+                      onClick={toggleBoxZoom}
+                      variant="ghost"
+                      size="icon"
+                    >
+                      <MoreVertical size={16} className="select-none" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </Tooltip>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => onEdit()}
+                    disabled={!enableEditing}
+                  >
+                    <Pencil /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onDuplicate()}
+                    disabled={!enableEditing}
+                  >
+                    <CopyPlus /> Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onDelete()}
+                    disabled={!enableEditing}
+                  >
+                    <Trash2 /> Delete
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem>
+                    <Download /> Download Data
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Camera /> Snapshot
+                  </DropdownMenuItem> */}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           }
         />

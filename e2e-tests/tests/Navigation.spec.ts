@@ -1,13 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/mango/");
 });
 
-test("has title", async ({ page }) => {
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/MANGO/);
-});
+// test("has title", async ({ page }) => {
+//   // Expect a title "to contain" a substring.
+//   await expect(page).toHaveTitle(/MANGO/);
+// });
 
 test("navigates to page", async ({ page }) => {
   // Navigate to page

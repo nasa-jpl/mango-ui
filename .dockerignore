@@ -1,6 +1,9 @@
 # env files
 .env.*
 
+# npm
+node_modules/
+
 # certificates
 # .cert/*
 

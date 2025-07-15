@@ -3,15 +3,33 @@ import react from "@vitejs/plugin-react";
 import fs from "fs";
 import { defineConfig, loadEnv } from "vite";
 import cesium from "vite-plugin-cesium";
+import { viteStaticCopy } from "vite-plugin-static-copy";
+
+const cesiumSource = "node_modules/cesium/Build/Cesium";
+const cesiumBaseUrl = "cesium";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   return {
-    plugins: [react(), cesium()],
+    plugins: [
+      react(),
+      cesium(),
+      viteStaticCopy({
+        targets: [
+          { src: `${cesiumSource}/ThirdParty`, dest: cesiumBaseUrl },
+          { src: `${cesiumSource}/Workers`, dest: cesiumBaseUrl },
+          { src: `${cesiumSource}/Assets`, dest: cesiumBaseUrl },
+          { src: `${cesiumSource}/Widgets`, dest: cesiumBaseUrl },
+          { src: `${cesiumSource}/Cesium.js`, dest: cesiumBaseUrl },
+        ],
+      }),
+    ],
     base: env.VITE_APP_PATH,
+
     define: {
       APP_VERSION: JSON.stringify(process.env.npm_package_version),
+      CESIUM_BASE_URL: JSON.stringify(`/mango/${cesiumBaseUrl}`),
     },
     preview: {
       // Preview server

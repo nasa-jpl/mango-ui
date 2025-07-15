@@ -94,6 +94,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         layer.instrument,
         layer.version,
         layer.fields,
+        layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
@@ -272,7 +273,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       <>
         {loading && (
           <div
-            className="map-indicator-overlay map-loading-indicator st-typography-medium"
+            className="map-loading-indicator  font-medium bg-gray-50 border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground mt-0"
             style={{
               top: `${viewerRef.current.container.clientHeight / 2}px`,
               left: `${viewerRef.current.container.clientWidth / 2}px`,
@@ -283,7 +284,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         )}
         {!loading && error && (
           <div
-            className="map-indicator-overlay map-error-indicator st-typography-medium"
+            className="border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px] mt-0"
             style={{
               top: `${viewerRef.current.container.clientHeight / 2}px`,
               left: `${viewerRef.current.container.clientWidth / 2}px`,

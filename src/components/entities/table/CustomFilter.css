@@ -22,10 +22,6 @@
   width: 24px;
 }
 
-.ag-ltr .ag-floating-filter-button:hover {
-  background: var(--st-gray-20) !important;
-}
-
 .ag-header-cell-menu-button {
   opacity: 0.5;
 }
@@ -35,8 +31,8 @@
   color: var(--ag-header-foreground-color) !important;
 }
 
-.ag-header-cell-menu-button:hover {
-  background: var(--st-gray-20) !important;
+.ag-header-cell-menu-button:hover,
+.ag-floating-filter-button:hover {
   opacity: 1;
 }
 

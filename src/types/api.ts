@@ -27,7 +27,7 @@ export type Dataset = {
   /* time of last entry */
   data_end: string;
   /* ID of instrument */
-  instrument: string;
+  instrument_id: string;
   /* time of last update */
   last_updated: string;
   /* <mission>_<product_id> */
@@ -37,6 +37,10 @@ export type Dataset = {
 export type ProductField = {
   constant_value?: (string | number)[];
   description?: string;
+  /* Array of channels */
+  enum_values?: string[];
+  /* Indicates whether this field has channels in which case the enum_values array will be populated */
+  is_channel_id: boolean;
   name: string;
   qc_thresholds?: ProductValueThreshold[]; // TODO is this actually optional or just missing in DB?
   supported_aggregations: ProductAggregation[];

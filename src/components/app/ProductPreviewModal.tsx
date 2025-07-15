@@ -1,19 +1,21 @@
 import {
-  Button,
-  Dropdown,
-  Modal,
-  ModalActionRow,
-  ModalBody,
-  ModalClose,
-  OptionType,
-} from "@nasa-jpl/react-stellar";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@nasa-jpl/stellar-react";
 import { useEffect, useState } from "react";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
-import { ChartEntity } from "../../types/view";
+import { Channel, ChartEntity } from "../../types/view";
 import Chart from "../entities/chart/Chart";
-import DateRangePicker from "../ui/DateRangePicker";
-import "./ProductPreviewModal.css";
+import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
   return `${product.mission} ${instrument || product.instruments[0]} ${
@@ -48,25 +50,40 @@ export const ProductPreviewModal = ({
       start: new Date("2020").toISOString(),
     }
   );
+  const [channels, setChannels] = useState<Channel[]>([]);
 
   useEffect(() => {
     let field = "";
+    let channels: Channel[] = [];
     let version = "";
     let dateRange = {
       end: new Date("2025").toISOString(),
       start: new Date("2020").toISOString(),
     };
     if (product) {
-      field = defaultField || product.available_fields[0].name;
+      field =
+        (defaultField ||
+          product.available_fields.find((field) => !field.is_channel_id)
+            ?.name) ??
+        "";
       version = defaultVersion || product.available_versions[0];
       dateRange = defaultDateRange || {
         end: new Date(product.datasets[0].data_end).toISOString(),
         start: new Date(product.datasets[0].data_begin).toISOString(),
       };
+      channels = product.available_fields
+        .filter((f) => f.is_channel_id)
+        .map((channel) => {
+          return {
+            id: channel.name,
+            value: channel.enum_values ? channel.enum_values[0] : "",
+          };
+        });
     }
     setField(field);
     setVersion(version);
     setDateRange(dateRange);
+    setChannels(channels);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,90 +115,134 @@ export const ProductPreviewModal = ({
         mission: product.mission,
         instrument: instrument || product.instruments[0],
         yAxisId: "y1",
+        channels,
       },
     ],
   };
 
-  const onFieldChange = (selectedOption: OptionType) => {
-    const value = (selectedOption as OptionType).value;
-    setField(value);
-  };
-
-  const onVersionChange = (selectedOption: OptionType) => {
-    const value = (selectedOption as OptionType).value;
-    setVersion(value);
+  const onChannelChange = (value: string, channel: Channel) => {
+    const newChannels = channels.map((c) => {
+      if (c.id === channel.id) {
+        return { ...c, value };
+      }
+      return c;
+    });
+    setChannels(newChannels);
   };
 
   return (
-    <Modal
-      className="product-preview-modal"
-      onOpenChange={onClose}
-      open
-      title={`${getProductDisplayName(product, instrument)} Preview`}
-    >
-      <ModalBody>
-        <div className="product-preview-modal-content">
-          <div className="product-preview-controls">
-            <Dropdown
-              className="product-preview-field"
-              value={{ value: field, label: field }}
-              label="Field"
-              labelPosition="left"
-              // @ts-expect-error TODO fix from the react-stellar side
-              onChange={onFieldChange}
-              options={product.available_fields.map((f) => ({
-                label: (
-                  <div className="product-preview-field--label">
-                    {f.name}
-                    <div>
-                      {f.unit} ({f.type})
-                    </div>
-                  </div>
-                ),
-                value: f.name,
-              }))}
-            />
-            <Dropdown
-              value={{ value: version, label: version }}
-              label="Version"
-              labelPosition="left"
-              // @ts-expect-error TODO fix from the react-stellar side
-              onChange={onVersionChange}
-              options={product.available_versions.map((v) => ({
-                label: v,
-                value: v,
-              }))}
-            />
-            <div className="product-preview-date">
-              <DateRangePicker
-                startDate={new Date(dateRange.start)}
-                endDate={new Date(dateRange.end)}
-                onChange={(startDate, endDate) => {
-                  setDateRange({
-                    end: endDate.toISOString(),
-                    start: startDate.toISOString(),
-                  });
-                }}
-              />
-            </div>
+    <Dialog onOpenChange={onClose} open>
+      <DialogContent className="w-[80vw] h-[80vh] max-w-none max-h-none flex flex-col">
+        <DialogHeader>
+          <div className="items-center flex flex-1 justify-between mr-4">
+            <DialogTitle>
+              {getProductDisplayName(product, instrument)}
+            </DialogTitle>
           </div>
-          <Chart
-            chartEntity={chartEntity}
-            products={products}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            hoverDate={null}
-            onHoverDateChange={() => {}}
-            selectedPoint={null}
-          />
+        </DialogHeader>
+        <div className="flex flex-col gap-4 flex-1 overflow-hidden">
+          <div className="flex gap-5 flex-wrap items-baseline py-0.5">
+            <div className="flex gap-2 items-center">
+              <Label size="sm">Field</Label>
+              <Select onValueChange={setField} value={field}>
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  {product.available_fields
+                    .filter(
+                      (f) =>
+                        !f.is_channel_id &&
+                        (f.type === "int" || f.type === "float")
+                    )
+                    .map((f) => {
+                      return (
+                        <SelectItem size="xs" value={f.name}>
+                          <div className="flex gap-1">
+                            {f.name}
+                            <div className="text-muted-foreground">
+                              {f.unit} ({f.type})
+                            </div>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                </SelectContent>
+              </Select>
+            </div>
+            {channels.map((channel) => {
+              const matchingChannel = product.available_fields.find(
+                (f) => f.name === channel.id
+              );
+              return (
+                <div className="flex gap-2 items-center">
+                  <Label size="sm">{channel.id}</Label>
+                  <Select
+                    onValueChange={(value) => onChannelChange(value, channel)}
+                    value={channel.value}
+                  >
+                    <SelectTrigger
+                      size="xs"
+                      className="flex-1 max-w-96 min-w-24"
+                    >
+                      <SelectValue placeholder="Select value" />
+                    </SelectTrigger>
+                    <SelectContent size="xs">
+                      {(matchingChannel?.enum_values || [])
+                        .sort((a, b) =>
+                          a.localeCompare(b, "en", { numeric: true })
+                        )
+                        .map((v) => (
+                          <SelectItem size="xs" value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })}
+            <div className="flex gap-2 items-center">
+              <Label size="sm">Version</Label>
+              <Select onValueChange={setVersion} value={version}>
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue placeholder="Select Version" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  {product.available_versions.map((v) => (
+                    <SelectItem size="xs" value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DateRangePicker
+              startDate={new Date(dateRange.start)}
+              endDate={new Date(dateRange.end)}
+              onChange={(startDate, endDate) => {
+                setDateRange({
+                  end: endDate.toISOString(),
+                  start: startDate.toISOString(),
+                });
+              }}
+            />
+          </div>
+          <div className="flex flex-1 flex-col h-0 border rounded overflow-hidden">
+            <Chart
+              enableEditing={false}
+              chartEntity={chartEntity}
+              products={products}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              hoverDate={null}
+              onHoverDateChange={() => {}}
+              selectedPoint={null}
+            />
+          </div>
         </div>
-      </ModalBody>
-      <ModalActionRow>
-        <ModalClose asChild>
-          <Button variant="secondary">Close</Button>
-        </ModalClose>
-      </ModalActionRow>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

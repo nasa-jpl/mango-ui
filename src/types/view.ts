@@ -8,8 +8,12 @@ import { DataResponse, DataResponseDataEntry } from "./api";
 import { DateRange } from "./time";
 
 export type View = {
+  config?: {
+    sidebarWidth?: number;
+  };
   home: Page;
   pageGroups: PageGroup[];
+  version: number;
 };
 
 export type PageGroup = {
@@ -130,7 +134,13 @@ export type YAxis = {
   type?: ChartTypeRegistry["line"]["scales"];
 };
 
+export type Channel = {
+  id: string;
+  value: string;
+};
+
 export type DataLayer = {
+  channels?: Channel[];
   dataset: string;
   endTime: string;
   fields: string[];

@@ -421,6 +421,7 @@ const Table = memo(function Table({
         instrument ?? layer.instrument,
         layer.version,
         layer.fields,
+        layer.channels ?? [],
         computedStartTime,
         computedEndTime
       );
@@ -618,9 +619,6 @@ const Table = memo(function Table({
           }}
         />
       )}
-      {/* {compact && (
-        <div className="st-typography-label">Click to expand</div>
-      )} */}
     </div>
   );
 },

@@ -21,18 +21,21 @@ import Map from "../entities/map/Map";
 import Table from "../entities/table/Table";
 import Text from "../entities/text/Text";
 import { DownlinkDashboard } from "../mission/GRACE/DownlinkDashboard";
-import "./Entity.css";
 
 export declare type EntityProps = {
   className?: string;
   compact?: boolean;
   dateRange: DateRange;
+  enableEditing?: boolean;
   entity: EntityType;
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?
   instrument?: string | null;
   loading?: boolean;
   mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
+  onDelete?: (entity: EntityType) => void;
+  onDuplicate?: (entity: EntityType) => void;
+  onEdit?: (entity: EntityType) => void;
   onHoverDateChange?: (date: Date | null) => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
@@ -56,21 +59,26 @@ export const Entity = (props: EntityProps) => {
     className = "",
     showHeader = entity.showHeader ?? true,
     compact = false,
+    enableEditing = true,
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
     onSelectPoint = () => {},
+    onDelete = () => {},
+    onDuplicate = () => {},
+    onEdit = () => {},
     onSetProductPreview = () => {},
     loading,
     selectedPoint,
   } = props;
   const entityClass = classNames({
-    entity: true,
+    "bg-background border rounded flex flex-1 flex-col overflow-hidden": true,
     [className]: !!className,
   });
   return (
     <div className={entityClass}>
       {isChartEntity(entity) && (
         <Chart
+          enableEditing={enableEditing}
           loading={loading}
           chartEntity={entity}
           dateRange={dateRange}
@@ -79,6 +87,9 @@ export const Entity = (props: EntityProps) => {
           mission={mission}
           products={products}
           onDateRangeChange={onDateRangeChange}
+          onDelete={() => onDelete(entity)}
+          onDuplicate={() => onDuplicate(entity)}
+          onEdit={() => onEdit(entity)}
           onHoverDateChange={onHoverDateChange}
           onSelectPoint={onSelectPoint}
           selectedPoint={selectedPoint}
