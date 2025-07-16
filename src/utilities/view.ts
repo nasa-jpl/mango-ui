@@ -204,7 +204,12 @@ export function formatYValue(tickValue: number | string): string {
   if (typeof tickValue === "string") {
     return tickValue;
   }
-  return format("~g")(tickValue);
+  const formattedValue =
+    Math.abs(tickValue) < 0.001 || Math.abs(tickValue) > 9999
+      ? format("~e")(tickValue)
+      : format("~g")(tickValue);
+
+  return formattedValue.replace("e+0", "");
 }
 
 export function createView(): View {
