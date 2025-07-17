@@ -298,7 +298,8 @@ const Table = memo(function Table({
       minWidth: 150,
       flex: 1,
       resizable: true,
-      sortable: true,
+      initialSort: "desc",
+      filter: "agDateColumnFilter",
       valueGetter: (params) => {
         const rowData = params.data;
         return rowData["timestamp"] ?? null;
