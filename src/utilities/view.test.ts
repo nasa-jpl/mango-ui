@@ -225,10 +225,10 @@ test("formatYValue", () => {
   expect(formatYValue("10")).toEqual("10");
   expect(formatYValue(0)).toEqual("0");
   expect(formatYValue(10)).toEqual("10");
-  expect(formatYValue(100000)).toEqual("100000");
-  expect(formatYValue(0.00005000009)).toEqual("0.0000500001");
-  expect(formatYValue(0.000480388100419)).toEqual("0.000480388");
-  expect(formatYValue(199123812391823)).toEqual("1.99124e+14");
+  expect(formatYValue(100000)).toEqual("1e+5");
+  expect(formatYValue(0.00005000009)).toEqual("5.000009e-5");
+  expect(formatYValue(0.000480388100419)).toEqual("4.803881e-4");
+  expect(formatYValue(199123812391823)).toEqual("1.991238e+14");
 });
 
 test("findMatchingPoint", () => {
