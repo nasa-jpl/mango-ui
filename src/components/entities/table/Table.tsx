@@ -308,7 +308,6 @@ const Table = memo(function Table({
         return rowData["timestamp"] ?? null;
       },
       valueFormatter: (params) => {
-        console.log("params:", params);
         if (shouldCollapseByDay) {
           return params.value.split("T")[0];
         }
