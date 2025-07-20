@@ -291,6 +291,9 @@ const Table = memo(function Table({
     });
 
     // Build derived column
+    const shouldCollapseByDay =
+      tableEntity.collapse === "same_day" && tableEntity.dateFormat === "short";
+
     const col: DataGridColumnDef = {
       field: "timestamp",
       floatingFilter: false,
@@ -305,6 +308,10 @@ const Table = memo(function Table({
         return rowData["timestamp"] ?? null;
       },
       valueFormatter: (params) => {
+        console.log("params:", params);
+        if (shouldCollapseByDay) {
+          return params.value.split("T")[0];
+        }
         return params.value.split("+")[0];
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -469,7 +476,10 @@ const Table = memo(function Table({
       finalResults = results;
     }
 
-    // Iterate over all layers to retrieve unique timestamps
+    const shouldCollapseByDay =
+      tableEntity.collapse === "same_day" && tableEntity.dateFormat === "short";
+
+    // Iterate over all layers to retrieve unique timestamps or days
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timestampMap = new Map<string, any[]>();
 
@@ -496,9 +506,13 @@ const Table = memo(function Table({
             processedResult[key]._thresholds = thresholds;
           }
         });
-        const timestampEntry = timestampMap.get(result.timestamp) || [];
+        let groupKey = result.timestamp;
+        if (shouldCollapseByDay) {
+          groupKey = result.timestamp.split("T")[0];
+        }
+        const timestampEntry = timestampMap.get(groupKey) || [];
         timestampEntry.push({ [layer.id]: processedResult });
-        timestampMap.set(result.timestamp, timestampEntry);
+        timestampMap.set(groupKey, timestampEntry);
       });
     });
 
@@ -509,13 +523,18 @@ const Table = memo(function Table({
       )
     );
 
-    // Merge entries with the same timestamp
+    // Merge entries with the same timestamp or day
     const rows: Record<string, DataResponseDataEntry>[] = Array.from(
       sortedTimestampMap.entries()
-    ).map(([timestamp, objects]) => ({
-      timestamp,
-      ...objects.reduce((acc, obj) => ({ ...acc, ...obj }), {}),
-    }));
+    ).map(([timestamp, objects]) => {
+      // Merge all layer data for this timestamp/day
+      const merged = objects.reduce((acc, obj) => ({ ...acc, ...obj }), {});
+      merged.timestamp = timestamp;
+      if (!merged.timestamp) {
+        throw new Error("Merged row is missing timestamp");
+      }
+      return merged;
+    });
 
     setRowData(rows);
   };

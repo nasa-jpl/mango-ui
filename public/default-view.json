@@ -59,6 +59,9 @@
                   "id": "fghyjqiqii",
                   "type": "table",
                   "title": "Table",
+                  "applyThresholds": true,
+                  "collapse": "same_day",
+                  "dateFormat": "short",
                   "layers": [
                     {
                       "id": "48gnes",
@@ -296,8 +299,7 @@
               "fullHeight": true,
               "defaultOpen": true
             }
-          ],
-          "dateFormat": "short"
+          ]
         },
         {
           "id": "123efg",
