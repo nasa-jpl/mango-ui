@@ -122,5 +122,6 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ env.DOCKER_TAG }}
-        env:
-          VITE_APP_RELEASE: ${{ env.GITHUB_REF_NAME_CLEAN }}
+          build-args: |
+            VITE_APP_RELEASE=${{ env.GITHUB_REF_NAME_CLEAN }}
+            VITE_GIT_COMMIT_HASH=${{ github.sha }}
