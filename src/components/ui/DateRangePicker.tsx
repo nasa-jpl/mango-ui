@@ -91,12 +91,15 @@ export function DateRangePicker({
       which: "from" | "to",
       inputValues: { from: string; to: string }
     ) => {
-      const dateString = (e.target as HTMLInputElement).value;
+      let dateString = (e.target as HTMLInputElement).value;
+      let otherDateString = inputValues[which === "from" ? "to" : "from"];
+      if (dateFormat === "short") {
+        dateString += "T00:00:00Z";
+        otherDateString += "T00:00:00Z";
+      }
       const eventDate = parseDateStringISO(dateString);
       const eventVerb = which === "from" ? "start" : "end";
-      const otherDate = parseDateStringISO(
-        inputValues[which === "from" ? "to" : "from"]
-      );
+      const otherDate = parseDateStringISO(otherDateString);
       const otherDateVerb = which === "from" ? "end" : "start";
       if (!dateString) {
         setDateRangeError(
@@ -120,7 +123,7 @@ export function DateRangePicker({
         }
       }
     },
-    [maxDate, minDate, onDateChange]
+    [maxDate, minDate, onDateChange, dateFormat]
   );
 
   const onDateRangeKeyUp = useCallback(
