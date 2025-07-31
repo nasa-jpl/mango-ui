@@ -238,7 +238,7 @@ export type TableColumnGroup = {
 
 export interface TableEntity extends Entity {
   applyThresholds?: boolean;
-  collapse?: string;
+  collapse?: "same_day";
   columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
   compact?: boolean;
