@@ -163,7 +163,7 @@ export function DownlinkDashboard({
       Object.values(cancelHandles).map((h) => h());
 
       // Fetch pass and product reports for every product
-      const productReportFiles = await Promise.all(
+      let productReportFiles = await Promise.all(
         downlinkDashboardEntity.products.map((product) =>
           fetchData(
             `${product.dataset}_RPT`,
@@ -187,11 +187,43 @@ export function DownlinkDashboard({
         )
       );
 
-      // Assign IDs to pass files to ensure uniqueness since pass files can be duplicated
+      productReportFiles = productReportFiles.map((productReportFile) => {
+        // Filer out files completely out of the time window
+        return {
+          ...productReportFile,
+          result: {
+            ...productReportFile.result,
+            data: productReportFile.result.data.filter((d) => {
+              return (
+                new Date(j2ToMs(d.last_data_point_t_tag.value as number)) >=
+                  newStartTimeDate &&
+                new Date(j2ToMs(d.first_data_point_t_tag.value as number)) <
+                  newEndTimeDate
+              );
+            }),
+          },
+        };
+      });
+
       passFiles.forEach((passFile) => {
-        passFile.result.data.forEach((r) => {
-          r.id = { value: generateUUID() };
-        });
+        // Filer out files completely out of the time window
+        // Also assign IDs to pass files to ensure uniqueness since pass files can be duplicated
+        return {
+          ...passFile,
+          result: {
+            ...passFile.result,
+            data: passFile.result.data
+              .filter((d) => {
+                return (
+                  new Date(j2ToMs(d.last_data_point_t_tag.value as number)) >=
+                    newStartTimeDate &&
+                  new Date(j2ToMs(d.first_data_point_t_tag.value as number)) <
+                    newEndTimeDate
+                );
+              })
+              .map((d) => (d.id = { value: generateUUID() })),
+          },
+        };
       });
 
       // Compute gaps for every pass
@@ -244,6 +276,8 @@ export function DownlinkDashboard({
           result: { ...result, data: processedGaps },
         };
       });
+
+      // Gap detection
       const gapsBetweenPasses = passFiles.map(({ product, result }) => {
         const matchingConfig = downlinkDashboardEntity.products.find(
           (p) => product === `${p.dataset}_PASS`
@@ -252,73 +286,98 @@ export function DownlinkDashboard({
           matchingConfig?.passGapLimit ??
           downlinkDashboardEntity.defaultPassGapLimit;
         const gaps: DataResponseDataEntry[] = [];
-        result.data.forEach((data, i) => {
-          const dataStartTime = j2ToMs(
-            data.first_data_point_t_tag.value as number
-          );
-          const dataEndTime = j2ToMs(
-            data.last_data_point_t_tag.value as number
-          );
-          const nextDataStartTime =
-            j2ToMs(
-              result.data[i + 1]?.first_data_point_t_tag.value as number
-            ) || null;
-
-          // TODO catch case of gap before first point?
-          if (
-            typeof dataEndTime === "number" &&
-            typeof nextDataStartTime === "number" &&
-            dataEndTime >= newStartTimeDate.getTime() && // pass is within time window
-            dataStartTime < newEndTimeDate.getTime() && // pass is within time window
-            nextDataStartTime - dataEndTime > passGapLimit // see if time between next pass start time and current pass end time is greater than gap limit
-          ) {
-            // See if any other point covers this gap
-            let smallestGap = Number.POSITIVE_INFINITY;
-            let closestEndTime = null;
-            result.data.forEach((_entry) => {
-              const _dataStartTime = j2ToMs(
-                _entry.first_data_point_t_tag.value as number
+        if (result.data.length < 1) {
+          gaps.push({
+            id: { value: generateUUID() },
+            type: { value: "pass_gap" },
+            gap_start_time: {
+              value: newStartTimeDate.toISOString(),
+            },
+            gap_end_time: {
+              value: newEndTimeDate.toISOString(),
+            },
+            gap_duration: {
+              value:
+                new Date(newStartTimeDate).getTime() -
+                new Date(newEndTimeDate).getTime(),
+            },
+            timestamp: newStartTimeDate.toISOString(),
+          } as DataResponseDataEntry);
+        } else {
+          result.data
+            .sort(
+              (a, b) =>
+                (a.first_data_point_t_tag.value as number) -
+                (b.first_data_point_t_tag.value as number)
+            )
+            .forEach((data, i) => {
+              const dataStartTime = j2ToMs(
+                data.first_data_point_t_tag.value as number
               );
-              const _dataEndTime = j2ToMs(
-                _entry.last_data_point_t_tag.value as number
+              const dataEndTime = j2ToMs(
+                data.last_data_point_t_tag.value as number
               );
+              const nextDataStartTime =
+                j2ToMs(
+                  result.data[i + 1]?.first_data_point_t_tag.value as number
+                ) || null;
 
-              const inTimeWindow =
-                _dataEndTime >= newStartTimeDate.getTime() &&
-                _dataStartTime < newEndTimeDate.getTime(); // pass is within time window
-              const coversStartOfPass = _dataStartTime <= dataStartTime; // pass comes before or at the same time as the current pass in above context
+              // TODO catch case of gap before first point?
+              if (
+                typeof dataEndTime === "number" && // end time exists for this pass
+                typeof nextDataStartTime === "number" && // end time exists for next pass
+                dataEndTime >= newStartTimeDate.getTime() && // pass is within time window
+                dataStartTime < newEndTimeDate.getTime() && // pass is within time window
+                nextDataStartTime - dataEndTime > passGapLimit // see if time between next pass start time and current pass end time is greater than gap limit
+              ) {
+                // See if any other point covers this gap
+                let smallestGap = Number.POSITIVE_INFINITY;
+                let closestEndTime = null;
+                result.data.forEach((_entry) => {
+                  const _dataStartTime = j2ToMs(
+                    _entry.first_data_point_t_tag.value as number
+                  );
+                  const _dataEndTime = j2ToMs(
+                    _entry.last_data_point_t_tag.value as number
+                  );
 
-              if (inTimeWindow && coversStartOfPass) {
-                const difference = nextDataStartTime - _dataEndTime;
-                if (difference < smallestGap) {
-                  smallestGap = difference;
-                  closestEndTime = _dataEndTime;
+                  const inTimeWindow =
+                    _dataEndTime >= newStartTimeDate.getTime() &&
+                    _dataStartTime < newEndTimeDate.getTime(); // pass is within time window
+                  const coversStartOfPass = _dataStartTime <= dataStartTime; // pass comes before or at the same time as the current pass in above context
+
+                  if (inTimeWindow && coversStartOfPass) {
+                    const difference = nextDataStartTime - _dataEndTime;
+                    if (difference < smallestGap) {
+                      smallestGap = difference;
+                      closestEndTime = _dataEndTime;
+                    }
+                  }
+                });
+                const gapCovered = smallestGap <= passGapLimit;
+                // TODO make gap rendering configurable
+                if (!gapCovered && closestEndTime) {
+                  gaps.push({
+                    id: { value: generateUUID() },
+                    type: { value: "pass_gap" },
+                    gap_start_time: {
+                      value: new Date(closestEndTime).toISOString(),
+                    },
+                    gap_end_time: {
+                      value: new Date(nextDataStartTime).toISOString(),
+                    },
+                    gap_duration: {
+                      value:
+                        new Date(nextDataStartTime).getTime() -
+                        new Date(dataEndTime).getTime(),
+                    },
+                    timestamp: data.timestamp,
+                  } as DataResponseDataEntry);
                 }
               }
+              return gaps;
             });
-            const gapCovered = smallestGap <= passGapLimit;
-            // TODO make gap rendering configurable
-            if (!gapCovered && closestEndTime) {
-              gaps.push({
-                id: { value: generateUUID() },
-                type: { value: "pass_gap" },
-                gap_start_time: {
-                  value: new Date(closestEndTime).toISOString(),
-                },
-                gap_end_time: {
-                  value: new Date(nextDataStartTime).toISOString(),
-                },
-                gap_duration: {
-                  value:
-                    new Date(nextDataStartTime).getTime() -
-                    new Date(dataEndTime).getTime(),
-                },
-                timestamp: data.timestamp,
-              } as DataResponseDataEntry);
-            }
-          }
-          return gaps;
-        });
+        }
 
         return {
           product,
@@ -461,17 +520,30 @@ export function DownlinkDashboard({
           },
         ],
         columns: [
-          "type",
-          "gap_start_time",
-          "gap_end_time",
-          "gap_duration",
-          "time_gap_max",
-          "file_name",
-          "id",
-        ].map((f) => ({
-          field: f,
-          layerId: "allGapsLayer",
-        })),
+          { field: "type", layerId: "allGapsLayer", label: "Gap Type" },
+          {
+            field: "gap_start_time",
+            layerId: "allGapsLayer",
+            label: "Gap Start Time",
+          },
+          {
+            field: "gap_end_time",
+            layerId: "allGapsLayer",
+            label: "Gap End Time",
+          },
+          {
+            field: "gap_duration",
+            layerId: "allGapsLayer",
+            label: "Gap Duration (ms)",
+          },
+          {
+            field: "time_gap_max",
+            layerId: "allGapsLayer",
+            label: "Time Gap Max",
+          },
+          { field: "file_name", layerId: "allGapsLayer", label: "File Name" },
+          { field: "id", layerId: "allGapsLayer", label: "Id" },
+        ],
       };
       const productFields = downlinkDashboardEntity.defaultFields.concat(
         product.additionalFields || []
@@ -512,6 +584,7 @@ export function DownlinkDashboard({
         title: `Product Reports (${productReports[0].result.data.length})`,
         syncWithPageDateRange: true,
         expandable: true,
+        compact: true,
         idField: "file_name",
         data: productReports,
         layers: [
