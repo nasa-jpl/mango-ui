@@ -303,9 +303,13 @@ const Table = memo(function Table({
       resizable: true,
       initialSort: "desc",
       filter: "agDateColumnFilter",
-      valueGetter: (params) => {
-        const rowData = params.data;
-        return rowData["timestamp"] ?? null;
+      valueGetter: (
+        params: ValueGetterParams<Record<string, DataResponseDataEntry>>
+      ) => {
+        if (!params.data) {
+          return "";
+        }
+        return Object.values(params.data)[0].timestamp ?? "";
       },
       valueFormatter: (params) => {
         if (shouldCollapseByDay) {
@@ -475,12 +479,7 @@ const Table = memo(function Table({
       finalResults = results;
     }
 
-    const shouldCollapseByDay =
-      tableEntity.collapse === "same_day" && tableEntity.dateFormat === "short";
-
-    // Iterate over all layers to retrieve unique timestamps or days
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const timestampMap = new Map<string, any[]>();
+    const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
 
     finalResults.forEach(({ layer, result }) => {
       const metadataCache: Record<string, ProductField> = {};
@@ -496,7 +495,7 @@ const Table = memo(function Table({
           }
         });
       }
-      result.data.forEach((result) => {
+      result.data.forEach((result, i) => {
         const processedResult: ProcessedDataResponseDataEntry = result;
         Object.keys(result).forEach((key) => {
           // Compute thresholds for result if metadata available for the field
@@ -505,34 +504,12 @@ const Table = memo(function Table({
             processedResult[key]._thresholds = thresholds;
           }
         });
-        let groupKey = result.timestamp;
-        if (shouldCollapseByDay) {
-          groupKey = result.timestamp.split("T")[0];
+        if (!rows[i]) {
+          rows[i] = { [layer.id]: processedResult };
+        } else {
+          rows[i] = { ...rows[i], [layer.id]: processedResult };
         }
-        const timestampEntry = timestampMap.get(groupKey) || [];
-        timestampEntry.push({ [layer.id]: processedResult });
-        timestampMap.set(groupKey, timestampEntry);
       });
-    });
-
-    // Sort down chronologically
-    const sortedTimestampMap = new Map(
-      [...timestampMap.entries()].sort(
-        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
-      )
-    );
-
-    // Merge entries with the same timestamp or day
-    const rows: Record<string, DataResponseDataEntry>[] = Array.from(
-      sortedTimestampMap.entries()
-    ).map(([timestamp, objects]) => {
-      // Merge all layer data for this timestamp/day
-      const merged = objects.reduce((acc, obj) => ({ ...acc, ...obj }), {});
-      merged.timestamp = timestamp;
-      if (!merged.timestamp) {
-        throw new Error("Merged row is missing timestamp");
-      }
-      return merged;
     });
 
     setRowData(rows);
