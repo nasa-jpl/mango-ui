@@ -238,9 +238,11 @@ export type TableColumnGroup = {
 
 export interface TableEntity extends Entity {
   applyThresholds?: boolean;
+  collapse?: "same_day";
   columnGroups?: TableColumnGroup[];
   columns: TableColumn[];
   compact?: boolean;
+  dateFormat?: DateFormat;
   fitToGridWidth?: boolean;
   layers: DataLayer[];
 }

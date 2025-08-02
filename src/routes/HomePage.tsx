@@ -23,7 +23,8 @@ export default function HomePage() {
           <div className="text">
             Product Count: {loadingInitialData ? "Loading..." : products.length}
           </div>
-          <div>Version: {APP_VERSION}</div>
+          <div>Release: {import.meta.env.VITE_APP_RELEASE}</div>
+          <div>Git Commit Hash: {import.meta.env.VITE_GIT_COMMIT_HASH}</div>
         </div>
       </div>
     </Page>

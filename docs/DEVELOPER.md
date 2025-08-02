@@ -58,11 +58,13 @@ brew install mkcert
 mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'localhost'
 ```
 
+## Environment variables
+
+For a template of the environment variables required see `.env.template`. Create a `.env` file at the root of the project and populate it with the venue-specific values for the [DEV venue](https://github.jpl.nasa.gov/Mass-Change/mango-ops/blob/mass-change-viz/mango-ui/.env). Reach out to `mango-ui` repository owners for access to the configuration repository.
+
 ## Start Development Server
 
 Run `npm run dev` for a dev server. Navigate to `https://localhost:5173/mango`. The app will automatically reload if you change any of the source files.
-
-The development server loads the environment variables from `.env.development`. To make requests to the API and access the MANGO Docs from the UI, make sure to populate the `VITE_API_URL` and `VITE_MANGO_DOCS_URL` environment variables, respectively.
 
 ## Building For Production
 
