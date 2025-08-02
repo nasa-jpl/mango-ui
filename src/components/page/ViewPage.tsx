@@ -59,10 +59,10 @@ export const ViewPage = ({
     start: startDate,
   });
   const [mission, setMission] = useState<string | null>(
-    viewPage?.missions ? viewPage?.missions[1].mission ?? null : null
+    viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
   );
   const [instrument, setInstrument] = useState<string | null>(
-    viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
+    viewPage?.missions ? viewPage?.missions[0].instrument ?? null : null
   );
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
 
@@ -77,10 +77,10 @@ export const ViewPage = ({
 
   useEffect(() => {
     setMission(
-      viewPage?.missions ? viewPage?.missions[1].mission ?? null : null
+      viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
     );
     setInstrument(
-      viewPage?.missions ? viewPage?.missions[1].instrument ?? null : null
+      viewPage?.missions ? viewPage?.missions[0].instrument ?? null : null
     );
   }, [viewPage?.missions]);
 

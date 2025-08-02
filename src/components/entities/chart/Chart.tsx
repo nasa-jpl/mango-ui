@@ -139,7 +139,6 @@ export const Chart = ({
   const [boxZoomEnabled, setBoxZoomEnabled] = useState(false);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
-
   const cancelHandles: Record<string, () => void> = {};
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -378,6 +377,7 @@ export const Chart = ({
         type: axis.type || "linear",
         // type: axis.type || "myscale",
         afterBuildTicks: function (scale: LinearScale | LogarithmicScale) {
+          // console.log("axis, scale :>> ", axis, scale);
           if (!compact || axis.type === "category") return;
 
           const { min, max } = scale.getMinMax(true);
@@ -410,8 +410,12 @@ export const Chart = ({
     });
     chartRef.current.config.options.scales = newAxes;
 
-    // Trigger a chartJS update
-    chartRef.current.update();
+    setTimeout(() => {
+      // Trigger a chartJS update
+      if (chartRef.current) {
+        chartRef.current.update();
+      }
+    }, 250);
   };
 
   const visualizeChartLayers = async (
@@ -1143,6 +1147,8 @@ export const Chart = ({
 
     chartRef.current.canvas.onmousemove = (e) => throttledOnChartMouseMove(e);
     chartRef.current.canvas.onmouseleave = (e) => onChartMouseMove(e);
+
+    configureChartAxes(chartEntity.yAxes || []);
   };
 
   const onChartMouseMove = (event: MouseEvent) => {
