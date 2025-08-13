@@ -25,7 +25,6 @@ dist-ssr
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-/storybook-static/
 
 # testing
 unit-test-results/
