@@ -6,6 +6,7 @@ export declare type EntityHeaderProps = {
   error?: Error;
   loading?: boolean;
   rightContent?: React.ReactNode;
+  movable?: boolean;
   title?: string;
 };
 
@@ -13,6 +14,7 @@ export const EntityHeader = ({
   title = "",
   children,
   loading = false,
+  movable = true,
   error,
   rightContent,
 }: EntityHeaderProps) => {
@@ -36,9 +38,11 @@ export const EntityHeader = ({
             </div>
           </Tooltip>
         )}
-        <div className="cursor-move flex justify-center w-[28px] entity-drag-handle text-muted-foreground">
-          <GripHorizontal size={16} />
-        </div>
+        {!movable && (
+          <div className="cursor-move flex justify-center w-[28px] entity-drag-handle text-muted-foreground">
+            <GripHorizontal size={16} />
+          </div>
+        )}
       </div>
     </div>
   );

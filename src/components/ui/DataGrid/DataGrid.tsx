@@ -81,6 +81,20 @@ export function DataGrid<T>({
     };
   }, [fitToGridWidth]);
 
+  useEffect(() => {
+    if (fitToGridWidth) {
+      gridRef.current?.api?.sizeColumnsToFit();
+    } else {
+      setTimeout(() => {
+        gridRef.current?.api?.autoSizeColumns(
+          gridRef.current?.api
+            ?.getAllDisplayedColumns()
+            .map((col) => col.getColId())
+        );
+      }, 15);
+    }
+  }, [fitToGridWidth, rowData]);
+
   return (
     <div
       className={classNames("ag-theme-stellar", {

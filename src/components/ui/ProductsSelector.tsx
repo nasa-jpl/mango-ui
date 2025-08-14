@@ -1,7 +1,7 @@
 import { Button } from "@nasa-jpl/stellar-react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { Copy, Trash2 } from "lucide-react";
-import { Product } from "../../types/api";
+import { memo } from "react";
+import { Product, ProductField } from "../../types/api";
 import { generateUUID } from "../../utilities/generic";
 import { SelectedProduct } from "./EntityEditor";
 import { ProductSelector } from "./ProductSelector";
@@ -11,18 +11,21 @@ export declare type ProductsSelectorProps = {
   onChange: (selectedProducts: SelectedProduct[]) => void;
   products: Product[];
   selectedProducts: SelectedProduct[];
+  fieldFilter: (field: ProductField) => boolean;
 };
 
-export const ProductsSelector = ({
+const ProductsSelector = ({
   onChange,
   products,
   selectedProducts,
+  fieldFilter,
 }: ProductsSelectorProps) => {
   return (
     <div className="flex flex-col gap-4">
       {selectedProducts.map((product, i) => (
         <div className="flex gap-2 items-end" key={product.id}>
           <ProductSelector
+            fieldFilter={fieldFilter}
             selectedProduct={product}
             products={products}
             onChange={(newSelectedProduct) => {
@@ -85,4 +88,4 @@ export const ProductsSelector = ({
   );
 };
 
-export const Content = TabsPrimitive.Content;
+export default memo(ProductsSelector);

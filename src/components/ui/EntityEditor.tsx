@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Input,
   Label,
   Popover,
@@ -17,10 +18,10 @@ import {
 } from "@nasa-jpl/stellar-react";
 import { debounce } from "lodash-es";
 import { Layers2, MoreVertical, Plus, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import useResizeObserver from "../../hooks/resizeObserver";
-import { Product } from "../../types/api";
+import { Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
 import {
   ChartEntity,
@@ -32,12 +33,20 @@ import {
   MapEntity,
   MapLayer,
   Section,
+  TableColumn,
+  TableEntity,
   YAxis,
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
+import {
+  createDataLayer,
+  createEntity,
+  isChartEntity,
+  isTableEntity,
+} from "../../utilities/view";
 import Entity from "../page/Entity";
 import { InputForm } from "./InputForm";
-import { ProductsSelector } from "./ProductsSelector";
+import ProductsSelector from "./ProductsSelector";
 import { Tooltip } from "./Tooltip";
 
 export declare type EntityEditorProps = {
@@ -60,42 +69,47 @@ export type SelectedProduct = Pick<
   | "id"
 >;
 
+const separator = "----";
+
 const getLabelForSelectedProductOrLayer = (
-  thing: SelectedProduct | DataLayer
+  thing: SelectedProduct | DataLayer,
+  fields?: string[]
 ) => {
-  return `${thing.mission} ${thing.instrument} ${
-    thing.dataset
-  } ${thing.fields.join(", ")} ${(thing.channels || [])
+  return `${thing.mission} ${thing.instrument} ${thing.dataset} ${(
+    fields || thing.fields
+  ).join(", ")} ${(thing.channels || [])
     ?.map((c) => `(${c.id}: ${c.value})`)
     .join(" ")} (v${thing.version})`;
 };
 
+// Returns the layer containing the selected product
 const getMatchingSelectedProductForLayer = (
   layer: DataLayer,
-  selectedProducts: SelectedProduct[]
-) => {
-  const layerLabel = getLabelForSelectedProductOrLayer(layer);
+  selectedProducts: SelectedProduct[],
+  fields?: string[]
+): SelectedProduct | undefined => {
   return selectedProducts.find(
-    (p) => getLabelForSelectedProductOrLayer(p) === layerLabel
+    (p) =>
+      getLabelForSelectedProductOrLayer(p, fields || p.fields) ===
+      getLabelForSelectedProductOrLayer(layer, fields || p.fields)
   );
 };
 
-const extractEntitySelectedProducts = (entity: EntityType) => {
-  if (entity.type === "chart") {
-    return ((entity as ChartEntity).layers || [])?.map((layer) => {
-      const selectedProduct: SelectedProduct = {
-        id: generateUUID(),
-        channels: layer.channels,
-        fields: layer.fields,
-        dataset: layer.dataset,
-        mission: layer.mission,
-        version: layer.version,
-        instrument: layer.instrument,
-      };
-      return selectedProduct;
-    });
-  }
-  return [];
+const extractEntitySelectedProducts = (
+  entity: EntityType
+): SelectedProduct[] => {
+  const layers = (entity as ChartEntity | TableEntity).layers || [];
+  return layers.map((layer) => {
+    return {
+      id: generateUUID(),
+      channels: layer.channels,
+      fields: layer.fields,
+      dataset: layer.dataset,
+      mission: layer.mission,
+      version: layer.version,
+      instrument: layer.instrument,
+    } as SelectedProduct;
+  });
 };
 
 export const EntityEditor = ({
@@ -115,13 +129,35 @@ export const EntityEditor = ({
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
     extractEntitySelectedProducts(entity)
   );
+  const [prevSelectedProducts, setPrevSelectedProducts] = useState<
+    SelectedProduct[]
+  >([]);
+  console.log("selectedProducts :>> ", selectedProducts);
 
-  const entityTypes: { label: string; value: EntityPlotType }[] = [
-    { value: "chart", label: "Chart" },
-    { value: "downlink-dashboard", label: "Downlink Dashboard" },
-    { value: "map", label: "Map" },
-    { value: "table", label: "Table" },
-    { value: "text", label: "Text" },
+  const productsFieldFilter = useCallback(
+    (field: ProductField) => {
+      if (newEntity.type === "chart") {
+        return field.type === "float" || field.type === "int";
+      }
+      return true;
+    },
+    [newEntity.type]
+  );
+
+  const entityTypes: {
+    label: string;
+    value: EntityPlotType;
+    disabled: boolean;
+  }[] = [
+    { value: "chart", label: "Chart", disabled: false },
+    { value: "table", label: "Table", disabled: false },
+    // {
+    //   value: "downlink-dashboard",
+    //   label: "Downlink Dashboard",
+    //   disabled: true,
+    // },
+    // { value: "map", label: "Map", disabled: true },
+    // { value: "text", label: "Text", disabled: true },
   ];
 
   const debouncedColorChange = debounce((color: string, layer: ChartLayer) => {
@@ -142,24 +178,37 @@ export const EntityEditor = ({
     setNewEntity(updatedEntity);
   };
 
-  const onSelectedProductsChange = (newSelectedProducts: SelectedProduct[]) => {
+  const onSelectedProductsChange = useCallback(
+    (newSelectedProducts: SelectedProduct[]) => {
+      setPrevSelectedProducts(selectedProducts);
+      setSelectedProducts(newSelectedProducts);
+    },
+    [selectedProducts]
+  );
+
+  useEffect(() => {
+    console.log(selectedProducts, prevSelectedProducts);
     // Reassign layer products to new selected products
-    const entityWithLayers = newEntity as ChartEntity | MapEntity;
-    const newLayers: (ChartLayer | MapLayer)[] = [];
+    const entityWithLayers = newEntity as ChartEntity | MapEntity | TableEntity;
+    const newLayers: (ChartLayer | MapLayer | TableEntity)[] = [];
+    let newTableColumns: TableColumn[] = [];
+    if (isTableEntity(entityWithLayers)) {
+      newTableColumns = entityWithLayers.columns;
+    }
     (entityWithLayers.layers || []).forEach((layer) => {
       const oldSelectedProduct = getMatchingSelectedProductForLayer(
         layer,
-        selectedProducts
+        prevSelectedProducts
       );
       const newSelectedProduct = getMatchingSelectedProductForLayer(
         layer,
-        newSelectedProducts
+        selectedProducts
       );
       // If an old matching selected product exists and a new one does not,
       // check for the existence of the old selected product and if found,
       // update layer to use this new product
       if (oldSelectedProduct && !newSelectedProduct) {
-        const matchingNewProduct = newSelectedProducts.find(
+        const matchingNewProduct = selectedProducts.find(
           (p) => p.id === oldSelectedProduct.id
         );
         if (matchingNewProduct) {
@@ -167,6 +216,12 @@ export const EntityEditor = ({
             ...layer,
             ...matchingNewProduct,
             id: layer.id,
+          });
+          newTableColumns = newTableColumns.map((c) => {
+            if (c.layerId === layer.id) {
+              return { ...c, field: matchingNewProduct.fields[0] };
+            }
+            return c;
           });
         }
       } else if (newSelectedProduct) {
@@ -177,15 +232,31 @@ export const EntityEditor = ({
           id: layer.id,
         });
       }
-      // Otherwise we can delete the layer since the associatated product has been deleted
+      // Otherwise we can delete the layer since the associated product has been deleted
     });
     const updatedEntity = {
       ...entityWithLayers,
       layers: newLayers,
     };
+    if (isTableEntity(updatedEntity)) {
+      updatedEntity.columns = newTableColumns;
+    }
+    console.log("updatedEntity :>> ", updatedEntity);
     setNewEntity(updatedEntity);
-    setSelectedProducts(newSelectedProducts);
-  };
+  }, [selectedProducts, prevSelectedProducts]);
+
+  function handleEntityTypeChange(type: EntityPlotType) {
+    setNewEntity(
+      createEntity({
+        id: newEntity.id,
+        type,
+        title: newEntity.title,
+        syncWithPageDateRange: newEntity.syncWithPageDateRange,
+        showHeader: newEntity.showHeader,
+        dateRange: newEntity.dateRange,
+      })
+    );
+  }
 
   // TODO break various parts of this component into subcomponents when refactoring to handle multiple entity types
   return (
@@ -251,6 +322,7 @@ export const EntityEditor = ({
                     onChange={onSelectedProductsChange}
                     products={products}
                     selectedProducts={selectedProducts}
+                    fieldFilter={productsFieldFilter}
                   />
                 </div>
               </TabsContent>
@@ -267,344 +339,635 @@ export const EntityEditor = ({
             </Tabs>
           </div>
         </div>
-        <div className="h-full min-w-96 border bg-white rounded divide-y">
+        <div className="h-full min-w-96 border bg-white rounded divide-y flex flex-col">
           <div className="p-4">
             <div className="text-base">Entity Options</div>
             <div className="pt-1 text-muted-foreground">
               Select the type of plot and add customizations
             </div>
           </div>
-          <div className="p-4 gap-4 flex flex-col">
-            <div className="flex flex-col gap-1">
-              <Label size="sm" htmlFor="entity-type">
-                Entity Type
-              </Label>
-              <Select onValueChange={() => {}} value={entity.type} disabled>
-                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-                  <SelectValue id="entity-type" placeholder="Select field" />
-                </SelectTrigger>
-                <SelectContent size="xs">
-                  {entityTypes.sort().map(({ value, label }) => (
-                    <SelectItem size="xs" value={value} key={label}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="overflow-auto">
+            <div className="p-4 gap-4 flex flex-col">
+              <div className="flex flex-col gap-1">
+                <Label size="sm" htmlFor="entity-type">
+                  Entity Type
+                </Label>
+                <Select
+                  onValueChange={handleEntityTypeChange}
+                  value={newEntity.type}
+                >
+                  <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                    <SelectValue id="entity-type" placeholder="Select field" />
+                  </SelectTrigger>
+                  <SelectContent size="xs">
+                    {entityTypes.sort().map(({ value, label, disabled }) => (
+                      <SelectItem
+                        size="xs"
+                        value={value}
+                        key={label}
+                        disabled={disabled}
+                      >
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label size="sm">Title</Label>
+                <Input
+                  sizeVariant="xs"
+                  value={newEntity.title}
+                  onChange={(e) =>
+                    setNewEntity({ ...newEntity, title: e.target.value })
+                  }
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <Label size="sm">Title</Label>
-              <Input
-                sizeVariant="xs"
-                value={newEntity.title}
-                onChange={(e) =>
-                  setNewEntity({ ...newEntity, title: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <div className="p-4">
-            {newEntity.type === "chart" && (
-              <div>
-                <div className="font-medium mb-4 justify-between flex ">
-                  Y Axes
-                  <Tooltip content="Add Y Axis">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const chartEntity: ChartEntity = newEntity;
-                        const newYAxis: YAxis = {
-                          id: generateUUID(),
-                          label: "",
-                        };
-                        const updatedEntity: ChartEntity = {
-                          ...chartEntity,
-                          yAxes: (chartEntity.yAxes || []).concat(newYAxis),
-                        };
-                        setNewEntity(updatedEntity);
-                      }}
-                    >
-                      <Plus />
-                    </Button>
-                  </Tooltip>
-                </div>
-                <div className="flex justify-between gap-20 items-center">
-                  {((newEntity as ChartEntity).yAxes === undefined ||
-                    ((newEntity as ChartEntity).yAxes || []).length < 1) && (
-                    <div className="text-muted-foreground">No y axes</div>
-                  )}
-                  {(newEntity as ChartEntity).yAxes !== undefined && (
-                    <div className="flex-1 flex flex-col gap-6">
-                      {(newEntity as ChartEntity).yAxes?.map((yAxis) => (
-                        <div className="flex flex-col gap-1" key={yAxis.id}>
-                          <div className="flex items-center flex-1 gap-1">
-                            <Input
-                              placeholder="Units used as axis name by default"
-                              className="flex-1 w-full"
-                              value={yAxis.label}
-                              sizeVariant="xs"
-                              onChange={(e) => {
-                                const chartEntity: ChartEntity = newEntity;
-                                const updatedEntity: ChartEntity = {
-                                  ...chartEntity,
-                                  yAxes: (chartEntity.yAxes || []).map(
-                                    (axis) => {
-                                      if (axis.id === yAxis.id) {
-                                        return {
-                                          ...axis,
-                                          label: e.target.value,
-                                        };
-                                      }
-                                      return axis;
-                                    }
-                                  ),
-                                };
-                                setNewEntity(updatedEntity);
-                              }}
-                            />
-                            <Tooltip content="Add Layer">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const chartEntity: ChartEntity = newEntity;
-                                  const newLayer: ChartLayerLine = {
-                                    dataset: "",
-                                    endTime: "",
-                                    fields: [],
-                                    id: generateUUID(),
-                                    color: "#002AFA", // TODO implement smart next color selection here
-                                    instrument: "",
-                                    type: "line",
-                                    mission: "",
-                                    startTime: "",
-                                    version: "",
-                                    yAxisId: yAxis.id,
-                                  };
-                                  const updatedEntity: ChartEntity = {
-                                    ...chartEntity,
-                                    layers: [
-                                      ...(chartEntity.layers || []),
-                                      newLayer,
-                                    ],
-                                  };
-                                  setNewEntity(updatedEntity);
-                                }}
-                              >
-                                <Layers2 />
-                              </Button>
-                            </Tooltip>
-                            <Tooltip content="Remove Y Axis">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const chartEntity: ChartEntity = newEntity;
-                                  // TODO re-associate any existing layers with other axes? What if none exist?
-                                  const updatedEntity: ChartEntity = {
-                                    ...chartEntity,
-                                    yAxes: (chartEntity.yAxes || []).filter(
-                                      (axis) => axis.id !== yAxis.id
-                                    ),
-                                    layers: (chartEntity.layers || []).filter(
-                                      (layer) => layer.yAxisId !== yAxis.id
-                                    ),
-                                  };
-                                  setNewEntity(updatedEntity);
-                                }}
-                              >
-                                <Trash2 />
-                              </Button>
-                            </Tooltip>
-                          </div>
-                          <div className="flex flex-col gap-2 border-l ml-1">
-                            {((newEntity as ChartEntity).layers || [])
-                              .filter((l) => l.yAxisId === yAxis.id)
-                              .map((layer) => (
-                                <div key={layer.id} className="flex gap-1">
-                                  <Select
-                                    onValueChange={(value) => {
-                                      const selectedProduct =
-                                        selectedProducts.find(
-                                          (p) => p.id === value
-                                        );
-                                      const chartEntity: ChartEntity =
-                                        newEntity;
-                                      const updatedEntity: ChartEntity = {
-                                        ...chartEntity,
-                                        layers: (chartEntity.layers || [])?.map(
-                                          (l) => {
-                                            if (l.id === layer.id) {
-                                              return {
-                                                ...layer,
-                                                ...selectedProduct,
-                                                id: layer.id,
-                                              };
-                                            }
-                                            return l;
+            <div>
+              {isChartEntity(newEntity) && (
+                <div className="flex gap-6 flex-col divide-y">
+                  <div className="p-4 flex gap-2 flex-col">
+                    <div className="font-medium h-6 justify-between flex">
+                      Y Axes
+                      <Tooltip content="Add Y Axis">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newYAxis: YAxis = {
+                              id: generateUUID(),
+                              label: "",
+                            };
+                            const updatedEntity = {
+                              ...newEntity,
+                              yAxes: (newEntity.yAxes || []).concat(newYAxis),
+                            };
+                            setNewEntity(updatedEntity);
+                          }}
+                        >
+                          <Plus />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      {(newEntity.yAxes === undefined ||
+                        (newEntity.yAxes || []).length < 1) && (
+                        <div className="text-muted-foreground">No y axes</div>
+                      )}
+                      {newEntity.yAxes !== undefined && (
+                        <div className="flex-1 flex flex-col gap-6">
+                          {newEntity.yAxes?.map((yAxis) => (
+                            <div className="flex flex-col gap-1" key={yAxis.id}>
+                              <div className="flex items-center flex-1 gap-1">
+                                <Input
+                                  placeholder="Name defaults to units"
+                                  className="flex-1 w-full"
+                                  value={yAxis.label}
+                                  sizeVariant="xs"
+                                  onChange={(e) => {
+                                    const updatedEntity = {
+                                      ...newEntity,
+                                      yAxes: (newEntity.yAxes || []).map(
+                                        (axis) => {
+                                          if (axis.id === yAxis.id) {
+                                            return {
+                                              ...axis,
+                                              label: e.target.value,
+                                            };
                                           }
+                                          return axis;
+                                        }
+                                      ),
+                                    };
+                                    setNewEntity(updatedEntity);
+                                  }}
+                                />
+                                <Tooltip content="Add Layer">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      const newLayer: ChartLayerLine = {
+                                        dataset: "",
+                                        endTime: "",
+                                        fields: [],
+                                        id: generateUUID(),
+                                        color: "#002AFA", // TODO implement smart next color selection here
+                                        instrument: "",
+                                        type: "line",
+                                        mission: "",
+                                        startTime: "",
+                                        version: "",
+                                        yAxisId: yAxis.id,
+                                      };
+                                      const updatedEntity = {
+                                        ...newEntity,
+                                        layers: [
+                                          ...(newEntity.layers || []),
+                                          newLayer,
+                                        ],
+                                      };
+                                      setNewEntity(updatedEntity);
+                                    }}
+                                  >
+                                    <Layers2 />
+                                  </Button>
+                                </Tooltip>
+                                <Tooltip content="Remove Y Axis">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      // TODO re-associate any existing layers with other axes? What if none exist?
+                                      const updatedEntity = {
+                                        ...newEntity,
+                                        yAxes: (newEntity.yAxes || []).filter(
+                                          (axis) => axis.id !== yAxis.id
+                                        ),
+                                        layers: (newEntity.layers || []).filter(
+                                          (layer) => layer.yAxisId !== yAxis.id
                                         ),
                                       };
                                       setNewEntity(updatedEntity);
                                     }}
+                                  >
+                                    <Trash2 />
+                                  </Button>
+                                </Tooltip>
+                              </div>
+                              <div className="flex flex-col gap-2 border-l ml-1">
+                                {(newEntity.layers || [])
+                                  .filter((l) => l.yAxisId === yAxis.id)
+                                  .map((layer) => (
+                                    <div key={layer.id} className="flex gap-1">
+                                      <Select
+                                        onValueChange={(value) => {
+                                          const selectedProduct =
+                                            selectedProducts.find(
+                                              (p) => p.id === value
+                                            );
+                                          const updatedEntity = {
+                                            ...newEntity,
+                                            layers: (
+                                              newEntity.layers || []
+                                            )?.map((l) => {
+                                              if (l.id === layer.id) {
+                                                return {
+                                                  ...layer,
+                                                  ...selectedProduct,
+                                                  id: layer.id,
+                                                };
+                                              }
+                                              return l;
+                                            }),
+                                          };
+                                          setNewEntity(updatedEntity);
+                                        }}
+                                        value={
+                                          getMatchingSelectedProductForLayer(
+                                            layer,
+                                            selectedProducts
+                                          )?.id
+                                        }
+                                      >
+                                        <SelectTrigger
+                                          size="xs"
+                                          className="flex-1 max-w-96 min-w-24 ml-2"
+                                        >
+                                          <SelectValue
+                                            id="entity-type"
+                                            placeholder="Select product"
+                                          />
+                                        </SelectTrigger>
+                                        <SelectContent size="xs">
+                                          {selectedProducts
+                                            .sort()
+                                            .map((selectedProduct) => (
+                                              <SelectItem
+                                                key={selectedProduct.id}
+                                                size="xs"
+                                                value={selectedProduct.id}
+                                              >
+                                                {getLabelForSelectedProductOrLayer(
+                                                  selectedProduct,
+                                                  [selectedProduct.fields[0]]
+                                                )}
+                                              </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <div className="w-6 h-6 flex">
+                                        <input
+                                          type="color"
+                                          className="bg-transparent [&::-webkit-color-swatch]:border-transparent [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch-wrapper]:p-0 w-6 h-6 p-1 hover:bg-secondary rounded cursor-pointer"
+                                          value={layer.color}
+                                          onChange={(e) => {
+                                            debouncedColorChange(
+                                              e.target.value,
+                                              layer
+                                            );
+                                          }}
+                                        />
+                                      </div>
+                                      <Tooltip content="Remove Layer">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => {
+                                            const chartEntity: ChartEntity =
+                                              newEntity;
+                                            const updatedEntity: ChartEntity = {
+                                              ...chartEntity,
+                                              layers: (
+                                                chartEntity.layers || []
+                                              ).filter(
+                                                (l) => l.id !== layer.id
+                                              ),
+                                            };
+                                            setNewEntity(updatedEntity);
+                                          }}
+                                        >
+                                          <Trash2 />
+                                        </Button>
+                                      </Tooltip>
+                                      <Popover>
+                                        <Tooltip content="Settings">
+                                          <PopoverTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                              <MoreVertical size={16} />
+                                            </Button>
+                                          </PopoverTrigger>
+                                        </Tooltip>
+                                        <PopoverContent
+                                          collisionPadding={{ right: 16 }}
+                                        >
+                                          <div className="leading-none font-medium h-6">
+                                            Layer Settings
+                                          </div>
+                                          <div className="flex items-center gap-2 flex-col">
+                                            <InputForm
+                                              inlineLabelWidth={72}
+                                              layout="inline"
+                                              formSchema={z.object({
+                                                lineWidth: z.coerce
+                                                  .number()
+                                                  .min(0)
+                                                  .max(10),
+                                              })}
+                                              inputProps={{
+                                                type: "number",
+                                                step: 0.25,
+                                              }}
+                                              defaultValue={
+                                                (
+                                                  layer as ChartLayerLine
+                                                ).lineWidth?.toString() ?? "1"
+                                              }
+                                              name="lineWidth"
+                                              label="Line Width"
+                                              onChange={(value) => {
+                                                const chartLayer =
+                                                  layer as ChartLayerLine;
+                                                updateChartLayer({
+                                                  ...chartLayer,
+                                                  lineWidth: parseFloat(value),
+                                                });
+                                              }}
+                                            />
+                                            <InputForm
+                                              inlineLabelWidth={72}
+                                              layout="inline"
+                                              inputProps={{
+                                                type: "number",
+                                                step: 0.25,
+                                              }}
+                                              formSchema={z.object({
+                                                pointRadius: z.coerce
+                                                  .number()
+                                                  .min(0)
+                                                  .max(10),
+                                              })}
+                                              defaultValue={
+                                                (
+                                                  layer as ChartLayerLine
+                                                ).pointRadius?.toString() ??
+                                                "1.25"
+                                              }
+                                              name="pointRadius"
+                                              label="Point Width"
+                                              onChange={(value) => {
+                                                const chartLayer =
+                                                  layer as ChartLayerLine;
+                                                updateChartLayer({
+                                                  ...chartLayer,
+                                                  pointRadius:
+                                                    parseFloat(value),
+                                                });
+                                              }}
+                                            />
+                                          </div>
+                                        </PopoverContent>
+                                      </Popover>
+                                    </div>
+                                  ))}
+                              </div>
+                              {(newEntity.layers || []).filter(
+                                (l) => l.yAxisId === yAxis.id
+                              ).length === 0 && (
+                                <div className="text-muted-foreground">
+                                  No layers on axis
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isTableEntity(newEntity) && (
+                <div className="flex gap-6 flex-col divide-y">
+                  <div className="p-4 gap-2 flex flex-col">
+                    <div className="font-medium h-6 justify-between flex ">
+                      Table Options
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Checkbox
+                        id="apply-field-thresholds"
+                        checked={newEntity.applyThresholds}
+                        onCheckedChange={(checked) => {
+                          const updatedEntity = {
+                            ...newEntity,
+                            applyThresholds: checked as boolean,
+                          };
+                          setNewEntity(updatedEntity);
+                        }}
+                      />
+                      <Label size="sm" htmlFor="apply-field-thresholds">
+                        Apply Field Thresholds
+                      </Label>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Checkbox
+                        id="table-compact"
+                        checked={newEntity.compact}
+                        onCheckedChange={(checked) => {
+                          const updatedEntity = {
+                            ...newEntity,
+                            compact: checked as boolean,
+                          };
+                          setNewEntity(updatedEntity);
+                        }}
+                      />
+                      <Label size="sm" htmlFor="table-compact">
+                        Compact
+                      </Label>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Checkbox
+                        id="fitToGridWidth"
+                        checked={newEntity.fitToGridWidth}
+                        onCheckedChange={(checked) => {
+                          const updatedEntity: TableEntity = {
+                            ...newEntity,
+                            fitToGridWidth: checked as boolean,
+                          };
+                          setNewEntity(updatedEntity);
+                        }}
+                      />
+                      <Label size="sm" htmlFor="fitToGridWidth">
+                        Expand columns to fit container
+                      </Label>
+                    </div>
+                  </div>
+
+                  <div className="p-4 gap-2 flex flex-col">
+                    <div className="font-medium h-6 justify-between flex ">
+                      Columns
+                      <Tooltip content="Add Column">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newColumn: TableColumn = {
+                              field: "",
+                              id: generateUUID(),
+                              layerId: "",
+                              label: "",
+                            };
+                            const updatedEntity = {
+                              ...newEntity,
+                              columns: (newEntity.columns || []).concat(
+                                newColumn
+                              ),
+                            };
+                            setNewEntity(updatedEntity);
+                          }}
+                        >
+                          <Plus />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      {newEntity.columns.length < 1 && (
+                        <div className="text-muted-foreground">No columns</div>
+                      )}
+                      {newEntity.columns.length > 0 && (
+                        <div className="flex-1 flex flex-col gap-6">
+                          {newEntity.columns.map((column) => {
+                            const columnLayer = newEntity.layers.find(
+                              (l) => l.id === column.layerId
+                            );
+                            return (
+                              <div className="flex gap-1" key={column.id}>
+                                <div className="flex flex-col flex-1 gap-1">
+                                  <div className="flex items-center flex-1 gap-1">
+                                    <Input
+                                      placeholder="Name defaults to field and units"
+                                      className="flex-1 w-full min-h-6"
+                                      value={column.label}
+                                      sizeVariant="xs"
+                                      onChange={(e) => {
+                                        const updatedEntity = {
+                                          ...newEntity,
+                                          columns: (
+                                            newEntity.columns || []
+                                          ).map((c) => {
+                                            if (column.id === c.id) {
+                                              return {
+                                                ...c,
+                                                label: e.target.value,
+                                              };
+                                            }
+                                            return c;
+                                          }),
+                                        };
+                                        setNewEntity(updatedEntity);
+                                      }}
+                                    />
+                                    <Tooltip content="Remove Column">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                          const updatedEntity = {
+                                            ...newEntity,
+                                            columns: newEntity.columns.filter(
+                                              (col) => col.id !== column.id
+                                            ),
+                                            layers: newEntity.layers.filter(
+                                              (layer) =>
+                                                layer.id !== column.layerId
+                                            ),
+                                          };
+                                          setNewEntity(updatedEntity);
+                                        }}
+                                      >
+                                        <Trash2 />
+                                      </Button>
+                                    </Tooltip>
+                                  </div>
+                                  <Select
+                                    onValueChange={(value) => {
+                                      debugger;
+                                      const [id, field] =
+                                        value.split(separator);
+                                      const selectedProduct =
+                                        selectedProducts.find(
+                                          (p) => p.id === id
+                                        );
+                                      if (!selectedProduct) {
+                                        return;
+                                      }
+                                      let computedColumnLayer = columnLayer;
+                                      const updatedEntity = { ...newEntity };
+                                      // Create a new layer for this product if it does not already exist
+                                      // or if a matching one cannot be found
+                                      computedColumnLayer =
+                                        updatedEntity.layers.find((l) => {
+                                          return (
+                                            l.mission ===
+                                              selectedProduct.mission &&
+                                            l.dataset ===
+                                              selectedProduct.dataset &&
+                                            l.instrument ===
+                                              selectedProduct.instrument &&
+                                            (l.channels || []).join(",") ===
+                                              (
+                                                selectedProduct.channels || []
+                                              ).join(",") &&
+                                            l.version ===
+                                              selectedProduct.version
+                                          );
+                                        });
+
+                                      if (!computedColumnLayer) {
+                                        computedColumnLayer = createDataLayer({
+                                          ...selectedProduct,
+                                          id: generateUUID(),
+                                        });
+                                        updatedEntity.layers =
+                                          updatedEntity.layers.concat(
+                                            computedColumnLayer
+                                          );
+                                      } else {
+                                        // Update the existing layer with the new field
+                                        updatedEntity.layers =
+                                          updatedEntity.layers.map((l) => {
+                                            if (
+                                              computedColumnLayer &&
+                                              l.id === computedColumnLayer.id
+                                            ) {
+                                              return {
+                                                ...computedColumnLayer,
+                                                ...selectedProduct,
+                                                fields: [
+                                                  ...new Set(
+                                                    computedColumnLayer.fields.concat(
+                                                      selectedProduct?.fields ||
+                                                        []
+                                                    )
+                                                  ),
+                                                ],
+                                                id: computedColumnLayer.id,
+                                              };
+                                            }
+                                            return l;
+                                          });
+                                      }
+                                      updatedEntity.columns =
+                                        updatedEntity.columns.map((col) => {
+                                          if (col.id === column.id) {
+                                            col = {
+                                              ...col,
+                                              field,
+                                              layerId: computedColumnLayer.id,
+                                            };
+                                            // col.field = field;
+                                            // col.layerId =
+                                            //   computedColumnLayer.id;
+                                          }
+                                          return col;
+                                        });
+                                      console.log(
+                                        "updatedEntity :>> ",
+                                        updatedEntity
+                                      );
+                                      setNewEntity(updatedEntity);
+                                    }}
                                     value={
-                                      getMatchingSelectedProductForLayer(
-                                        layer,
-                                        selectedProducts
-                                      )?.id
+                                      columnLayer
+                                        ? `${
+                                            getMatchingSelectedProductForLayer(
+                                              columnLayer,
+                                              selectedProducts,
+                                              [column.field]
+                                            )?.id
+                                          }${separator}${column.field}`
+                                        : ""
                                     }
                                   >
                                     <SelectTrigger
                                       size="xs"
-                                      className="flex-1 max-w-96 min-w-24 ml-2"
+                                      className="flex-1 max-w-96 min-w-24"
                                     >
-                                      <SelectValue
-                                        id="entity-type"
-                                        placeholder="Select product"
-                                      />
+                                      <SelectValue placeholder="Select product" />
                                     </SelectTrigger>
                                     <SelectContent size="xs">
                                       {selectedProducts
                                         .sort()
-                                        .map((selectedProduct) => (
-                                          <SelectItem
-                                            key={selectedProduct.id}
-                                            size="xs"
-                                            value={selectedProduct.id}
-                                          >
-                                            {getLabelForSelectedProductOrLayer(
-                                              selectedProduct
-                                            )}
-                                          </SelectItem>
-                                        ))}
+                                        .map((selectedProduct) =>
+                                          selectedProduct.fields.map((f) => {
+                                            const value = `${selectedProduct.id}${separator}${f}`;
+                                            return (
+                                              <SelectItem
+                                                key={value}
+                                                size="xs"
+                                                value={value}
+                                              >
+                                                {getLabelForSelectedProductOrLayer(
+                                                  selectedProduct,
+                                                  [f]
+                                                )}
+                                              </SelectItem>
+                                            );
+                                          })
+                                        )}
                                     </SelectContent>
                                   </Select>
-                                  <div className="w-6 h-6 flex">
-                                    <input
-                                      type="color"
-                                      className="bg-transparent [&::-webkit-color-swatch]:border-transparent [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch-wrapper]:p-0 w-6 h-6 p-1 hover:bg-secondary rounded cursor-pointer"
-                                      value={layer.color}
-                                      onChange={(e) => {
-                                        debouncedColorChange(
-                                          e.target.value,
-                                          layer
-                                        );
-                                      }}
-                                    />
-                                  </div>
-                                  <Tooltip content="Remove Layer">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        const chartEntity: ChartEntity =
-                                          newEntity;
-                                        const updatedEntity: ChartEntity = {
-                                          ...chartEntity,
-                                          layers: (
-                                            chartEntity.layers || []
-                                          ).filter((l) => l.id !== layer.id),
-                                        };
-                                        setNewEntity(updatedEntity);
-                                      }}
-                                    >
-                                      <Trash2 />
-                                    </Button>
-                                  </Tooltip>
-                                  <Popover>
-                                    <Tooltip content="Settings">
-                                      <PopoverTrigger asChild>
-                                        <Button variant="ghost" size="icon">
-                                          <MoreVertical size={16} />
-                                        </Button>
-                                      </PopoverTrigger>
-                                    </Tooltip>
-                                    <PopoverContent
-                                      collisionPadding={{ right: 16 }}
-                                    >
-                                      <div className="leading-none font-medium mb-4">
-                                        Layer Settings
-                                      </div>
-                                      <div className="flex items-center gap-2 flex-col">
-                                        <InputForm
-                                          inlineLabelWidth={72}
-                                          layout="inline"
-                                          formSchema={z.object({
-                                            lineWidth: z.coerce
-                                              .number()
-                                              .min(0)
-                                              .max(10),
-                                          })}
-                                          inputProps={{
-                                            type: "number",
-                                            step: 0.25,
-                                          }}
-                                          defaultValue={
-                                            (
-                                              layer as ChartLayerLine
-                                            ).lineWidth?.toString() ?? "1"
-                                          }
-                                          name="lineWidth"
-                                          label="Line Width"
-                                          onChange={(value) => {
-                                            const chartLayer =
-                                              layer as ChartLayerLine;
-                                            updateChartLayer({
-                                              ...chartLayer,
-                                              lineWidth: parseFloat(value),
-                                            });
-                                          }}
-                                        />
-                                        <InputForm
-                                          inlineLabelWidth={72}
-                                          layout="inline"
-                                          inputProps={{
-                                            type: "number",
-                                            step: 0.25,
-                                          }}
-                                          formSchema={z.object({
-                                            pointRadius: z.coerce
-                                              .number()
-                                              .min(0)
-                                              .max(10),
-                                          })}
-                                          defaultValue={
-                                            (
-                                              layer as ChartLayerLine
-                                            ).pointRadius?.toString() ?? "1.25"
-                                          }
-                                          name="pointRadius"
-                                          label="Point Width"
-                                          onChange={(value) => {
-                                            const chartLayer =
-                                              layer as ChartLayerLine;
-                                            updateChartLayer({
-                                              ...chartLayer,
-                                              pointRadius: parseFloat(value),
-                                            });
-                                          }}
-                                        />
-                                      </div>
-                                    </PopoverContent>
-                                  </Popover>
                                 </div>
-                              ))}
-                          </div>
-                          {((newEntity as ChartEntity).layers || []).filter(
-                            (l) => l.yAxisId === yAxis.id
-                          ).length === 0 && (
-                            <div className="text-muted-foreground">
-                              No layers on axis
-                            </div>
-                          )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

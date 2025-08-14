@@ -24,7 +24,11 @@ import {
   Section as SectionType,
 } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
-import { duplicateEntity, duplicateSection } from "../../utilities/view";
+import {
+  createEntity,
+  duplicateEntity,
+  duplicateSection,
+} from "../../utilities/view";
 import { useConfirm } from "../ui/AlertDialogProvider";
 import { DateRangePicker } from "../ui/DateRangePicker";
 import EntityEditor from "../ui/EntityEditor";
@@ -216,12 +220,7 @@ export const ViewPage = ({
       if (!viewPage) {
         return;
       }
-      const newEntity: ChartEntity = {
-        id: generateUUID(),
-        title: "New Entity",
-        type: "chart",
-        syncWithPageDateRange: true,
-      };
+      const newEntity: ChartEntity = createEntity({ type: "chart" });
       const updatedViewPage: PageType = {
         ...viewPage,
         sections: viewPage.sections.map((s) => {

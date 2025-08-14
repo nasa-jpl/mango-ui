@@ -1,6 +1,15 @@
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@nasa-jpl/stellar-react";
 import type { ColGroupDef, ValueGetterParams } from "ag-grid-community";
 import classNames from "classnames";
-import { memo, useEffect, useMemo, useState } from "react";
+import { debounce } from "lodash-es";
+import { CopyPlus, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   DataResponse,
   DataResponseDataEntry,
@@ -26,16 +35,21 @@ import {
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
 import StatusBadge from "../../ui/StatusBadge.tsx";
+import { Tooltip } from "../../ui/Tooltip.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 
 export declare type TableProps = {
   compact?: boolean;
   dateRange: DateRange;
+  enableEditing?: boolean;
   instrument?: string | null;
   mission?: string | null;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  onEdit?: () => void;
   products: Product[];
   selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
@@ -64,6 +78,7 @@ function getAGGridFilterType(type: ProductField["type"] | string) {
 const Table = memo(function Table({
   dateRange,
   showHeader = true,
+  enableEditing = true,
   instrument,
   mission,
   tableEntity,
@@ -71,6 +86,9 @@ const Table = memo(function Table({
   selectedPoint,
   onSetProductPreview = () => {},
   onSelectPoint = () => {},
+  onDelete = () => {},
+  onDuplicate = () => {},
+  onEdit = () => {},
   compact = false,
 }: TableProps) {
   const [loading, setLoading] = useState(false);
@@ -88,8 +106,22 @@ const Table = memo(function Table({
     [tableEntity.syncWithPageDateRange, dateRange]
   );
 
+  const debouncedFetchTableData = useCallback(
+    debounce(
+      (
+        layers: DataLayer[],
+        startDate: string,
+        endDate: string,
+        mission,
+        instrument
+      ) => fetchTableData(layers, startDate, endDate, mission, instrument),
+      100
+    ),
+    []
+  );
+
   useEffect(() => {
-    fetchTableData(
+    debouncedFetchTableData(
       tableEntity.layers,
       computedDateRange.start,
       computedDateRange.end,
@@ -102,6 +134,8 @@ const Table = memo(function Table({
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(tableEntity.layers),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(tableEntity.columns),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(computedDateRange),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,7 +187,9 @@ const Table = memo(function Table({
         filter: getAGGridFilterType(metadata?.type || ""),
         floatingFilter: true,
         floatingFilterComponent: CustomFilter,
-        headerName: column.label ?? column.field,
+        headerName:
+          column.label ||
+          `${column.field}${metadata?.unit ? ` (${metadata?.unit})` : ""}`,
         resizable: true,
         sortable: true,
         floatingFilterComponentParams: {
@@ -558,10 +594,61 @@ const Table = memo(function Table({
     }, {}) as DataResponseDataEntry;
     onSelectPoint(point);
   };
-
   return (
-    <div className={classNames("table", { "table-compact": compact })}>
-      {showHeader && <EntityHeader title={tableEntity.title} />}
+    <div
+      className={classNames("table group", {
+        "table-compact": compact,
+      })}
+    >
+      {showHeader && (
+        <EntityHeader
+          movable={!enableEditing}
+          title={tableEntity.title}
+          rightContent={
+            <div className="right-content invisible h-full group-hover:visible border-r">
+              <DropdownMenu>
+                <Tooltip content="More options">
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="h-full w-[28px] rounded-none"
+                      variant="ghost"
+                      size="icon"
+                    >
+                      <MoreVertical size={16} className="select-none" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </Tooltip>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => onEdit()}
+                    disabled={!enableEditing}
+                  >
+                    <Pencil /> Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onDuplicate()}
+                    disabled={!enableEditing}
+                  >
+                    <CopyPlus /> Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onDelete()}
+                    disabled={!enableEditing}
+                  >
+                    <Trash2 /> Delete
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem>
+                    <Download /> Download Data
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Camera /> Snapshot
+                  </DropdownMenuItem> */}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          }
+        />
+      )}
       {!compact && (
         <DataGrid
           idKey={idField}

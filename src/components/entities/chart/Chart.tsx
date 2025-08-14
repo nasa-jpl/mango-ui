@@ -1315,12 +1315,13 @@ export const Chart = ({
   };
 
   return (
-    <div className="chart">
+    <div className="chart group">
       {showHeader && (
         <EntityHeader
+          movable={!enableEditing}
           title={chartEntity.title}
           rightContent={
-            <div className="chart-header-buttons border-r">
+            <div className="right-content invisible h-full group-hover:visible border-r">
               <Tooltip content="Reset Y Axis">
                 <Button
                   className="h-full w-[28px] rounded-none"
@@ -1371,7 +1372,6 @@ export const Chart = ({
                   <DropdownMenuTrigger asChild>
                     <Button
                       className="h-full w-[28px] rounded-none"
-                      onClick={toggleBoxZoom}
                       variant="ghost"
                       size="icon"
                     >
