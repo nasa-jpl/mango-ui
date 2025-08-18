@@ -520,29 +520,48 @@ export function DownlinkDashboard({
           },
         ],
         columns: [
-          { field: "type", layerId: "allGapsLayer", label: "Gap Type" },
+          {
+            field: "type",
+            layerId: "allGapsLayer",
+            label: "Gap Type",
+            id: generateUUID(),
+          },
           {
             field: "gap_start_time",
             layerId: "allGapsLayer",
             label: "Gap Start Time",
+            id: generateUUID(),
           },
           {
             field: "gap_end_time",
             layerId: "allGapsLayer",
             label: "Gap End Time",
+            id: generateUUID(),
           },
           {
             field: "gap_duration",
             layerId: "allGapsLayer",
             label: "Gap Duration (ms)",
+            id: generateUUID(),
           },
           {
             field: "time_gap_max",
             layerId: "allGapsLayer",
             label: "Time Gap Max",
+            id: generateUUID(),
           },
-          { field: "file_name", layerId: "allGapsLayer", label: "File Name" },
-          { field: "id", layerId: "allGapsLayer", label: "Id" },
+          {
+            field: "file_name",
+            layerId: "allGapsLayer",
+            label: "File Name",
+            id: generateUUID(),
+          },
+          {
+            field: "id",
+            layerId: "allGapsLayer",
+            label: "Id",
+            id: generateUUID(),
+          },
         ],
       };
       const productFields = downlinkDashboardEntity.defaultFields.concat(
@@ -576,6 +595,7 @@ export function DownlinkDashboard({
         columns: [...productFields, "id"].map((f) => ({
           field: f,
           layerId: "passesLayer",
+          id: generateUUID(),
         })),
       };
       const productReportsTable: TimelineRowSubrowEntity<TableEntity> = {
@@ -602,6 +622,7 @@ export function DownlinkDashboard({
         columns: productFields.map((f) => ({
           field: f,
           layerId: "productReportsLayer",
+          id: generateUUID(),
         })),
       };
       const gapsChart: TimelineRowSubrowEntity<ChartEntity> = {

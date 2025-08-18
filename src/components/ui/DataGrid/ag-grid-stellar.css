@@ -44,7 +44,7 @@
     color-mix(in srgb, transparent, var(--ag-input-focus-border-color) 47%);
   --ag-invalid-color: #e02525;
   --ag-list-item-height: calc(var(--ag-grid-size) * 6);
-  --ag-odd-row-background-color: #fcfcfc;
+  --ag-odd-row-background-color: hsl(var(--secondary) / 0.5);
   --ag-popup-shadow: var(--ag-card-shadow);
   --ag-range-selection-background-color-2: rgba(33, 150, 243, 0.36);
   --ag-range-selection-background-color-3: rgba(33, 150, 243, 0.49);

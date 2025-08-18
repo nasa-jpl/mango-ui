@@ -4,6 +4,7 @@ import {
   ChartLayer,
   ChartLayerEvent,
   ChartLayerLine,
+  DataLayer,
   DataTransform,
   DataTransformDerived,
   DataTransformSelf,
@@ -238,6 +239,38 @@ export function createViewPageGroup(params: Partial<PageGroup>): PageGroup {
     pages: [],
     title: "",
     url: "",
+    ...params,
+  };
+}
+
+export function createEntity(params: Partial<Entity>): Entity {
+  const type = params.type || "chart";
+  const entity: Entity = {
+    id: generateUUID(),
+    title: "New Entity",
+    type,
+    syncWithPageDateRange: true,
+    ...params,
+  };
+
+  // Add in required properties
+  if (isTableEntity(entity)) {
+    entity.columns = [];
+    entity.layers = [];
+  }
+  return entity;
+}
+
+export function createDataLayer(params: Partial<DataLayer>): DataLayer {
+  return {
+    dataset: "",
+    endTime: "",
+    fields: [],
+    id: generateUUID(),
+    instrument: "",
+    mission: "",
+    startTime: "",
+    version: "",
     ...params,
   };
 }

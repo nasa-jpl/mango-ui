@@ -227,6 +227,7 @@ export type TableColumn = {
   columnGroupId?: string;
   dateFormat?: DateFormat;
   field: string;
+  id: string;
   label?: string;
   layerId: string;
 };

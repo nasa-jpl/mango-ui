@@ -102,6 +102,7 @@ export const Entity = (props: EntityProps) => {
       )}
       {isTableEntity(entity) && (
         <Table
+          enableEditing={enableEditing}
           tableEntity={entity as TableEntity}
           dateRange={dateRange}
           showHeader={showHeader}
@@ -110,6 +111,9 @@ export const Entity = (props: EntityProps) => {
           mission={mission}
           onSetProductPreview={onSetProductPreview}
           onSelectPoint={onSelectPoint}
+          onDelete={() => onDelete(entity)}
+          onDuplicate={() => onDuplicate(entity)}
+          onEdit={() => onEdit(entity)}
           selectedPoint={selectedPoint}
           compact={compact}
         />

@@ -1,5 +1,19 @@
+import { Check, ChevronsUpDown } from "lucide-react";
+
 import {
+  Button,
+  cn,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -8,10 +22,12 @@ import {
 } from "@nasa-jpl/stellar-react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { Product } from "../../types/api";
+import { Product, ProductField } from "../../types/api";
 import { SelectedProduct } from "./EntityEditor";
 
 export declare type ProductSelectorProps = {
+  fieldFilter: (field: ProductField) => boolean;
+  multiple: boolean;
   onChange: (selectedProduct: SelectedProduct) => void;
   products: Product[];
   selectedProduct: SelectedProduct;
@@ -21,6 +37,8 @@ export const ProductSelector = ({
   onChange,
   products,
   selectedProduct,
+  fieldFilter,
+  multiple = false,
 }: ProductSelectorProps) => {
   const [newSelectedProduct, setNewSelectedProduct] =
     useState<SelectedProduct>(selectedProduct);
@@ -28,6 +46,8 @@ export const ProductSelector = ({
   useEffect(() => {
     setNewSelectedProduct(selectedProduct);
   }, [selectedProduct]);
+
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
@@ -47,9 +67,10 @@ export const ProductSelector = ({
   const missions = [...new Set(products.map((product) => product.mission))];
   const instruments = [
     ...new Set(
-      ...products
+      products
         .filter((product) => product.mission === newSelectedProduct.mission)
         .map((product) => product.instruments)
+        .flat()
     ),
   ];
   const datasets = [
@@ -70,12 +91,7 @@ export const ProductSelector = ({
       product.mission === newSelectedProduct.mission &&
       product.instruments.indexOf(newSelectedProduct.instrument) > -1
   );
-
-  const fields =
-    product?.available_fields.filter(
-      (field) =>
-        (!field.is_channel_id && field.type === "float") || field.type === "int"
-    ) || [];
+  const fields = product?.available_fields.filter(fieldFilter) || [];
 
   const channels = product?.available_fields
     .filter((f) => f.is_channel_id)
@@ -161,31 +177,92 @@ export const ProductSelector = ({
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <Label size="sm">Field</Label>
-          <Select
-            onValueChange={(value) =>
-              updateSelectedProduct({
-                ...newSelectedProduct,
-                fields: [value],
-              })
-            }
-            value={
-              newSelectedProduct.fields.length
-                ? newSelectedProduct.fields[0]
-                : undefined
-            }
-          >
-            <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-              <SelectValue id="entity-type" placeholder="Select field" />
-            </SelectTrigger>
-            <SelectContent size="xs">
-              {fields.map((field) => (
-                <SelectItem size="xs" value={field.name} key={field.name}>
-                  {field.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label size="sm">{multiple ? "Field(s)" : "Field"}</Label>
+          <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={comboboxOpen}
+                className="w-[200px] flex overflow-hidden items-center p-2 justify-between h-[26px]"
+              >
+                <div className="block overflow-hidden text-ellipsis">
+                  {newSelectedProduct.fields.length ? (
+                    newSelectedProduct.fields.join(", ")
+                  ) : (
+                    <div className="text-muted-foreground font-normal">
+                      Select {multiple ? "field(s)" : "field"}
+                    </div>
+                  )}
+                </div>
+                <ChevronsUpDown className="opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 max-w-fit min-w-fit" align="start">
+              <Command className="min-w-fit">
+                <CommandInput placeholder="Search fields..." asChild>
+                  <Input
+                    className="border-none h-8 focus-visible:outline-none focus-visible:ring-0 text-xs"
+                    sizeVariant="sm"
+                  />
+                </CommandInput>
+                <CommandList className="min-w-fit">
+                  <CommandEmpty className="py-4 text-center text-xs">
+                    No field found.
+                  </CommandEmpty>
+                  <CommandGroup className="min-w-fit">
+                    {fields.map((field) => (
+                      <CommandItem
+                        className="text-xs min-w-fit"
+                        key={field.name}
+                        value={field.name}
+                        onSelect={(currentValue) => {
+                          if (!multiple) {
+                            updateSelectedProduct({
+                              ...newSelectedProduct,
+                              fields: [currentValue],
+                            });
+                            setComboboxOpen(false);
+                            return;
+                          }
+
+                          let newFields = [...newSelectedProduct.fields];
+                          if (
+                            newSelectedProduct.fields.indexOf(currentValue) > -1
+                          ) {
+                            newFields = newFields.filter(
+                              (f) => f !== currentValue
+                            );
+                          } else {
+                            newFields.push(currentValue);
+                          }
+                          updateSelectedProduct({
+                            ...newSelectedProduct,
+                            fields: newFields,
+                          });
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "",
+                            newSelectedProduct.fields.indexOf(field.name) > -1
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        <div className="flex gap-1 whitespace-nowrap">
+                          {field.name}
+                          <div className="text-muted-foreground">
+                            {field.unit} ({field.type})
+                          </div>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
         {(channels || []).map((channel) => {
           const matchingChannel = (selectedProduct.channels || []).find(
