@@ -36,6 +36,7 @@ import Timeline from "../../entities/timeline/Timeline";
 
 export declare type DownlinkDashboardProps = {
   dateRange: DateRange;
+  dateBounds: DateRange;
   downlinkDashboardEntity: DownlinkDashboardEntity;
   hoverDate: Date | null;
   instrument?: string | null;
@@ -56,6 +57,7 @@ type DownlinkDashData = {
 export function DownlinkDashboard({
   downlinkDashboardEntity,
   dateRange,
+  dateBounds,
   products,
   hoverDate,
   selectedPoint,
@@ -771,6 +773,7 @@ export function DownlinkDashboard({
           status={datasetStatus}
           loading={loading}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           mission={mission}
           instrument={instrument}
           products={products}

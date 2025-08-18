@@ -30,6 +30,7 @@ import "./Section.css";
 
 export declare type SectionProps = {
   dateRange: DateRange;
+  dateBounds: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
   mission?: string | null;
@@ -51,6 +52,7 @@ export declare type SectionProps = {
 
 export const Section = ({
   dateRange,
+  dateBounds,
   hoverDate,
   products,
   section,
@@ -143,6 +145,7 @@ export const Section = ({
       products={products}
       entity={e}
       onDateRangeChange={onDateRangeChange}
+      dateBounds={dateBounds}
       onDelete={() => onEntityDelete(e, section)}
       onDuplicate={() => onEntityDuplicate(e, section)}
       onEdit={() => onEntityEdit(e, section)}

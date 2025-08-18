@@ -215,7 +215,13 @@ export function formatYValue(tickValue: number | string): string {
 
 export function createView(): View {
   return {
-    config: { sidebarWidth: 200 },
+    config: {
+      sidebarWidth: 200,
+      dateRangeBounds: {
+        start: "2010-12-01T00:00:00Z",
+        end: "2050-12-01T00:00:00Z",
+      },
+    },
     home: createViewPage({}),
     pageGroups: [],
     version: VIEW_VERSION,

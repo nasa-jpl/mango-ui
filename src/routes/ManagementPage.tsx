@@ -16,6 +16,7 @@ import { ArrowDown, ArrowUp, Copy, Trash2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { z } from "zod";
+import { DateRangePicker } from "../components/ui/DateRangePicker";
 import { InputForm } from "../components/ui/InputForm";
 import Page from "../components/ui/Page";
 import { Tooltip } from "../components/ui/Tooltip";
@@ -326,6 +327,32 @@ export default function ManagementPage() {
               });
             }}
           />
+
+          <div className="flex flex-1 mt-6 flex-col gap-1">
+            <Label size="sm">Date Range Bounds</Label>
+            <DateRangePicker
+              startDate={
+                new Date(view.config?.dateRangeBounds?.start || "2010T00:00:00")
+              }
+              endDate={
+                new Date(view.config?.dateRangeBounds?.end || "2050T00:00:00")
+              }
+              onChange={(startDate: Date, endDate: Date) => {
+                const config = view.config || {};
+                setView({
+                  ...view,
+                  config: {
+                    ...config,
+                    dateRangeBounds: {
+                      end: endDate.toISOString(),
+                      start: startDate.toISOString(),
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+
           {view.pageGroups.map((pageGroup, i) => {
             const otherPageGroups = view.pageGroups.filter(
               (p) => p.id !== pageGroup.id

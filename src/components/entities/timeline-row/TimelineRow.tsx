@@ -13,6 +13,7 @@ import "./TimelineRow.css";
 
 export declare type TimelineRowProps = {
   dateRange: DateRange;
+  dateBounds: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;
@@ -31,6 +32,7 @@ export declare type TimelineRowProps = {
 export function TimelineRow({
   timelineRowEntity,
   dateRange,
+  dateBounds,
   marginLeft,
   products,
   hoverDate,
@@ -72,6 +74,7 @@ export function TimelineRow({
           loading={loading}
           entity={timelineRowEntity.entity}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           hoverDate={hoverDate}
           products={products}
           showHeader={false}
@@ -129,6 +132,7 @@ export function TimelineRow({
                   entity={entity}
                   loading={loading}
                   dateRange={dateRange}
+                  dateBounds={dateBounds}
                   hoverDate={hoverDate}
                   products={products}
                   showHeader={false}

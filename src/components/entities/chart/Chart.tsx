@@ -77,6 +77,7 @@ export declare type ChartProps = {
   chartEntity: ChartEntity;
   compact?: boolean;
   dateRange: DateRange;
+  dateBounds: DateRange;
   enableEditing?: boolean;
   hoverDate: Date | null;
   instrument?: string | null;
@@ -118,6 +119,7 @@ export const Chart = ({
   chartEntity,
   products,
   dateRange,
+  dateBounds,
   instrument: instrumentProp,
   mission: missionProp,
   compact = false,
@@ -1107,6 +1109,12 @@ export const Chart = ({
             algorithm: "min-max",
           },
           zoom: {
+            limits: {
+              x: {
+                min: new Date(dateBounds.start).getTime(),
+                max: new Date(dateBounds.end).getTime(),
+              },
+            },
             zoom: {
               wheel: {
                 enabled: true,

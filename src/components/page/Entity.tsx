@@ -26,6 +26,7 @@ export declare type EntityProps = {
   className?: string;
   compact?: boolean;
   dateRange: DateRange;
+  dateBounds: DateRange;
   enableEditing?: boolean;
   entity: EntityType;
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?
@@ -53,6 +54,7 @@ export const Entity = (props: EntityProps) => {
     products,
     entity,
     dateRange,
+    dateBounds,
     hoverDate,
     instrument = null,
     mission = null,
@@ -82,6 +84,7 @@ export const Entity = (props: EntityProps) => {
           loading={loading}
           chartEntity={entity}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           hoverDate={hoverDate}
           instrument={instrument}
           mission={mission}
@@ -134,6 +137,7 @@ export const Entity = (props: EntityProps) => {
         <DownlinkDashboard
           downlinkDashboardEntity={entity as DownlinkDashboardEntity}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           products={products}
           hoverDate={hoverDate}
           instrument={instrument}

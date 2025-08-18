@@ -9,6 +9,7 @@ import { DateRange } from "./time";
 
 export type View = {
   config?: {
+    dateRangeBounds?: DateRange;
     sidebarWidth?: number;
   };
   home: Page;
