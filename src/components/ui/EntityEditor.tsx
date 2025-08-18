@@ -835,8 +835,17 @@ export const EntityEditor = ({
                                               (col) => col.id !== column.id
                                             ),
                                             layers: newEntity.layers.filter(
-                                              (layer) =>
-                                                layer.id !== column.layerId
+                                              (layer) => {
+                                                // Remove the matching layer if it is not in use by any other column
+                                                return (
+                                                  layer.id !== column.layerId ||
+                                                  newEntity.columns.find(
+                                                    (c) =>
+                                                      c.layerId === layer.id &&
+                                                      c.id !== column.id
+                                                  )
+                                                );
+                                              }
                                             ),
                                           };
                                           setNewEntity(updatedEntity);
