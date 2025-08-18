@@ -11,6 +11,11 @@ import {
   Button,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@nasa-jpl/stellar-react";
 import { ArrowDown, ArrowUp, Copy, Trash2 } from "lucide-react";
 import { FormEvent, useState } from "react";
@@ -22,7 +27,7 @@ import Page from "../components/ui/Page";
 import { Tooltip } from "../components/ui/Tooltip";
 import { Product } from "../types/api";
 import { ProductPreview } from "../types/page";
-import { PageGroup, Page as PageType, View } from "../types/view";
+import { DateFormat, PageGroup, Page as PageType, View } from "../types/view";
 import { downloadJSON, generateUUID } from "../utilities/generic";
 import {
   createViewPage,
@@ -310,7 +315,7 @@ export default function ManagementPage() {
     <Page title="Manage" padBody>
       <div className="overflow-auto p-4 bg-background border rounded">
         <div className="text-lg font-medium">Configure Mango</div>
-        <div className="mt-4 w-[600px]">
+        <div className="mt-4 w-[900px]">
           <InputForm
             inputProps={{
               type: "number",
@@ -498,21 +503,6 @@ export default function ManagementPage() {
                     return (
                       <div className="flex gap-2 w-full" key={page.id}>
                         <InputForm
-                          formSchema={PageURLFormSchema}
-                          defaultValue={page.url}
-                          name="url"
-                          label="URL"
-                          onChange={(value) =>
-                            updatePage(
-                              {
-                                ...page,
-                                url: value,
-                              },
-                              pageGroup.id
-                            )
-                          }
-                        />
-                        <InputForm
                           formSchema={PageTitleFormSchema}
                           defaultValue={page.title}
                           name="title"
@@ -527,6 +517,56 @@ export default function ManagementPage() {
                             )
                           }
                         />
+                        <InputForm
+                          formSchema={PageURLFormSchema}
+                          defaultValue={page.url}
+                          name="url"
+                          label="URL"
+                          onChange={(value) =>
+                            updatePage(
+                              {
+                                ...page,
+                                url: value,
+                              },
+                              pageGroup.id
+                            )
+                          }
+                        />
+                        <div>
+                          <Label htmlFor="date-format" size="sm">
+                            Date Format
+                          </Label>
+                          <Select
+                            onValueChange={(value) => {
+                              updatePage(
+                                {
+                                  ...page,
+                                  dateFormat: value as DateFormat,
+                                },
+                                pageGroup.id
+                              );
+                            }}
+                            value={page.dateFormat || "long"}
+                          >
+                            <SelectTrigger
+                              size="xs"
+                              className="flex-1 max-w-96 min-w-64 mt-1"
+                            >
+                              <SelectValue
+                                id="date-format"
+                                placeholder="Select format"
+                              />
+                            </SelectTrigger>
+                            <SelectContent size="xs">
+                              <SelectItem size="xs" value="short">
+                                Short (YYYY-MM-DD)
+                              </SelectItem>
+                              <SelectItem size="xs" value="long">
+                                Long (YYYY-MM-DDTHH:MM:SS)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <div className="flex self-end">
                           <Tooltip content="Duplicate Page Group">
                             <Button
