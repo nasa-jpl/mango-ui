@@ -82,17 +82,6 @@ export const ProductTable = ({
       width: 110,
     },
     {
-      field: "available_resolutions",
-      filter: "string",
-      headerName: "Resolutions",
-      width: 200,
-      resizable: true,
-      sortable: true,
-      autoHeight: true,
-      valueFormatter: ({ value: resolutions }) =>
-        resolutions.map((r: ProductResolution) => r.downsampling_factor),
-    },
-    {
       filter: "string",
       headerName: "Data Start",
       resizable: true,
@@ -128,6 +117,17 @@ export const ProductTable = ({
       autoHeight: true,
       valueGetter: (params) =>
         params.data?.available_fields.map((f: ProductField) => f.name),
+    },
+    {
+      field: "available_resolutions",
+      filter: "string",
+      headerName: "Resolutions",
+      width: 200,
+      resizable: true,
+      sortable: true,
+      autoHeight: true,
+      valueFormatter: ({ value: resolutions }) =>
+        resolutions.map((r: ProductResolution) => r.downsampling_factor),
     },
   ];
   return (
