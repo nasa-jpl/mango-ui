@@ -24,6 +24,7 @@ const getProductDisplayName = (product: Product, instrument?: string) => {
 };
 
 export declare type ProductPreviewModalProps = {
+  dateBounds?: DateRange;
   dateRange?: DateRange | undefined;
   field?: string;
   instrument?: string;
@@ -38,6 +39,7 @@ export const ProductPreviewModal = ({
   product,
   products,
   instrument,
+  dateBounds,
   version: defaultVersion = "",
   dateRange: defaultDateRange,
   field: defaultField = "",
@@ -128,6 +130,11 @@ export const ProductPreviewModal = ({
       return c;
     });
     setChannels(newChannels);
+  };
+
+  const computedDateBounds = dateBounds || {
+    start: "2010T00:00:00Z",
+    end: "2050T00:00:00Z",
   };
 
   return (
@@ -226,10 +233,13 @@ export const ProductPreviewModal = ({
                   start: startDate.toISOString(),
                 });
               }}
+              minDate={new Date(computedDateBounds.start)}
+              maxDate={new Date(computedDateBounds.end)}
             />
           </div>
           <div className="flex flex-1 flex-col h-0 border rounded overflow-hidden">
             <Chart
+              dateBounds={computedDateBounds}
               enableEditing={false}
               chartEntity={chartEntity}
               products={products}

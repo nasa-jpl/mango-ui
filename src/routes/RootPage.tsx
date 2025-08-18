@@ -100,6 +100,7 @@ export default function RootPage() {
       <Outlet context={context} />
       {!loadingInitialData && (
         <ProductPreviewModal
+          dateBounds={view.config?.dateRangeBounds}
           onClose={() => setProductPreview({ product: undefined })}
           products={products}
           {...productPreview}

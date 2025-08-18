@@ -40,6 +40,7 @@ export default function ViewPage() {
       products={products}
       loadingInitialData={loadingInitialData}
       viewPage={page}
+      dateBounds={view.config?.dateRangeBounds}
       onSetProductPreview={setProductPreview}
       onPageChange={(page: ViewPageType) => {
         const newView = {

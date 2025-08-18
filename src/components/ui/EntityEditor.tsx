@@ -50,6 +50,7 @@ import ProductsSelector from "./ProductsSelector";
 import { Tooltip } from "./Tooltip";
 
 export declare type EntityEditorProps = {
+  dateBounds: DateRange;
   dateRange: DateRange;
   entity: EntityType;
   onCancel: () => void;
@@ -115,6 +116,7 @@ const extractEntitySelectedProducts = (
 export const EntityEditor = ({
   entity,
   dateRange,
+  dateBounds,
   onCancel,
   onSave,
   onDateRangeChange,
@@ -302,6 +304,7 @@ export const EntityEditor = ({
               entity={newEntity}
               products={products}
               dateRange={dateRange}
+              dateBounds={dateBounds}
               onDateRangeChange={onDateRangeChange}
               hoverDate={null}
               onSelectPoint={() => {}}

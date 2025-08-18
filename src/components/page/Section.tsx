@@ -29,6 +29,7 @@ import Entity from "./Entity";
 import "./Section.css";
 
 export declare type SectionProps = {
+  dateBounds: DateRange;
   dateRange: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
@@ -51,6 +52,7 @@ export declare type SectionProps = {
 
 export const Section = ({
   dateRange,
+  dateBounds,
   hoverDate,
   products,
   section,
@@ -143,6 +145,7 @@ export const Section = ({
       products={products}
       entity={e}
       onDateRangeChange={onDateRangeChange}
+      dateBounds={dateBounds}
       onDelete={() => onEntityDelete(e, section)}
       onDuplicate={() => onEntityDuplicate(e, section)}
       onEdit={() => onEntityEdit(e, section)}

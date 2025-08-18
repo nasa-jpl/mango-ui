@@ -38,6 +38,7 @@ import { Tooltip } from "../ui/Tooltip";
 import Section from "./Section";
 
 export declare type PageProps = {
+  dateBounds?: DateRange;
   loadingInitialData: boolean;
   onPageChange: (page: PageType) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
@@ -47,6 +48,10 @@ export declare type PageProps = {
 
 // TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
 export const ViewPage = ({
+  dateBounds = {
+    start: "2010-12-01T00:00:00Z",
+    end: "2050-12-01T00:00:00Z",
+  },
   products,
   loadingInitialData,
   viewPage,
@@ -309,6 +314,8 @@ export const ViewPage = ({
                 end: endDate.toISOString(),
               });
             }}
+            minDate={new Date(dateBounds.start)}
+            maxDate={new Date(dateBounds.end)}
           />
 
           <DropdownMenu>
@@ -396,6 +403,7 @@ export const ViewPage = ({
           onCancel={() => setEntityToEdit(null)}
           onSave={onEntitySave}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           onDateRangeChange={setDateRange}
           products={products}
         />
@@ -408,6 +416,7 @@ export const ViewPage = ({
             section={section}
             key={section.id}
             dateRange={dateRange}
+            dateBounds={dateBounds}
             mission={viewPage.missions ? mission : null}
             instrument={viewPage.missions ? instrument : null}
             hoverDate={pageOptions.showHoverDate ? hoverDate : null}

@@ -12,6 +12,7 @@ import StatusBadge from "../../ui/StatusBadge";
 import "./TimelineRow.css";
 
 export declare type TimelineRowProps = {
+  dateBounds: DateRange;
   dateRange: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
@@ -31,6 +32,7 @@ export declare type TimelineRowProps = {
 export function TimelineRow({
   timelineRowEntity,
   dateRange,
+  dateBounds,
   marginLeft,
   products,
   hoverDate,
@@ -72,6 +74,7 @@ export function TimelineRow({
           loading={loading}
           entity={timelineRowEntity.entity}
           dateRange={dateRange}
+          dateBounds={dateBounds}
           hoverDate={hoverDate}
           products={products}
           showHeader={false}
@@ -129,6 +132,7 @@ export function TimelineRow({
                   entity={entity}
                   loading={loading}
                   dateRange={dateRange}
+                  dateBounds={dateBounds}
                   hoverDate={hoverDate}
                   products={products}
                   showHeader={false}
