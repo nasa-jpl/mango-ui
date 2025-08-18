@@ -5,8 +5,8 @@ export declare type EntityHeaderProps = {
   children?: React.ReactNode;
   error?: Error;
   loading?: boolean;
-  rightContent?: React.ReactNode;
   movable?: boolean;
+  rightContent?: React.ReactNode;
   title?: string;
 };
 

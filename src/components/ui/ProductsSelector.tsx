@@ -8,11 +8,11 @@ import { ProductSelector } from "./ProductSelector";
 import { Tooltip } from "./Tooltip";
 
 export declare type ProductsSelectorProps = {
+  fieldFilter: (field: ProductField) => boolean;
+  multiple: boolean;
   onChange: (selectedProducts: SelectedProduct[]) => void;
   products: Product[];
   selectedProducts: SelectedProduct[];
-  fieldFilter: (field: ProductField) => boolean;
-  multiple: boolean;
 };
 
 const ProductsSelector = ({

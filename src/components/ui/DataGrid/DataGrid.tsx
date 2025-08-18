@@ -36,6 +36,7 @@ export declare type DataGridProps<T> = {
   className?: string;
   columnDefs: DataGridColumnDef[];
   compact?: boolean;
+  error?: Error | null;
   fitToGridWidth?: boolean;
   gridProps?: AgGridReactProps;
   idKey?: keyof T | undefined;
@@ -43,7 +44,6 @@ export declare type DataGridProps<T> = {
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
-  error?: Error | null;
 };
 
 export function DataGrid<T>({

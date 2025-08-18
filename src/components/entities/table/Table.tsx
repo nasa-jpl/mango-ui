@@ -45,11 +45,11 @@ export declare type TableProps = {
   enableEditing?: boolean;
   instrument?: string | null;
   mission?: string | null;
-  onSelectPoint: (point: DataResponseDataEntry | null) => void;
-  onSetProductPreview: (previewProduct: ProductPreview) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
   onEdit?: () => void;
+  onSelectPoint: (point: DataResponseDataEntry | null) => void;
+  onSetProductPreview: (previewProduct: ProductPreview) => void;
   products: Product[];
   selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
@@ -106,6 +106,7 @@ const Table = memo(function Table({
     [tableEntity.syncWithPageDateRange, dateRange]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchTableData = useCallback(
     debounce(
       (

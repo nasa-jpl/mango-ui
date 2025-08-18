@@ -144,9 +144,9 @@ export const EntityEditor = ({
   );
 
   const entityTypes: {
+    disabled: boolean;
     label: string;
     value: EntityPlotType;
-    disabled: boolean;
   }[] = [
     { value: "chart", label: "Chart", disabled: false },
     { value: "table", label: "Table", disabled: false },
@@ -240,6 +240,7 @@ export const EntityEditor = ({
       updatedEntity.columns = newTableColumns;
     }
     setNewEntity(updatedEntity);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProducts, prevSelectedProducts]);
 
   function handleEntityTypeChange(type: EntityPlotType) {

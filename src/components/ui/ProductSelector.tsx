@@ -26,11 +26,11 @@ import { Product, ProductField } from "../../types/api";
 import { SelectedProduct } from "./EntityEditor";
 
 export declare type ProductSelectorProps = {
+  fieldFilter: (field: ProductField) => boolean;
+  multiple: boolean;
   onChange: (selectedProduct: SelectedProduct) => void;
   products: Product[];
   selectedProduct: SelectedProduct;
-  fieldFilter: (field: ProductField) => boolean;
-  multiple: boolean;
 };
 
 export const ProductSelector = ({
