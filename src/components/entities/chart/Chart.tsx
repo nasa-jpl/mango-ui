@@ -76,8 +76,8 @@ let tooltipRoot: Root;
 export declare type ChartProps = {
   chartEntity: ChartEntity;
   compact?: boolean;
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   enableEditing?: boolean;
   hoverDate: Date | null;
   instrument?: string | null;

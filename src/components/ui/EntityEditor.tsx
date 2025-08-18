@@ -50,8 +50,8 @@ import ProductsSelector from "./ProductsSelector";
 import { Tooltip } from "./Tooltip";
 
 export declare type EntityEditorProps = {
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   entity: EntityType;
   onCancel: () => void;
   onDateRangeChange: (dateRange: DateRange) => void;

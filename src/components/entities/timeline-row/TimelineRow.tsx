@@ -12,8 +12,8 @@ import StatusBadge from "../../ui/StatusBadge";
 import "./TimelineRow.css";
 
 export declare type TimelineRowProps = {
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;

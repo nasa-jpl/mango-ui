@@ -29,8 +29,8 @@ import Entity from "./Entity";
 import "./Section.css";
 
 export declare type SectionProps = {
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   hoverDate: Date | null;
   instrument?: string | null;
   mission?: string | null;

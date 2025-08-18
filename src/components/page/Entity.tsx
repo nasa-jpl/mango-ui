@@ -25,8 +25,8 @@ import { DownlinkDashboard } from "../mission/GRACE/DownlinkDashboard";
 export declare type EntityProps = {
   className?: string;
   compact?: boolean;
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   enableEditing?: boolean;
   entity: EntityType;
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?

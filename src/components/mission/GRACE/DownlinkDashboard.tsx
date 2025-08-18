@@ -35,8 +35,8 @@ import TimelineRow from "../../entities/timeline-row/TimelineRow";
 import Timeline from "../../entities/timeline/Timeline";
 
 export declare type DownlinkDashboardProps = {
-  dateRange: DateRange;
   dateBounds: DateRange;
+  dateRange: DateRange;
   downlinkDashboardEntity: DownlinkDashboardEntity;
   hoverDate: Date | null;
   instrument?: string | null;
