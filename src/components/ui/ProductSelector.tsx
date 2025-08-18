@@ -198,22 +198,22 @@ export const ProductSelector = ({
                 <ChevronsUpDown className="opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0 max-w-[200px]">
-              <Command>
+            <PopoverContent className="p-0 max-w-fit min-w-fit" align="start">
+              <Command className="min-w-fit">
                 <CommandInput placeholder="Search fields..." asChild>
                   <Input
                     className="border-none h-8 focus-visible:outline-none focus-visible:ring-0 text-xs"
                     sizeVariant="sm"
                   />
                 </CommandInput>
-                <CommandList>
+                <CommandList className="min-w-fit">
                   <CommandEmpty className="py-4 text-center text-xs">
                     No field found.
                   </CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="min-w-fit">
                     {fields.map((field) => (
                       <CommandItem
-                        className="text-xs"
+                        className="text-xs min-w-fit"
                         key={field.name}
                         value={field.name}
                         onSelect={(currentValue) => {
@@ -250,7 +250,12 @@ export const ProductSelector = ({
                               : "opacity-0"
                           )}
                         />
-                        {field.name}
+                        <div className="flex gap-1 whitespace-nowrap">
+                          {field.name}
+                          <div className="text-muted-foreground">
+                            {field.unit} ({field.type})
+                          </div>
+                        </div>
                       </CommandItem>
                     ))}
                   </CommandGroup>
