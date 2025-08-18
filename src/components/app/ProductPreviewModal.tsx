@@ -134,7 +134,7 @@ export const ProductPreviewModal = ({
 
   const computedDateBounds = dateBounds || {
     start: "2010T00:00:00Z",
-    end: "2040T00:00:00Z",
+    end: "2050T00:00:00Z",
   };
 
   return (
