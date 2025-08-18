@@ -93,7 +93,7 @@ const Table = memo(function Table({
 }: TableProps) {
   const [loading, setLoading] = useState(false);
   // TODO pass error to DataGrid and have it make use of an error
-  // const [error, setError] = useState<Error | null>();
+  const [error, setError] = useState<Error | null>();
   const [rowData, setRowData] = useState<
     Record<string, DataResponseDataEntry>[]
   >([]);
@@ -421,7 +421,7 @@ const Table = memo(function Table({
     instrument?: string | null
   ) => {
     setLoading(true);
-    // setError(null);
+    setError(null);
     let results: {
       layer: DataLayer;
       result: DataResponse;
@@ -437,7 +437,7 @@ const Table = memo(function Table({
       setLoading(false);
     } catch (err) {
       if (!isAbortError(err)) {
-        // setError(err as Error);
+        setError(err as Error);
         error = true;
         setLoading(false);
       } else {
@@ -651,6 +651,7 @@ const Table = memo(function Table({
       )}
       {!compact && (
         <DataGrid
+          error={error}
           idKey={idField}
           fitToGridWidth={!!tableEntity.fitToGridWidth}
           compact={tableEntity.compact}

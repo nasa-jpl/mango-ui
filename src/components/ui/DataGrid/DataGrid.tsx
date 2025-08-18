@@ -3,13 +3,34 @@ import {
   SizeColumnsToFitGridStrategy,
   SizeColumnsToFitProvidedWidthStrategy,
 } from "@ag-grid-community/core";
+import { cn } from "@nasa-jpl/stellar-react";
 import { IRowNode } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
-import { AgGridReact, AgGridReactProps } from "ag-grid-react"; // React Grid Logic
+import {
+  AgGridReact,
+  AgGridReactProps,
+  CustomNoRowsOverlayProps,
+} from "ag-grid-react"; // React Grid Logic
 import classNames from "classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import "./ag-grid-stellar.css";
+
+const CustomNoRowsOverlay = (
+  props: CustomNoRowsOverlayProps & { error?: Error | null }
+) => {
+  const { error } = props;
+  return (
+    <div
+      className={cn(
+        "text-xs text-muted-foreground",
+        error ? "text-destructive" : ""
+      )}
+    >
+      {error?.message ? `Error: ${error?.message}` : "No rows to display"}
+    </div>
+  );
+};
 
 export declare type DataGridProps<T> = {
   className?: string;
@@ -22,6 +43,7 @@ export declare type DataGridProps<T> = {
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
+  error?: Error | null;
 };
 
 export function DataGrid<T>({
@@ -35,6 +57,7 @@ export function DataGrid<T>({
   loading = true,
   className = "",
   gridProps = {},
+  error,
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
@@ -95,6 +118,12 @@ export function DataGrid<T>({
     }
   }, [fitToGridWidth, rowData]);
 
+  const noRowsOverlayComponentParams = useMemo(() => {
+    return {
+      error,
+    };
+  }, [error]);
+
   return (
     <div
       className={classNames("ag-theme-stellar", {
@@ -108,7 +137,7 @@ export function DataGrid<T>({
         headerHeight={32}
         rowHeight={compact ? 24 : 33}
         className={className}
-        rowData={rowData}
+        rowData={error ? [] : rowData}
         rowSelection={{
           checkboxes: false,
           enableClickSelection: true,
@@ -123,6 +152,8 @@ export function DataGrid<T>({
         onGridReady={() => setGridReady(true)}
         enableCellTextSelection
         suppressDragLeaveHidesColumns
+        noRowsOverlayComponent={CustomNoRowsOverlay}
+        noRowsOverlayComponentParams={noRowsOverlayComponentParams}
         /* TODO style this and don't load it from url */
         overlayLoadingTemplate='<div aria-live="polite" aria-atomic="true" style="position:absolute;top:0;left:0;right:0; bottom:0; background: url(https://ag-grid.com/images/ag-grid-loading-spinner.svg) center no-repeat" aria-label="loading"></div>'
         onSelectionChanged={() => {
