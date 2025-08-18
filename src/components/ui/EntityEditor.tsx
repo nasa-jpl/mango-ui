@@ -91,7 +91,7 @@ const getMatchingSelectedProductForLayer = (
   return selectedProducts.find(
     (p) =>
       getLabelForSelectedProductOrLayer(p, fields || p.fields) ===
-      getLabelForSelectedProductOrLayer(layer, fields || p.fields)
+      getLabelForSelectedProductOrLayer(layer, fields || layer.fields)
   );
 };
 
@@ -132,7 +132,6 @@ export const EntityEditor = ({
   const [prevSelectedProducts, setPrevSelectedProducts] = useState<
     SelectedProduct[]
   >([]);
-  console.log("selectedProducts :>> ", selectedProducts);
 
   const productsFieldFilter = useCallback(
     (field: ProductField) => {
@@ -187,7 +186,6 @@ export const EntityEditor = ({
   );
 
   useEffect(() => {
-    console.log(selectedProducts, prevSelectedProducts);
     // Reassign layer products to new selected products
     const entityWithLayers = newEntity as ChartEntity | MapEntity | TableEntity;
     const newLayers: (ChartLayer | MapLayer | TableEntity)[] = [];
@@ -241,11 +239,25 @@ export const EntityEditor = ({
     if (isTableEntity(updatedEntity)) {
       updatedEntity.columns = newTableColumns;
     }
-    console.log("updatedEntity :>> ", updatedEntity);
     setNewEntity(updatedEntity);
   }, [selectedProducts, prevSelectedProducts]);
 
   function handleEntityTypeChange(type: EntityPlotType) {
+    // If switching from table to anything else, split up the selected products with multiple fields
+    // into selected products with single fields
+    if (newEntity.type === "table" && type !== "table") {
+      const newSelectedProducts: SelectedProduct[] = [];
+      selectedProducts.forEach((selectedProduct) => {
+        selectedProduct.fields.forEach((field) => {
+          newSelectedProducts.push({
+            ...selectedProduct,
+            fields: [field],
+            id: generateUUID(),
+          });
+        });
+      });
+      setSelectedProducts(newSelectedProducts);
+    }
     setNewEntity(
       createEntity({
         id: newEntity.id,
@@ -323,6 +335,7 @@ export const EntityEditor = ({
                     products={products}
                     selectedProducts={selectedProducts}
                     fieldFilter={productsFieldFilter}
+                    multiple={newEntity.type === "table"}
                   />
                 </div>
               </TabsContent>
@@ -421,7 +434,7 @@ export const EntityEditor = ({
                             <div className="flex flex-col gap-1" key={yAxis.id}>
                               <div className="flex items-center flex-1 gap-1">
                                 <Input
-                                  placeholder="Name defaults to units"
+                                  placeholder="Axis name (defaults to units)"
                                   className="flex-1 w-full"
                                   value={yAxis.label}
                                   sizeVariant="xs"
@@ -706,7 +719,7 @@ export const EntityEditor = ({
                         }}
                       />
                       <Label size="sm" htmlFor="apply-field-thresholds">
-                        Apply Field Thresholds
+                        Apply field thresholds
                       </Label>
                     </div>
                     <div className="flex gap-2 items-center">
@@ -738,7 +751,7 @@ export const EntityEditor = ({
                         }}
                       />
                       <Label size="sm" htmlFor="fitToGridWidth">
-                        Expand columns to fit container
+                        Fit columns to container
                       </Label>
                     </div>
                   </div>
@@ -776,16 +789,20 @@ export const EntityEditor = ({
                       )}
                       {newEntity.columns.length > 0 && (
                         <div className="flex-1 flex flex-col gap-6">
-                          {newEntity.columns.map((column) => {
+                          {newEntity.columns.map((column, columnIndex) => {
                             const columnLayer = newEntity.layers.find(
                               (l) => l.id === column.layerId
                             );
                             return (
-                              <div className="flex gap-1" key={column.id}>
+                              <div
+                                className="flex gap-1 items-baseline"
+                                key={column.id}
+                              >
+                                <div className="">{columnIndex}.</div>
                                 <div className="flex flex-col flex-1 gap-1">
                                   <div className="flex items-center flex-1 gap-1">
                                     <Input
-                                      placeholder="Name defaults to field and units"
+                                      placeholder="Column name (defaults to field and units)"
                                       className="flex-1 w-full min-h-6"
                                       value={column.label}
                                       sizeVariant="xs"
@@ -831,7 +848,6 @@ export const EntityEditor = ({
                                   </div>
                                   <Select
                                     onValueChange={(value) => {
-                                      debugger;
                                       const [id, field] =
                                         value.split(separator);
                                       const selectedProduct =
@@ -905,16 +921,9 @@ export const EntityEditor = ({
                                               field,
                                               layerId: computedColumnLayer.id,
                                             };
-                                            // col.field = field;
-                                            // col.layerId =
-                                            //   computedColumnLayer.id;
                                           }
                                           return col;
                                         });
-                                      console.log(
-                                        "updatedEntity :>> ",
-                                        updatedEntity
-                                      );
                                       setNewEntity(updatedEntity);
                                     }}
                                     value={

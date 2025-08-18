@@ -30,6 +30,7 @@ export declare type ProductSelectorProps = {
   products: Product[];
   selectedProduct: SelectedProduct;
   fieldFilter: (field: ProductField) => boolean;
+  multiple: boolean;
 };
 
 export const ProductSelector = ({
@@ -37,6 +38,7 @@ export const ProductSelector = ({
   products,
   selectedProduct,
   fieldFilter,
+  multiple = false,
 }: ProductSelectorProps) => {
   const [newSelectedProduct, setNewSelectedProduct] =
     useState<SelectedProduct>(selectedProduct);
@@ -175,7 +177,7 @@ export const ProductSelector = ({
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <Label size="sm">Field(s)</Label>
+          <Label size="sm">{multiple ? "Field(s)" : "Field"}</Label>
           <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -189,7 +191,7 @@ export const ProductSelector = ({
                     newSelectedProduct.fields.join(", ")
                   ) : (
                     <div className="text-muted-foreground font-normal">
-                      Select field(s)...
+                      Select {multiple ? "field(s)" : "field"}
                     </div>
                   )}
                 </div>
@@ -200,20 +202,30 @@ export const ProductSelector = ({
               <Command>
                 <CommandInput placeholder="Search fields..." asChild>
                   <Input
-                    className="border-none h-6 focus-visible:outline-none focus-visible:ring-0 text-sm"
+                    className="border-none h-8 focus-visible:outline-none focus-visible:ring-0 text-xs"
                     sizeVariant="sm"
                   />
                 </CommandInput>
                 <CommandList>
-                  <CommandEmpty className="py-4 text-center text-sm">
+                  <CommandEmpty className="py-4 text-center text-xs">
                     No field found.
                   </CommandEmpty>
                   <CommandGroup>
                     {fields.map((field) => (
                       <CommandItem
+                        className="text-xs"
                         key={field.name}
                         value={field.name}
                         onSelect={(currentValue) => {
+                          if (!multiple) {
+                            updateSelectedProduct({
+                              ...newSelectedProduct,
+                              fields: [currentValue],
+                            });
+                            setComboboxOpen(false);
+                            return;
+                          }
+
                           let newFields = [...newSelectedProduct.fields];
                           if (
                             newSelectedProduct.fields.indexOf(currentValue) > -1
@@ -230,15 +242,15 @@ export const ProductSelector = ({
                           });
                         }}
                       >
-                        {field.name}
                         <Check
                           className={cn(
-                            "ml-auto",
+                            "",
                             newSelectedProduct.fields.indexOf(field.name) > -1
                               ? "opacity-100"
                               : "opacity-0"
                           )}
                         />
+                        {field.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>

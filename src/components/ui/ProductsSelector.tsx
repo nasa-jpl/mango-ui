@@ -12,6 +12,7 @@ export declare type ProductsSelectorProps = {
   products: Product[];
   selectedProducts: SelectedProduct[];
   fieldFilter: (field: ProductField) => boolean;
+  multiple: boolean;
 };
 
 const ProductsSelector = ({
@@ -19,12 +20,14 @@ const ProductsSelector = ({
   products,
   selectedProducts,
   fieldFilter,
+  multiple = false,
 }: ProductsSelectorProps) => {
   return (
     <div className="flex flex-col gap-4">
       {selectedProducts.map((product, i) => (
         <div className="flex gap-2 items-end" key={product.id}>
           <ProductSelector
+            multiple={multiple}
             fieldFilter={fieldFilter}
             selectedProduct={product}
             products={products}
