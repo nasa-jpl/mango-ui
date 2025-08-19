@@ -165,3 +165,7 @@ export function downloadJSON(obj: unknown, filename: string) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+export function isMacOs(): boolean {
+  return /mac/i.test(window.navigator.platform);
+}
