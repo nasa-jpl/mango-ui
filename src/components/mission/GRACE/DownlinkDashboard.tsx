@@ -632,6 +632,9 @@ export function DownlinkDashboard({
         type: "chart",
         title: "",
         syncWithPageDateRange: true,
+        chartOptions: {
+          enableBoxZoom: false,
+        },
         data: gapsWithinPasses.concat(gapsBetweenPasses),
         layers: [
           {
@@ -684,6 +687,9 @@ export function DownlinkDashboard({
         id: "passesChart",
         type: "chart",
         title: `Passes (${passes[0].result.data.length})`,
+        chartOptions: {
+          enableBoxZoom: false,
+        },
         syncWithPageDateRange: true,
         data: passes,
         layers: [

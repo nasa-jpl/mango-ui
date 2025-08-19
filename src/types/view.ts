@@ -94,6 +94,7 @@ export interface ChartEntity extends Entity {
 }
 
 export type ChartOptions = {
+  enableBoxZoom?: boolean;
   tooltip?: {
     intersect?: TooltipOptions["intersect"];
     mode?: TooltipOptions["mode"];

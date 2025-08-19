@@ -3,6 +3,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@nasa-jpl/stellar-react";
 import ChartJS, {
@@ -24,13 +28,11 @@ import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import {
   CopyPlus,
+  Minus,
   MoreVertical,
-  Move3D,
-  MoveHorizontal,
-  MoveVertical,
   Pencil,
+  Plus,
   RotateCcw,
-  SquareDashedMousePointer,
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -52,6 +54,7 @@ import {
   convertHexToRGBA,
   getDataLayerId,
   isAbortError,
+  isMacOs,
   pluralize,
 } from "../../../utilities/generic";
 import {
@@ -138,7 +141,6 @@ export const Chart = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<CustomChartType | null>();
   const [loading, setLoading] = useState(true);
-  const [boxZoomEnabled, setBoxZoomEnabled] = useState(false);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
   const cancelHandles: Record<string, () => void> = {};
@@ -1118,13 +1120,13 @@ export const Chart = ({
             zoom: {
               wheel: {
                 enabled: true,
+                modifierKey: "meta",
               },
               pinch: {
                 enabled: true,
               },
               drag: {
-                enabled: true,
-                modifierKey: "meta",
+                enabled: chartEntity.chartOptions?.enableBoxZoom ?? true,
               },
               mode: "x",
               onZoomComplete: () => {
@@ -1139,6 +1141,7 @@ export const Chart = ({
             pan: {
               enabled: true,
               mode: "x",
+              modifierKey: "meta",
               onPanComplete: () => {
                 onZoomComplete(
                   chartEntity.layers || [],
@@ -1187,33 +1190,6 @@ export const Chart = ({
     }
   };
 
-  const setChartBoxZoomEnabled = (enabled: boolean) => {
-    if (
-      chartRef.current &&
-      chartRef.current.options.plugins?.zoom?.zoom?.drag &&
-      chartRef.current.options.plugins?.zoom?.pan
-    ) {
-      // Zoom configuration
-      chartRef.current.options.plugins.zoom.zoom.drag.modifierKey = enabled
-        ? undefined
-        : "meta";
-
-      // Pan configuration
-      // chartRef.current.options.plugins.zoom.pan.enabled = true;
-      chartRef.current.options.plugins.zoom.pan.modifierKey = enabled
-        ? "meta"
-        : undefined;
-
-      // Trigger a chartJS update
-      chartRef.current.update();
-    }
-  };
-
-  const toggleBoxZoom = () => {
-    setChartBoxZoomEnabled(!boxZoomEnabled);
-    setBoxZoomEnabled(!boxZoomEnabled);
-  };
-
   const setChartInteractionAxes = (mode: Mode) => {
     if (
       chartRef.current &&
@@ -1229,22 +1205,32 @@ export const Chart = ({
     }
   };
 
-  const cycleInteractionModes = () => {
-    let newInteractionAxes: Mode = "x";
-    if (interactionAxes === "x") {
-      newInteractionAxes = "y";
-    } else if (interactionAxes === "y") {
-      newInteractionAxes = "xy";
-    } else {
-      newInteractionAxes = "x";
-    }
-    setInteractionAxes(newInteractionAxes);
-    setChartInteractionAxes(newInteractionAxes);
-  };
-
   const resetPan = () => {
     if (chartRef.current) {
       chartRef.current.resetZoom();
+    }
+  };
+
+  const zoomIn = () => {
+    if (chartRef.current) {
+      chartRef.current.zoom(0.8);
+      chartRef.current.update();
+      if (chartRef.current.options.plugins?.zoom?.zoom?.onZoomComplete) {
+        chartRef.current.options.plugins.zoom.zoom.onZoomComplete(
+          chartRef.current.getContext()
+        );
+      }
+    }
+  };
+  const zoomOut = () => {
+    if (chartRef.current) {
+      chartRef.current.zoom(1.2);
+      chartRef.current.update();
+      if (chartRef.current.options.plugins?.zoom?.zoom?.onZoomComplete) {
+        chartRef.current.options.plugins.zoom.zoom.onZoomComplete(
+          chartRef.current.getContext()
+        );
+      }
     }
   };
 
@@ -1256,7 +1242,7 @@ export const Chart = ({
     }
     return (
       <>
-        {hoverDate && !boxZoomEnabled && (
+        {hoverDate && (
           <div
             className="chart-cursor-container"
             style={{
@@ -1330,52 +1316,35 @@ export const Chart = ({
           title={chartEntity.title}
           rightContent={
             <div className="right-content invisible h-full group-hover:visible border-r">
-              <Tooltip content="Reset Y Axis">
-                <Button
-                  className="h-full w-[28px] rounded-none"
-                  onClick={resetPan}
-                  variant="ghost"
-                  size="icon"
-                >
-                  <RotateCcw size={16} className="select-none" />
-                </Button>
-              </Tooltip>
-              <Tooltip content={`Cycle Pan & Zoom Axis (${interactionAxes})`}>
-                <Button
-                  className="h-full w-[28px] rounded-none"
-                  onClick={cycleInteractionModes}
-                  variant="ghost"
-                  size="icon"
-                >
-                  {interactionAxes === "x" ? (
-                    <MoveHorizontal size={16} className="select-none" />
-                  ) : interactionAxes === "xy" ? (
-                    <Move3D size={16} className="select-none" />
-                  ) : (
-                    <MoveVertical size={16} className="select-none" />
-                  )}
-                </Button>
-              </Tooltip>
-              <Tooltip
-                content={
-                  !boxZoomEnabled ? "Enable box zoom" : "Disable box zoom"
-                }
-              >
-                <Button
-                  className={classNames(
-                    "h-full w-[28px] rounded-none",
-                    boxZoomEnabled
-                      ? "text-primary hover:text-primary border-b border-b-primary"
-                      : ""
-                  )}
-                  onClick={toggleBoxZoom}
-                  variant="ghost"
-                  size="icon"
-                >
-                  <SquareDashedMousePointer size={16} className="select-none" />
-                </Button>
-              </Tooltip>
               <DropdownMenu>
+                <Tooltip
+                  content={`Zoom out (Hold ${
+                    isMacOs() ? "⌘" : "Ctrl"
+                  } to zoom and pan in chart)`}
+                >
+                  <Button
+                    className="h-full w-[28px] rounded-none"
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomIn}
+                  >
+                    <Minus size={16} className="select-none" />
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  content={`Zoom in (Hold ${
+                    isMacOs() ? "⌘" : "Ctrl"
+                  } to zoom and pan in chart)`}
+                >
+                  <Button
+                    className="h-full w-[28px] rounded-none"
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomOut}
+                  >
+                    <Plus size={16} className="select-none" />
+                  </Button>
+                </Tooltip>
                 <Tooltip content="More options">
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -1406,6 +1375,31 @@ export const Chart = ({
                   >
                     <Trash2 /> Delete
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={resetPan}>
+                    <RotateCcw /> Reset Y Axis
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup
+                    value={interactionAxes}
+                    onValueChange={(value) => {
+                      const mode = value as Mode;
+                      setInteractionAxes(mode);
+                      setChartInteractionAxes(mode);
+                    }}
+                  >
+                    <DropdownMenuLabel>Drag, Zoom, and Pan</DropdownMenuLabel>
+                    <DropdownMenuRadioItem value="x">
+                      X Axis
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="y">
+                      Y Axis
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="xy">
+                      XY Axes
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+
                   {/* <DropdownMenuItem>
                     <Download /> Download Data
                   </DropdownMenuItem>
