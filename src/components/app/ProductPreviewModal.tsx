@@ -14,13 +14,14 @@ import { useEffect, useState } from "react";
 import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Channel, ChartEntity } from "../../types/view";
+import { addHyphenToMission } from "../../utilities/generic";
 import Chart from "../entities/chart/Chart";
 import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
-  return `${product.mission} ${instrument || product.instruments[0]} ${
-    product.id
-  }`;
+  return `${addHyphenToMission(product.mission)} ${
+    instrument || product.instruments[0]
+  } ${product.id}`;
 };
 
 export declare type ProductPreviewModalProps = {

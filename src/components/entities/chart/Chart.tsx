@@ -51,6 +51,7 @@ import {
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import {
+  addHyphenToMission,
   convertHexToRGBA,
   getDataLayerId,
   isAbortError,
@@ -613,7 +614,9 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                `${addHyphenToMission(mission)} ${instrument} ${
+                  layer.dataset
+                } ${layer.fields[0]}${
                   layer.channels && layer.channels.length > 0
                     ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
@@ -1018,7 +1021,7 @@ export const Chart = ({
         tooltip={tooltipModel}
         renderHeader={(point) => (
           <>
-            {mission ?? point.dataset.layer.mission}{" "}
+            {mission ?? addHyphenToMission(point.dataset.layer.mission)}{" "}
             {instrument ?? point.dataset.layer.instrument}{" "}
             {point.dataset.layer.dataset}{" "}
             {point.dataset.layer.fields.length === 1

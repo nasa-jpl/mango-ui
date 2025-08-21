@@ -3,6 +3,7 @@ import { ChartLine } from "lucide-react";
 import { Product, ProductField, ProductResolution } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
 import { ProductPreview } from "../../types/page";
+import { addHyphenToMission } from "../../utilities/generic";
 import DataGrid from "../ui/DataGrid/DataGrid";
 import { Tooltip } from "../ui/Tooltip";
 
@@ -72,6 +73,10 @@ export const ProductTable = ({
       resizable: true,
       sortable: true,
       width: 90,
+      valueFormatter: ({ value: mission }) => {
+        if (!mission) return "–";
+        return addHyphenToMission(mission);
+      },
     },
     {
       field: "instruments",
