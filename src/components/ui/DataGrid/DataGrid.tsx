@@ -3,7 +3,7 @@ import {
   SizeColumnsToFitGridStrategy,
   SizeColumnsToFitProvidedWidthStrategy,
 } from "@ag-grid-community/core";
-import { cn } from "@nasa-jpl/stellar-react";
+import { cn, Input } from "@nasa-jpl/stellar-react";
 import { IRowNode } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import {
@@ -44,6 +44,7 @@ export declare type DataGridProps<T> = {
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
+  showQuickFilter?: boolean;
 };
 
 export function DataGrid<T>({
@@ -55,12 +56,23 @@ export function DataGrid<T>({
   compact = false,
   fitToGridWidth = false,
   loading = true,
+  showQuickFilter = false,
   className = "",
   gridProps = {},
   error,
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
+
+  useEffect(() => {
+    if (gridRef.current?.api && gridReady) {
+      const quickFilterText = gridProps.quickFilterText;
+      if (quickFilterText !== undefined) {
+        // @ts-expect-error - ag-grid types might be outdated
+        gridRef.current.api.setQuickFilter(quickFilterText);
+      }
+    }
+  }, [gridProps.quickFilterText, gridReady]);
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.api && gridReady) {
@@ -124,6 +136,15 @@ export function DataGrid<T>({
     };
   }, [error]);
 
+  const onFilterTextBoxChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.setGridOption(
+        "quickFilterText",
+        event.currentTarget.value
+      );
+    }
+  };
+
   return (
     <div
       className={classNames("ag-theme-stellar", {
@@ -131,6 +152,16 @@ export function DataGrid<T>({
       })}
       style={{ height: "100%", width: "100%" }}
     >
+      {showQuickFilter && (
+        <div className="mb-4" style={{ width: "25%" }}>
+          <Input
+            type="text"
+            id="filter-text-box"
+            placeholder="Filter..."
+            onInput={onFilterTextBoxChanged}
+          />
+        </div>
+      )}
       <AgGridReact<T>
         ref={gridRef}
         suppressColumnVirtualisation
