@@ -65,16 +65,6 @@ export function DataGrid<T>({
   const [gridReady, setGridReady] = useState(false);
 
   useEffect(() => {
-    if (gridRef.current?.api && gridReady) {
-      const quickFilterText = gridProps.quickFilterText;
-      if (quickFilterText !== undefined) {
-        // @ts-expect-error - ag-grid types might be outdated
-        gridRef.current.api.setQuickFilter(quickFilterText);
-      }
-    }
-  }, [gridProps.quickFilterText, gridReady]);
-
-  useEffect(() => {
     if (gridRef.current && gridRef.current.api && gridReady) {
       if (!selectedItemId || !idKey) {
         gridRef.current.api.deselectAll();
@@ -150,11 +140,17 @@ export function DataGrid<T>({
       className={classNames("ag-theme-stellar", {
         "ag-theme-stellar--compact": compact,
       })}
-      style={{ height: "100%", width: "100%" }}
+      style={{
+        height: "100%",
+        width: "100%",
+        overflow: "hidden",
+        padding: "2px",
+      }}
     >
       {showQuickFilter && (
-        <div className="mb-4" style={{ width: "25%" }}>
+        <div className="mb-4 w-[25%] min-w-[300px]">
           <Input
+            autoComplete="off"
             type="text"
             id="filter-text-box"
             placeholder="Filter..."
@@ -176,6 +172,7 @@ export function DataGrid<T>({
         }}
         loading={loading}
         columnDefs={columnDefs}
+        quickFilterText={gridProps.quickFilterText}
         enableBrowserTooltips={true}
         animateRows={false}
         suppressCellFocus
