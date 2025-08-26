@@ -1,7 +1,6 @@
 import {
   Button,
   DateRangePicker as DateRangePickerStellar,
-  formatDateISO,
   parseDateStringISO,
 } from "@nasa-jpl/stellar-react";
 import {
@@ -37,8 +36,8 @@ export function DateRangePicker({
   endDate,
   startDate,
   onChange = () => {},
-  minDate = new Date("2010-01-01T00:00:00Z"),
-  maxDate = new Date("2100-12-01T00:00:00Z"),
+  minDate = new Date("2010-01-01T00:00:00"),
+  maxDate = new Date("2100-12-01T00:00:00"),
 }: DateRangePickerProps) {
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new TZDate(startDate, "UTC"),
@@ -79,7 +78,7 @@ export function DateRangePicker({
       if (dateFormat === "short") {
         return format(date, "yyyy-MM-dd");
       } else {
-        return formatDateISO(date);
+        return format(date, "yyyy-MM-dd'T'HH:mm:ss");
       }
     },
     [dateFormat]
@@ -94,9 +93,10 @@ export function DateRangePicker({
       let dateString = (e.target as HTMLInputElement).value;
       let otherDateString = inputValues[which === "from" ? "to" : "from"];
       if (dateFormat === "short") {
-        dateString += "T00:00:00Z";
-        otherDateString += "T00:00:00Z";
+        dateString += "T00:00:00";
+        otherDateString += "T00:00:00";
       }
+      // TODO: mlucas
       const eventDate = parseDateStringISO(dateString);
       const eventVerb = which === "from" ? "start" : "end";
       const otherDate = parseDateStringISO(otherDateString);
