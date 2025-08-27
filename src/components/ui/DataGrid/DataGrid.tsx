@@ -3,7 +3,7 @@ import {
   SizeColumnsToFitGridStrategy,
   SizeColumnsToFitProvidedWidthStrategy,
 } from "@ag-grid-community/core";
-import { cn } from "@nasa-jpl/stellar-react";
+import { cn, Input } from "@nasa-jpl/stellar-react";
 import { IRowNode } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import {
@@ -44,6 +44,7 @@ export declare type DataGridProps<T> = {
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
+  showQuickFilter?: boolean;
 };
 
 export function DataGrid<T>({
@@ -55,6 +56,7 @@ export function DataGrid<T>({
   compact = false,
   fitToGridWidth = false,
   loading = true,
+  showQuickFilter = false,
   className = "",
   gridProps = {},
   error,
@@ -124,13 +126,39 @@ export function DataGrid<T>({
     };
   }, [error]);
 
+  const onFilterTextBoxChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.setGridOption(
+        "quickFilterText",
+        event.currentTarget.value
+      );
+    }
+  };
+
   return (
     <div
       className={classNames("ag-theme-stellar", {
         "ag-theme-stellar--compact": compact,
       })}
-      style={{ height: "100%", width: "100%" }}
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
+      {showQuickFilter && (
+        <div className="mb-4 w-[25%] min-w-[300px]">
+          <Input
+            autoComplete="off"
+            type="text"
+            id="filter-text-box"
+            sizeVariant="sm"
+            placeholder="Filter..."
+            onInput={onFilterTextBoxChanged}
+          />
+        </div>
+      )}
       <AgGridReact<T>
         ref={gridRef}
         suppressColumnVirtualisation
@@ -145,6 +173,7 @@ export function DataGrid<T>({
         }}
         loading={loading}
         columnDefs={columnDefs}
+        quickFilterText={gridProps.quickFilterText}
         enableBrowserTooltips={true}
         animateRows={false}
         suppressCellFocus

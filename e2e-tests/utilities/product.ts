@@ -5,9 +5,11 @@ export const generateTestDataset = (): Dataset => {
   return {
     data_begin: "2022-01-01T00:00:00.037430+00:00",
     data_end: "2023-01-01T00:00:00.037430+00:00",
+    dataset_id: generateUniqueName(),
     instrument_id: "C",
     last_updated: "2024-01-01T00:00:00.037430+00:00",
-    product: generateUniqueName(),
+    product_id: generateUniqueName(),
+    version_id: "04",
   };
 };
 

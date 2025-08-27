@@ -26,12 +26,16 @@ export type Dataset = {
   data_begin: string;
   /* time of last entry */
   data_end: string;
+  /* <mission>_<product>_<version>_<instrument> */
+  dataset_id: string;
   /* ID of instrument */
   instrument_id: string;
   /* time of last update */
   last_updated: string;
   /* <mission>_<product_id> */
-  product: string;
+  product_id: string;
+  /* version of the product */
+  version_id: string;
 };
 
 export type ProductField = {
