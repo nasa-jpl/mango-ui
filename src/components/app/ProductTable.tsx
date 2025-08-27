@@ -107,11 +107,11 @@ export const ProductTable = ({
       valueGetter: (params) => params.data?.datasets[0].data_end,
     },
     {
-      field: "available_versions",
       filter: "string",
-      headerName: "Versions",
+      headerName: "Version",
       resizable: true,
       width: 100,
+      valueGetter: (params) => params.data?.datasets[0].version_id,
     },
     {
       field: "available_fields",
@@ -135,11 +135,13 @@ export const ProductTable = ({
         resolutions.map((r: ProductResolution) => r.downsampling_factor),
     },
   ];
+
   return (
     <DataGrid<Product>
       rowData={productEntries}
       columnDefs={columnDefs}
       loading={loading}
+      showQuickFilter={true}
       className="[&_div[role='row']:not(:hover)_.product-preview-button]:opacity-0 [&_div[role='row']:not(:hover)_.product-preview-button]:pointer-events-none"
     />
   );
