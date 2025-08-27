@@ -64,6 +64,7 @@ export type SelectedProduct = Pick<
   | "channels"
   | "dataset"
   | "fields"
+  | "filter"
   | "instrument"
   | "mission"
   | "version"
@@ -80,7 +81,9 @@ const getLabelForSelectedProductOrLayer = (
     fields || thing.fields
   ).join(", ")} ${(thing.channels || [])
     ?.map((c) => `(${c.id}: ${c.value})`)
-    .join(" ")} (v${thing.version})`;
+    .join(" ")} (v${thing.version}) ${
+    typeof thing.filter === "string" ? `filter: ${thing.filter}` : ""
+  }`;
 };
 
 // Returns the layer containing the selected product
@@ -109,6 +112,7 @@ const extractEntitySelectedProducts = (
       mission: layer.mission,
       version: layer.version,
       instrument: layer.instrument,
+      ...(typeof layer.filter === "string" ? { filter: layer.filter } : null),
     } as SelectedProduct;
   });
 };
@@ -212,11 +216,15 @@ export const EntityEditor = ({
           (p) => p.id === oldSelectedProduct.id
         );
         if (matchingNewProduct) {
-          newLayers.push({
+          const newLayer = {
             ...layer,
             ...matchingNewProduct,
             id: layer.id,
-          });
+          };
+          if (typeof matchingNewProduct.filter !== "string") {
+            delete newLayer.filter;
+          }
+          newLayers.push(newLayer);
           newTableColumns = newTableColumns.map((c) => {
             if (c.layerId === layer.id) {
               return { ...c, field: matchingNewProduct.fields[0] };
@@ -226,11 +234,15 @@ export const EntityEditor = ({
         }
       } else if (newSelectedProduct) {
         // If the layer matches a new selected product, use the new product
-        newLayers.push({
+        const newLayer = {
           ...layer,
           ...newSelectedProduct,
           id: layer.id,
-        });
+        };
+        if (typeof newSelectedProduct.filter !== "string") {
+          delete newLayer.filter;
+        }
+        newLayers.push(newLayer);
       }
       // Otherwise we can delete the layer since the associated product has been deleted
     });

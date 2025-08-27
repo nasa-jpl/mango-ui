@@ -333,6 +333,23 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
+        {typeof selectedProduct.filter === "string" && (
+          <div className="flex flex-col gap-1 min-w-40">
+            <Label size="sm">Filter</Label>
+            <Input
+              placeholder="<field_name>=<value>"
+              className="flex-1 w-full"
+              value={newSelectedProduct.filter || ""}
+              sizeVariant="xs"
+              onChange={(e) => {
+                updateSelectedProduct({
+                  ...newSelectedProduct,
+                  filter: e.target.value,
+                });
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
