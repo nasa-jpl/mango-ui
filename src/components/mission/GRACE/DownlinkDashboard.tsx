@@ -77,11 +77,13 @@ export function DownlinkDashboard({
     gapsWithinPasses: DownlinkDashData[];
     passFiles: DownlinkDashData[];
     productReportFiles: DownlinkDashData[];
+    ipuResets: DownlinkDashData | null;
   }>({
     gapsBetweenPasses: [],
     gapsWithinPasses: [],
     passFiles: [],
     productReportFiles: [],
+    ipuResets: null,
   });
 
   const cancelHandles = useMemo(() => {
@@ -123,7 +125,9 @@ export function DownlinkDashboard({
         downlinkDashboardEntity.defaultFields.concat(additionalFields),
         [],
         start,
-        end
+        end,
+        undefined,
+        downlinkDashboardEntity.filter
       );
       cancelHandles[requestId] = cancel;
       json()
@@ -163,6 +167,36 @@ export function DownlinkDashboard({
 
       // Cancel all previous requests
       Object.values(cancelHandles).map((h) => h());
+
+      const ipuResets = await fetchData(
+        "SOE_EVNT",
+        {
+          version: "04",
+          dateRange: { start: "", end: "" },
+          defaultFields: [
+            "soe_event",
+            "comments",
+            "createdby",
+            "gps_time",
+            "timestamp",
+          ],
+          defaultPassGapLimit: 0,
+          gapField: "",
+          instrument: "",
+          filter: "soe_event=IPU",
+          products: [{ dataset: "soe_event", title: "" }],
+          type: "downlink-dashboard",
+          id: "",
+          title: "",
+        },
+        [],
+        computedStartTime,
+        computedEndTime
+      );
+      ipuResets.result.data.forEach((d) => {
+        d.soe_event_derived = { value: d.timestamp };
+      });
+      // console.log("ipuResets :>> ", ipuResets);
 
       // Fetch pass and product reports for every product
       let productReportFiles = await Promise.all(
@@ -391,6 +425,7 @@ export function DownlinkDashboard({
         productReportFiles,
         gapsWithinPasses,
         gapsBetweenPasses,
+        ipuResets,
       });
     } catch (err) {
       console.error(err);
@@ -402,368 +437,482 @@ export function DownlinkDashboard({
 
   const marginLeft = 176;
   const rows = useMemo(() => {
-    return downlinkDashboardEntity.products.map((product, i) => {
-      const passesForProduct =
-        data?.passFiles.find((p) => p.product === `${product.dataset}_PASS`) ??
-        null;
-
-      const passes = [
+    const ipuResetsChart: TimelineRowSubrowEntity<ChartEntity> = {
+      id: "ipuResetsChart",
+      type: "chart",
+      title: "",
+      syncWithPageDateRange: true,
+      chartOptions: {
+        enableBoxZoom: false,
+      },
+      data: [
         {
-          layer: { id: "passesLayer" },
-          result: passesForProduct?.result ?? {
+          layer: { id: "ipuResetsLayer" },
+          result: data.ipuResets?.result ?? {
             data: [] as DataResponseDataEntry[],
           },
         },
-      ];
-      const productReportsForProduct =
-        data?.productReportFiles.find(
-          (p) => p.product === `${product.dataset}_RPT`
-        ) ?? null;
-      const productReports = [
+      ],
+      layers: [
         {
-          layer: { id: "productReportsLayer" },
-          result: productReportsForProduct?.result ?? {
+          id: "ipuResetsLayer",
+          mission,
+          dataset: "IPU Resets",
+          fields: ["soe_event", "timestamp", "soe_event_derived"],
+          dataFieldStart: "soe_event_derived",
+          dataFieldEnd: "soe_event_derived",
+          version: "04",
+          instrument: "C",
+          startTime: "2022-03-02T00:26:00.000000Z",
+          endTime: "2022-03-02T00:36:00.000000Z",
+          yAxisId: "y1",
+          type: "event",
+          style: "scatter",
+          windowBuffer: 1,
+          color: "red",
+          tooltipField: "soe_event",
+        },
+      ],
+      yAxes: [
+        {
+          id: "y1",
+          position: "left",
+          type: "category",
+          hidden: true,
+        },
+      ],
+    };
+    const ipuResetsTable: TimelineRowSubrowEntity<TableEntity> = {
+      id: "ipuResetsTable",
+      type: "table",
+      title: "IPU Resets",
+      syncWithPageDateRange: true,
+      expandable: true,
+      fitToGridWidth: true,
+      compact: true,
+      idField: "timestamp",
+      data: [
+        {
+          layer: { id: "ipuResetsLayer" },
+          result: data.ipuResets?.result ?? {
             data: [] as DataResponseDataEntry[],
           },
         },
-      ];
-
-      const gapsWithinPassesForProduct =
-        data?.gapsWithinPasses.find(
-          (p) => p.product === `${product.dataset}_PASS`
-        ) ?? null;
-      const gapsWithinPasses = [
+      ],
+      layers: [
         {
-          layer: { id: "gapsWithinPassesLayer" },
-          result: gapsWithinPassesForProduct?.result ?? {
-            data: [] as DataResponseDataEntry[],
-          },
+          id: "ipuResetsLayer",
+          version: "04",
+          mission,
+          dataset: "IPU Resets",
+          instrument,
+          fields: ["comments", "createdby", "gps_time", "timestamp"],
+          filter: "soe_event=IPU",
+          startTime: downlinkDashboardEntity.dateRange.start,
+          endTime: downlinkDashboardEntity.dateRange.end,
         },
-      ];
-
-      const gapsBetweenPassesForProduct =
-        data?.gapsBetweenPasses.find(
-          (p) => p.product === `${product.dataset}_PASS`
-        ) ?? null;
-      const gapsBetweenPasses = [
+      ],
+      columns: [
         {
-          layer: { id: "gapsBetweenPassesLayer" },
-          result: gapsBetweenPassesForProduct?.result ?? {
-            data: [] as DataResponseDataEntry[],
-          },
-        },
-      ];
-      const allGapData: Entity["data"] = [
-        {
-          layer: { id: "allGapsLayer" },
-          result: {
-            data: gapsBetweenPasses[0].result.data.concat(
-              gapsWithinPasses[0].result.data
-            ),
-          },
-        },
-      ];
-
-      const matchingProduct = products.find((p) => p.id === product.dataset);
-
-      const textEntity: TimelineRowSubrowEntity<TextEntity> = {
-        id: i.toString() + "text",
-        type: "text",
-        title: "Description",
-        text: matchingProduct?.description || "Description not found",
-      };
-      const gapsTable: TimelineRowSubrowEntity<TableEntity> = {
-        id: i.toString() + "gapstable",
-        type: "table",
-        title: `Gaps (${allGapData[0].result.data.length})`,
-        syncWithPageDateRange: true,
-        expandable: true,
-        compact: true,
-        idField: "id",
-        data: allGapData,
-        layers: [
-          {
-            id: "allGapsLayer",
-            version: "04",
-            mission,
-            dataset: product.dataset,
-            instrument,
-            fields: [
-              "type",
-              "time_gap_max",
-              "gap_start_time",
-              "gap_end_time",
-              "gap_duration",
-              "file_name",
-              "timestamp",
-              "id",
-            ],
-            startTime: downlinkDashboardEntity.dateRange.start,
-            endTime: downlinkDashboardEntity.dateRange.end,
-          },
-          {
-            id: "gapsBetweenPassesLayer",
-            version: "04",
-            mission,
-            dataset: product.dataset,
-            instrument,
-            fields: [
-              "type",
-              "time_gap_max",
-              "gap_start_time",
-              "gap_end_time",
-              "gap_duration",
-              "file_name",
-              "timestamp",
-              "id",
-            ],
-            startTime: downlinkDashboardEntity.dateRange.start,
-            endTime: downlinkDashboardEntity.dateRange.end,
-          },
-        ],
-        columns: [
-          {
-            field: "type",
-            layerId: "allGapsLayer",
-            label: "Gap Type",
-            id: generateUUID(),
-          },
-          {
-            field: "gap_start_time",
-            layerId: "allGapsLayer",
-            label: "Gap Start Time",
-            id: generateUUID(),
-          },
-          {
-            field: "gap_end_time",
-            layerId: "allGapsLayer",
-            label: "Gap End Time",
-            id: generateUUID(),
-          },
-          {
-            field: "gap_duration",
-            layerId: "allGapsLayer",
-            label: "Gap Duration (ms)",
-            id: generateUUID(),
-          },
-          {
-            field: "time_gap_max",
-            layerId: "allGapsLayer",
-            label: "Time Gap Max",
-            id: generateUUID(),
-          },
-          {
-            field: "file_name",
-            layerId: "allGapsLayer",
-            label: "File Name",
-            id: generateUUID(),
-          },
-          {
-            field: "id",
-            layerId: "allGapsLayer",
-            label: "Id",
-            id: generateUUID(),
-          },
-        ],
-      };
-      const productFields = downlinkDashboardEntity.defaultFields.concat(
-        product.additionalFields || []
-      );
-      const passesTable: TimelineRowSubrowEntity<TableEntity> = {
-        id: i.toString() + "passtable",
-        type: "table",
-        title: `Passes (${passes[0].result.data.length})`,
-        syncWithPageDateRange: true,
-        compact: true,
-        expandable: true,
-        idField: "id",
-        data: passes,
-        layers: [
-          {
-            id: "passesLayer",
-            version: "04",
-            mission,
-            dataset: product.dataset + "_PASS",
-            instrument,
-            fields: [
-              ...productFields,
-              ...(product.additionalFields || []),
-              "id",
-            ],
-            startTime: downlinkDashboardEntity.dateRange.start,
-            endTime: downlinkDashboardEntity.dateRange.end,
-          },
-        ],
-        columns: [...productFields, "id"].map((f) => ({
-          field: f,
-          layerId: "passesLayer",
+          field: "comments",
+          layerId: "ipuResetsLayer",
+          label: "Comments",
           id: generateUUID(),
-        })),
-      };
-      const productReportsTable: TimelineRowSubrowEntity<TableEntity> = {
-        id: i.toString() + "productReportsTable",
-        type: "table",
-        title: `Product Reports (${productReports[0].result.data.length})`,
-        syncWithPageDateRange: true,
-        expandable: true,
-        compact: true,
-        idField: "file_name",
-        data: productReports,
-        layers: [
-          {
-            id: "productReportsLayer",
-            version: "04",
-            mission,
-            dataset: product.dataset + "_RPT",
-            instrument,
-            fields: productFields,
-            startTime: downlinkDashboardEntity.dateRange.start,
-            endTime: downlinkDashboardEntity.dateRange.end,
-          },
-        ],
-        columns: productFields.map((f) => ({
-          field: f,
-          layerId: "productReportsLayer",
+        },
+        {
+          field: "createdby",
+          layerId: "ipuResetsLayer",
+          label: "Created By",
           id: generateUUID(),
-        })),
-      };
-      const gapsChart: TimelineRowSubrowEntity<ChartEntity> = {
-        id: "gapsChart",
-        type: "chart",
-        title: "",
-        syncWithPageDateRange: true,
-        chartOptions: {
-          enableBoxZoom: false,
         },
-        data: gapsWithinPasses.concat(gapsBetweenPasses),
-        layers: [
-          {
-            id: "gapsWithinPassesLayer",
-            mission,
-            dataset: "Time Gap Max Violation",
-            fields: ["gap_start_time", "gap_end_time", "file_name"],
-            dataFieldStart: "gap_start_time",
-            dataFieldEnd: "gap_end_time",
-            version: "04",
-            instrument: "C",
-            startTime: "2022-03-02T00:26:00.000000Z",
-            endTime: "2022-03-02T00:36:00.000000Z",
-            yAxisId: "y1",
-            type: "event",
-            style: "scatter",
-            windowBuffer: 1,
-            color: "red",
-            tooltipField: "file_name",
-          },
-          {
-            id: "gapsBetweenPassesLayer",
-            mission,
-            dataset: "Pass Gap",
-            fields: ["gap_start_time", "gap_end_time", "file_name"],
-            dataFieldStart: "gap_start_time",
-            dataFieldEnd: "gap_end_time",
-            version: "04",
-            instrument: "C",
-            startTime: "2022-03-02T00:26:00.000000Z",
-            endTime: "2022-03-02T00:36:00.000000Z",
-            yAxisId: "y1",
-            type: "event",
-            style: "bar",
-            windowBuffer: 1,
-            color: "red",
-            // tooltipField: "file_name",
-          },
-        ],
-        yAxes: [
-          {
-            id: "y1",
-            position: "left",
-            type: "category",
-            hidden: true,
-          },
-        ],
-      };
-      const passesChart: TimelineRowSubrowEntity<ChartEntity> = {
-        id: "passesChart",
-        type: "chart",
-        title: `Passes (${passes[0].result.data.length})`,
-        chartOptions: {
-          enableBoxZoom: false,
+        {
+          field: "gps_time",
+          layerId: "ipuResetsLayer",
+          label: "GPS Time",
+          id: generateUUID(),
         },
-        syncWithPageDateRange: true,
-        data: passes,
-        layers: [
-          {
-            id: "passesLayer",
-            mission,
-            dataset: "ACC1A_PASS",
-            fields: [
-              "first_data_point_t_tag",
-              "last_data_point_t_tag",
-              "file_name",
-            ],
-            dataFieldStart: "first_data_point_t_tag",
-            dataFieldEnd: "last_data_point_t_tag",
-            version: "04",
-            instrument: "C",
-            startTime: "2022-03-02T00:26:00.000000Z",
-            endTime: "2022-03-02T00:36:00.000000Z",
-            yAxisId: "y2",
-            type: "event",
-            style: "bubble",
-            windowBuffer: 1,
-            color: "rgba(227, 185, 36, 0.28)",
-            tooltipField: "file_name",
-            transformTargets: [
-              "first_data_point_t_tag",
-              "last_data_point_t_tag",
-            ],
-            transforms: [
-              {
-                axis: "y",
-                type: "self",
-                multiply: 1000,
-              },
-              {
-                axis: "y",
-                type: "self",
-                add: 946728000000,
-              },
-            ],
-          },
-        ],
-        yAxes: [
-          {
-            id: "y2",
-            position: "left",
-            type: "category",
-            hidden: true,
-          },
-        ],
-      };
-      const datasetStatus: Status = loading
-        ? "loading"
-        : allGapData[0].result.data.length || error
-        ? "error"
-        : "nominal";
+      ],
+    };
+    const ipuResetsDatasetStatus: Status = loading
+      ? "loading"
+      : data?.ipuResets?.result.data.length || error
+      ? "error"
+      : "nominal";
+    const ipuResetsRow: TimelineRowEntity = {
+      id: generateUUID(),
+      type: "timeline-row",
+      title: "IPU Resets",
+      entity: ipuResetsChart,
+      dateRange: dateRange,
+      subrows: [ipuResetsTable],
+    };
+    const rows = [{ row: ipuResetsRow, datasetStatus: ipuResetsDatasetStatus }];
+    return rows.concat(
+      downlinkDashboardEntity.products.map((product, i) => {
+        const passesForProduct =
+          data?.passFiles.find(
+            (p) => p.product === `${product.dataset}_PASS`
+          ) ?? null;
 
-      const row: TimelineRowEntity = {
-        id: i.toString(),
-        type: "timeline-row",
-        title: product.dataset,
-        entity: gapsChart,
-        dateRange: dateRange,
-        subrows: [
-          textEntity as unknown as EntityType,
-          gapsTable,
-          passesChart,
-          passesTable,
-          productReportsTable,
-          ...(product.entities || []),
-        ],
-      };
-      return { row, datasetStatus };
-    });
+        const passes = [
+          {
+            layer: { id: "passesLayer" },
+            result: passesForProduct?.result ?? {
+              data: [] as DataResponseDataEntry[],
+            },
+          },
+        ];
+        const productReportsForProduct =
+          data?.productReportFiles.find(
+            (p) => p.product === `${product.dataset}_RPT`
+          ) ?? null;
+        const productReports = [
+          {
+            layer: { id: "productReportsLayer" },
+            result: productReportsForProduct?.result ?? {
+              data: [] as DataResponseDataEntry[],
+            },
+          },
+        ];
+
+        const gapsWithinPassesForProduct =
+          data?.gapsWithinPasses.find(
+            (p) => p.product === `${product.dataset}_PASS`
+          ) ?? null;
+        const gapsWithinPasses = [
+          {
+            layer: { id: "gapsWithinPassesLayer" },
+            result: gapsWithinPassesForProduct?.result ?? {
+              data: [] as DataResponseDataEntry[],
+            },
+          },
+        ];
+
+        const gapsBetweenPassesForProduct =
+          data?.gapsBetweenPasses.find(
+            (p) => p.product === `${product.dataset}_PASS`
+          ) ?? null;
+        const gapsBetweenPasses = [
+          {
+            layer: { id: "gapsBetweenPassesLayer" },
+            result: gapsBetweenPassesForProduct?.result ?? {
+              data: [] as DataResponseDataEntry[],
+            },
+          },
+        ];
+        const allGapData: Entity["data"] = [
+          {
+            layer: { id: "allGapsLayer" },
+            result: {
+              data: gapsBetweenPasses[0].result.data.concat(
+                gapsWithinPasses[0].result.data
+              ),
+            },
+          },
+        ];
+
+        const matchingProduct = products.find((p) => p.id === product.dataset);
+
+        const textEntity: TimelineRowSubrowEntity<TextEntity> = {
+          id: i.toString() + "text",
+          type: "text",
+          title: "Description",
+          text: matchingProduct?.description || "Description not found",
+        };
+        const gapsTable: TimelineRowSubrowEntity<TableEntity> = {
+          id: i.toString() + "gapstable",
+          type: "table",
+          title: `Gaps (${allGapData[0].result.data.length})`,
+          syncWithPageDateRange: true,
+          expandable: true,
+          compact: true,
+          idField: "id",
+          data: allGapData,
+          layers: [
+            {
+              id: "allGapsLayer",
+              version: "04",
+              mission,
+              dataset: product.dataset,
+              instrument,
+              fields: [
+                "type",
+                "time_gap_max",
+                "gap_start_time",
+                "gap_end_time",
+                "gap_duration",
+                "file_name",
+                "timestamp",
+                "id",
+              ],
+              startTime: downlinkDashboardEntity.dateRange.start,
+              endTime: downlinkDashboardEntity.dateRange.end,
+            },
+            {
+              id: "gapsBetweenPassesLayer",
+              version: "04",
+              mission,
+              dataset: product.dataset,
+              instrument,
+              fields: [
+                "type",
+                "time_gap_max",
+                "gap_start_time",
+                "gap_end_time",
+                "gap_duration",
+                "file_name",
+                "timestamp",
+                "id",
+              ],
+              startTime: downlinkDashboardEntity.dateRange.start,
+              endTime: downlinkDashboardEntity.dateRange.end,
+            },
+          ],
+          columns: [
+            {
+              field: "type",
+              layerId: "allGapsLayer",
+              label: "Gap Type",
+              id: generateUUID(),
+            },
+            {
+              field: "gap_start_time",
+              layerId: "allGapsLayer",
+              label: "Gap Start Time",
+              id: generateUUID(),
+            },
+            {
+              field: "gap_end_time",
+              layerId: "allGapsLayer",
+              label: "Gap End Time",
+              id: generateUUID(),
+            },
+            {
+              field: "gap_duration",
+              layerId: "allGapsLayer",
+              label: "Gap Duration (ms)",
+              id: generateUUID(),
+            },
+            {
+              field: "time_gap_max",
+              layerId: "allGapsLayer",
+              label: "Time Gap Max",
+              id: generateUUID(),
+            },
+            {
+              field: "file_name",
+              layerId: "allGapsLayer",
+              label: "File Name",
+              id: generateUUID(),
+            },
+            {
+              field: "id",
+              layerId: "allGapsLayer",
+              label: "Id",
+              id: generateUUID(),
+            },
+          ],
+        };
+        const productFields = downlinkDashboardEntity.defaultFields.concat(
+          product.additionalFields || []
+        );
+        const passesTable: TimelineRowSubrowEntity<TableEntity> = {
+          id: i.toString() + "passtable",
+          type: "table",
+          title: `Passes (${passes[0].result.data.length})`,
+          syncWithPageDateRange: true,
+          compact: true,
+          expandable: true,
+          idField: "id",
+          data: passes,
+          layers: [
+            {
+              id: "passesLayer",
+              version: "04",
+              mission,
+              dataset: product.dataset + "_PASS",
+              instrument,
+              fields: [
+                ...productFields,
+                ...(product.additionalFields || []),
+                "id",
+              ],
+              startTime: downlinkDashboardEntity.dateRange.start,
+              endTime: downlinkDashboardEntity.dateRange.end,
+            },
+          ],
+          columns: [...productFields, "id"].map((f) => ({
+            field: f,
+            layerId: "passesLayer",
+            id: generateUUID(),
+          })),
+        };
+        const productReportsTable: TimelineRowSubrowEntity<TableEntity> = {
+          id: i.toString() + "productReportsTable",
+          type: "table",
+          title: `Product Reports (${productReports[0].result.data.length})`,
+          syncWithPageDateRange: true,
+          expandable: true,
+          compact: true,
+          idField: "file_name",
+          data: productReports,
+          layers: [
+            {
+              id: "productReportsLayer",
+              version: "04",
+              mission,
+              dataset: product.dataset + "_RPT",
+              instrument,
+              fields: productFields,
+              startTime: downlinkDashboardEntity.dateRange.start,
+              endTime: downlinkDashboardEntity.dateRange.end,
+            },
+          ],
+          columns: productFields.map((f) => ({
+            field: f,
+            layerId: "productReportsLayer",
+            id: generateUUID(),
+          })),
+        };
+        const gapsChart: TimelineRowSubrowEntity<ChartEntity> = {
+          id: "gapsChart",
+          type: "chart",
+          title: "",
+          syncWithPageDateRange: true,
+          chartOptions: {
+            enableBoxZoom: false,
+          },
+          data: gapsWithinPasses.concat(gapsBetweenPasses),
+          layers: [
+            {
+              id: "gapsWithinPassesLayer",
+              mission,
+              dataset: "Time Gap Max Violation",
+              fields: ["gap_start_time", "gap_end_time", "file_name"],
+              dataFieldStart: "gap_start_time",
+              dataFieldEnd: "gap_end_time",
+              version: "04",
+              instrument: "C",
+              startTime: "2022-03-02T00:26:00.000000Z",
+              endTime: "2022-03-02T00:36:00.000000Z",
+              yAxisId: "y1",
+              type: "event",
+              style: "scatter",
+              windowBuffer: 1,
+              color: "red",
+              tooltipField: "file_name",
+            },
+            {
+              id: "gapsBetweenPassesLayer",
+              mission,
+              dataset: "Pass Gap",
+              fields: ["gap_start_time", "gap_end_time", "file_name"],
+              dataFieldStart: "gap_start_time",
+              dataFieldEnd: "gap_end_time",
+              version: "04",
+              instrument: "C",
+              startTime: "2022-03-02T00:26:00.000000Z",
+              endTime: "2022-03-02T00:36:00.000000Z",
+              yAxisId: "y1",
+              type: "event",
+              style: "bar",
+              windowBuffer: 1,
+              color: "red",
+              // tooltipField: "file_name",
+            },
+          ],
+          yAxes: [
+            {
+              id: "y1",
+              position: "left",
+              type: "category",
+              hidden: true,
+            },
+          ],
+        };
+        const passesChart: TimelineRowSubrowEntity<ChartEntity> = {
+          id: "passesChart",
+          type: "chart",
+          title: `Passes (${passes[0].result.data.length})`,
+          chartOptions: {
+            enableBoxZoom: false,
+          },
+          syncWithPageDateRange: true,
+          data: passes,
+          layers: [
+            {
+              id: "passesLayer",
+              mission,
+              dataset: "ACC1A_PASS",
+              fields: [
+                "first_data_point_t_tag",
+                "last_data_point_t_tag",
+                "file_name",
+              ],
+              dataFieldStart: "first_data_point_t_tag",
+              dataFieldEnd: "last_data_point_t_tag",
+              version: "04",
+              instrument: "C",
+              startTime: "2022-03-02T00:26:00.000000Z",
+              endTime: "2022-03-02T00:36:00.000000Z",
+              yAxisId: "y2",
+              type: "event",
+              style: "bubble",
+              windowBuffer: 1,
+              color: "rgba(227, 185, 36, 0.28)",
+              tooltipField: "file_name",
+              transformTargets: [
+                "first_data_point_t_tag",
+                "last_data_point_t_tag",
+              ],
+              transforms: [
+                {
+                  axis: "y",
+                  type: "self",
+                  multiply: 1000,
+                },
+                {
+                  axis: "y",
+                  type: "self",
+                  add: 946728000000,
+                },
+              ],
+            },
+          ],
+          yAxes: [
+            {
+              id: "y2",
+              position: "left",
+              type: "category",
+              hidden: true,
+            },
+          ],
+        };
+        const datasetStatus: Status = loading
+          ? "loading"
+          : allGapData[0].result.data.length || error
+          ? "error"
+          : "nominal";
+
+        const row: TimelineRowEntity = {
+          id: i.toString(),
+          type: "timeline-row",
+          title: product.dataset,
+          entity: gapsChart,
+          dateRange: dateRange,
+          subrows: [
+            textEntity as unknown as EntityType,
+            gapsTable,
+            passesChart,
+            passesTable,
+            productReportsTable,
+            ...(product.entities || []),
+          ],
+        };
+        return { row, datasetStatus };
+      })
+    );
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downlinkDashboardEntity, data, error]);
 
