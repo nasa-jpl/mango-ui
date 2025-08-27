@@ -234,7 +234,7 @@ export const ViewPage = ({
             // letting the library append it to the bottom
             const newLayout: SectionLayout[] = [
               ...s.layout,
-              { i: newEntity.id, w: 4, h: 2, x: 0, y: 0 },
+              { i: newEntity.id, w: 8, h: 7, x: 0, y: 0 },
             ];
             return {
               ...s,
