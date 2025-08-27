@@ -143,8 +143,8 @@ export function DataGrid<T>({
       style={{
         height: "100%",
         width: "100%",
-        overflow: "hidden",
-        padding: "2px",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {showQuickFilter && (
@@ -153,6 +153,7 @@ export function DataGrid<T>({
             autoComplete="off"
             type="text"
             id="filter-text-box"
+            sizeVariant="sm"
             placeholder="Filter..."
             onInput={onFilterTextBoxChanged}
           />
