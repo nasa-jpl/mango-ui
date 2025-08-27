@@ -96,7 +96,7 @@ export const getData = (
             response
               .json()
               .then((json) => {
-                if (response.status === 400) {
+                if (response.status >= 400) {
                   throw new Error(
                     (json as DataResponseError).detail || "Unknown error"
                   );

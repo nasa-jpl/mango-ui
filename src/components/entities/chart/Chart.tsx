@@ -1297,7 +1297,7 @@ export const Chart = ({
             Loading
           </div>
         )}
-        {isLoading && error && (
+        {error && (
           <div
             className={classNames(
               "font-medium border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px]",
