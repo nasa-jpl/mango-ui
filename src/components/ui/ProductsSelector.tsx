@@ -65,7 +65,6 @@ const ProductsSelector = ({
                   }
                   return p;
                 });
-                console.log("newProducts :>> ", newProducts);
                 onChange(newProducts);
               }}
             >
