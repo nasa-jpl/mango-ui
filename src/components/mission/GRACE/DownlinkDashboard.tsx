@@ -75,9 +75,9 @@ export function DownlinkDashboard({
   const [data, setData] = useState<{
     gapsBetweenPasses: DownlinkDashData[];
     gapsWithinPasses: DownlinkDashData[];
+    ipuResets: DownlinkDashData | null;
     passFiles: DownlinkDashData[];
     productReportFiles: DownlinkDashData[];
-    ipuResets: DownlinkDashData | null;
   }>({
     gapsBetweenPasses: [],
     gapsWithinPasses: [],

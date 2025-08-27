@@ -916,7 +916,8 @@ export const Chart = ({
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor
+        downsamplingFactor,
+        layer.filter
       );
       cancelHandles[layerFullId] = cancel;
       json()
