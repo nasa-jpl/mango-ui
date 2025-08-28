@@ -92,7 +92,7 @@ export const ChartTooltip = ({
         <div className="chart-tooltip-x text-white font-bold">
           {new Date(
             tooltip.dataPoints[0].parsed.x as unknown as number
-          ).toISOString()}
+          ).toGPSString()}
         </div>
         <div className="chart-tooltip-rows">
           {tooltip.dataPoints.map((point, i) => {

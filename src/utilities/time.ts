@@ -1,3 +1,5 @@
+import { formatDateISO } from "@nasa-jpl/stellar-react";
+
 /**
  * Parses input ISO string to return datetime-local string.
  * e.g. "2022-03-02T00:36:00.000Z" -> "2022-03-02T00:36"
@@ -27,22 +29,24 @@ export function j2ToMs(x: number) {
   return x * 1000 + 946728000000;
 }
 
-// export function formatDateGPS(date: Date) {
-//   console.log("formatting date: ", date);
-//   return date.toISOString().substring(0, 19);
-// }
+/**
+ * Takes Date object and returns date string in GPS time format.
+ * @param {Date} date
+ * @returns {string} format YYYY-MM-DDTHH:MM:SS
+ */
+export function formatDateGPS(date: Date) {
+  return formatDateISO(date).substring(0, 19);
+}
 
-// /*
-//  * Extend Date prototype to add toGPSString method.
-//  *
-//  * Removes the "Z" from the end of the input GPS date so as to not confuse
-//  * with UTC time and truncates to YYYY-MM-DDTHH:MM:SS format.
-//  *
-//  * @param {Date} Date object in GPS time.
-//  * @return {string} String in GPS format YYYY-MM-DDTHH:MM:SS.
-//  */
-// Date.prototype.toGPSString = function (): string {
-//   const result = this.toISOString().substring(0, 19);
-//   console.log("Result:", result);
-//   return result;
-// };
+/*
+ * Extend Date prototype to add toGPSString method.
+ *
+ * Removes the "Z" from the end of the input GPS date so as to not confuse
+ * with UTC time and truncates to YYYY-MM-DDTHH:MM:SS format.
+ *
+ * @param {Date} Date object in GPS time.
+ * @return {string} String in GPS format YYYY-MM-DDTHH:MM:SS.
+ */
+Date.prototype.toGPSString = function (): string {
+  return this.toISOString().substring(0, 19);
+};

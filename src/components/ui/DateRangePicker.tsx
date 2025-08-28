@@ -21,6 +21,7 @@ import {
 } from "react";
 import { DateRange, TZDate } from "react-day-picker";
 import { DateFormat } from "../../types/view";
+import { formatDateGPS } from "../../utilities/time";
 
 export declare type DateRangePickerProps = {
   dateFormat?: DateFormat;
@@ -47,7 +48,7 @@ export function DateRangePicker({
   const [prevPropDateRange, setPrevPropDateRange] = useState("");
 
   useEffect(() => {
-    const dateRangeString = `${startDate.toISOString()}_${endDate.toISOString()}`;
+    const dateRangeString = `${startDate.toGPSString()}_${endDate.toGPSString()}`;
     if (dateRangeString !== prevPropDateRange) {
       setPrevPropDateRange(dateRangeString);
       setDateRange({
@@ -78,7 +79,7 @@ export function DateRangePicker({
       if (dateFormat === "short") {
         return format(date, "yyyy-MM-dd");
       } else {
-        return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+        return formatDateGPS(date);
       }
     },
     [dateFormat]
@@ -96,10 +97,14 @@ export function DateRangePicker({
         dateString += "T00:00:00";
         otherDateString += "T00:00:00";
       }
-      // TODO: mlucas
-      const eventDate = parseDateStringISO(dateString);
+      // Treat GPS time string as UTC otherwise 7 hours will be added
+      const eventDate = dateString.endsWith("Z")
+        ? parseDateStringISO(dateString)
+        : parseDateStringISO(dateString + "Z");
       const eventVerb = which === "from" ? "start" : "end";
-      const otherDate = parseDateStringISO(otherDateString);
+      const otherDate = otherDateString.endsWith("Z")
+        ? parseDateStringISO(otherDateString)
+        : parseDateStringISO(otherDateString + "Z");
       const otherDateVerb = which === "from" ? "end" : "start";
       if (!dateString) {
         setDateRangeError(
