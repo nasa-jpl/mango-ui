@@ -5,12 +5,12 @@ import { getFieldMetadataForLayer, getProductForLayer } from "./product";
 
 test("getProductForLayer", () => {
   const layer = generateTestChartLayer();
-  layer.mission = "foo";
+  layer.mission = { id: "foo", label: "foo" };
   layer.dataset = "bar";
   layer.fields = ["field1"];
 
   const dataset1 = generateTestProduct();
-  dataset1.mission = "foo";
+  dataset1.mission = { id: "foo", label: "foo" };
   dataset1.id = "bar";
   dataset1.available_fields = [
     {
@@ -29,7 +29,7 @@ test("getProductForLayer", () => {
     },
   ];
   const dataset2 = generateTestProduct();
-  dataset2.mission = "foo";
+  dataset2.mission = { id: "foo", label: "foo" };
   dataset2.id = "bar";
   dataset2.available_fields = [
     {
@@ -48,7 +48,7 @@ test("getProductForLayer", () => {
     },
   ];
   const dataset3 = generateTestProduct();
-  dataset3.mission = "foo";
+  dataset3.mission = { id: "foo", label: "foo" };
   dataset3.id = "bat";
   dataset3.available_fields = [
     {
@@ -67,7 +67,7 @@ test("getProductForLayer", () => {
     },
   ];
   const dataset4 = generateTestProduct();
-  dataset4.mission = "cat";
+  dataset4.mission = { id: "cat", label: "cat" };
   dataset4.id = "bat";
   dataset4.available_fields = [
     {
@@ -94,12 +94,12 @@ test("getProductForLayer", () => {
 
 test("getFieldMetadataForLayer", () => {
   const layer = generateTestChartLayer();
-  layer.mission = "foo";
+  layer.mission = { id: "foo", label: "foo" };
   layer.dataset = "bar";
   layer.fields = ["field1"];
 
   const dataset1 = generateTestProduct();
-  dataset1.mission = "foo";
+  dataset1.mission = { id: "foo", label: "foo" };
   dataset1.id = "bar";
   dataset1.available_fields = [
     {

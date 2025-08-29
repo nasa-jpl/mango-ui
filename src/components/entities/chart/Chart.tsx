@@ -51,7 +51,6 @@ import {
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import {
-  addHyphenToMission,
   convertHexToRGBA,
   getDataLayerId,
   isAbortError,
@@ -86,7 +85,7 @@ export declare type ChartProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;
-  mission?: string | null;
+  mission?: { id: string; label: string } | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -594,7 +593,8 @@ export const Chart = ({
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
-          const mission = _mission ?? layer.mission;
+          const mission =
+            _mission ?? getProductForLayer(layer, products)?.mission.label;
           const instrument = _instrument ?? layer.instrument;
           const isLineLayer = isChartLayerLine(layer);
           const isEventLayer = isChartLayerEvent(layer);
@@ -614,9 +614,7 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${addHyphenToMission(mission)} ${instrument} ${
-                  layer.dataset
-                } ${layer.fields[0]}${
+                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
                   layer.channels && layer.channels.length > 0
                     ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
@@ -1021,7 +1019,7 @@ export const Chart = ({
         tooltip={tooltipModel}
         renderHeader={(point) => (
           <>
-            {mission ?? addHyphenToMission(point.dataset.layer.mission)}{" "}
+            {mission ?? point.dataset.layer.mission}{" "}
             {instrument ?? point.dataset.layer.instrument}{" "}
             {point.dataset.layer.dataset}{" "}
             {point.dataset.layer.fields.length === 1

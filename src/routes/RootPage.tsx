@@ -64,7 +64,7 @@ export default function RootPage() {
   const fetchProducts = async (signal: AbortSignal) => {
     const missions = await getMissions(signal);
     const products = await Promise.all(
-      missions.map((mission) => getProducts(mission, signal))
+      missions.map((mission) => getProducts(mission.id, signal))
     );
     setProducts(products.flat());
     setLoadingInitialData(false);

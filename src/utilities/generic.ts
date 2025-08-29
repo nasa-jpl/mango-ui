@@ -169,9 +169,3 @@ export function downloadJSON(obj: unknown, filename: string) {
 export function isMacOs(): boolean {
   return /mac/i.test(window.navigator.platform);
 }
-
-export function addHyphenToMission(mission: string): string {
-  if (!mission || mission.startsWith("GRACE-") || !mission.startsWith("GRACE"))
-    return mission;
-  return mission.replace(/^GRACE/, "GRACE-");
-}

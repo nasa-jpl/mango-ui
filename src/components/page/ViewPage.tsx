@@ -23,7 +23,7 @@ import {
   SectionLayout,
   Section as SectionType,
 } from "../../types/view";
-import { addHyphenToMission, generateUUID } from "../../utilities/generic";
+import { generateUUID } from "../../utilities/generic";
 import {
   createEntity,
   duplicateEntity,
@@ -389,7 +389,7 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {mission ? addHyphenToMission(mission) : mission}&nbsp;
+                  {mission}&nbsp;
                   {instrument}
                 </Tabs.Trigger>
               ))}

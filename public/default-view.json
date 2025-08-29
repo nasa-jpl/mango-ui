@@ -354,11 +354,11 @@
           "title": "Downlink Dashboard",
           "missions": [
             {
-              "mission": "GRACEFO",
+              "mission": "GRACE-FO",
               "instrument": "C"
             },
             {
-              "mission": "GRACEFO",
+              "mission": "GRACE-FO",
               "instrument": "D"
             }
           ],

@@ -29,7 +29,15 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
   }
 };
 
-export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
+// TODO: mlucas create mission object type
+export const getMissions = async (
+  signal: AbortSignal
+): Promise<
+  {
+    id: string;
+    label: string;
+  }[]
+> => {
   const url = config.endpoints.data + config.api.data.missions;
   const response = await (
     await fetch(url, { signal, credentials: "include" })
@@ -38,12 +46,12 @@ export const getMissions = async (signal: AbortSignal): Promise<string[]> => {
 };
 
 export const getProducts = async (
-  mission: string,
+  missionId: string,
   signal: AbortSignal
 ): Promise<Product[]> => {
   const url =
     config.endpoints.data +
-    config.api.data.products.replace("{MISSION}", mission);
+    config.api.data.products.replace("{MISSION}", missionId);
   const response = await (
     await fetch(url, { signal, credentials: "include" })
   ).json();
@@ -51,7 +59,7 @@ export const getProducts = async (
 };
 
 export const getData = (
-  mission: string,
+  missionId: string,
   dataset: string,
   instrumentId: string,
   version: string,
@@ -72,7 +80,7 @@ export const getData = (
   const url =
     config.endpoints.data +
     config.api.data.data
-      .replace("{MISSION}", mission)
+      .replace("{MISSION}", missionId)
       .replace("{INSTRUMENT}", instrumentId)
       .replace("{DATASET}", dataset)
       .replace("{VERSION}", version) +

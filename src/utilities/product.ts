@@ -7,7 +7,7 @@ export function getProductForLayer(
   products: Product[]
 ): Product | undefined {
   return products.find(
-    (d) => layer.mission === d.mission && layer.dataset === d.id
+    (d) => layer.mission === d.mission.id && layer.dataset === d.id
   );
 }
 
