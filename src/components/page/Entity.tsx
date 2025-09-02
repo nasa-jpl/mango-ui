@@ -32,7 +32,7 @@ export declare type EntityProps = {
   hoverDate: Date | null; // TODO could this be Date | undefined and made optional?
   instrument?: string | null;
   loading?: boolean;
-  mission?: string | null;
+  mission?: string | null; // MLUCAS: if not null, value was pulled from view config
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: (entity: EntityType) => void;
   onDuplicate?: (entity: EntityType) => void;

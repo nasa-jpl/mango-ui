@@ -43,7 +43,7 @@ export declare type PageProps = {
   onPageChange: (page: PageType) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
-  viewPage?: PageType;
+  viewPage?: PageType; // MLUCAS: mission param optional and not in here
 };
 
 // TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
@@ -67,6 +67,7 @@ export const ViewPage = ({
     end: endDate,
     start: startDate,
   });
+  // MLUCAS: mission will be null if not defined as missions in view config
   const [mission, setMission] = useState<string | null>(
     viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
   );
@@ -374,6 +375,7 @@ export const ViewPage = ({
         </div>
       )}
       {!loadingInitialData && viewPage.missions && viewPage.missions.length && (
+        // MLUCAS: is 'missions' property defined in view config for downlink dashboard only?
         <div className="left-0 sticky top-0 z-[1]">
           <Tabs.Root
             value={`${mission}_${instrument}`}
@@ -389,7 +391,7 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {mission}&nbsp;
+                  {mission?.replace("GRACE", "GRACE-")}&nbsp;
                   {instrument}
                 </Tabs.Trigger>
               ))}

@@ -5,7 +5,7 @@ import { getFieldMetadataForLayer, getProductForLayer } from "./product";
 
 test("getProductForLayer", () => {
   const layer = generateTestChartLayer();
-  layer.mission = { id: "foo", label: "foo" };
+  layer.mission = "foo";
   layer.dataset = "bar";
   layer.fields = ["field1"];
 
@@ -94,7 +94,7 @@ test("getProductForLayer", () => {
 
 test("getFieldMetadataForLayer", () => {
   const layer = generateTestChartLayer();
-  layer.mission = { id: "foo", label: "foo" };
+  layer.mission = "foo";
   layer.dataset = "bar";
   layer.fields = ["field1"];
 

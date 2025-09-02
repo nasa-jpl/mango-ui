@@ -85,7 +85,7 @@ export declare type ChartProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;
-  mission?: { id: string; label: string } | null;
+  mission?: string | null; // MLUCAS: if not null, value was pulled from view config
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -593,8 +593,8 @@ export const Chart = ({
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
-          const mission =
-            _mission ?? getProductForLayer(layer, products)?.mission.label;
+          const missionLabel = getProductForLayer(layer, products)?.mission
+            .label;
           const instrument = _instrument ?? layer.instrument;
           const isLineLayer = isChartLayerLine(layer);
           const isEventLayer = isChartLayerEvent(layer);
@@ -614,7 +614,9 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                `${missionLabel} ${instrument} ${layer.dataset} ${
+                  layer.fields[0]
+                }${
                   layer.channels && layer.channels.length > 0
                     ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
@@ -812,6 +814,7 @@ export const Chart = ({
     ) {
       chartRef.current.options.plugins.tooltip.external = (tooltipModel) => {
         //@ts-expect-error incorrect typings here from library again
+        // MLUCAS: _mission needs to be pulled from product?
         renderTooltip(tooltipModel, _mission, _instrument);
       };
     }
@@ -993,7 +996,7 @@ export const Chart = ({
 
   const renderTooltip = (
     context: TooltipModel<"line">,
-    mission?: string,
+    missionLabel?: string,
     instrument?: string
   ) => {
     //@ts-expect-error incorrect typings from library
@@ -1019,7 +1022,7 @@ export const Chart = ({
         tooltip={tooltipModel}
         renderHeader={(point) => (
           <>
-            {mission ?? point.dataset.layer.mission}{" "}
+            {missionLabel ?? point.dataset.layer.mission}{" "}
             {instrument ?? point.dataset.layer.instrument}{" "}
             {point.dataset.layer.dataset}{" "}
             {point.dataset.layer.fields.length === 1

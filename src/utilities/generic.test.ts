@@ -15,7 +15,7 @@ test("pluralize", () => {
 
 test("getDataLayerId", () => {
   const layer: ChartLayer = {
-    mission: { id: "MISSION", label: "MISSION" },
+    mission: "MISSION",
     dataset: "DATASET",
     fields: ["FIELD1", "FIELD2"],
     instrument: "INSTRUMENT",
