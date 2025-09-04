@@ -45,7 +45,7 @@ export const generateTestProduct = (): Product => {
     full_id: generateUniqueName(),
     id: generateUniqueName(),
     instruments: ["C", "D"],
-    mission: generateUniqueName(),
+    mission: { id: "MISSION", label: "MISSION" },
     processing_level: "1A",
     query_result_limit: 1000,
     timestamp_field: generateUniqueName(),

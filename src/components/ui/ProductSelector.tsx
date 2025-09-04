@@ -68,7 +68,7 @@ export const ProductSelector = ({
   const instruments = [
     ...new Set(
       products
-        .filter((product) => product.mission === newSelectedProduct.mission)
+        .filter((product) => product.mission.id === newSelectedProduct.mission)
         .map((product) => product.instruments)
         .flat()
     ),
@@ -78,7 +78,7 @@ export const ProductSelector = ({
       products
         .filter(
           (product) =>
-            product.mission === newSelectedProduct.mission &&
+            product.mission.id === newSelectedProduct.mission &&
             product.instruments.indexOf(newSelectedProduct.instrument) > -1
         )
         .map((product) => product.id)
@@ -88,7 +88,7 @@ export const ProductSelector = ({
   const product = products.find(
     (product) =>
       product.id === newSelectedProduct.dataset &&
-      product.mission === newSelectedProduct.mission &&
+      product.mission.id === newSelectedProduct.mission &&
       product.instruments.indexOf(newSelectedProduct.instrument) > -1
   );
   const fields = product?.available_fields.filter(fieldFilter) || [];
@@ -101,7 +101,7 @@ export const ProductSelector = ({
     products.find(
       (product) =>
         product.id === newSelectedProduct.dataset &&
-        product.mission === newSelectedProduct.mission &&
+        product.mission.id === newSelectedProduct.mission &&
         product.instruments.indexOf(newSelectedProduct.instrument) > -1
     )?.available_versions || [];
   return (
@@ -111,7 +111,10 @@ export const ProductSelector = ({
           <Label size="sm">Mission</Label>
           <Select
             onValueChange={(value) =>
-              updateSelectedProduct({ ...newSelectedProduct, mission: value })
+              updateSelectedProduct({
+                ...newSelectedProduct,
+                mission: value,
+              })
             }
             value={newSelectedProduct.mission}
           >
@@ -120,8 +123,8 @@ export const ProductSelector = ({
             </SelectTrigger>
             <SelectContent size="xs">
               {missions.sort().map((mission) => (
-                <SelectItem size="xs" value={mission} key={mission}>
-                  {mission}
+                <SelectItem size="xs" value={mission.id} key={mission.id}>
+                  {mission.label}
                 </SelectItem>
               ))}
             </SelectContent>

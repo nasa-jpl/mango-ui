@@ -66,12 +66,12 @@ export const ProductTable = ({
       width: 130,
     },
     {
-      field: "mission",
       filter: "string",
       headerName: "Mission",
       resizable: true,
       sortable: true,
       width: 90,
+      valueGetter: (params) => params.data?.mission.label,
     },
     {
       field: "instruments",

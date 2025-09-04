@@ -18,7 +18,7 @@ import Chart from "../entities/chart/Chart";
 import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
-  return `${product.mission} ${instrument || product.instruments[0]} ${
+  return `${product.mission.label} ${instrument || product.instruments[0]} ${
     product.id
   }`;
 };
@@ -114,7 +114,7 @@ export const ProductPreviewModal = ({
         version,
         fields: [field],
         id: "layer1",
-        mission: product.mission,
+        mission: product.mission.id,
         instrument: instrument || product.instruments[0],
         yAxisId: "y1",
         channels,

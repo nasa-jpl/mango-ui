@@ -23,6 +23,7 @@ import {
   SectionLayout,
   Section as SectionType,
 } from "../../types/view";
+import { getMissions } from "../../utilities/api";
 import { generateUUID } from "../../utilities/generic";
 import {
   createEntity,
@@ -81,6 +82,14 @@ export const ViewPage = ({
   const [pageOptions, setPageOptions] = useState<PageOptions>({
     showHoverDate: true,
   });
+
+  const [missionsObj, setMissionsObj] = useState<
+    { id: string; label: string }[]
+  >([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    getMissions(controller.signal).then((data) => setMissionsObj(data));
+  }, []);
 
   const confirm = useConfirm();
 
@@ -389,7 +398,8 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {mission}&nbsp;
+                  {missionsObj.find((m) => m.id === mission)?.label || mission}
+                  &nbsp;
                   {instrument}
                 </Tabs.Trigger>
               ))}
