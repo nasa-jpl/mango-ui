@@ -23,6 +23,7 @@ import {
   SectionLayout,
   Section as SectionType,
 } from "../../types/view";
+import { getMissions } from "../../utilities/api";
 import { generateUUID } from "../../utilities/generic";
 import {
   createEntity,
@@ -43,7 +44,7 @@ export declare type PageProps = {
   onPageChange: (page: PageType) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
-  viewPage?: PageType; // MLUCAS: mission param optional and not in here
+  viewPage?: PageType;
 };
 
 // TODO consider if we need to disambiguate View<Page|Entity|Section> from the component names?
@@ -67,7 +68,6 @@ export const ViewPage = ({
     end: endDate,
     start: startDate,
   });
-  // MLUCAS: mission will be null if not defined as missions in view config
   const [mission, setMission] = useState<string | null>(
     viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
   );
@@ -82,6 +82,14 @@ export const ViewPage = ({
   const [pageOptions, setPageOptions] = useState<PageOptions>({
     showHoverDate: true,
   });
+
+  const [missionsObj, setMissionsObj] = useState<
+    { id: string; label: string }[]
+  >([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    getMissions(controller.signal).then((data) => setMissionsObj(data));
+  }, []);
 
   const confirm = useConfirm();
 
@@ -375,7 +383,6 @@ export const ViewPage = ({
         </div>
       )}
       {!loadingInitialData && viewPage.missions && viewPage.missions.length && (
-        // MLUCAS: is 'missions' property defined in view config for downlink dashboard only?
         <div className="left-0 sticky top-0 z-[1]">
           <Tabs.Root
             value={`${mission}_${instrument}`}
@@ -391,7 +398,8 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {mission?.replace("GRACE", "GRACE-")}&nbsp;
+                  {missionsObj.find((m) => m.id === mission)?.label || mission}
+                  &nbsp;
                   {instrument}
                 </Tabs.Trigger>
               ))}

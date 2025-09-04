@@ -29,7 +29,6 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
   }
 };
 
-// TODO: mlucas create mission object type
 export const getMissions = async (
   signal: AbortSignal
 ): Promise<

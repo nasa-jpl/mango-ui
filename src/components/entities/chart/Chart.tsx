@@ -85,7 +85,7 @@ export declare type ChartProps = {
   hoverDate: Date | null;
   instrument?: string | null;
   loading?: boolean;
-  mission?: string | null; // MLUCAS: if not null, value was pulled from view config
+  mission?: string | null;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -814,7 +814,6 @@ export const Chart = ({
     ) {
       chartRef.current.options.plugins.tooltip.external = (tooltipModel) => {
         //@ts-expect-error incorrect typings here from library again
-        // MLUCAS: _mission needs to be pulled from product?
         renderTooltip(tooltipModel, _mission, _instrument);
       };
     }
