@@ -3,6 +3,7 @@ import { ChartLine } from "lucide-react";
 import { Product, ProductField, ProductResolution } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
 import { ProductPreview } from "../../types/page";
+import { formatDateGPS } from "../../utilities/time";
 import DataGrid from "../ui/DataGrid/DataGrid";
 import { Tooltip } from "../ui/Tooltip";
 
@@ -88,7 +89,7 @@ export const ProductTable = ({
       sortable: true,
       minWidth: 180,
       valueFormatter: ({ value: dataEnd }) =>
-        dataEnd ? new Date(dataEnd).toGPSString() : "–",
+        dataEnd ? formatDateGPS(new Date(dataEnd)) : "–",
       valueGetter: (params) => params.data?.datasets[0].data_begin,
     },
     {
@@ -98,7 +99,7 @@ export const ProductTable = ({
       sortable: true,
       minWidth: 180,
       valueFormatter: ({ value: dataEnd }) =>
-        dataEnd ? new Date(dataEnd).toGPSString() : "–",
+        dataEnd ? formatDateGPS(new Date(dataEnd)) : "–",
       valueGetter: (params) => params.data?.datasets[0].data_end,
     },
     {
