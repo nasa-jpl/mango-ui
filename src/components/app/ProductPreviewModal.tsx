@@ -65,8 +65,11 @@ export const ProductPreviewModal = ({
     if (product) {
       field =
         (defaultField ||
-          product.available_fields.find((field) => !field.is_channel_id)
-            ?.name) ??
+          product.available_fields.find(
+            (field) =>
+              !field.is_channel_id &&
+              (field.type === "int" || field.type === "float")
+          )?.name) ??
         "";
       version = defaultVersion || product.available_versions[0];
       dateRange = defaultDateRange || {
