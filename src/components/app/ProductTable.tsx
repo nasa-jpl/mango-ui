@@ -88,7 +88,7 @@ export const ProductTable = ({
       sortable: true,
       minWidth: 180,
       valueFormatter: ({ value: dataEnd }) =>
-        dataEnd ? new Date(dataEnd).toISOString() : "–",
+        dataEnd ? new Date(dataEnd).toGPSString() : "–",
       valueGetter: (params) => params.data?.datasets[0].data_begin,
     },
     {
@@ -98,7 +98,7 @@ export const ProductTable = ({
       sortable: true,
       minWidth: 180,
       valueFormatter: ({ value: dataEnd }) =>
-        dataEnd ? new Date(dataEnd).toISOString() : "–",
+        dataEnd ? new Date(dataEnd).toGPSString() : "–",
       valueGetter: (params) => params.data?.datasets[0].data_end,
     },
     {
