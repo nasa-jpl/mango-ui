@@ -21,7 +21,6 @@ import {
 } from "react";
 import { DateRange, TZDate } from "react-day-picker";
 import { DateFormat } from "../../types/view";
-import { formatDateGPS } from "../../utilities/time";
 
 export declare type DateRangePickerProps = {
   dateFormat?: DateFormat;
@@ -79,7 +78,7 @@ export function DateRangePicker({
       if (dateFormat === "short") {
         return format(date, "yyyy-MM-dd");
       } else {
-        return formatDateGPS(date);
+        return date.toGPSString();
       }
     },
     [dateFormat]
