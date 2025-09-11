@@ -1,6 +1,7 @@
 import { TooltipItem, TooltipModel } from "chart.js";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { DataLayer } from "../../../types/view";
+import { formatDateGPS } from "../../../utilities/time";
 import { formatYValue } from "../../../utilities/view";
 import { CustomChartData } from "./Chart";
 import "./ChartTooltip.css";
@@ -90,9 +91,9 @@ export const ChartTooltip = ({
     >
       <div className="chart-tooltip-content bg-foreground">
         <div className="chart-tooltip-x text-white font-bold">
-          {new Date(
-            tooltip.dataPoints[0].parsed.x as unknown as number
-          ).toISOString()}
+          {formatDateGPS(
+            new Date(tooltip.dataPoints[0].parsed.x as unknown as number)
+          )}
         </div>
         <div className="chart-tooltip-rows">
           {tooltip.dataPoints.map((point, i) => {

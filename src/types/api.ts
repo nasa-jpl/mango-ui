@@ -12,7 +12,10 @@ export type Product = {
   full_id: string;
   id: string;
   instruments: string[];
-  mission: string;
+  mission: {
+    id: string;
+    label: string;
+  };
   processing_level: string;
   /* maximum number of values that the query will return */
   query_result_limit: number;

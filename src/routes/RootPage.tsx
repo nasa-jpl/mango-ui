@@ -15,6 +15,7 @@ export default function RootPage() {
   const [view, setView] = useState<View>(_initialView);
   const [viewChanged, setViewChanged] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [missions, setMissions] = useState<{ id: string; label: string }[]>([]);
   const [loadingInitialData, setLoadingInitialData] = useState<boolean>(true);
   const [productPreview, setProductPreview] = useState<ProductPreview>({
     product: undefined,
@@ -64,8 +65,9 @@ export default function RootPage() {
   const fetchProducts = async (signal: AbortSignal) => {
     const missions = await getMissions(signal);
     const products = await Promise.all(
-      missions.map((mission) => getProducts(mission, signal))
+      missions.map((mission) => getProducts(mission.id, signal))
     );
+    setMissions(missions);
     setProducts(products.flat());
     setLoadingInitialData(false);
   };
@@ -76,6 +78,7 @@ export default function RootPage() {
       setView,
       products,
       setProductPreview,
+      missions,
       loadingInitialData,
       initialView,
     ],
@@ -84,6 +87,7 @@ export default function RootPage() {
       setView,
       products,
       setProductPreview,
+      missions,
       loadingInitialData,
       initialView,
     ]

@@ -605,7 +605,8 @@ export const Chart = ({
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
-          const mission = _mission ?? layer.mission;
+          const missionLabel = getProductForLayer(layer, products)?.mission
+            .label;
           const instrument = _instrument ?? layer.instrument;
           const isLineLayer = isChartLayerLine(layer);
           const isEventLayer = isChartLayerEvent(layer);
@@ -625,7 +626,9 @@ export const Chart = ({
               type: "line",
               label:
                 layer.label ||
-                `${mission} ${instrument} ${layer.dataset} ${layer.fields[0]}${
+                `${missionLabel} ${instrument} ${layer.dataset} ${
+                  layer.fields[0]
+                }${
                   layer.channels && layer.channels.length > 0
                     ? ` (${layer.channels
                         .map((c) => `${c.id}: ${c.value}`)
@@ -1005,7 +1008,7 @@ export const Chart = ({
 
   const renderTooltip = (
     context: TooltipModel<"line">,
-    mission?: string,
+    missionLabel?: string,
     instrument?: string
   ) => {
     //@ts-expect-error incorrect typings from library
@@ -1031,7 +1034,7 @@ export const Chart = ({
         tooltip={tooltipModel}
         renderHeader={(point) => (
           <>
-            {mission ?? point.dataset.layer.mission}{" "}
+            {missionLabel ?? point.dataset.layer.mission}{" "}
             {instrument ?? point.dataset.layer.instrument}{" "}
             {point.dataset.layer.dataset}{" "}
             {point.dataset.layer.fields.length === 1

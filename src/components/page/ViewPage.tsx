@@ -40,6 +40,7 @@ import Section from "./Section";
 export declare type PageProps = {
   dateBounds?: DateRange;
   loadingInitialData: boolean;
+  missions: { id: string; label: string }[];
   onPageChange: (page: PageType) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
@@ -53,6 +54,7 @@ export const ViewPage = ({
     end: "2050-12-01T00:00:00Z",
   },
   products,
+  missions,
   loadingInitialData,
   viewPage,
   onPageChange,
@@ -389,7 +391,8 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {mission}&nbsp;
+                  {missions.find((m) => m.id === mission)?.label || mission}
+                  &nbsp;
                   {instrument}
                 </Tabs.Trigger>
               ))}
