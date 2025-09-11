@@ -5,13 +5,21 @@ import { ProductPreview } from "../types/page";
 import { View, Page as ViewPageType } from "../types/view";
 
 export default function ViewPage() {
-  const [view, setView, products, setProductPreview, loadingInitialData] =
+  const [
+    view,
+    setView,
+    products,
+    setProductPreview,
+    missions,
+    loadingInitialData,
+  ] =
     useOutletContext<
       [
         View,
         React.Dispatch<React.SetStateAction<View>>,
         Product[],
         React.Dispatch<React.SetStateAction<ProductPreview>>,
+        { id: string; label: string }[],
         boolean
       ]
     >();
@@ -39,6 +47,7 @@ export default function ViewPage() {
     <Page
       products={products}
       loadingInitialData={loadingInitialData}
+      missions={missions}
       viewPage={page}
       dateBounds={view.config?.dateRangeBounds}
       onSetProductPreview={setProductPreview}

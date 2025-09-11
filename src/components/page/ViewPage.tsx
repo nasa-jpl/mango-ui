@@ -23,7 +23,6 @@ import {
   SectionLayout,
   Section as SectionType,
 } from "../../types/view";
-import { getMissions } from "../../utilities/api";
 import { generateUUID } from "../../utilities/generic";
 import {
   createEntity,
@@ -41,6 +40,7 @@ import Section from "./Section";
 export declare type PageProps = {
   dateBounds?: DateRange;
   loadingInitialData: boolean;
+  missions: { id: string; label: string }[];
   onPageChange: (page: PageType) => void;
   onSetProductPreview: (productPreview: ProductPreview) => void;
   products: Product[];
@@ -54,6 +54,7 @@ export const ViewPage = ({
     end: "2050-12-01T00:00:00Z",
   },
   products,
+  missions,
   loadingInitialData,
   viewPage,
   onPageChange,
@@ -82,14 +83,6 @@ export const ViewPage = ({
   const [pageOptions, setPageOptions] = useState<PageOptions>({
     showHoverDate: true,
   });
-
-  const [missionsObj, setMissionsObj] = useState<
-    { id: string; label: string }[]
-  >([]);
-  useEffect(() => {
-    const controller = new AbortController();
-    getMissions(controller.signal).then((data) => setMissionsObj(data));
-  }, []);
 
   const confirm = useConfirm();
 
@@ -398,7 +391,7 @@ export const ViewPage = ({
                   key={`${mission}_${instrument}`}
                   value={`${mission}_${instrument}`}
                 >
-                  {missionsObj.find((m) => m.id === mission)?.label || mission}
+                  {missions.find((m) => m.id === mission)?.label || mission}
                   &nbsp;
                   {instrument}
                 </Tabs.Trigger>
