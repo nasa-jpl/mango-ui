@@ -1,7 +1,6 @@
 import {
   Button,
   DateRangePicker as DateRangePickerStellar,
-  formatDateISO,
   parseDateStringISO,
 } from "@nasa-jpl/stellar-react";
 import {
@@ -22,6 +21,7 @@ import {
 } from "react";
 import { DateRange, TZDate } from "react-day-picker";
 import { DateFormat } from "../../types/view";
+import { formatDateGPS } from "../../utilities/time";
 
 export declare type DateRangePickerProps = {
   dateFormat?: DateFormat;
@@ -37,8 +37,8 @@ export function DateRangePicker({
   endDate,
   startDate,
   onChange = () => {},
-  minDate = new Date("2010-01-01T00:00:00Z"),
-  maxDate = new Date("2100-12-01T00:00:00Z"),
+  minDate = new Date("2010-01-01T00:00:00"),
+  maxDate = new Date("2100-12-01T00:00:00"),
 }: DateRangePickerProps) {
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new TZDate(startDate, "UTC"),
@@ -48,7 +48,9 @@ export function DateRangePicker({
   const [prevPropDateRange, setPrevPropDateRange] = useState("");
 
   useEffect(() => {
-    const dateRangeString = `${startDate.toISOString()}_${endDate.toISOString()}`;
+    const dateRangeString = `${formatDateGPS(startDate)}_${formatDateGPS(
+      endDate
+    )}`;
     if (dateRangeString !== prevPropDateRange) {
       setPrevPropDateRange(dateRangeString);
       setDateRange({
@@ -79,7 +81,7 @@ export function DateRangePicker({
       if (dateFormat === "short") {
         return format(date, "yyyy-MM-dd");
       } else {
-        return formatDateISO(date);
+        return formatDateGPS(date);
       }
     },
     [dateFormat]
@@ -94,12 +96,17 @@ export function DateRangePicker({
       let dateString = (e.target as HTMLInputElement).value;
       let otherDateString = inputValues[which === "from" ? "to" : "from"];
       if (dateFormat === "short") {
-        dateString += "T00:00:00Z";
-        otherDateString += "T00:00:00Z";
+        dateString += "T00:00:00";
+        otherDateString += "T00:00:00";
       }
-      const eventDate = parseDateStringISO(dateString);
+      // Treat GPS time string as UTC otherwise 7 hours will be added
+      const eventDate = dateString.endsWith("Z")
+        ? parseDateStringISO(dateString)
+        : parseDateStringISO(dateString + "Z");
       const eventVerb = which === "from" ? "start" : "end";
-      const otherDate = parseDateStringISO(otherDateString);
+      const otherDate = otherDateString.endsWith("Z")
+        ? parseDateStringISO(otherDateString)
+        : parseDateStringISO(otherDateString + "Z");
       const otherDateVerb = which === "from" ? "end" : "start";
       if (!dateString) {
         setDateRangeError(
