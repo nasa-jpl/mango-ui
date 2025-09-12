@@ -352,9 +352,22 @@ export const Chart = ({
     ) {
       return;
     }
-    const newAxes: typeof chartRef.current.config.options.scales = {
-      x: chartRef.current.config.options.scales.x,
+
+    const x = chartRef.current.config.options.scales.x ?? {};
+    chartRef.current.config.options.scales.x = {
+      ...x,
+      position: "bottom",
+      offset: false,
+      ticks: {
+        ...(x.ticks ?? {}),
+        mirror: false,
+        display: !compact, // hide in compact mode
+      },
+      grid: { ...(x.grid ?? {}), display: false, drawTicks: false },
+      border: { display: false },
     };
+
+    const newAxes: typeof chartRef.current.config.options.scales = { x };
 
     yAxes.forEach((axis, i) => {
       let axisLabel = axis.label;
@@ -379,9 +392,7 @@ export const Chart = ({
       newAxes[axis.id] = {
         display: !compact && !axis.hidden,
         type: axis.type || "linear",
-        // type: axis.type || "myscale",
         afterBuildTicks: function (scale: LinearScale | LogarithmicScale) {
-          // console.log("axis, scale :>> ", axis, scale);
           if (!compact || axis.type === "category") return;
 
           const { min, max } = scale.getMinMax(true);
@@ -405,6 +416,7 @@ export const Chart = ({
         ticks: {
           callback: formatYValue,
         },
+        offset: true,
         title: { display: !!axisLabel, text: axisLabel, color: axis?.color },
         grid: { display: i === 0 }, // only show horizontal axis ticks for first axis
         ...(axis.min ? { min: axis.min } : null),
@@ -907,7 +919,8 @@ export const Chart = ({
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor
+        downsamplingFactor,
+        layer.filter
       );
       cancelHandles[layerFullId] = cancel;
       json()
@@ -1287,7 +1300,7 @@ export const Chart = ({
             Loading
           </div>
         )}
-        {isLoading && error && (
+        {error && (
           <div
             className={classNames(
               "font-medium border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px]",

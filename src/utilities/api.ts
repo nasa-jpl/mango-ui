@@ -66,16 +66,20 @@ export const getData = (
   channels: Channel[],
   startTime: string,
   endTime: string,
-  downsamplingFactor?: number
+  downsamplingFactor?: number,
+  filter?: string
 ) => {
   const fieldsString = fields.length
     ? `${fields.map((f) => `&fields=${f}`).join("")}`
     : "";
-  const filtersString = channels.length
+  let filtersString = channels.length
     ? channels
         .map((channel) => `&filter=${channel.id}=${channel.value}`)
         .join("")
     : "";
+  if (typeof filter === "string") {
+    filtersString += `&filter=${filter}`;
+  }
   const url =
     config.endpoints.data +
     config.api.data.data
@@ -99,7 +103,7 @@ export const getData = (
             response
               .json()
               .then((json) => {
-                if (response.status === 400) {
+                if (response.status >= 400) {
                   throw new Error(
                     (json as DataResponseError).detail || "Unknown error"
                   );

@@ -471,7 +471,9 @@ const Table = memo(function Table({
         layer.fields,
         layer.channels ?? [],
         computedStartTime,
-        computedEndTime
+        computedEndTime,
+        undefined,
+        layer.filter
       );
       cancelHandles[layerFullId] = cancel;
       json()

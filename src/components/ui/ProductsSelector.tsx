@@ -1,5 +1,5 @@
 import { Button } from "@nasa-jpl/stellar-react";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Filter, LucideFilterX, Trash2 } from "lucide-react";
 import { memo } from "react";
 import { Product, ProductField } from "../../types/api";
 import { generateUUID } from "../../utilities/generic";
@@ -42,6 +42,39 @@ const ProductsSelector = ({
               );
             }}
           />
+          <Tooltip
+            content={
+              typeof product.filter === "string"
+                ? "Remove Filter"
+                : "Add Filter"
+            }
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const newProducts = selectedProducts.map((p) => {
+                  if (p.id === product.id) {
+                    if (typeof product.filter === "string") {
+                      const newProduct = structuredClone(p);
+                      delete newProduct.filter;
+                      return newProduct;
+                    } else {
+                      return { ...p, filter: "" };
+                    }
+                  }
+                  return p;
+                });
+                onChange(newProducts);
+              }}
+            >
+              {typeof product.filter === "string" ? (
+                <LucideFilterX />
+              ) : (
+                <Filter />
+              )}
+            </Button>
+          </Tooltip>
           <Tooltip content="Duplicate Product">
             <Button
               variant="outline"
