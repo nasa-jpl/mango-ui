@@ -146,14 +146,22 @@ test("applyLayerTransforms", () => {
     raw: generateTestDataEntry(),
     selected: false,
   };
-  expect(applyLayerTransforms(point, chartLayer1, testData, 0)).to.deep.eq({
+  expect(
+    applyLayerTransforms(point, chartLayer1, chartLayer1.fields[0], testData, 0)
+  ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 0,
     raw: point.raw,
     selected: point.selected,
   });
   expect(
-    applyLayerTransforms(point, { ...chartLayer1, transforms: [] }, testData, 0)
+    applyLayerTransforms(
+      point,
+      { ...chartLayer1, transforms: [] },
+      chartLayer1.fields[0],
+      testData,
+      0
+    )
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 0,
@@ -164,6 +172,7 @@ test("applyLayerTransforms", () => {
     applyLayerTransforms(
       point,
       { ...chartLayer1, transforms: [{ type: "self", add: 1, axis: "y" }] },
+      chartLayer1.fields[0],
       testData,
       0
     )
@@ -189,6 +198,7 @@ test("applyLayerTransforms", () => {
           },
         ],
       },
+      chartLayer1.fields[0],
       testData,
       0
     )
@@ -215,6 +225,7 @@ test("applyLayerTransforms", () => {
           },
         ],
       },
+      chartLayer1.fields[0],
       testData,
       0
     )

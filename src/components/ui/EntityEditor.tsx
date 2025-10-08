@@ -69,6 +69,8 @@ export type SelectedProduct = Pick<
   | "mission"
   | "version"
   | "id"
+  | "transforms"
+  | "transformTargets"
 >;
 
 const separator = "----";
@@ -192,6 +194,7 @@ export const EntityEditor = ({
   );
 
   useEffect(() => {
+    console.log("???");
     // Reassign layer products to new selected products
     const entityWithLayers = newEntity as ChartEntity | MapEntity | TableEntity;
     const newLayers: (ChartLayer | MapLayer | TableEntity)[] = [];
@@ -208,6 +211,8 @@ export const EntityEditor = ({
         layer,
         selectedProducts
       );
+      console.log("oldSelectedProduct :>> ", oldSelectedProduct);
+      console.log("newSelectedProduct :>> ", newSelectedProduct);
       // If an old matching selected product exists and a new one does not,
       // check for the existence of the old selected product and if found,
       // update layer to use this new product

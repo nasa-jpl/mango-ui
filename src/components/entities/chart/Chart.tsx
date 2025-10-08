@@ -585,6 +585,7 @@ export const Chart = ({
                 return applyLayerTransforms(
                   point,
                   layer,
+                  layer.fields[0],
                   processedData,
                   j
                 ) as CustomChartData;

@@ -48,15 +48,19 @@ export const ProductSelector = ({
   }, [selectedProduct]);
 
   const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [comboboxOpen2, setComboboxOpen2] = useState(false);
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
     if (
-      updatedSelectedProduct.mission &&
-      updatedSelectedProduct.instrument &&
-      updatedSelectedProduct.dataset &&
-      updatedSelectedProduct.fields.length &&
-      updatedSelectedProduct.version
+      (updatedSelectedProduct.mission &&
+        updatedSelectedProduct.instrument &&
+        updatedSelectedProduct.dataset &&
+        updatedSelectedProduct.fields.length &&
+        updatedSelectedProduct.version &&
+        !updatedSelectedProduct.transforms) ||
+      (Array.isArray(updatedSelectedProduct.transforms) &&
+        updatedSelectedProduct.transforms.length)
     ) {
       onChange(updatedSelectedProduct);
     }
@@ -64,7 +68,14 @@ export const ProductSelector = ({
   };
 
   // TODO memoize these
-  const missions = [...new Set(products.map((product) => product.mission))];
+  const missions = Object.values(
+    products.reduce<{ [key: string]: Product["mission"] }>((acc, product) => {
+      if (!acc[product.mission.id]) {
+        acc[product.mission.id] = product.mission;
+      }
+      return acc;
+    }, {})
+  );
   const instruments = [
     ...new Set(
       products
@@ -104,6 +115,7 @@ export const ProductSelector = ({
         product.mission.id === newSelectedProduct.mission &&
         product.instruments.indexOf(newSelectedProduct.instrument) > -1
     )?.available_versions || [];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -353,7 +365,243 @@ export const ProductSelector = ({
             />
           </div>
         )}
+        {Array.isArray(selectedProduct.transforms) && (
+          <div className="flex flex-col gap-1 min-w-40">
+            <Label size="sm">Transform Fields</Label>
+            <Popover open={comboboxOpen2} onOpenChange={setComboboxOpen2}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={comboboxOpen2}
+                  className="w-[200px] flex overflow-hidden items-center p-2 justify-between h-[26px]"
+                >
+                  <div className="block overflow-hidden text-ellipsis">
+                    {newSelectedProduct.transformTargets?.length ? (
+                      newSelectedProduct.transformTargets.join(", ")
+                    ) : (
+                      <div className="text-muted-foreground font-normal">
+                        All fields transformed
+                      </div>
+                    )}
+                  </div>
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 max-w-fit min-w-fit" align="start">
+                <Command className="min-w-fit">
+                  <CommandInput
+                    placeholder="Search transform fields..."
+                    asChild
+                  >
+                    <Input
+                      className="border-none h-8 focus-visible:outline-none focus-visible:ring-0 text-xs"
+                      sizeVariant="sm"
+                    />
+                  </CommandInput>
+                  <CommandList className="min-w-fit">
+                    <CommandEmpty className="py-4 text-center text-xs">
+                      No field found.
+                    </CommandEmpty>
+                    <CommandGroup className="min-w-fit">
+                      {fields.map((field) => (
+                        <CommandItem
+                          className="text-xs min-w-fit"
+                          key={field.name}
+                          value={field.name}
+                          onSelect={(currentValue) => {
+                            let newFields = [
+                              ...(newSelectedProduct.transformTargets || []),
+                            ];
+                            if (
+                              (
+                                newSelectedProduct.transformTargets || []
+                              ).indexOf(currentValue) > -1
+                            ) {
+                              newFields = newFields.filter(
+                                (f) => f !== currentValue
+                              );
+                            } else {
+                              newFields.push(currentValue);
+                            }
+                            updateSelectedProduct({
+                              ...newSelectedProduct,
+                              transformTargets: newFields,
+                            });
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "",
+                              (
+                                newSelectedProduct.transformTargets || []
+                              ).indexOf(field.name) > -1
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <div className="flex gap-1 whitespace-nowrap">
+                            {field.name}
+                            <div className="text-muted-foreground">
+                              {field.unit} ({field.type})
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
+      {Array.isArray(selectedProduct.transforms) &&
+        selectedProduct.transforms.map((transform, index) => {
+          return (
+            <div className="flex ml-4 items-center gap-1 min-w-40">
+              <Label size="sm">Transform {index + 1}</Label>
+              <div className="flex flex-col gap-1 min-w-40">
+                <Label size="sm">Transform Type</Label>
+                <Select
+                  onValueChange={(value) => {
+                    const existingTransforms = selectedProduct.transforms;
+                    existingTransforms[index] = {
+                      ...transform,
+                      type: value as "self" | "derived",
+                    };
+                    updateSelectedProduct({
+                      ...newSelectedProduct,
+                      transforms: existingTransforms,
+                    });
+                  }}
+                  value={transform.type}
+                >
+                  <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                    <SelectValue
+                      id="transform-type"
+                      placeholder="Select Transform Type"
+                    />
+                  </SelectTrigger>
+                  <SelectContent size="xs">
+                    <SelectItem size="xs" value="self" key="self">
+                      Self
+                    </SelectItem>
+                    <SelectItem size="xs" value="derived" key="derived">
+                      Derived
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1 min-w-40">
+                <Label size="sm">Operation</Label>
+                <Select
+                  onValueChange={(value) => {
+                    const newTransform = structuredClone(transform);
+                    if (newTransform) {
+                      delete newTransform.add;
+                      delete newTransform.subtract;
+                      delete newTransform.multiply;
+                      delete newTransform.divide;
+                      newTransform[value] = 0;
+                      updateSelectedProduct({
+                        ...newSelectedProduct,
+                        transforms: (newSelectedProduct.transforms || []).map(
+                          (t, i) => {
+                            if (i === index) {
+                              return newTransform;
+                            }
+                            return t;
+                          }
+                        ),
+                      });
+                      console.log(
+                        "newSelectedProduct :>> ",
+                        newSelectedProduct
+                      );
+                    }
+                  }}
+                  value={
+                    typeof transform.add === "number"
+                      ? "add"
+                      : typeof transform.subtract === "number"
+                      ? "subtract"
+                      : typeof transform.divide === "number"
+                      ? "divide"
+                      : typeof transform.multiply === "number"
+                      ? "multiply"
+                      : ""
+                  }
+                >
+                  <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                    <SelectValue
+                      id="transform-type"
+                      placeholder="Select Transform Type"
+                    />
+                  </SelectTrigger>
+                  <SelectContent size="xs">
+                    <SelectItem size="xs" value="add" key="add">
+                      Add
+                    </SelectItem>
+                    <SelectItem size="xs" value="subtract" key="subtract">
+                      Subtract
+                    </SelectItem>
+                    <SelectItem size="xs" value="multiply" key="multiply">
+                      Multiply
+                    </SelectItem>
+                    <SelectItem size="xs" value="divide" key="divide">
+                      Divide
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {transform.type === "self" && (
+                <div className="flex flex-col gap-1 min-w-40">
+                  <Label size="sm">Value</Label>
+                  <Input
+                    className=""
+                    type="number"
+                    value={
+                      transform.add ??
+                      transform.subtract ??
+                      transform.multiply ??
+                      (transform.divide || 0)
+                    }
+                    sizeVariant="xs"
+                    onChange={(e) => {
+                      const activeKey =
+                        typeof transform.add === "number"
+                          ? "add"
+                          : typeof transform.subtract === "number"
+                          ? "subtract"
+                          : typeof transform.multiply === "number"
+                          ? "multiply"
+                          : typeof transform.divide === "number"
+                          ? "divide"
+                          : null;
+                      if (activeKey) {
+                        const newTransforms =
+                          structuredClone(selectedProduct.transforms) || [];
+                        newTransforms[index][activeKey] = parseFloat(
+                          e.target.value
+                        );
+                        console.log(
+                          "newTransforms :>> ",
+                          newTransforms,
+                          e.target.value
+                        );
+                        updateSelectedProduct({
+                          ...newSelectedProduct,
+                          transforms: newTransforms,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
     </div>
   );
 };

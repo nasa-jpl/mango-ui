@@ -24,7 +24,12 @@ import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
 import { Status } from "../../../types/status.ts";
 import { DateRange } from "../../../types/time";
-import { DataLayer, TableEntity } from "../../../types/view";
+import {
+  DataLayer,
+  Point,
+  TableEntity,
+  TimeSeriesPoint,
+} from "../../../types/view";
 import { getData } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
@@ -32,6 +37,7 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
+import { applyLayerTransforms } from "../../../utilities/view.ts";
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
 import StatusBadge from "../../ui/StatusBadge.tsx";
@@ -493,6 +499,16 @@ const Table = memo(function Table({
     });
   };
 
+  // const getUniqueFieldID = (field: string, layer: DataLayer) => {
+  //   return `${layer.mission} ${layer.instrument} ${layer.dataset} ${field} ${(
+  //     layer.channels || []
+  //   )
+  //     ?.map((c) => `(${c.id}: ${c.value})`)
+  //     .join(" ")} (v${layer.version}) ${
+  //     typeof layer.filter === "string" ? `filter: ${layer.filter}` : ""
+  //   }`;
+  // };
+
   const fetchTableData = async (
     layers: DataLayer[],
     startTime?: string,
@@ -519,6 +535,78 @@ const Table = memo(function Table({
     }
 
     const rows: Record<string, ProcessedDataResponseDataEntry>[] = [];
+
+    // apply transforms if needed
+    console.log("finalResults :>> ", finalResults);
+    const data: {
+      layer: DataLayer;
+      pointsByField: Record<string, TimeSeriesPoint[]>;
+    }[] = finalResults.map(({ layer, result }) => {
+      const pointsByField = result.data.reduce((acc, entry) => {
+        layer.fields?.forEach((field) => {
+          if (!acc[field]) {
+            acc[field] = [];
+          }
+          if (entry[field] && entry.timestamp) {
+            const point: TimeSeriesPoint = {
+              x: entry.timestamp,
+              y: entry[field].value as number,
+              raw: entry,
+              selected: false,
+            };
+            acc[field].push(point);
+          }
+        });
+        return acc;
+      }, {} as Record<string, TimeSeriesPoint[]>);
+      return { layer, pointsByField };
+    });
+    finalResults.forEach(({ layer, result, ...rest }, i) => {
+      const newObject = { layer, result, ...rest };
+      if (layer.transforms?.length) {
+        // Determine which fields to transform
+        let fieldsToTransform = layer.fields || [];
+        if (layer.transformTargets && layer.transformTargets.length) {
+          fieldsToTransform = layer.transformTargets;
+        }
+
+        fieldsToTransform.forEach((field) => {
+          // Transform each point in the result
+          result.data.forEach((point, index) => {
+            if (
+              point[field]?.value !== undefined &&
+              point.timestamp !== "string"
+            ) {
+              const typedPoint: Point<string, number | string> = {
+                x: point.timestamp,
+                y: point[field]?.value as number | string,
+              };
+              const newPoint = applyLayerTransforms(
+                { ...typedPoint, raw: point, selected: false },
+                layer as DataLayer,
+                field,
+                data,
+                index
+              );
+              if (newPoint && point[field] !== undefined) {
+                point.timestamp = newPoint?.x ?? point.x.value;
+                point[field].value = newPoint?.y ?? point.y.value;
+              } else {
+                point.timestamp = "";
+              }
+            }
+          });
+        });
+      }
+      // filter out any points that have null timestamps
+      finalResults[i] = {
+        ...newObject,
+        result: {
+          ...newObject.result,
+          data: newObject.result.data.filter((d) => !!d.timestamp),
+        },
+      };
+    });
 
     finalResults.forEach(({ layer, result }) => {
       const metadataCache: Record<string, ProductField> = {};
@@ -552,6 +640,7 @@ const Table = memo(function Table({
     });
 
     setRowData(rows);
+    console.log("rows :>> ", rows);
   };
 
   let selectedPointId;

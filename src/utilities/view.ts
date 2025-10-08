@@ -70,7 +70,7 @@ export function applyLayerTransform(
   transform: DataTransform,
   field: string | undefined,
   data: {
-    layer: ChartLayer;
+    layer: DataLayer;
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
   index: number = 0
@@ -89,10 +89,12 @@ export function applyLayerTransform(
     const matchingLayer = data.find(
       ({ layer }) => layer.id === transformDerived.layerId
     );
-    if (matchingLayer && field) {
+    if (matchingLayer && (transform.field || matchingLayer?.layer.fields[0])) {
       // Find matching value in time
       const matchingPoint = findMatchingPoint(
-        matchingLayer.pointsByField[field],
+        matchingLayer.pointsByField[
+          transform.field || matchingLayer?.layer.fields[0]
+        ],
         index,
         point.x
       );
@@ -145,15 +147,15 @@ export function findMatchingPoint(
 /* Apply layer transformations to a point at the given index */
 export function applyLayerTransforms(
   point: TimeSeriesPoint,
-  layer: ChartLayer,
+  layer: DataLayer,
+  field: string | undefined,
   data: {
-    layer: ChartLayer;
+    layer: DataLayer;
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
   index: number
 ): TimeSeriesPoint | null {
   if (!layer.transforms || !layer.transforms.length) return point;
-  const field = layer.fields[0]; // TODO pass this in?
   let newPoint = { ...point };
 
   for (let i = 0; i < layer.transforms.length; i++) {

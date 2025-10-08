@@ -153,6 +153,8 @@ export type DataLayer = {
   label?: string;
   mission: string;
   startTime: string;
+  transformTargets?: string[];
+  transforms?: DataTransform[];
   version: string;
   windowBuffer?: number;
 };
@@ -165,8 +167,6 @@ export interface ChartLayerLine extends DataLayer {
   hidePoints?: boolean;
   lineWidth?: number;
   pointRadius?: number;
-  transformTargets?: string[];
-  transforms?: DataTransform[];
   type: "line";
   yAxisId?: string;
 }
@@ -178,9 +178,6 @@ export interface ChartLayerEvent extends DataLayer {
   hidden?: boolean;
   style: "bubble" | "bar" | "scatter";
   tooltipField?: string;
-  // TODO move transforms to DataLayer
-  transformTargets?: string[];
-  transforms?: DataTransform[];
   type: "event";
   yAxisId?: string;
 }
@@ -201,7 +198,9 @@ export type TimeSeriesPoint = Point<string, number | string> & {
   selected: boolean;
 };
 
-export type DataTransform = { axis: "x" | "y" } & (
+export type DataTransformAxisType = "x" | "y";
+
+export type DataTransform = { axis: DataTransformAxisType } & (
   | DataTransformSelf
   | DataTransformDerived
 );
@@ -217,6 +216,7 @@ export type DataTransformSelf = {
 export type DataTransformDerived = {
   add?: boolean;
   divide?: boolean;
+  field?: string; // if not provided, use the first field in the layer
   layerId: DataLayer["id"];
   multiply?: boolean;
   subtract?: boolean;

@@ -1,7 +1,8 @@
 import { Button } from "@nasa-jpl/stellar-react";
-import { Copy, Filter, LucideFilterX, Trash2 } from "lucide-react";
+import { Calculator, Copy, Filter, LucideFilterX, Trash2 } from "lucide-react";
 import { memo } from "react";
 import { Product, ProductField } from "../../types/api";
+import { DataTransform, DataTransformAxisType } from "../../types/view";
 import { generateUUID } from "../../utilities/generic";
 import { SelectedProduct } from "./EntityEditor";
 import { ProductSelector } from "./ProductSelector";
@@ -73,6 +74,32 @@ const ProductsSelector = ({
               ) : (
                 <Filter />
               )}
+            </Button>
+          </Tooltip>
+          <Tooltip content="Add Transformation">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const newProducts = selectedProducts.map((p) => {
+                  if (p.id === product.id) {
+                    const newTransform = {
+                      type: "self",
+                      axis: "y" as DataTransformAxisType,
+                    } as DataTransform;
+                    return {
+                      ...product,
+                      transforms: (product.transforms || []).concat(
+                        newTransform
+                      ),
+                    };
+                  }
+                  return p;
+                });
+                onChange(newProducts);
+              }}
+            >
+              <Calculator />
             </Button>
           </Tooltip>
           <Tooltip content="Duplicate Product">
