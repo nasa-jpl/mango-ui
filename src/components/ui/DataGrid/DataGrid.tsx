@@ -41,6 +41,7 @@ export declare type DataGridProps<T> = {
   gridProps?: AgGridReactProps;
   idKey?: keyof T | undefined;
   loading?: boolean;
+  onClearFilters?: (clearFn: () => void) => void;
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
@@ -52,6 +53,7 @@ export function DataGrid<T>({
   rowData,
   selectedItemId,
   onRowSelected = () => {},
+  onClearFilters,
   idKey,
   compact = false,
   fitToGridWidth = false,
@@ -134,6 +136,28 @@ export function DataGrid<T>({
       );
     }
   };
+
+  const clearFilters = () => {
+    if (gridRef.current?.api) {
+      // Clear column filters
+      gridRef.current.api.setFilterModel(null);
+      // Clear quick filter
+      gridRef.current.api.setGridOption("quickFilterText", "");
+      // Clear the input field if it exists
+      const filterInput = document.getElementById(
+        "filter-text-box"
+      ) as HTMLInputElement;
+      if (filterInput) {
+        filterInput.value = "";
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (onClearFilters && gridReady) {
+      onClearFilters(clearFilters);
+    }
+  }, [gridReady, onClearFilters]);
 
   return (
     <div

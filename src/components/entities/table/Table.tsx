@@ -8,7 +8,7 @@ import {
 import type { ColGroupDef, ValueGetterParams } from "ag-grid-community";
 import classNames from "classnames";
 import { debounce } from "lodash-es";
-import { CopyPlus, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { CopyPlus, FilterX, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   DataResponse,
@@ -97,6 +97,9 @@ const Table = memo(function Table({
   const [rowData, setRowData] = useState<
     Record<string, DataResponseDataEntry>[]
   >([]);
+  const [clearFiltersCallback, setClearFiltersCallback] = useState<
+    (() => void) | null
+  >(null);
 
   const cancelHandles: Record<string, () => void> = {};
 
@@ -597,6 +600,10 @@ const Table = memo(function Table({
     }, {}) as DataResponseDataEntry;
     onSelectPoint(point);
   };
+
+  const handleClearFilters = useCallback((clearFn: () => void) => {
+    setClearFiltersCallback(() => clearFn);
+  }, []);
   return (
     <div
       className={classNames("table group", {
@@ -608,46 +615,58 @@ const Table = memo(function Table({
           movable={!enableEditing}
           title={tableEntity.title}
           rightContent={
-            <div className="right-content invisible h-full group-hover:visible border-r">
-              <DropdownMenu>
-                <Tooltip content="More options">
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="h-full w-[28px] rounded-none"
-                      variant="ghost"
-                      size="icon"
+            <div className="right-content flex h-full items-center gap-0 border-r">
+              <Tooltip content="Clear all filters">
+                <Button
+                  className="h-full w-[28px] rounded-none"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => clearFiltersCallback?.()}
+                >
+                  <FilterX size={16} className="select-none" />
+                </Button>
+              </Tooltip>
+              <div className="invisible group-hover:visible">
+                <DropdownMenu>
+                  <Tooltip content="More options">
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="h-full w-[28px] rounded-none"
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <MoreVertical size={16} className="select-none" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </Tooltip>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem
+                      onClick={() => onEdit()}
+                      disabled={!enableEditing}
                     >
-                      <MoreVertical size={16} className="select-none" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </Tooltip>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuItem
-                    onClick={() => onEdit()}
-                    disabled={!enableEditing}
-                  >
-                    <Pencil /> Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDuplicate()}
-                    disabled={!enableEditing}
-                  >
-                    <CopyPlus /> Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDelete()}
-                    disabled={!enableEditing}
-                  >
-                    <Trash2 /> Delete
-                  </DropdownMenuItem>
-                  {/* <DropdownMenuItem>
-                    <Download /> Download Data
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Camera /> Snapshot
-                  </DropdownMenuItem> */}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <Pencil /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDuplicate()}
+                      disabled={!enableEditing}
+                    >
+                      <CopyPlus /> Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete()}
+                      disabled={!enableEditing}
+                    >
+                      <Trash2 /> Delete
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem>
+                      <Download /> Download Data
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Camera /> Snapshot
+                    </DropdownMenuItem> */}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           }
         />
@@ -663,6 +682,7 @@ const Table = memo(function Table({
           columnDefs={columnDefs}
           selectedItemId={selectedPointId}
           onRowSelected={onRowSelected}
+          onClearFilters={handleClearFilters}
           gridProps={{
             getRowClass: (params) => {
               let rowClass = "";
