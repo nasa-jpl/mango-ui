@@ -12,6 +12,7 @@ import {
   CustomNoRowsOverlayProps,
 } from "ag-grid-react"; // React Grid Logic
 import classNames from "classnames";
+import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import "./ag-grid-stellar.css";
@@ -41,17 +42,25 @@ export declare type DataGridProps<T> = {
   gridProps?: AgGridReactProps;
   idKey?: keyof T | undefined;
   loading?: boolean;
+  onClearFilters?: (clearFn: () => void) => void;
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
   showQuickFilter?: boolean;
 };
 
+interface ActiveFilter {
+  column: string;
+  displayName: string;
+  filterText: string;
+}
+
 export function DataGrid<T>({
   columnDefs,
   rowData,
   selectedItemId,
   onRowSelected = () => {},
+  onClearFilters,
   idKey,
   compact = false,
   fitToGridWidth = false,
@@ -63,6 +72,7 @@ export function DataGrid<T>({
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
   const [gridReady, setGridReady] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.api && gridReady) {
@@ -135,6 +145,129 @@ export function DataGrid<T>({
     }
   };
 
+  const getFilterDisplayText = (filterModel: Record<string, unknown>): string => {
+    if (!filterModel) return "";
+
+    const { type, filter, filterTo, operator } = filterModel as {
+      condition1?: Record<string, unknown>;
+      condition2?: Record<string, unknown>;
+      filter?: string | number;
+      filterTo?: string | number;
+      operator?: string;
+      type?: string;
+    };
+
+    if (operator) {
+      // Combined filter (AND/OR)
+      const { condition1, condition2 } = filterModel as {
+        condition1: Record<string, unknown>;
+        condition2: Record<string, unknown>;
+      };
+      const text1 = getFilterDisplayText(condition1);
+      const text2 = getFilterDisplayText(condition2);
+      return `${text1} ${operator.toUpperCase()} ${text2}`;
+    }
+
+    let text = "";
+    switch (type) {
+      case "equals":
+        text = `= ${filter}`;
+        break;
+      case "notEqual":
+        text = `≠ ${filter}`;
+        break;
+      case "lessThan":
+        text = `< ${filter}`;
+        break;
+      case "lessThanOrEqual":
+        text = `≤ ${filter}`;
+        break;
+      case "greaterThan":
+        text = `> ${filter}`;
+        break;
+      case "greaterThanOrEqual":
+        text = `≥ ${filter}`;
+        break;
+      case "inRange":
+        text = `${filter} to ${filterTo}`;
+        break;
+      case "contains":
+        text = `contains "${filter}"`;
+        break;
+      case "notContains":
+        text = `!contains "${filter}"`;
+        break;
+      case "startsWith":
+        text = `starts with "${filter}"`;
+        break;
+      case "endsWith":
+        text = `ends with "${filter}"`;
+        break;
+      case "blank":
+        text = "is blank";
+        break;
+      case "notBlank":
+        text = "is not blank";
+        break;
+      default:
+        text = filter ? String(filter) : "";
+    }
+    return text;
+  };
+
+  const updateActiveFilters = () => {
+    if (!gridRef.current?.api) return;
+
+    const filterModel = gridRef.current.api.getFilterModel();
+    const filters: ActiveFilter[] = [];
+
+    Object.keys(filterModel).forEach((colId) => {
+      const column = gridRef.current?.api?.getColumn(colId);
+      const displayName = column?.getColDef().headerName || colId;
+      const filterText = getFilterDisplayText(filterModel[colId]);
+
+      if (filterText) {
+        filters.push({
+          column: colId,
+          displayName,
+          filterText,
+        });
+      }
+    });
+
+    setActiveFilters(filters);
+  };
+
+  const removeFilter = (columnId: string) => {
+    if (!gridRef.current?.api) return;
+
+    const filterModel = gridRef.current.api.getFilterModel();
+    delete filterModel[columnId];
+    gridRef.current.api.setFilterModel(filterModel);
+  };
+
+  const clearFilters = () => {
+    if (gridRef.current?.api) {
+      // Clear column filters
+      gridRef.current.api.setFilterModel(null);
+      // Clear quick filter
+      gridRef.current.api.setGridOption("quickFilterText", "");
+      // Clear the input field if it exists
+      const filterInput = document.getElementById(
+        "filter-text-box"
+      ) as HTMLInputElement;
+      if (filterInput) {
+        filterInput.value = "";
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (onClearFilters && gridReady) {
+      onClearFilters(clearFilters);
+    }
+  }, [gridReady, onClearFilters]);
+
   return (
     <div
       className={classNames("ag-theme-stellar", {
@@ -159,6 +292,29 @@ export function DataGrid<T>({
           />
         </div>
       )}
+      {activeFilters.length > 0 && (
+        <div className="my-1 ml-2 flex flex-wrap items-center gap-2">
+          <div>Active Filters:</div>
+          {activeFilters.map((filter) => (
+            <div
+              key={filter.column}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+              )}
+            >
+              <span className="font-semibold">{filter.displayName}:</span>
+              <span>{filter.filterText}</span>
+              <button
+                onClick={() => removeFilter(filter.column)}
+                className="ml-0.5 rounded-sm opacity-70 hover:opacity-100 focus:outline-none"
+                aria-label={`Remove ${filter.displayName} filter`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <AgGridReact<T>
         ref={gridRef}
         suppressColumnVirtualisation
@@ -179,6 +335,7 @@ export function DataGrid<T>({
         suppressCellFocus
         autoSizeStrategy={autoSizeStrategy}
         onGridReady={() => setGridReady(true)}
+        onFilterChanged={updateActiveFilters}
         enableCellTextSelection
         suppressDragLeaveHidesColumns
         noRowsOverlayComponent={CustomNoRowsOverlay}
