@@ -17,26 +17,65 @@
   font-weight: 700;
 }
 
+/* Alternating row colors for better contrast */
+.table .ag-theme-stellar .ag-row-even {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table .ag-theme-stellar .ag-row-odd {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Maintain row striping on hover */
+.table .ag-theme-stellar .ag-row-even.ag-row-hover:not(.ag-row-selected) {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.table .ag-theme-stellar .ag-row-odd.ag-row-hover:not(.ag-row-selected) {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Row borders for better separation */
+.table .ag-theme-stellar .ag-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 .table .limit-cell {
-  background: rgba(255, 180, 180, 0.6);
-  color: rgb(147, 0, 0);
+  background: rgba(255, 150, 150, 0.85);
+  color: rgb(120, 0, 0);
+  font-weight: 500;
 }
 
 .table .warning-cell {
-  background: rgba(255, 239, 180, 0.6);
-  color: rgb(112, 91, 19);
+  background: rgba(255, 220, 140, 0.85);
+  color: rgb(90, 70, 10);
+  font-weight: 500;
 }
 
-.table .limit-row,
-.table .ag-theme-stellar .ag-row-hover.limit-row:not(.ag-row-selected)::before {
-  background: rgba(255, 180, 180, 0.3);
+/* Limit rows with zebra striping */
+.table .limit-row.ag-row-even,
+.table .ag-theme-stellar .ag-row-hover.limit-row.ag-row-even:not(.ag-row-selected)::before {
+  background: rgba(255, 150, 150, 0.35);
 }
 
-.table .warning-row,
+.table .limit-row.ag-row-odd,
+.table .ag-theme-stellar .ag-row-hover.limit-row.ag-row-odd:not(.ag-row-selected)::before {
+  background: rgba(255, 150, 150, 0.5);
+}
+
+/* Warning rows with zebra striping */
+.table .warning-row.ag-row-even,
 .table
   .ag-theme-stellar
-  .ag-row-hover.warning-row:not(.ag-row-selected)::before {
-  background: rgba(255, 239, 180, 0.3);
+  .ag-row-hover.warning-row.ag-row-even:not(.ag-row-selected)::before {
+  background: rgba(255, 220, 140, 0.35);
+}
+
+.table .warning-row.ag-row-odd,
+.table
+  .ag-theme-stellar
+  .ag-row-hover.warning-row.ag-row-odd:not(.ag-row-selected)::before {
+  background: rgba(255, 220, 140, 0.5);
 }
 
 .table .derived-column {
