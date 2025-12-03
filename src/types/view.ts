@@ -153,10 +153,10 @@ export type DataLayer = {
   label?: string;
   mission: string;
   startTime: string;
-  version: string;
-  windowBuffer?: number;
   transformTargets?: string[];
   transforms?: DataTransform[];
+  version: string;
+  windowBuffer?: number;
 };
 
 export type ChartLayer = ChartLayerLine | ChartLayerEvent;

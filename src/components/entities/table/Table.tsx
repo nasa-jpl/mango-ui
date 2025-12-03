@@ -555,7 +555,7 @@ const Table = memo(function Table({
                 let transformedValue = fieldValue.value as number;
 
                 // Apply each transform
-                layer.transforms.forEach((transform) => {
+                layer.transforms?.forEach((transform) => {
                   if (transform.axis === "y" && transform.type === "self") {
                     transformedValue *= transform.multiply ?? 1;
                     transformedValue /= transform.divide ?? 1;

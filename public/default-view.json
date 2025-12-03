@@ -155,7 +155,17 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "C"
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 1000
+                        }
+                      ],
+                      "transformTargets": [
+                        "lpos_rms_start"
+                      ]
                     },
                     {
                       "id": "48gneq",
@@ -168,7 +178,17 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "D"
+                      "instrument": "D",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 1000
+                        }
+                      ],
+                      "transformTargets": [
+                        "lpos_rms_start"
+                      ]
                     }
                   ],
                   "columns": [
