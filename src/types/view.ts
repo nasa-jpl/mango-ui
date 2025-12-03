@@ -155,6 +155,8 @@ export type DataLayer = {
   startTime: string;
   version: string;
   windowBuffer?: number;
+  transformTargets?: string[];
+  transforms?: DataTransform[];
 };
 
 export type ChartLayer = ChartLayerLine | ChartLayerEvent;
