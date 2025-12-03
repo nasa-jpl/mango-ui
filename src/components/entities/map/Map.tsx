@@ -40,6 +40,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>();
+  const [hasData, setHasData] = useState(false);
 
   const cancelHandles = useMemo(() => {
     return {} as Record<string, () => void>;
@@ -183,6 +184,8 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       });
     });
 
+    setHasData(points.length > 0);
+
     if (viewerRef.current) {
       // Clear existing points/lines
       viewerRef.current.entities.removeAll();
@@ -291,6 +294,17 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
             }}
           >
             Error: {error.message}
+          </div>
+        )}
+        {!loading && !error && !hasData && (
+          <div
+            className="font-medium bg-gray-50 border rounded-sm text-sm py-1 px-3 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground mt-0"
+            style={{
+              top: `${viewerRef.current.container.clientHeight / 2}px`,
+              left: `${viewerRef.current.container.clientWidth / 2}px`,
+            }}
+          >
+            No data available
           </div>
         )}
       </>
