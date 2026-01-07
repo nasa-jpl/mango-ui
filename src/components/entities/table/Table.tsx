@@ -538,11 +538,45 @@ const Table = memo(function Table({
         });
       }
       result.data.forEach((result, i) => {
-        const processedResult: ProcessedDataResponseDataEntry = result;
-        Object.keys(result).forEach((key) => {
+        let processedResult: ProcessedDataResponseDataEntry = result;
+
+        // Apply transforms if specified
+        if (layer.transforms?.length) {
+          processedResult = { ...result };
+          Object.keys(processedResult).forEach((key) => {
+            // Apply transforms to specified keys or all keys if none specified
+            if (
+              key !== "timestamp" &&
+              (!layer.transformTargets ||
+                (layer.transformTargets && layer.transformTargets.indexOf(key) > -1))
+            ) {
+              const fieldValue = processedResult[key];
+              if (fieldValue && typeof fieldValue === "object" && "value" in fieldValue) {
+                let transformedValue = fieldValue.value as number;
+
+                // Apply each transform
+                layer.transforms?.forEach((transform) => {
+                  if (transform.axis === "y" && transform.type === "self") {
+                    transformedValue *= transform.multiply ?? 1;
+                    transformedValue /= transform.divide ?? 1;
+                    transformedValue += transform.add ?? 0;
+                    transformedValue -= transform.subtract ?? 0;
+                  }
+                });
+
+                processedResult[key] = {
+                  ...fieldValue,
+                  value: transformedValue,
+                };
+              }
+            }
+          });
+        }
+
+        Object.keys(processedResult).forEach((key) => {
           // Compute thresholds for result if metadata available for the field
           if (key !== "timestamp" && metadataCache[key]) {
-            const thresholds = applyFieldThresholds(metadataCache[key], result);
+            const thresholds = applyFieldThresholds(metadataCache[key], processedResult);
             processedResult[key]._thresholds = thresholds;
           }
         });

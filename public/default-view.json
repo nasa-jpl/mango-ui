@@ -98,7 +98,15 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "Y"
+                      "instrument": "Y",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 10
+                        }
+                      ],
+                      "transformTargets": ["resid_rms"]
                     },
                     {
                       "id": "48gnek",
@@ -147,7 +155,17 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "C"
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 1000
+                        }
+                      ],
+                      "transformTargets": [
+                        "lpos_rms_start"
+                      ]
                     },
                     {
                       "id": "48gneq",
@@ -160,55 +178,65 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "D"
+                      "instrument": "D",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 1000
+                        }
+                      ],
+                      "transformTargets": [
+                        "lpos_rms_start"
+                      ]
                     }
                   ],
                   "columns": [
                     {
                       "id": "1bcgdwq87y398r4jiotrjgdfs",
                       "field": "resid_rms",
-                      "label": "",
+                      "label": "KBR RMS (mm)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "2bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "resid_nobs",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "3bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "arc_length",
                       "label": "arc (hr)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "4bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_nobs",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "5bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_mean",
                       "label": "mean",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "6bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_sigma",
                       "label": "stddev",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "7bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_rms",
                       "label": "RMS",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
