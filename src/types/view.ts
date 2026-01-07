@@ -153,6 +153,8 @@ export type DataLayer = {
   label?: string;
   mission: string;
   startTime: string;
+  transformTargets?: string[];
+  transforms?: DataTransform[];
   version: string;
   windowBuffer?: number;
 };
