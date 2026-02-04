@@ -30,9 +30,7 @@
               {
                 "id": "dfgth",
                 "type": "line",
-                "fields": [
-                  "lin_accl_x"
-                ],
+                "fields": ["lin_accl_x"],
                 "dataset": "ACC1A",
                 "endTime": "2022-03-02T00:36:00.000000Z",
                 "mission": "GRACEFO",
@@ -68,11 +66,11 @@
               "title": "Examples",
               "layout": [
                 {
+                  "h": 14,
                   "i": "fghyjqiqii",
-                  "x": 0,
-                  "y": 0,
                   "w": 16,
-                  "h": 14
+                  "x": 0,
+                  "y": 0
                 }
               ],
               "entities": [
@@ -98,15 +96,7 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "Y",
-                      "transforms": [
-                        {
-                          "axis": "y",
-                          "type": "self",
-                          "multiply": 10
-                        }
-                      ],
-                      "transformTargets": ["resid_rms"]
+                      "instrument": "Y"
                     },
                     {
                       "id": "48gnek",
@@ -146,97 +136,71 @@
                     },
                     {
                       "id": "48gnew",
-                      "fields": [
-                        "lpos_rms_start",
-                        "timestamp"
-                      ],
+                      "fields": ["lpos_rms_start", "timestamp"],
                       "dataset": "GNV1B_RPT",
                       "endTime": "2023-06-30T23:59:00.000000Z",
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "C",
-                      "transforms": [
-                        {
-                          "axis": "y",
-                          "type": "self",
-                          "multiply": 1000
-                        }
-                      ],
-                      "transformTargets": [
-                        "lpos_rms_start"
-                      ]
+                      "instrument": "C"
                     },
                     {
                       "id": "48gneq",
-                      "fields": [
-                        "lpos_rms_start",
-                        "timestamp"
-                      ],
+                      "fields": ["lpos_rms_start", "timestamp"],
                       "dataset": "GNV1B_RPT",
                       "endTime": "2023-06-30T23:59:00.000000Z",
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "D",
-                      "transforms": [
-                        {
-                          "axis": "y",
-                          "type": "self",
-                          "multiply": 1000
-                        }
-                      ],
-                      "transformTargets": [
-                        "lpos_rms_start"
-                      ]
+                      "instrument": "D"
                     }
                   ],
                   "columns": [
                     {
                       "id": "1bcgdwq87y398r4jiotrjgdfs",
                       "field": "resid_rms",
-                      "label": "KBR RMS (mm)",
+                      "label": "",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "2bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_nobs",
+                      "field": "resid_rms",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "3bcgdwq87y398r4jiotrjgdfs",
-                      "field": "arc_length",
+                      "field": "resid_rms",
                       "label": "arc (hr)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "4bcgdwq87y398r4jiotrjgdfs",
-                      "field": "clkdd_nobs",
+                      "field": "resid_rms",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "5bcgdwq87y398r4jiotrjgdfs",
-                      "field": "clkdd_mean",
+                      "field": "resid_rms",
                       "label": "mean",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "6bcgdwq87y398r4jiotrjgdfs",
-                      "field": "clkdd_sigma",
+                      "field": "resid_rms",
                       "label": "stddev",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "7bcgdwq87y398r4jiotrjgdfs",
-                      "field": "clkdd_rms",
+                      "field": "resid_rms",
                       "label": "RMS",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
@@ -422,9 +386,7 @@
                             {
                               "id": "5dfgdfgdfg",
                               "type": "line",
-                              "fields": [
-                                "lin_accl_x"
-                              ],
+                              "fields": ["lin_accl_x"],
                               "dataset": "ACC1A",
                               "endTime": "2022-03-02T00:36:00.000000Z",
                               "mission": "GRACEFO",
@@ -518,6 +480,216 @@
             }
           ],
           "dateFormat": "short"
+        },
+        {
+          "dateFormat": "long",
+          "id": "b91fe14b-f33f-46a1-9ee9-515fef55657a",
+          "sections": [
+            {
+              "entities": [
+                {
+                  "id": "c197b822-57ee-45cc-80cb-0abbac4da1bd",
+                  "title": "KBR Ionospheric Combination (K-0.75Ka)",
+                  "type": "chart",
+                  "syncWithPageDateRange": true,
+                  "layers": [
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["k_minus_0_75ka"],
+                      "id": "18155e0a-6363-4968-816c-b4ebff15b1e8",
+                      "color": "#002AFA",
+                      "instrument": "C",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
+                      "channels": []
+                    },
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["k_minus_0_75ka"],
+                      "id": "165a976b-757c-4e03-980e-52acaee2cf70",
+                      "color": "#f01e0d",
+                      "instrument": "D",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
+                      "channels": []
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "5655980e-5875-4cc1-af54-c55f109af337",
+                      "label": "IC K Band Cycles"
+                    }
+                  ]
+                },
+                {
+                  "id": "3ab3708f-1253-48bb-991b-f1b051dc32af",
+                  "title": "KBR K SNR",
+                  "type": "chart",
+                  "syncWithPageDateRange": true,
+                  "layers": [
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["k_snr"],
+                      "id": "b7bfd4e8-4db6-4a88-902e-68453b5d02b2",
+                      "color": "#002AFA",
+                      "instrument": "C",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
+                      "channels": []
+                    },
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["k_snr"],
+                      "id": "e7dac343-7985-4a47-a9e8-e88985d0fe3b",
+                      "color": "#f00400",
+                      "instrument": "D",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
+                      "channels": []
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
+                      "label": "K Band SNR 0.1db/Hz"
+                    }
+                  ]
+                },
+                {
+                  "id": "a1b5b797-aab4-41f9-91ed-96a8a503816f",
+                  "title": "KBR Ka SNR",
+                  "type": "chart",
+                  "syncWithPageDateRange": true,
+                  "layers": [
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["ka_snr"],
+                      "id": "17fef086-b939-44a6-b109-7819adcd6c3c",
+                      "color": "#002AFA",
+                      "instrument": "C",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
+                      "channels": []
+                    },
+                    {
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "fields": ["ka_snr"],
+                      "id": "f61b785d-468a-4149-a4bc-a41ac8c1b524",
+                      "color": "#f0061a",
+                      "instrument": "D",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
+                      "channels": []
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "76c4fd7c-5064-4105-8781-2413144f8038",
+                      "label": "Ka Band SNR 0.1db/Hz"
+                    }
+                  ]
+                }
+              ],
+              "id": "e0607f6f-805d-4732-a581-b94504a15b78",
+              "layout": [
+                {
+                  "i": "c197b822-57ee-45cc-80cb-0abbac4da1bd",
+                  "x": 0,
+                  "y": 0,
+                  "w": 11,
+                  "h": 7
+                },
+                {
+                  "i": "3ab3708f-1253-48bb-991b-f1b051dc32af",
+                  "x": 0,
+                  "y": 7,
+                  "w": 11,
+                  "h": 7
+                },
+                {
+                  "i": "a1b5b797-aab4-41f9-91ed-96a8a503816f",
+                  "x": 0,
+                  "y": 14,
+                  "w": 11,
+                  "h": 8
+                }
+              ],
+              "enableHeader": true,
+              "defaultOpen": true,
+              "title": "GRACE-FO KBR Ionospheric Combination (K-0.75Ka), K & Ka SNRs"
+            },
+            {
+              "entities": [
+                {
+                  "id": "741094f4-c864-47be-ae08-b4e8e8cb88c1",
+                  "title": "KBR Double Differenced Missed Interrupt (DDMI)",
+                  "type": "chart",
+                  "syncWithPageDateRange": true,
+                  "layers": [
+                    {
+                      "dataset": "DDIC",
+                      "endTime": "",
+                      "fields": ["ddic"],
+                      "id": "0307212b-6e8e-4361-bcbf-8e20acfd9abe",
+                      "color": "#002AFA",
+                      "instrument": "Y",
+                      "type": "line",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "00",
+                      "yAxisId": "bb2c74aa-d1a8-4eb7-a727-42cc2efb9c8c",
+                      "channels": []
+                    }
+                  ],
+                  "yAxes": [
+                    {
+                      "id": "bb2c74aa-d1a8-4eb7-a727-42cc2efb9c8c",
+                      "label": "K Band Cycles"
+                    }
+                  ]
+                }
+              ],
+              "id": "25810c4a-24ca-49f1-aead-cb9f736925eb",
+              "layout": [
+                {
+                  "i": "741094f4-c864-47be-ae08-b4e8e8cb88c1",
+                  "x": 0,
+                  "y": 0,
+                  "w": 11,
+                  "h": 8
+                }
+              ],
+              "enableHeader": true,
+              "defaultOpen": true,
+              "title": "GRACE-FO KBR Double Differenced Missed Interrupt (DDMI)"
+            }
+          ],
+          "title": "KBR1A Data and DDMI Plots",
+          "url": "kbr1a_ddmi"
         }
       ],
       "title": "Downlink & Product Generation"
@@ -574,9 +746,7 @@
                       "id": "234567",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -589,9 +759,7 @@
                       "id": "345678",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -613,9 +781,7 @@
                       "id": "234567",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_y"
-                      ],
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -628,9 +794,7 @@
                       "id": "2wdfgt4",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_y"
-                      ],
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -652,9 +816,7 @@
                       "id": "3wefsdv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_z"
-                      ],
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -667,9 +829,7 @@
                       "id": "3rwefv",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_z"
-                      ],
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -723,9 +883,7 @@
                       "id": "r4redgbv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "ang_accl_x"
-                      ],
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -737,9 +895,7 @@
                       "id": "sfdr34red",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "ang_accl_x"
-                      ],
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -760,9 +916,7 @@
                       "id": "sdfer4ed",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "ang_accl_y"
-                      ],
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -774,9 +928,7 @@
                       "id": "ewfsvc",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "ang_accl_y"
-                      ],
+                      "fields": ["ang_accl_y"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -797,9 +949,7 @@
                       "id": "sdfxv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "ang_accl_z"
-                      ],
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -811,9 +961,7 @@
                       "id": "sdfsdfsf",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "ang_accl_z"
-                      ],
+                      "fields": ["ang_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -869,20 +1017,33 @@
                   "layers": [
                     {
                       "id": "a6a0c326-42af-4093-94e5-c2fa5ab815af",
-                      "fields": [
-                        "ang_accl_x"
-                      ],
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "",
                       "mission": "GRACEFO",
                       "version": "04",
                       "channels": [],
                       "startTime": "",
-                      "instrument": "C"
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "add": 500,
+                          "axis": "y",
+                          "type": "self"
+                        },
+                        {
+                          "axis": "y",
+                          "type": "derived",
+                          "field": "lin_accl_y",
+                          "divide": true,
+                          "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                        }
+                      ]
                     },
                     {
                       "id": "75b25a7b-4d8e-4e20-ab74-394f2655a636",
                       "fields": [
+                        "ang_accl_x",
                         "lin_accl_y",
                         "lin_accl_x",
                         "lin_accl_z"
@@ -893,14 +1054,14 @@
                       "version": "04",
                       "channels": [],
                       "startTime": "",
-                      "instrument": "D"
+                      "instrument": "C"
                     }
                   ],
                   "columns": [
                     {
                       "id": "3e31334d-c834-4f95-a7d9-4d3ba5cd09bc",
                       "field": "ang_accl_x",
-                      "label": "",
+                      "label": "derived and self",
                       "layerId": "a6a0c326-42af-4093-94e5-c2fa5ab815af"
                     },
                     {
@@ -926,6 +1087,12 @@
                       "field": "lin_accl_z",
                       "label": "",
                       "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                    },
+                    {
+                      "id": "34070d92-4247-4ef2-8d8a-a12c3261c665",
+                      "field": "ang_accl_x",
+                      "label": "",
+                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
                     }
                   ],
                   "compact": false,
@@ -940,9 +1107,7 @@
                   "layers": [
                     {
                       "id": "a6a0c326-42af-4093-94e5-c2fa5ab815af",
-                      "fields": [
-                        "ang_accl_x"
-                      ],
+                      "fields": ["ang_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "",
                       "mission": "GRACEFO",
@@ -953,11 +1118,7 @@
                     },
                     {
                       "id": "75b25a7b-4d8e-4e20-ab74-394f2655a636",
-                      "fields": [
-                        "lin_accl_y",
-                        "lin_accl_x",
-                        "lin_accl_z"
-                      ],
+                      "fields": ["lin_accl_y", "lin_accl_x", "lin_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "",
                       "mission": "GRACEFO",
@@ -1072,16 +1233,16 @@
                 },
                 {
                   "h": 7,
-                  "i": "hgjhnfgdfede",
-                  "w": 8,
-                  "x": 0,
-                  "y": 20
-                },
-                {
-                  "h": 7,
                   "i": "sdfgrtrw",
                   "w": 8,
                   "x": 8,
+                  "y": 20
+                },
+                {
+                  "h": 8,
+                  "i": "hgjhnfgdfedee",
+                  "w": 8,
+                  "x": 0,
                   "y": 20
                 }
               ],
@@ -1093,9 +1254,7 @@
                   "layers": [
                     {
                       "id": "3regf",
-                      "fields": [
-                        "location"
-                      ],
+                      "fields": ["location"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1130,9 +1289,7 @@
                       "id": "3regf",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1145,9 +1302,7 @@
                       "id": "3rwefrd",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1182,9 +1337,7 @@
                       "id": "fdv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1197,9 +1350,7 @@
                       "id": "sdfe",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1212,9 +1363,7 @@
                       "id": "2wedfg",
                       "type": "line",
                       "color": "#11c12b",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1242,9 +1391,7 @@
                       "id": "fdv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "mission": "GRACEFO",
@@ -1259,9 +1406,7 @@
                       "id": "sdfe",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "mission": "GRACEFO",
@@ -1276,9 +1421,7 @@
                       "id": "2ed",
                       "type": "line",
                       "color": "#11c12b",
-                      "fields": [
-                        "lin_accl_z"
-                      ],
+                      "fields": ["lin_accl_z"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:33:35.000000Z",
                       "mission": "GRACEFO",
@@ -1306,9 +1449,7 @@
                       "id": "fdv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1321,9 +1462,7 @@
                       "id": "sdfe",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACC1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1357,9 +1496,7 @@
                       "id": "fdv",
                       "type": "line",
                       "color": "#4bb1ff",
-                      "fields": [
-                        "ca_range"
-                      ],
+                      "fields": ["ca_range"],
                       "dataset": "GPS1A",
                       "endTime": "2022-06-02T01:10:18.993Z",
                       "mission": "GRACEFO",
@@ -1382,9 +1519,7 @@
                       "id": "2ergss",
                       "type": "line",
                       "color": "#f14444",
-                      "fields": [
-                        "ca_range"
-                      ],
+                      "fields": ["ca_range"],
                       "dataset": "GPS1A",
                       "endTime": "2022-06-02T01:10:18.993Z",
                       "mission": "GRACEFO",
@@ -1407,9 +1542,7 @@
                       "id": "2ergss",
                       "type": "line",
                       "color": "#11c12b",
-                      "fields": [
-                        "ca_range"
-                      ],
+                      "fields": ["ca_range"],
                       "dataset": "GPS1A",
                       "endTime": "2022-06-02T01:10:18.993Z",
                       "mission": "GRACEFO",
@@ -1432,9 +1565,7 @@
                       "id": "2ergss",
                       "type": "line",
                       "color": "#494949",
-                      "fields": [
-                        "ca_range"
-                      ],
+                      "fields": ["ca_range"],
                       "dataset": "GPS1A",
                       "endTime": "2022-06-02T01:10:18.993Z",
                       "mission": "GRACEFO",
@@ -1473,9 +1604,7 @@
                       "type": "line",
                       "color": "#11c12b",
                       "label": "GRACEFO: KBR1A range_accl v04",
-                      "fields": [
-                        "range_accl"
-                      ],
+                      "fields": ["range_accl"],
                       "dataset": "KBR1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1489,9 +1618,7 @@
                       "type": "line",
                       "color": "#4bb1ff",
                       "label": "GRACEFO: LRI1B range_accl",
-                      "fields": [
-                        "range_accl"
-                      ],
+                      "fields": ["range_accl"],
                       "dataset": "LRI1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1505,9 +1632,7 @@
                       "type": "line",
                       "color": "#f14444",
                       "label": "GRACEFO: range_accl KBR1B-LRI1B",
-                      "fields": [
-                        "range_accl"
-                      ],
+                      "fields": ["range_accl"],
                       "dataset": "KBR1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1544,9 +1669,7 @@
                       "type": "line",
                       "color": "#4bb1ff",
                       "label": "GRACEFO C: lin_accl_x v04",
-                      "fields": [
-                        "lin_accl_y"
-                      ],
+                      "fields": ["lin_accl_y"],
                       "dataset": "ACT1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1560,9 +1683,7 @@
                       "type": "line",
                       "color": "#11c12b",
                       "label": "GRACEFO D: lin_accl_x v04",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1576,9 +1697,7 @@
                       "type": "line",
                       "color": "#f14444",
                       "label": "GRACEFO C: (lin_accl_x + 23000ms * -1.05) v04",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1B",
                       "endTime": "2023-06-01T23:59:58.000000Z",
                       "mission": "GRACEFO",
@@ -1610,9 +1729,7 @@
                     {
                       "id": "asdasd",
                       "type": "line",
-                      "fields": [
-                        "lin_accl_x"
-                      ],
+                      "fields": ["lin_accl_x"],
                       "dataset": "ACT1A",
                       "endTime": "2022-03-02T00:36:00.000000Z",
                       "mission": "GRACEFO",
@@ -1622,12 +1739,137 @@
                     }
                   ],
                   "syncWithPageDateRange": false
+                },
+                {
+                  "id": "hgjhnfgdfedee",
+                  "type": "chart",
+                  "title": "GRACE-FO: (K - 0.75Ka)",
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "stuff1",
+                      "position": "left"
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "3r4ethmhee",
+                      "type": "line",
+                      "color": "#11c12b",
+                      "label": "GRACE-FO: KBR1A (0.75)ka_phase v04 C",
+                      "fields": ["ka_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 0.75
+                        }
+                      ]
+                    },
+                    {
+                      "id": "yhgfew3reggg",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "label": "GRACE-FO: KBR1A k_phase v04 C",
+                      "fields": ["k_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "3r4etfnhh",
+                      "type": "line",
+                      "color": "#f14444",
+                      "label": "GRACE-FO: K-Band Ionospheric Combination (K - 0.75Ka)",
+                      "fields": ["ka_phase", "k_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "derived",
+                          "layerId": "3r4ethmhee",
+                          "subtract": true
+                        }
+                      ]
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 }
               ],
               "defaultOpen": true,
               "enableHeader": true
             }
           ]
+        },
+        {
+          "id": "d73083f7-eb97-4a87-822f-4605010fe7d4",
+          "url": "export-test",
+          "title": "Export Test",
+          "sections": [
+            {
+              "id": "ae3658f2-b168-47db-8f07-e9de09591f6f",
+              "title": "New Section",
+              "layout": [
+                {
+                  "h": 7,
+                  "i": "70ae985d-6328-4954-9ea3-3c25dc591681",
+                  "w": 14,
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "entities": [
+                {
+                  "id": "70ae985d-6328-4954-9ea3-3c25dc591681",
+                  "type": "chart",
+                  "title": "New Entity",
+                  "yAxes": [
+                    {
+                      "id": "eccbda3b-3baf-412a-a7d0-daa045415867",
+                      "label": ""
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "18749c0f-9ae7-4eb0-b73a-cf7d91ed3a71",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["ang_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "eccbda3b-3baf-412a-a7d0-daa045415867",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
+                }
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
+            }
+          ],
+          "dateFormat": "long"
         }
       ],
       "title": "Development Area"
