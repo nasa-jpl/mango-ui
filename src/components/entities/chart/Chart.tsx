@@ -50,6 +50,7 @@ import {
   YAxis,
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
+import { getColorForGroup } from "../../../utilities/colors";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -597,11 +598,63 @@ export const Chart = ({
       processedData[i] = { layer, pointsByField: newPointsByField, ...rest };
     });
 
+    // Expand layers with groupBy into separate groups
+    const expandedProcessedData = processedData.flatMap((item) => {
+      const { layer, pointsByField } = item;
+
+      // Check if this is a ChartLayerLine with groupBy
+      if (isChartLayerLine(layer) && layer.groupBy) {
+        const groupField = layer.groupBy;
+        const primaryField = layer.fields[0];
+
+        // Skip if the primary field data doesn't exist
+        if (!pointsByField[primaryField]) {
+          return [item];
+        }
+
+        // Group points by the groupBy field value
+        const groups: Record<string, CustomChartData[]> = {};
+
+        pointsByField[primaryField].forEach((point) => {
+          const groupValue = point.raw[groupField]?.value?.toString() || "unknown";
+          if (!groups[groupValue]) {
+            groups[groupValue] = [];
+          }
+          groups[groupValue].push(point);
+        });
+
+        // Create a virtual layer for each group
+        return Object.entries(groups).map(([groupValue, groupPoints], index) => {
+          const virtualLayer = {
+            ...layer,
+            // Override color for this group
+            color: getColorForGroup(index, layer.colorPalette),
+            // Update label to include group
+            label: layer.label
+              ? `${layer.label} (${groupField}=${groupValue})`
+              : `${groupField}=${groupValue}`,
+          };
+
+          return {
+            ...item,
+            layer: virtualLayer,
+            pointsByField: {
+              ...pointsByField,
+              [primaryField]: groupPoints,
+            },
+          };
+        });
+      }
+
+      // Return as-is if no grouping
+      return [item];
+    });
+
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<
       "line" | "bar" | "scatter" | "bubble",
       CustomChartData[]
-    >[] = processedData
+    >[] = expandedProcessedData
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
@@ -909,18 +962,37 @@ export const Chart = ({
         }
       }
 
+      // Include groupBy field if specified
+      let fieldsToFetch = layer.fields;
+      if (isChartLayerLine(layer)) {
+        if (layer.groupBy && !fieldsToFetch.includes(layer.groupBy)) {
+          fieldsToFetch = [...fieldsToFetch, layer.groupBy];
+        }
+      }
+
+      // Build filter string - combine existing filter with subset_version if specified
+      let filterString = layer.filter;
+      if (isChartLayerLine(layer) && layer.subsetVersion) {
+        const subsetVersionFilter = `subset_version=${layer.subsetVersion}`;
+        filterString = filterString
+          ? `${filterString}&filter=${subsetVersionFilter}`
+          : subsetVersionFilter;
+        // Force no downsampling when filtering by subset_version
+        downsamplingFactor = 1;
+      }
+
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        layer.fields,
+        fieldsToFetch,
         layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
         downsamplingFactor,
-        layer.filter
+        filterString
       );
       cancelHandles[layerFullId] = cancel;
       json()

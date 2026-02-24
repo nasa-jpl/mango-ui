@@ -23,9 +23,12 @@ import {
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
 import { Product, ProductField } from "../../types/api";
+import { DateRange } from "../../types/time";
+import { getData } from "../../utilities/api";
 import { SelectedProduct } from "./EntityEditor";
 
 export declare type ProductSelectorProps = {
+  dateRange?: DateRange;
   fieldFilter: (field: ProductField) => boolean;
   multiple: boolean;
   onChange: (selectedProduct: SelectedProduct) => void;
@@ -34,6 +37,7 @@ export declare type ProductSelectorProps = {
 };
 
 export const ProductSelector = ({
+  dateRange,
   onChange,
   products,
   selectedProduct,
@@ -48,6 +52,8 @@ export const ProductSelector = ({
   }, [selectedProduct]);
 
   const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [availableSubsetVersions, setAvailableSubsetVersions] = useState<string[]>([]);
+  const [loadingSubsetVersions, setLoadingSubsetVersions] = useState(false);
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
@@ -104,6 +110,111 @@ export const ProductSelector = ({
         product.mission.id === newSelectedProduct.mission &&
         product.instruments.indexOf(newSelectedProduct.instrument) > -1
     )?.available_versions || [];
+
+  // Check if product has a subset_version field
+  const hasSubsetVersionField = product?.available_fields.some(
+    (f) => f.name === "subset_version"
+  );
+
+  // Fetch available subset versions when product has the field and selection is complete
+  useEffect(() => {
+    // Reset if product doesn't have subset_version field
+    if (!hasSubsetVersionField) {
+      setAvailableSubsetVersions([]);
+      if (newSelectedProduct.subsetVersion) {
+        updateSelectedProduct({
+          ...newSelectedProduct,
+          subsetVersion: undefined,
+        });
+      }
+      return;
+    }
+
+    // Need all required fields to fetch
+    if (
+      !dateRange ||
+      !newSelectedProduct.mission ||
+      !newSelectedProduct.instrument ||
+      !newSelectedProduct.dataset ||
+      !newSelectedProduct.version
+    ) {
+      setAvailableSubsetVersions([]);
+      return;
+    }
+
+    setLoadingSubsetVersions(true);
+
+    const fetchSubsetVersions = async () => {
+      try {
+        // Make a lightweight request for just the subset_version field
+        // Omit downsampling_factor to get all unique values
+        const { json } = getData(
+          newSelectedProduct.mission,
+          newSelectedProduct.dataset,
+          newSelectedProduct.instrument,
+          newSelectedProduct.version,
+          ["subset_version"],
+          newSelectedProduct.channels ?? [],
+          dateRange.start,
+          dateRange.end
+        );
+
+        const data = await json();
+        if (data && data.data && Array.isArray(data.data)) {
+          const subsetVersionSet = new Set<string>();
+          data.data.forEach((point: any) => {
+            const subsetVersionValue = point.subset_version?.value;
+            if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+              subsetVersionSet.add(String(subsetVersionValue));
+            }
+          });
+
+          const sortedVersions = Array.from(subsetVersionSet).sort((a, b) =>
+            a.localeCompare(b, "en", { numeric: true })
+          );
+          setAvailableSubsetVersions(sortedVersions);
+
+          // Clear subsetVersion if no longer available
+          if (
+            newSelectedProduct.subsetVersion &&
+            !sortedVersions.includes(newSelectedProduct.subsetVersion)
+          ) {
+            updateSelectedProduct({
+              ...newSelectedProduct,
+              subsetVersion: undefined,
+            });
+          }
+        } else {
+          setAvailableSubsetVersions([]);
+          if (newSelectedProduct.subsetVersion) {
+            updateSelectedProduct({
+              ...newSelectedProduct,
+              subsetVersion: undefined,
+            });
+          }
+        }
+      } catch (error: any) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+        console.error("Error fetching subset versions:", error);
+        setAvailableSubsetVersions([]);
+      } finally {
+        setLoadingSubsetVersions(false);
+      }
+    };
+
+    fetchSubsetVersions();
+  }, [
+    hasSubsetVersionField,
+    dateRange?.start,
+    dateRange?.end,
+    newSelectedProduct.mission,
+    newSelectedProduct.instrument,
+    newSelectedProduct.dataset,
+    newSelectedProduct.version,
+  ]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -336,6 +447,35 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
+        {(loadingSubsetVersions || availableSubsetVersions.length > 0) && (
+          <div className="flex flex-col gap-1">
+            <Label size="sm">Subset Version</Label>
+            <Select
+              disabled={loadingSubsetVersions}
+              onValueChange={(value) =>
+                updateSelectedProduct({
+                  ...newSelectedProduct,
+                  subsetVersion: value === "none" ? undefined : value,
+                })
+              }
+              value={newSelectedProduct.subsetVersion || "none"}
+            >
+              <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                <SelectValue placeholder={loadingSubsetVersions ? "Loading..." : "Select subset version"} />
+              </SelectTrigger>
+              <SelectContent size="xs">
+                <SelectItem size="xs" value="none">
+                  All versions
+                </SelectItem>
+                {availableSubsetVersions.map((version) => (
+                  <SelectItem size="xs" value={version} key={version}>
+                    {version}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         {typeof selectedProduct.filter === "string" && (
           <div className="flex flex-col gap-1 min-w-40">
             <Label size="sm">Filter</Label>

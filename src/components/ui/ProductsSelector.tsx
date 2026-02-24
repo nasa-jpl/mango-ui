@@ -2,12 +2,14 @@ import { Button } from "@nasa-jpl/stellar-react";
 import { Copy, Filter, LucideFilterX, Trash2 } from "lucide-react";
 import { memo } from "react";
 import { Product, ProductField } from "../../types/api";
+import { DateRange } from "../../types/time";
 import { generateUUID } from "../../utilities/generic";
 import { SelectedProduct } from "./EntityEditor";
 import { ProductSelector } from "./ProductSelector";
 import { Tooltip } from "./Tooltip";
 
 export declare type ProductsSelectorProps = {
+  dateRange?: DateRange;
   fieldFilter: (field: ProductField) => boolean;
   multiple: boolean;
   onChange: (selectedProducts: SelectedProduct[]) => void;
@@ -16,6 +18,7 @@ export declare type ProductsSelectorProps = {
 };
 
 const ProductsSelector = ({
+  dateRange,
   onChange,
   products,
   selectedProducts,
@@ -27,6 +30,7 @@ const ProductsSelector = ({
       {selectedProducts.map((product, i) => (
         <div className="flex gap-2 items-end" key={product.id}>
           <ProductSelector
+            dateRange={dateRange}
             multiple={multiple}
             fieldFilter={fieldFilter}
             selectedProduct={product}
