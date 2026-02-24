@@ -599,12 +599,66 @@ export const Chart = ({
     });
 
     // Expand layers with groupBy into separate groups
-    const expandedProcessedData = processedData.flatMap((item) => {
-      const { layer, pointsByField } = item;
+    const expandedProcessedData = processedData
+      .flatMap((item) => {
+        const { layer, pointsByField } = item;
 
-      // Check if this is a ChartLayerLine with groupBy
-      if (isChartLayerLine(layer) && layer.groupBy) {
-        const groupField = layer.groupBy;
+        // Check if this is a ChartLayerLine with groupBy
+        if (isChartLayerLine(layer) && layer.groupBy) {
+          const groupField = layer.groupBy;
+          const primaryField = layer.fields[0];
+
+          // Skip if the primary field data doesn't exist
+          if (!pointsByField[primaryField]) {
+            return [item];
+          }
+
+          // Group points by the groupBy field value
+          const groups: Record<string, CustomChartData[]> = {};
+
+          pointsByField[primaryField].forEach((point) => {
+            const groupValue = point.raw[groupField]?.value?.toString() || "unknown";
+            if (!groups[groupValue]) {
+              groups[groupValue] = [];
+            }
+            groups[groupValue].push(point);
+          });
+
+          // Create a virtual layer for each group
+          return Object.entries(groups).map(([groupValue, groupPoints], index) => {
+            const virtualLayer = {
+              ...layer,
+              // Override color for this group
+              color: getColorForGroup(index, layer.colorPalette),
+              // Update label to include group
+              label: layer.label
+                ? `${layer.label} (${groupField}=${groupValue})`
+                : `${groupField}=${groupValue}`,
+            };
+
+            return {
+              ...item,
+              layer: virtualLayer,
+              pointsByField: {
+                ...pointsByField,
+                [primaryField]: groupPoints,
+              },
+            };
+          });
+        }
+
+        // Return as-is if no grouping
+        return [item];
+      })
+      // Expand layers with subset_version into alternating colors
+      .flatMap((item) => {
+        const { layer, pointsByField } = item;
+
+        // Only process ChartLayerLine
+        if (!isChartLayerLine(layer)) {
+          return [item];
+        }
+
         const primaryField = layer.fields[0];
 
         // Skip if the primary field data doesn't exist
@@ -612,43 +666,52 @@ export const Chart = ({
           return [item];
         }
 
-        // Group points by the groupBy field value
+        // Check if any point has subset_version data
+        const hasSubsetVersion = pointsByField[primaryField].some(
+          (point) => point.raw.subset_version?.value !== undefined
+        );
+
+        if (!hasSubsetVersion) {
+          return [item];
+        }
+
+        // Group points by subset_version
         const groups: Record<string, CustomChartData[]> = {};
 
         pointsByField[primaryField].forEach((point) => {
-          const groupValue = point.raw[groupField]?.value?.toString() || "unknown";
-          if (!groups[groupValue]) {
-            groups[groupValue] = [];
+          const subsetVersionValue = point.raw.subset_version?.value?.toString() || "unknown";
+          if (!groups[subsetVersionValue]) {
+            groups[subsetVersionValue] = [];
           }
-          groups[groupValue].push(point);
+          groups[subsetVersionValue].push(point);
         });
 
-        // Create a virtual layer for each group
-        return Object.entries(groups).map(([groupValue, groupPoints], index) => {
-          const virtualLayer = {
-            ...layer,
-            // Override color for this group
-            color: getColorForGroup(index, layer.colorPalette),
-            // Update label to include group
-            label: layer.label
-              ? `${layer.label} (${groupField}=${groupValue})`
-              : `${groupField}=${groupValue}`,
-          };
+        // Create a virtual layer for each subset_version with alternating colors
+        return Object.entries(groups)
+          .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
+          .map(([subsetVersionValue, groupPoints], index) => {
+            // Alternate between blue and red for subset_versions
+            const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
 
-          return {
-            ...item,
-            layer: virtualLayer,
-            pointsByField: {
-              ...pointsByField,
-              [primaryField]: groupPoints,
-            },
-          };
-        });
-      }
+            const virtualLayer = {
+              ...layer,
+              color: color,
+              // Update label to include subset_version
+              label: layer.label
+                ? `${layer.label} (subset_version=${subsetVersionValue})`
+                : `subset_version=${subsetVersionValue}`,
+            };
 
-      // Return as-is if no grouping
-      return [item];
-    });
+            return {
+              ...item,
+              layer: virtualLayer,
+              pointsByField: {
+                ...pointsByField,
+                [primaryField]: groupPoints,
+              },
+            };
+          });
+      });
 
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<
@@ -671,12 +734,33 @@ export const Chart = ({
           };
           if (isLineLayer) {
             const isDownsampled = downsampling_factor !== 1;
+
+            // Count unique subset_versions in the data
+            const subsetVersionSet = new Set<string>();
+            const primaryField = layer.fields[0];
+            if (pointsByField[primaryField]) {
+              pointsByField[primaryField].forEach((point) => {
+                const subsetVersionValue = point.raw.subset_version?.value;
+                if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+                  subsetVersionSet.add(String(subsetVersionValue));
+                }
+              });
+            }
+            const subsetVersionCount = subsetVersionSet.size;
+
+            // Store count on layer for EntityEditor to use
+            const layerWithCount: typeof layer & { subsetVersionCount: number } = {
+              ...layer,
+              subsetVersionCount,
+            };
+
             return {
               ...commonConfig, // TODO would be nice to render these outside of the canvas in order to better format
               // and control these labels
               // TODO what should these labels contain metadata wise? Fairly verbose right now.
               data: pointsByField[layer.fields[0]],
               type: "line",
+              layer: layerWithCount,
               label:
                 layer.label ||
                 `${missionLabel} ${instrument} ${layer.dataset} ${
@@ -964,22 +1048,24 @@ export const Chart = ({
 
       // Include groupBy field if specified
       let fieldsToFetch = layer.fields;
+      let shouldSkipDownsampling = false;
       if (isChartLayerLine(layer)) {
         if (layer.groupBy && !fieldsToFetch.includes(layer.groupBy)) {
           fieldsToFetch = [...fieldsToFetch, layer.groupBy];
         }
+        // Include subset_version field if the product has it
+        if (
+          (layer as ChartLayer & { hasSubsetVersionField?: boolean }).hasSubsetVersionField &&
+          !fieldsToFetch.includes("subset_version")
+        ) {
+          fieldsToFetch = [...fieldsToFetch, "subset_version"];
+          // Skip downsampling when fetching subset_version data
+          shouldSkipDownsampling = true;
+        }
       }
 
-      // Build filter string - combine existing filter with subset_version if specified
-      let filterString = layer.filter;
-      if (isChartLayerLine(layer) && layer.subsetVersion) {
-        const subsetVersionFilter = `subset_version=${layer.subsetVersion}`;
-        filterString = filterString
-          ? `${filterString}&filter=${subsetVersionFilter}`
-          : subsetVersionFilter;
-        // Force no downsampling when filtering by subset_version
-        downsamplingFactor = 1;
-      }
+      // Build filter string from existing filter
+      const filterString = layer.filter;
 
       const { json, cancel } = getData(
         mission ?? layer.mission,
@@ -991,7 +1077,7 @@ export const Chart = ({
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor,
+        shouldSkipDownsampling ? undefined : downsamplingFactor,
         filterString
       );
       cancelHandles[layerFullId] = cancel;
@@ -1182,7 +1268,7 @@ export const Chart = ({
         },
         plugins: {
           legend: {
-            display: !compact,
+            display: false,
           },
           tooltip: {
             enabled: false,

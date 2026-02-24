@@ -70,7 +70,8 @@ export type SelectedProduct = Pick<
   | "version"
   | "id"
 > & {
-  subsetVersion?: string;
+  hasSubsetVersionField?: boolean;
+  subsetVersionCount?: number;
 };
 
 const separator = "----";
@@ -532,98 +533,99 @@ export const EntityEditor = ({
                                 {(newEntity.layers || [])
                                   .filter((l) => l.yAxisId === yAxis.id)
                                   .map((layer) => (
-                                    <div key={layer.id} className="flex gap-1">
-                                      <Select
-                                        onValueChange={(value) => {
-                                          const selectedProduct =
-                                            selectedProducts.find(
-                                              (p) => p.id === value
-                                            );
-                                          const updatedEntity = {
-                                            ...newEntity,
-                                            layers: (
-                                              newEntity.layers || []
-                                            )?.map((l) => {
-                                              if (l.id === layer.id) {
-                                                return {
-                                                  ...layer,
-                                                  ...selectedProduct,
-                                                  id: layer.id,
-                                                };
-                                              }
-                                              return l;
-                                            }),
-                                          };
-                                          setNewEntity(updatedEntity);
-                                        }}
-                                        value={
-                                          getMatchingSelectedProductForLayer(
-                                            layer,
-                                            selectedProducts
-                                          )?.id
-                                        }
-                                      >
-                                        <SelectTrigger
-                                          size="xs"
-                                          className="flex-1 max-w-96 min-w-24 ml-2"
-                                        >
-                                          <SelectValue
-                                            id="entity-type"
-                                            placeholder="Select product"
-                                          />
-                                        </SelectTrigger>
-                                        <SelectContent size="xs">
-                                          {selectedProducts
-                                            .sort()
-                                            .map((selectedProduct) => (
-                                              <SelectItem
-                                                key={selectedProduct.id}
-                                                size="xs"
-                                                value={selectedProduct.id}
-                                              >
-                                                {getLabelForSelectedProductOrLayer(
-                                                  selectedProduct,
-                                                  [selectedProduct.fields[0]]
-                                                )}
-                                              </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <div className="w-6 h-6 flex">
-                                        <input
-                                          type="color"
-                                          className="bg-transparent [&::-webkit-color-swatch]:border-transparent [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch-wrapper]:p-0 w-6 h-6 p-1 hover:bg-secondary rounded cursor-pointer"
-                                          value={layer.color}
-                                          onChange={(e) => {
-                                            debouncedColorChange(
-                                              e.target.value,
-                                              layer
-                                            );
-                                          }}
-                                        />
-                                      </div>
-                                      <Tooltip content="Remove Layer">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          onClick={() => {
-                                            const chartEntity: ChartEntity =
-                                              newEntity;
-                                            const updatedEntity: ChartEntity = {
-                                              ...chartEntity,
+                                    <div key={layer.id} className="flex flex-col gap-1">
+                                      <div className="flex gap-1">
+                                        <Select
+                                          onValueChange={(value) => {
+                                            const selectedProduct =
+                                              selectedProducts.find(
+                                                (p) => p.id === value
+                                              );
+                                            const updatedEntity = {
+                                              ...newEntity,
                                               layers: (
-                                                chartEntity.layers || []
-                                              ).filter(
-                                                (l) => l.id !== layer.id
-                                              ),
+                                                newEntity.layers || []
+                                              )?.map((l) => {
+                                                if (l.id === layer.id) {
+                                                  return {
+                                                    ...layer,
+                                                    ...selectedProduct,
+                                                    id: layer.id,
+                                                  };
+                                                }
+                                                return l;
+                                              }),
                                             };
                                             setNewEntity(updatedEntity);
                                           }}
+                                          value={
+                                            getMatchingSelectedProductForLayer(
+                                              layer,
+                                              selectedProducts
+                                            )?.id
+                                          }
                                         >
-                                          <Trash2 />
-                                        </Button>
-                                      </Tooltip>
-                                      <Popover>
+                                          <SelectTrigger
+                                            size="xs"
+                                            className="flex-1 max-w-96 min-w-24 ml-2"
+                                          >
+                                            <SelectValue
+                                              id="entity-type"
+                                              placeholder="Select product"
+                                            />
+                                          </SelectTrigger>
+                                          <SelectContent size="xs">
+                                            {selectedProducts
+                                              .sort()
+                                              .map((selectedProduct) => (
+                                                <SelectItem
+                                                  key={selectedProduct.id}
+                                                  size="xs"
+                                                  value={selectedProduct.id}
+                                                >
+                                                  {getLabelForSelectedProductOrLayer(
+                                                    selectedProduct,
+                                                    [selectedProduct.fields[0]]
+                                                  )}
+                                                </SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                        </Select>
+                                        <div className="w-6 h-6 flex">
+                                          <input
+                                            type="color"
+                                            className="bg-transparent [&::-webkit-color-swatch]:border-transparent [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch-wrapper]:p-0 w-6 h-6 p-1 hover:bg-secondary rounded cursor-pointer"
+                                            value={layer.color}
+                                            onChange={(e) => {
+                                              debouncedColorChange(
+                                                e.target.value,
+                                                layer
+                                              );
+                                            }}
+                                          />
+                                        </div>
+                                        <Tooltip content="Remove Layer">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                              const chartEntity: ChartEntity =
+                                                newEntity;
+                                              const updatedEntity: ChartEntity = {
+                                                ...chartEntity,
+                                                layers: (
+                                                  chartEntity.layers || []
+                                                ).filter(
+                                                  (l) => l.id !== layer.id
+                                                ),
+                                              };
+                                              setNewEntity(updatedEntity);
+                                            }}
+                                          >
+                                            <Trash2 />
+                                          </Button>
+                                        </Tooltip>
+                                        <Popover>
                                         <Tooltip content="Settings">
                                           <PopoverTrigger asChild>
                                             <Button variant="ghost" size="icon">
@@ -726,6 +728,12 @@ export const EntityEditor = ({
                                           </div>
                                         </PopoverContent>
                                       </Popover>
+                                      </div>
+                                      {((layer as unknown as { subsetVersionCount?: number }).subsetVersionCount ?? 0) > 0 && (
+                                        <div className="text-xs text-muted-foreground ml-2">
+                                          {(layer as unknown as { subsetVersionCount: number }).subsetVersionCount} subset version{((layer as unknown as { subsetVersionCount: number }).subsetVersionCount) === 1 ? "" : "s"}
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                               </div>

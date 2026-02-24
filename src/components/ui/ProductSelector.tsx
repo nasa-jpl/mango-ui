@@ -22,7 +22,7 @@ import {
 } from "@nasa-jpl/stellar-react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { Product, ProductField } from "../../types/api";
+import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { getData } from "../../utilities/api";
 import { SelectedProduct } from "./EntityEditor";
@@ -52,8 +52,6 @@ export const ProductSelector = ({
   }, [selectedProduct]);
 
   const [comboboxOpen, setComboboxOpen] = useState(false);
-  const [availableSubsetVersions, setAvailableSubsetVersions] = useState<string[]>([]);
-  const [loadingSubsetVersions, setLoadingSubsetVersions] = useState(false);
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
@@ -116,38 +114,38 @@ export const ProductSelector = ({
     (f) => f.name === "subset_version"
   );
 
-  // Fetch available subset versions when product has the field and selection is complete
+  // Update the selected product's hasSubsetVersionField flag when it changes
   useEffect(() => {
-    // Reset if product doesn't have subset_version field
-    if (!hasSubsetVersionField) {
-      setAvailableSubsetVersions([]);
-      if (newSelectedProduct.subsetVersion) {
-        updateSelectedProduct({
-          ...newSelectedProduct,
-          subsetVersion: undefined,
-        });
-      }
-      return;
-    }
-
-    // Need all required fields to fetch
     if (
-      !dateRange ||
+      newSelectedProduct.hasSubsetVersionField !== hasSubsetVersionField &&
+      (newSelectedProduct.mission ||
+        newSelectedProduct.instrument ||
+        newSelectedProduct.dataset)
+    ) {
+      updateSelectedProduct({
+        ...newSelectedProduct,
+        hasSubsetVersionField,
+        subsetVersionCount: 0, // Reset count when field changes
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSubsetVersionField]);
+
+  // Fetch and count subset versions when product has the field and selection is complete
+  useEffect(() => {
+    if (
+      !hasSubsetVersionField ||
       !newSelectedProduct.mission ||
       !newSelectedProduct.instrument ||
       !newSelectedProduct.dataset ||
-      !newSelectedProduct.version
+      !newSelectedProduct.version ||
+      !dateRange
     ) {
-      setAvailableSubsetVersions([]);
       return;
     }
 
-    setLoadingSubsetVersions(true);
-
-    const fetchSubsetVersions = async () => {
+    const fetchSubsetVersionCount = async () => {
       try {
-        // Make a lightweight request for just the subset_version field
-        // Omit downsampling_factor to get all unique values
         const { json } = getData(
           newSelectedProduct.mission,
           newSelectedProduct.dataset,
@@ -162,49 +160,32 @@ export const ProductSelector = ({
         const data = await json();
         if (data && data.data && Array.isArray(data.data)) {
           const subsetVersionSet = new Set<string>();
-          data.data.forEach((point: any) => {
+          data.data.forEach((point: DataResponseDataEntry) => {
             const subsetVersionValue = point.subset_version?.value;
             if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
               subsetVersionSet.add(String(subsetVersionValue));
             }
           });
-
-          const sortedVersions = Array.from(subsetVersionSet).sort((a, b) =>
-            a.localeCompare(b, "en", { numeric: true })
-          );
-          setAvailableSubsetVersions(sortedVersions);
-
-          // Clear subsetVersion if no longer available
-          if (
-            newSelectedProduct.subsetVersion &&
-            !sortedVersions.includes(newSelectedProduct.subsetVersion)
-          ) {
+          const count = subsetVersionSet.size;
+          // Update selected product with the count
+          if (count > 0) {
             updateSelectedProduct({
               ...newSelectedProduct,
-              subsetVersion: undefined,
-            });
-          }
-        } else {
-          setAvailableSubsetVersions([]);
-          if (newSelectedProduct.subsetVersion) {
-            updateSelectedProduct({
-              ...newSelectedProduct,
-              subsetVersion: undefined,
+              subsetVersionCount: count,
             });
           }
         }
-      } catch (error: any) {
-        if (error?.name === "AbortError") {
+      } catch (error: unknown) {
+        const err = error as Error;
+        if (err?.name === "AbortError") {
           return;
         }
         console.error("Error fetching subset versions:", error);
-        setAvailableSubsetVersions([]);
-      } finally {
-        setLoadingSubsetVersions(false);
       }
     };
 
-    fetchSubsetVersions();
+    fetchSubsetVersionCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     hasSubsetVersionField,
     dateRange?.start,
@@ -214,6 +195,7 @@ export const ProductSelector = ({
     newSelectedProduct.dataset,
     newSelectedProduct.version,
   ]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -447,35 +429,6 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
-        {(loadingSubsetVersions || availableSubsetVersions.length > 0) && (
-          <div className="flex flex-col gap-1">
-            <Label size="sm">Subset Version</Label>
-            <Select
-              disabled={loadingSubsetVersions}
-              onValueChange={(value) =>
-                updateSelectedProduct({
-                  ...newSelectedProduct,
-                  subsetVersion: value === "none" ? undefined : value,
-                })
-              }
-              value={newSelectedProduct.subsetVersion || "none"}
-            >
-              <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-                <SelectValue placeholder={loadingSubsetVersions ? "Loading..." : "Select subset version"} />
-              </SelectTrigger>
-              <SelectContent size="xs">
-                <SelectItem size="xs" value="none">
-                  All versions
-                </SelectItem>
-                {availableSubsetVersions.map((version) => (
-                  <SelectItem size="xs" value={version} key={version}>
-                    {version}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
         {typeof selectedProduct.filter === "string" && (
           <div className="flex flex-col gap-1 min-w-40">
             <Label size="sm">Filter</Label>
