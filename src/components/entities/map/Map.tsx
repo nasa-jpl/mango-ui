@@ -36,7 +36,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
 
   // Maximum number of points the api can performantly return (TODO: should be a config option)
-  const MAX_POINT_NUMBER = 5000;
+  const MAX_POINT_NUMBER = 55000;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>();
