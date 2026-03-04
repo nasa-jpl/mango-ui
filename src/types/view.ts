@@ -162,8 +162,6 @@ export type DataLayer = {
 export type ChartLayer = ChartLayerLine | ChartLayerEvent;
 export interface ChartLayerLine extends DataLayer {
   color?: string;
-  colorPalette?: string[];
-  groupBy?: string;
   hidden?: boolean;
   hideLines?: boolean;
   hidePoints?: boolean;

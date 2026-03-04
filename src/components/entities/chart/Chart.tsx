@@ -50,7 +50,6 @@ import {
   YAxis,
 } from "../../../types/view";
 import { getData } from "../../../utilities/api";
-import { getColorForGroup } from "../../../utilities/colors";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -598,60 +597,8 @@ export const Chart = ({
       processedData[i] = { layer, pointsByField: newPointsByField, ...rest };
     });
 
-    // Expand layers with groupBy into separate groups
-    const expandedProcessedData = processedData
-      .flatMap((item) => {
-        const { layer, pointsByField } = item;
-
-        // Check if this is a ChartLayerLine with groupBy
-        if (isChartLayerLine(layer) && layer.groupBy) {
-          const groupField = layer.groupBy;
-          const primaryField = layer.fields[0];
-
-          // Skip if the primary field data doesn't exist
-          if (!pointsByField[primaryField]) {
-            return [item];
-          }
-
-          // Group points by the groupBy field value
-          const groups: Record<string, CustomChartData[]> = {};
-
-          pointsByField[primaryField].forEach((point) => {
-            const groupValue = point.raw[groupField]?.value?.toString() || "unknown";
-            if (!groups[groupValue]) {
-              groups[groupValue] = [];
-            }
-            groups[groupValue].push(point);
-          });
-
-          // Create a virtual layer for each group
-          return Object.entries(groups).map(([groupValue, groupPoints], index) => {
-            const virtualLayer = {
-              ...layer,
-              // Override color for this group
-              color: getColorForGroup(index, layer.colorPalette),
-              // Update label to include group
-              label: layer.label
-                ? `${layer.label} (${groupField}=${groupValue})`
-                : `${groupField}=${groupValue}`,
-            };
-
-            return {
-              ...item,
-              layer: virtualLayer,
-              pointsByField: {
-                ...pointsByField,
-                [primaryField]: groupPoints,
-              },
-            };
-          });
-        }
-
-        // Return as-is if no grouping
-        return [item];
-      })
-      // Expand layers with subset_version into alternating colors
-      .flatMap((item) => {
+    // Expand layers with subset_version into alternating colors
+    const expandedProcessedData = processedData.flatMap((item) => {
         const { layer, pointsByField } = item;
 
         // Only process ChartLayerLine
@@ -1050,9 +997,6 @@ export const Chart = ({
       let fieldsToFetch = layer.fields;
       let shouldSkipDownsampling = false;
       if (isChartLayerLine(layer)) {
-        if (layer.groupBy && !fieldsToFetch.includes(layer.groupBy)) {
-          fieldsToFetch = [...fieldsToFetch, layer.groupBy];
-        }
         // Include subset_version field if the product has it
         if (
           (layer as ChartLayer & { hasSubsetVersionField?: boolean }).hasSubsetVersionField &&

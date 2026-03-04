@@ -164,7 +164,7 @@ export const EntityEditor = ({
     //   label: "Downlink Dashboard",
     //   disabled: true,
     // },
-    { value: "map", label: "Map", disabled: false },
+    // { value: "map", label: "Map", disabled: true },
     // { value: "text", label: "Text", disabled: true },
   ];
 
@@ -700,31 +700,6 @@ export const EntityEditor = ({
                                                 });
                                               }}
                                             />
-                                            <div className="flex items-center justify-between w-full">
-                                              <Label size="sm">Group By</Label>
-                                              <Select
-                                                value={(layer as ChartLayerLine).groupBy || "none"}
-                                                onValueChange={(value) => {
-                                                  const chartLayer = layer as ChartLayerLine;
-                                                  updateChartLayer({
-                                                    ...chartLayer,
-                                                    groupBy: value === "none" ? undefined : value,
-                                                  });
-                                                }}
-                                              >
-                                                <SelectTrigger size="xs" className="w-40">
-                                                  <SelectValue placeholder="None" />
-                                                </SelectTrigger>
-                                                <SelectContent size="xs">
-                                                  <SelectItem size="xs" value="none">
-                                                    None
-                                                  </SelectItem>
-                                                  <SelectItem size="xs" value="subset_version">
-                                                    subset_version
-                                                  </SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
                                           </div>
                                         </PopoverContent>
                                       </Popover>
