@@ -68,13 +68,16 @@ export const ProductSelector = ({
   };
 
   // TODO memoize these
-  const missions = [...new Set(products.map((product) => product.mission))];
+  const missions = [
+    ...new Map(products.map((p) => [p.mission.id, p.mission])).values(),
+  ];
+
   const instruments = [
     ...new Set(
       products
         .filter((product) => product.mission.id === newSelectedProduct.mission)
         .map((product) => product.instruments)
-        .flat()
+        .flat(),
     ),
   ];
   const datasets = [
@@ -83,9 +86,9 @@ export const ProductSelector = ({
         .filter(
           (product) =>
             product.mission.id === newSelectedProduct.mission &&
-            product.instruments.indexOf(newSelectedProduct.instrument) > -1
+            product.instruments.indexOf(newSelectedProduct.instrument) > -1,
         )
-        .map((product) => product.id)
+        .map((product) => product.id),
     ),
   ];
 
@@ -93,7 +96,7 @@ export const ProductSelector = ({
     (product) =>
       product.id === newSelectedProduct.dataset &&
       product.mission.id === newSelectedProduct.mission &&
-      product.instruments.indexOf(newSelectedProduct.instrument) > -1
+      product.instruments.indexOf(newSelectedProduct.instrument) > -1,
   );
   const fields = product?.available_fields.filter(fieldFilter) || [];
 
@@ -106,7 +109,7 @@ export const ProductSelector = ({
       (product) =>
         product.id === newSelectedProduct.dataset &&
         product.mission.id === newSelectedProduct.mission &&
-        product.instruments.indexOf(newSelectedProduct.instrument) > -1
+        product.instruments.indexOf(newSelectedProduct.instrument) > -1,
     )?.available_versions || [];
 
   // Check if product has a subset_version field
@@ -327,7 +330,7 @@ export const ProductSelector = ({
                             newSelectedProduct.fields.indexOf(currentValue) > -1
                           ) {
                             newFields = newFields.filter(
-                              (f) => f !== currentValue
+                              (f) => f !== currentValue,
                             );
                           } else {
                             newFields.push(currentValue);
@@ -343,7 +346,7 @@ export const ProductSelector = ({
                             "",
                             newSelectedProduct.fields.indexOf(field.name) > -1
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         <div className="flex gap-1 whitespace-nowrap">
@@ -362,7 +365,7 @@ export const ProductSelector = ({
         </div>
         {(channels || []).map((channel) => {
           const matchingChannel = (selectedProduct.channels || []).find(
-            (c) => c.id === channel.id
+            (c) => c.id === channel.id,
           );
           return (
             <div className="flex flex-col gap-1">
