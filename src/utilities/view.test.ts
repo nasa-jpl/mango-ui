@@ -106,8 +106,8 @@ test("applyLayerTransform", () => {
       point,
       { add: 1, type: "self", axis: "y" },
       undefined,
-      testData
-    )
+      testData,
+    ),
   ).toBe(1);
   expect(
     applyLayerTransform(
@@ -115,8 +115,8 @@ test("applyLayerTransform", () => {
       point,
       { add: 500, type: "self", axis: "y" },
       undefined,
-      testData
-    )
+      testData,
+    ),
   ).toBe(new Date("2030-01-01T00:00:00.000Z").getTime() + 500);
   expect(
     applyLayerTransform(
@@ -124,8 +124,8 @@ test("applyLayerTransform", () => {
       point,
       { add: 1, subtract: 2, type: "self", axis: "y" },
       undefined,
-      testData
-    )
+      testData,
+    ),
   ).toBe(-1);
   expect(
     applyLayerTransform(
@@ -134,8 +134,8 @@ test("applyLayerTransform", () => {
       { add: true, type: "derived", axis: "y", layerId: chartLayer2.id },
       "field1",
       testData,
-      0
-    )
+      0,
+    ),
   ).toBe(3);
 });
 
@@ -153,7 +153,12 @@ test("applyLayerTransforms", () => {
     selected: point.selected,
   });
   expect(
-    applyLayerTransforms(point, { ...chartLayer1, transforms: [] }, testData, 0)
+    applyLayerTransforms(
+      point,
+      { ...chartLayer1, transforms: [] },
+      testData,
+      0,
+    ),
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 0,
@@ -165,8 +170,8 @@ test("applyLayerTransforms", () => {
       point,
       { ...chartLayer1, transforms: [{ type: "self", add: 1, axis: "y" }] },
       testData,
-      0
-    )
+      0,
+    ),
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 1,
@@ -190,8 +195,8 @@ test("applyLayerTransforms", () => {
         ],
       },
       testData,
-      0
-    )
+      0,
+    ),
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 3,
@@ -216,8 +221,8 @@ test("applyLayerTransforms", () => {
         ],
       },
       testData,
-      0
-    )
+      0,
+    ),
   ).to.deep.eq(null);
 });
 
@@ -229,6 +234,7 @@ test("formatYValue", () => {
   expect(formatYValue(0.00005000009)).toEqual("5.000009e-5");
   expect(formatYValue(0.000480388100419)).toEqual("4.803881e-4");
   expect(formatYValue(199123812391823)).toEqual("1.991238e+14");
+  expect(formatYValue(null)).toEqual("");
 });
 
 test("findMatchingPoint", () => {
@@ -244,8 +250,8 @@ test("findMatchingPoint", () => {
         },
       ],
       0,
-      "2030-01-01T00:00:00.000Z"
-    )
+      "2030-01-01T00:00:00.000Z",
+    ),
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 0,
@@ -269,8 +275,8 @@ test("findMatchingPoint", () => {
         },
       ],
       0,
-      "2030-01-01T00:00:00.000Z"
-    )
+      "2030-01-01T00:00:00.000Z",
+    ),
   ).to.deep.eq({
     x: "2030-01-01T00:00:00.000Z",
     y: 0,
@@ -300,8 +306,8 @@ test("findMatchingPoint", () => {
         },
       ],
       0,
-      "2030-01-02T00:00:00.000Z"
-    )
+      "2030-01-02T00:00:00.000Z",
+    ),
   ).to.deep.eq({
     x: "2030-01-02T00:00:00.000Z",
     y: 1,
@@ -331,7 +337,7 @@ test("findMatchingPoint", () => {
         },
       ],
       0,
-      "2040-01-02T00:00:00.000Z"
-    )
+      "2040-01-02T00:00:00.000Z",
+    ),
   ).to.deep.eq(null);
 });
