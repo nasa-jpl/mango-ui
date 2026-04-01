@@ -84,7 +84,7 @@ export const ChartTooltip = ({
         left:
           Math.min(
             window.innerWidth - dimensions.width - 20,
-            left + window.scrollX - dimensions.width / 2 + tooltip.caretX
+            left + window.scrollX - dimensions.width / 2 + tooltip.caretX,
           ) + "px",
         top: top + window.scrollY - dimensions.height - -tooltip.caretY - 12,
       }}
@@ -92,7 +92,7 @@ export const ChartTooltip = ({
       <div className="chart-tooltip-content bg-foreground">
         <div className="chart-tooltip-x text-white font-bold">
           {formatDateGPS(
-            new Date(tooltip.dataPoints[0].parsed.x as unknown as number)
+            new Date(tooltip.dataPoints[0].parsed.x as unknown as number),
           )}
         </div>
         <div className="chart-tooltip-rows">
