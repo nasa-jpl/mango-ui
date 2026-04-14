@@ -58,6 +58,7 @@ import {
   pluralize,
 } from "../../../utilities/generic";
 import {
+  getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
@@ -1426,26 +1427,39 @@ export const Chart = ({
           !error &&
           chartRef.current.data.datasets.every(
             (dataset) => dataset.data.length === 0
-          ) && (
-            <div
-              className={classNames(
-                "font-medium bg-gray-50 border rounded-sm text-sm py-1 px-3 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground",
-                { "chart-indicator-overlay--compact": compact }
-              )}
-              style={{
-                top: `${
-                  chartRef.current.chartArea.top +
-                  chartRef.current.chartArea.height / 2
-                }px`,
-                left: `${
-                  chartRef.current.chartArea.left +
-                  chartRef.current.chartArea.width / 2
-                }px`,
-              }}
-            >
-              No data available
-            </div>
-          )}
+          ) &&
+          (() => {
+            const layers = chartEntity.layers || [];
+            const instrument = instrumentProp;
+            const hasUningestedLayers = layers.some(
+              (layer) => !getDatasetForLayer(layer, products, instrument)
+            );
+            return (
+              <div
+                className={classNames(
+                  "font-medium border rounded-sm text-sm py-1 px-3 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%]",
+                  hasUningestedLayers
+                    ? "bg-amber-50 text-amber-700 border-amber-300"
+                    : "bg-gray-50 text-secondary-foreground",
+                  { "chart-indicator-overlay--compact": compact }
+                )}
+                style={{
+                  top: `${
+                    chartRef.current!.chartArea.top +
+                    chartRef.current!.chartArea.height / 2
+                  }px`,
+                  left: `${
+                    chartRef.current!.chartArea.left +
+                    chartRef.current!.chartArea.width / 2
+                  }px`,
+                }}
+              >
+                {hasUningestedLayers
+                  ? "No data ingested"
+                  : "No data available"}
+              </div>
+            );
+          })()}
       </>
     );
   };

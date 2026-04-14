@@ -18,17 +18,22 @@ import { DataGridColumnDef } from "../../../types/data-grid";
 import "./ag-grid-stellar.css";
 
 const CustomNoRowsOverlay = (
-  props: CustomNoRowsOverlayProps & { error?: Error | null }
+  props: CustomNoRowsOverlayProps & { error?: Error | null; hasUningestedLayers?: boolean }
 ) => {
-  const { error } = props;
+  const { error, hasUningestedLayers } = props;
   return (
     <div
       className={cn(
         "text-xs text-muted-foreground",
-        error ? "text-destructive" : ""
+        error ? "text-destructive" : "",
+        hasUningestedLayers ? "text-amber-700" : ""
       )}
     >
-      {error?.message ? `Error: ${error?.message}` : "No rows to display"}
+      {error?.message
+        ? `Error: ${error?.message}`
+        : hasUningestedLayers
+          ? "No data ingested"
+          : "No rows to display"}
     </div>
   );
 };
@@ -40,6 +45,7 @@ export declare type DataGridProps<T> = {
   error?: Error | null;
   fitToGridWidth?: boolean;
   gridProps?: AgGridReactProps;
+  hasUningestedLayers?: boolean;
   idKey?: keyof T | undefined;
   loading?: boolean;
   onClearFilters?: (clearFn: () => void) => void;
@@ -64,6 +70,7 @@ export function DataGrid<T>({
   idKey,
   compact = false,
   fitToGridWidth = false,
+  hasUningestedLayers = false,
   loading = true,
   showQuickFilter = false,
   className = "",
@@ -133,8 +140,9 @@ export function DataGrid<T>({
   const noRowsOverlayComponentParams = useMemo(() => {
     return {
       error,
+      hasUningestedLayers,
     };
-  }, [error]);
+  }, [error, hasUningestedLayers]);
 
   const onFilterTextBoxChanged = (event: React.FormEvent<HTMLInputElement>) => {
     if (gridRef.current?.api) {

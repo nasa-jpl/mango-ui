@@ -29,6 +29,7 @@ import { getData } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
   applyFieldThresholds,
+  getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
@@ -708,6 +709,9 @@ const Table = memo(function Table({
       {!compact && (
         <DataGrid
           error={error}
+          hasUningestedLayers={tableEntity.layers.some(
+            (layer) => !getDatasetForLayer(layer, products, instrument)
+          )}
           idKey={idField}
           fitToGridWidth={!!tableEntity.fitToGridWidth}
           compact={tableEntity.compact}
