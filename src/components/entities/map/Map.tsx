@@ -1,8 +1,13 @@
 import {
+  Cartesian2,
   Cartesian3,
   Viewer as CesiumViewer,
   Color,
+  defined,
+  Entity as CesiumEntity,
   ProviderViewModel,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
   WebMapTileServiceImageryProvider,
 } from "cesium";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -41,6 +46,13 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>();
   const [hasData, setHasData] = useState(false);
+  const [tooltip, setTooltip] = useState<{
+    fields: { label: string; value: string }[];
+    visible: boolean;
+    x: number;
+    y: number;
+  }>({ visible: false, x: 0, y: 0, fields: [] });
+  const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
 
   const cancelHandles = useMemo(() => {
     return {} as Record<string, () => void>;
@@ -152,6 +164,50 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     return { results, aborted, error };
   };
 
+  const setupTooltipHandler = () => {
+    if (!viewerRef.current) return;
+
+    // Remove existing handler
+    if (handlerRef.current) {
+      handlerRef.current.destroy();
+      handlerRef.current = null;
+    }
+
+    const handler = new ScreenSpaceEventHandler(
+      viewerRef.current.scene.canvas
+    );
+
+    handler.setInputAction(
+      (movement: { endPosition: Cartesian2 }) => {
+        if (!viewerRef.current) return;
+        const picked = viewerRef.current.scene.pick(movement.endPosition);
+        if (defined(picked) && picked.id?.properties) {
+          const props = picked.id.properties;
+          const propertyNames = props.propertyNames as string[];
+          const fields = propertyNames.map((name: string) => ({
+            label: name,
+            value: String(props[name]?.getValue?.(viewerRef.current!.clock.currentTime) ?? props[name]),
+          }));
+          setTooltip({
+            visible: true,
+            x: movement.endPosition.x,
+            y: movement.endPosition.y,
+            fields,
+          });
+        } else {
+          setTooltip((prev) =>
+            prev.visible
+              ? { visible: false, x: 0, y: 0, fields: [] }
+              : prev
+          );
+        }
+      },
+      ScreenSpaceEventType.MOUSE_MOVE
+    );
+
+    handlerRef.current = handler;
+  };
+
   const visualizeMapLayers = async (
     layers: MapLayer[],
     products: Product[],
@@ -169,17 +225,46 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     }
 
     let downsampling = 1;
-    const points: { latitude: number; longitude: number }[] = [];
+    const points: {
+      color: Color;
+      latitude: number;
+      longitude: number;
+      pixelSize: number;
+      tooltipData?: Record<string, unknown>;
+    }[] = [];
+
+    // Collect tooltip fields from all layers
+    const tooltipFields = layers.flatMap((l) => l.tooltipFields ?? []);
 
     // TODO: does it make sense to support multiple layers for the map view?
-    results.map(({ result }) => {
+    results.map(({ layer, result }) => {
       downsampling = result.downsampling_factor;
+      const layerColor = layer.color
+        ? Color.fromCssColorString(layer.color)
+        : Color.RED;
+      const layerPointSize = layer.pointRadius ?? 5;
+
       result.data.forEach((d) => {
         const location: Location = d.location as unknown as Location;
         if (!location) return;
+        const tooltipData: Record<string, unknown> = {};
+        const fields = layer.tooltipFields ?? [];
+        for (const field of fields) {
+          const entry = d[field];
+          if (entry !== undefined) {
+            tooltipData[field] =
+              typeof entry === "object" && entry !== null && "value" in entry
+                ? entry.value
+                : entry;
+          }
+        }
         points.push({
           latitude: location["latitude"],
           longitude: location["longitude"],
+          color: layerColor,
+          pixelSize: layerPointSize,
+          tooltipData:
+            Object.keys(tooltipData).length > 0 ? tooltipData : undefined,
         });
       });
     });
@@ -190,29 +275,40 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       // Clear existing points/lines
       viewerRef.current.entities.removeAll();
 
-      const coordinates = points.map((point) => {
-        return Cartesian3.fromDegrees(point.longitude, point.latitude);
-      });
-
       // For full-res data, render individual points; for decimated data, render polylines
       if (downsampling === 1) {
-        coordinates.forEach((coordinate) => {
-          viewerRef.current?.entities.add({
-            position: coordinate,
+        points.forEach((point) => {
+          const entity: CesiumEntity.ConstructorOptions = {
+            position: Cartesian3.fromDegrees(point.longitude, point.latitude),
             point: {
-              pixelSize: 1,
-              color: Color.RED,
+              pixelSize: point.pixelSize,
+              color: point.color,
             },
-          });
+          };
+          if (point.tooltipData) {
+            entity.properties = point.tooltipData as unknown as CesiumEntity.ConstructorOptions["properties"];
+          }
+          viewerRef.current?.entities.add(entity);
         });
       } else {
+        const layerColor = layers[0]?.color
+          ? Color.fromCssColorString(layers[0].color)
+          : Color.RED;
+        const coordinates = points.map((point) =>
+          Cartesian3.fromDegrees(point.longitude, point.latitude)
+        );
         viewerRef.current?.entities.add({
           polyline: {
             positions: coordinates,
             width: 1,
-            material: Color.RED,
+            material: layerColor,
           },
         });
+      }
+
+      // Set up tooltip hover handler if tooltip fields are configured
+      if (tooltipFields.length > 0) {
+        setupTooltipHandler();
       }
 
       // Trigger Cesium map update
@@ -266,6 +362,13 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance =
         MAX_ZOOM_DISTANCE;
     }
+
+    return () => {
+      if (handlerRef.current) {
+        handlerRef.current.destroy();
+        handlerRef.current = null;
+      }
+    };
   }, []);
 
   const renderMapOverlays = () => {
@@ -327,6 +430,24 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       <div className="cesium-container">
         <div className="viewer-container" ref={mapRef} />
         {renderMapOverlays()}
+        {tooltip.visible && tooltip.fields.length > 0 && (
+          <div
+            className="map-tooltip pointer-events-none absolute z-50 rounded bg-foreground px-3 py-2 text-xs text-white shadow-lg"
+            style={{
+              left: `${tooltip.x + 12}px`,
+              top: `${tooltip.y - 12}px`,
+            }}
+          >
+            {tooltip.fields.map((field) => (
+              <div key={field.label} className="flex gap-2 py-0.5">
+                <span className="font-medium text-gray-300">
+                  {field.label}:
+                </span>
+                <span>{field.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </React.Fragment>
   );

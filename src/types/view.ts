@@ -191,6 +191,7 @@ export interface MapLayer extends DataLayer {
   color?: string;
   hidePoints?: boolean;
   pointRadius?: number;
+  tooltipFields?: string[];
 }
 
 export type Point<X = string, Y = number> = {
