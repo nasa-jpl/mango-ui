@@ -25,7 +25,7 @@ import { ProductPreview } from "../../../types/page.ts";
 import { Status } from "../../../types/status.ts";
 import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
-import { getData } from "../../../utilities/api";
+import { getData, HttpError } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
   applyFieldThresholds,
@@ -95,6 +95,7 @@ const Table = memo(function Table({
   const [loading, setLoading] = useState(false);
   // TODO pass error to DataGrid and have it make use of an error
   const [error, setError] = useState<Error | null>();
+  const [hasNotIngestedLayers, setHasNotIngestedLayers] = useState(false);
   const [rowData, setRowData] = useState<
     Record<string, DataResponseDataEntry>[]
   >([]);
@@ -429,6 +430,7 @@ const Table = memo(function Table({
     setError(null);
     let results: {
       layer: DataLayer;
+      notIngested?: boolean;
       result: DataResponse;
     }[] = [];
     let aborted = false;
@@ -439,6 +441,7 @@ const Table = memo(function Table({
           fetchLayerData(layer, startTime, endTime, mission, instrument)
         )
       );
+      setHasNotIngestedLayers(results.some((r) => r.notIngested));
       setLoading(false);
     } catch (err) {
       if (!isAbortError(err)) {
@@ -458,7 +461,7 @@ const Table = memo(function Table({
     endTime: string | undefined,
     mission?: string | null,
     instrument?: string | null
-  ): Promise<{ layer: DataLayer; result: DataResponse }> => {
+  ): Promise<{ layer: DataLayer; notIngested?: boolean; result: DataResponse }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
@@ -491,7 +494,15 @@ const Table = memo(function Table({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            reject(error);
+            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+              resolve({
+                layer,
+                result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
+                notIngested: true,
+              });
+            } else {
+              reject(error);
+            }
           }
         });
     });
@@ -709,7 +720,7 @@ const Table = memo(function Table({
       {!compact && (
         <DataGrid
           error={error}
-          hasUningestedLayers={tableEntity.layers.some(
+          hasUningestedLayers={hasNotIngestedLayers || tableEntity.layers.some(
             (layer) => !getDatasetForLayer(layer, products, instrument)
           )}
           idKey={idField}

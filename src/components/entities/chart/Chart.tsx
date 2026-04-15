@@ -49,7 +49,7 @@ import {
   TimeSeriesPoint,
   YAxis,
 } from "../../../types/view";
-import { getData } from "../../../utilities/api";
+import { getData, HttpError } from "../../../utilities/api";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -144,6 +144,7 @@ export const Chart = ({
   const [loading, setLoading] = useState(true);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
+  const [hasNotIngestedLayers, setHasNotIngestedLayers] = useState(false);
   const cancelHandles: Record<string, () => void> = {};
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -470,6 +471,9 @@ export const Chart = ({
     if (error || aborted || !chartRef.current) {
       return;
     }
+
+    setHasNotIngestedLayers(results.some((r) => r.notIngested));
+
     // Process result points
     const processedData: {
       data_count: number;
@@ -927,7 +931,7 @@ export const Chart = ({
     endTime: string | undefined,
     mission?: string,
     instrument?: string
-  ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
+  ): Promise<{ layer: ChartLayer; notIngested?: boolean; result: DataResponse }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
@@ -1037,7 +1041,15 @@ export const Chart = ({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            reject(error);
+            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+              resolve({
+                layer,
+                result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
+                notIngested: true,
+              });
+            } else {
+              reject(error);
+            }
           }
         });
     });
@@ -1078,6 +1090,7 @@ export const Chart = ({
     setError(null);
     let results: {
       layer: ChartLayer;
+      notIngested?: boolean;
       result: DataResponse;
     }[] = [];
     let aborted = false;
@@ -1431,7 +1444,7 @@ export const Chart = ({
           (() => {
             const layers = chartEntity.layers || [];
             const instrument = instrumentProp;
-            const hasUningestedLayers = layers.some(
+            const hasUningestedLayers = hasNotIngestedLayers || layers.some(
               (layer) => !getDatasetForLayer(layer, products, instrument)
             );
             return (
