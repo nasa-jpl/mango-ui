@@ -70,10 +70,10 @@ export const ViewPage = ({
     start: startDate,
   });
   const [mission, setMission] = useState<string | null>(
-    viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
+    viewPage?.missions ? (viewPage?.missions[0].mission ?? null) : null,
   );
   const [instrument, setInstrument] = useState<string | null>(
-    viewPage?.missions ? viewPage?.missions[0].instrument ?? null : null
+    viewPage?.missions ? (viewPage?.missions[0].instrument ?? null) : null,
   );
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
 
@@ -88,10 +88,10 @@ export const ViewPage = ({
 
   useEffect(() => {
     setMission(
-      viewPage?.missions ? viewPage?.missions[0].mission ?? null : null
+      viewPage?.missions ? (viewPage?.missions[0].mission ?? null) : null,
     );
     setInstrument(
-      viewPage?.missions ? viewPage?.missions[0].instrument ?? null : null
+      viewPage?.missions ? (viewPage?.missions[0].instrument ?? null) : null,
     );
   }, [viewPage?.missions]);
 
@@ -145,7 +145,7 @@ export const ViewPage = ({
       };
       onPageChange(updatedViewPage);
     },
-    [viewPage, onPageChange, confirm]
+    [viewPage, onPageChange, confirm],
   );
 
   const onEntityDuplicate = useCallback(
@@ -164,7 +164,7 @@ export const ViewPage = ({
       };
       onPageChange(updatedViewPage);
     },
-    [viewPage, onPageChange]
+    [viewPage, onPageChange],
   );
 
   const onEntitySave = useCallback(
@@ -174,7 +174,7 @@ export const ViewPage = ({
       }
       // Find section containing entity
       const section = viewPage.sections.find((s) =>
-        s.entities.find((e) => e.id === entity.id)
+        s.entities.find((e) => e.id === entity.id),
       );
       if (!section) {
         return;
@@ -199,7 +199,7 @@ export const ViewPage = ({
       onPageChange(updatedViewPage);
       setEntityToEdit(null);
     },
-    [viewPage, onPageChange]
+    [viewPage, onPageChange],
   );
 
   const onAddSection = useCallback(() => {
@@ -250,7 +250,7 @@ export const ViewPage = ({
       onPageChange(updatedViewPage);
       setEntityToEdit(null);
     },
-    [viewPage, onPageChange]
+    [viewPage, onPageChange],
   );
 
   const onSectionDelete = useCallback(
@@ -275,7 +275,7 @@ export const ViewPage = ({
       };
       onPageChange(newViewPage);
     },
-    [viewPage, onPageChange, confirm]
+    [viewPage, onPageChange, confirm],
   );
 
   const onSectionDuplicate = useCallback(
@@ -294,7 +294,7 @@ export const ViewPage = ({
       };
       onPageChange(newViewPage);
     },
-    [viewPage, onPageChange]
+    [viewPage, onPageChange],
   );
 
   if (!viewPage) {
@@ -306,6 +306,22 @@ export const ViewPage = ({
       title={viewPage.title}
       pageHeaderChildren={
         <>
+          <Button
+            variant="outline"
+            className="ml-2"
+            onClick={() => {
+              const endDate = new Date();
+              const startDate = new Date(
+                endDate.getTime() - 24 * 60 * 60 * 1000,
+              );
+              setDateRange({
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+              });
+            }}
+          >
+            Latest 24hrs
+          </Button>
           <DateRangePicker
             dateFormat={viewPage.dateFormat}
             startDate={new Date(dateRange.start)}

@@ -39,13 +39,13 @@ export function isTableEntity(entity: Entity): entity is TableEntity {
 }
 
 export function isDownlinkDashboardEntity(
-  entity: Entity
+  entity: Entity,
 ): entity is DownlinkDashboardEntity {
   return entity.type === "downlink-dashboard";
 }
 
 export function isTimelineRowEntity(
-  entity: Entity
+  entity: Entity,
 ): entity is TimelineRowEntity {
   return entity.type === "timeline-row";
 }
@@ -73,7 +73,7 @@ export function applyLayerTransform(
     layer: ChartLayer;
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
-  index: number = 0
+  index: number = 0,
 ): number | null {
   let newValue = value;
   if (transform.type === "self") {
@@ -87,14 +87,14 @@ export function applyLayerTransform(
     const transformDerived = transform as DataTransformDerived;
     // Transform using the matching point from a specified layer
     const matchingLayer = data.find(
-      ({ layer }) => layer.id === transformDerived.layerId
+      ({ layer }) => layer.id === transformDerived.layerId,
     );
     if (matchingLayer && field) {
       // Find matching value in time
       const matchingPoint = findMatchingPoint(
         matchingLayer.pointsByField[field],
         index,
-        point.x
+        point.x,
       );
       if (
         matchingPoint
@@ -120,7 +120,7 @@ export function applyLayerTransform(
 export function findMatchingPoint(
   points: TimeSeriesPoint[],
   index = 0,
-  dateString = ""
+  dateString = "",
 ) {
   const pointAtIndex = points[index];
   if (pointAtIndex && pointAtIndex.x === dateString) {
@@ -150,7 +150,7 @@ export function applyLayerTransforms(
     layer: ChartLayer;
     pointsByField: Record<string, TimeSeriesPoint[]>;
   }[],
-  index: number
+  index: number,
 ): TimeSeriesPoint | null {
   if (!layer.transforms || !layer.transforms.length) return point;
   const field = layer.fields[0]; // TODO pass this in?
@@ -167,7 +167,7 @@ export function applyLayerTransforms(
         transform,
         field,
         data,
-        index
+        index,
       );
       if (transformedX === null) {
         return null;
@@ -182,7 +182,7 @@ export function applyLayerTransforms(
         transform,
         field,
         data,
-        index
+        index,
       );
       if (transformedY === null) {
         return null;
@@ -201,7 +201,11 @@ export function applyLayerTransforms(
 }
 
 // TODO move to a more generic utils file?
-export function formatYValue(tickValue: number | string): string {
+export function formatYValue(tickValue: number | string | null): string {
+  if (tickValue === null) {
+    return "";
+  }
+
   if (typeof tickValue === "string") {
     return tickValue;
   }

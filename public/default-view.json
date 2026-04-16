@@ -66,11 +66,11 @@
               "title": "Examples",
               "layout": [
                 {
+                  "h": 14,
                   "i": "fghyjqiqii",
-                  "x": 0,
-                  "y": 0,
                   "w": 16,
-                  "h": 14
+                  "x": 0,
+                  "y": 0
                 }
               ],
               "entities": [
@@ -96,15 +96,7 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "Y",
-                      "transforms": [
-                        {
-                          "axis": "y",
-                          "type": "self",
-                          "multiply": 10
-                        }
-                      ],
-                      "transformTargets": ["resid_rms"]
+                      "instrument": "Y"
                     },
                     {
                       "id": "48gnek",
@@ -177,7 +169,7 @@
                     {
                       "id": "1bcgdwq87y398r4jiotrjgdfs",
                       "field": "resid_rms",
-                      "label": "KBR RMS (mm)",
+                      "label": "",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
@@ -215,7 +207,7 @@
                     },
                     {
                       "id": "6bcgdwq87y398r4jiotrjgdfs",
-                      "field": "clkdd_sigma",
+                      "field": "resid_rms",
                       "label": "stddev",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
@@ -1322,16 +1314,16 @@
                 },
                 {
                   "h": 7,
-                  "i": "hgjhnfgdfede",
-                  "w": 8,
-                  "x": 0,
-                  "y": 20
-                },
-                {
-                  "h": 7,
                   "i": "sdfgrtrw",
                   "w": 8,
                   "x": 8,
+                  "y": 20
+                },
+                {
+                  "h": 8,
+                  "i": "hgjhnfgdfedee",
+                  "w": 8,
+                  "x": 0,
                   "y": 20
                 }
               ],
@@ -1828,12 +1820,137 @@
                     }
                   ],
                   "syncWithPageDateRange": false
+                },
+                {
+                  "id": "hgjhnfgdfedee",
+                  "type": "chart",
+                  "title": "GRACE-FO: (K - 0.75Ka)",
+                  "yAxes": [
+                    {
+                      "id": "y1",
+                      "label": "stuff1",
+                      "position": "left"
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "3r4ethmhee",
+                      "type": "line",
+                      "color": "#11c12b",
+                      "label": "GRACE-FO: KBR1A (0.75)ka_phase v04 C",
+                      "fields": ["ka_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 0.75
+                        }
+                      ]
+                    },
+                    {
+                      "id": "yhgfew3reggg",
+                      "type": "line",
+                      "color": "#4bb1ff",
+                      "label": "GRACE-FO: KBR1A k_phase v04 C",
+                      "fields": ["k_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "3r4etfnhh",
+                      "type": "line",
+                      "color": "#f14444",
+                      "label": "GRACE-FO: K-Band Ionospheric Combination (K - 0.75Ka)",
+                      "fields": ["ka_phase", "k_phase"],
+                      "dataset": "KBR1A",
+                      "endTime": "2022-01-01T23:59:58.000000Z",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "y1",
+                      "startTime": "2022-01-01T00:00:00.000000Z",
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "derived",
+                          "layerId": "3r4ethmhee",
+                          "subtract": true
+                        }
+                      ]
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 }
               ],
               "defaultOpen": true,
               "enableHeader": true
             }
           ]
+        },
+        {
+          "id": "d73083f7-eb97-4a87-822f-4605010fe7d4",
+          "url": "export-test",
+          "title": "Export Test",
+          "sections": [
+            {
+              "id": "ae3658f2-b168-47db-8f07-e9de09591f6f",
+              "title": "New Section",
+              "layout": [
+                {
+                  "h": 7,
+                  "i": "70ae985d-6328-4954-9ea3-3c25dc591681",
+                  "w": 14,
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "entities": [
+                {
+                  "id": "70ae985d-6328-4954-9ea3-3c25dc591681",
+                  "type": "chart",
+                  "title": "New Entity",
+                  "yAxes": [
+                    {
+                      "id": "eccbda3b-3baf-412a-a7d0-daa045415867",
+                      "label": ""
+                    }
+                  ],
+                  "layers": [
+                    {
+                      "id": "18749c0f-9ae7-4eb0-b73a-cf7d91ed3a71",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["ang_accl_x"],
+                      "dataset": "ACC1A",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "yAxisId": "eccbda3b-3baf-412a-a7d0-daa045415867",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
+                }
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
+            }
+          ],
+          "dateFormat": "long"
         }
       ],
       "title": "Development Area"

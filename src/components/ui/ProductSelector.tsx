@@ -22,10 +22,13 @@ import {
 } from "@nasa-jpl/stellar-react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { Product, ProductField } from "../../types/api";
+import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
+import { DateRange } from "../../types/time";
+import { getData } from "../../utilities/api";
 import { SelectedProduct } from "./EntityEditor";
 
 export declare type ProductSelectorProps = {
+  dateRange?: DateRange;
   fieldFilter: (field: ProductField) => boolean;
   multiple: boolean;
   onChange: (selectedProduct: SelectedProduct) => void;
@@ -34,6 +37,7 @@ export declare type ProductSelectorProps = {
 };
 
 export const ProductSelector = ({
+  dateRange,
   onChange,
   products,
   selectedProduct,
@@ -64,13 +68,16 @@ export const ProductSelector = ({
   };
 
   // TODO memoize these
-  const missions = [...new Set(products.map((product) => product.mission))];
+  const missions = [
+    ...new Map(products.map((p) => [p.mission.id, p.mission])).values(),
+  ];
+
   const instruments = [
     ...new Set(
       products
         .filter((product) => product.mission.id === newSelectedProduct.mission)
         .map((product) => product.instruments)
-        .flat()
+        .flat(),
     ),
   ];
   const datasets = [
@@ -79,9 +86,9 @@ export const ProductSelector = ({
         .filter(
           (product) =>
             product.mission.id === newSelectedProduct.mission &&
-            product.instruments.indexOf(newSelectedProduct.instrument) > -1
+            product.instruments.indexOf(newSelectedProduct.instrument) > -1,
         )
-        .map((product) => product.id)
+        .map((product) => product.id),
     ),
   ];
 
@@ -89,7 +96,7 @@ export const ProductSelector = ({
     (product) =>
       product.id === newSelectedProduct.dataset &&
       product.mission.id === newSelectedProduct.mission &&
-      product.instruments.indexOf(newSelectedProduct.instrument) > -1
+      product.instruments.indexOf(newSelectedProduct.instrument) > -1,
   );
   const fields = product?.available_fields.filter(fieldFilter) || [];
 
@@ -102,8 +109,97 @@ export const ProductSelector = ({
       (product) =>
         product.id === newSelectedProduct.dataset &&
         product.mission.id === newSelectedProduct.mission &&
-        product.instruments.indexOf(newSelectedProduct.instrument) > -1
+        product.instruments.indexOf(newSelectedProduct.instrument) > -1,
     )?.available_versions || [];
+
+  // Check if product has a subset_version field
+  const hasSubsetVersionField = product?.available_fields.some(
+    (f) => f.name === "subset_version"
+  );
+
+  // Update the selected product's hasSubsetVersionField flag when it changes
+  useEffect(() => {
+    if (
+      newSelectedProduct.hasSubsetVersionField !== hasSubsetVersionField &&
+      (newSelectedProduct.mission ||
+        newSelectedProduct.instrument ||
+        newSelectedProduct.dataset)
+    ) {
+      updateSelectedProduct({
+        ...newSelectedProduct,
+        hasSubsetVersionField,
+        subsetVersionCount: 0, // Reset count when field changes
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSubsetVersionField]);
+
+  // Fetch and count subset versions when product has the field and selection is complete
+  useEffect(() => {
+    if (
+      !hasSubsetVersionField ||
+      !newSelectedProduct.mission ||
+      !newSelectedProduct.instrument ||
+      !newSelectedProduct.dataset ||
+      !newSelectedProduct.version ||
+      !dateRange
+    ) {
+      return;
+    }
+
+    const fetchSubsetVersionCount = async () => {
+      try {
+        const { json } = getData(
+          newSelectedProduct.mission,
+          newSelectedProduct.dataset,
+          newSelectedProduct.instrument,
+          newSelectedProduct.version,
+          ["subset_version"],
+          newSelectedProduct.channels ?? [],
+          dateRange.start,
+          dateRange.end
+        );
+
+        const data = await json();
+        if (data && data.data && Array.isArray(data.data)) {
+          const subsetVersionSet = new Set<string>();
+          data.data.forEach((point: DataResponseDataEntry) => {
+            const subsetVersionValue = point.subset_version?.value;
+            if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+              subsetVersionSet.add(String(subsetVersionValue));
+            }
+          });
+          const count = subsetVersionSet.size;
+          // Update selected product with the count
+          if (count > 0) {
+            updateSelectedProduct({
+              ...newSelectedProduct,
+              subsetVersionCount: count,
+            });
+          }
+        }
+      } catch (error: unknown) {
+        const err = error as Error;
+        if (err?.name === "AbortError") {
+          return;
+        }
+        console.error("Error fetching subset versions:", error);
+      }
+    };
+
+    fetchSubsetVersionCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    hasSubsetVersionField,
+    dateRange?.start,
+    dateRange?.end,
+    newSelectedProduct.mission,
+    newSelectedProduct.instrument,
+    newSelectedProduct.dataset,
+    newSelectedProduct.version,
+  ]);
+
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -234,7 +330,7 @@ export const ProductSelector = ({
                             newSelectedProduct.fields.indexOf(currentValue) > -1
                           ) {
                             newFields = newFields.filter(
-                              (f) => f !== currentValue
+                              (f) => f !== currentValue,
                             );
                           } else {
                             newFields.push(currentValue);
@@ -250,7 +346,7 @@ export const ProductSelector = ({
                             "",
                             newSelectedProduct.fields.indexOf(field.name) > -1
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         <div className="flex gap-1 whitespace-nowrap">
@@ -269,7 +365,7 @@ export const ProductSelector = ({
         </div>
         {(channels || []).map((channel) => {
           const matchingChannel = (selectedProduct.channels || []).find(
-            (c) => c.id === channel.id
+            (c) => c.id === channel.id,
           );
           return (
             <div className="flex flex-col gap-1">
