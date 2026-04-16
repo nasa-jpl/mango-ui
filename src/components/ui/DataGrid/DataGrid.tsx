@@ -112,14 +112,12 @@ export function DataGrid<T>({
     | SizeColumnsToContentStrategy
   >(() => {
     return {
-      type: fitToGridWidth ? "fitGridWidth" : "fitCellContents",
+      type: compact || !fitToGridWidth ? "fitCellContents" : "fitGridWidth",
     };
-  }, [fitToGridWidth]);
+  }, [fitToGridWidth, compact]);
 
   useEffect(() => {
-    if (fitToGridWidth) {
-      gridRef.current?.api?.sizeColumnsToFit();
-    } else {
+    if (compact || !fitToGridWidth) {
       setTimeout(() => {
         gridRef.current?.api?.autoSizeColumns(
           gridRef.current?.api
@@ -127,8 +125,10 @@ export function DataGrid<T>({
             .map((col) => col.getColId())
         );
       }, 15);
+    } else {
+      gridRef.current?.api?.sizeColumnsToFit();
     }
-  }, [fitToGridWidth, rowData]);
+  }, [fitToGridWidth, compact, rowData]);
 
   const noRowsOverlayComponentParams = useMemo(() => {
     return {

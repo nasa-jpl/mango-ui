@@ -77,7 +77,7 @@ export const Section = ({
   const [resizing, setResizing] = useState(false);
   const MemoizedReactGridLayout = useMemo(
     () => WidthProvider(ReactGridLayout),
-    []
+    [],
   );
   const resizable =
     typeof section.resizable === "boolean" ? section.resizable : true;
@@ -173,7 +173,7 @@ export const Section = ({
         <div
           className={classNames(
             "border-t sticky top-0 w-full bg-background z-[1] shadow-[0_1px_0_0_hsl(var(--border))]",
-            { "": open }
+            { "": open },
           )}
         >
           <Button

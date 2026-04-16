@@ -106,7 +106,7 @@ const Table = memo(function Table({
   const computedDateRange = useMemo(
     () =>
       tableEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
-    [tableEntity.syncWithPageDateRange, dateRange]
+    [tableEntity.syncWithPageDateRange, dateRange],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,11 +117,11 @@ const Table = memo(function Table({
         startDate: string,
         endDate: string,
         mission,
-        instrument
+        instrument,
       ) => fetchTableData(layers, startDate, endDate, mission, instrument),
-      100
+      100,
     ),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -130,7 +130,7 @@ const Table = memo(function Table({
       computedDateRange.start,
       computedDateRange.end,
       mission,
-      instrument
+      instrument,
     );
     // Use JSON.stringify for deep comparison (recommended)
     // https://github.com/facebook/react/issues/14476#issuecomment-471199055
@@ -180,13 +180,17 @@ const Table = memo(function Table({
       const metadata = getFieldMetadataForLayer(
         column.field,
         pseudoLayer,
-        products
+        products,
       );
       const product = getProductForLayer(pseudoLayer, products);
       const fieldId = `${column.layerId}.${column.field}`;
       const col: DataGridColumnDef = {
         field: fieldId,
-        flex: tableEntity.fitToGridWidth ? 1 : undefined,
+        flex: tableEntity.compact
+          ? undefined
+          : tableEntity.fitToGridWidth
+            ? 1
+            : undefined,
         minWidth: 50,
         filter: getAGGridFilterType(metadata?.type || ""),
         floatingFilter: true,
@@ -233,7 +237,7 @@ const Table = memo(function Table({
           if (metadata && tableEntity.applyThresholds) {
             const { limits, warnings } = applyFieldThresholds(
               metadata,
-              params.data[column.layerId]
+              params.data[column.layerId],
             );
 
             if (limits.lower || limits.upper) {
@@ -257,7 +261,7 @@ const Table = memo(function Table({
           if (metadata && tableEntity.applyThresholds) {
             const { limits, warnings } = applyFieldThresholds(
               metadata,
-              params.data[column.layerId]
+              params.data[column.layerId],
             );
 
             const tooltipText =
@@ -288,7 +292,7 @@ const Table = memo(function Table({
           return params.value;
         },
         valueGetter: (
-          params: ValueGetterParams<Record<string, DataResponseDataEntry>>
+          params: ValueGetterParams<Record<string, DataResponseDataEntry>>,
         ) => {
           if (
             !params.data ||
@@ -338,13 +342,13 @@ const Table = memo(function Table({
       field: "timestamp",
       floatingFilter: false,
       headerName: "Timestamp",
-      minWidth: 150,
-      flex: 1,
+      minWidth: tableEntity.compact ? undefined : 150,
+      flex: tableEntity.compact ? undefined : 1,
       resizable: true,
       initialSort: "desc",
       filter: "agDateColumnFilter",
       valueGetter: (
-        params: ValueGetterParams<Record<string, DataResponseDataEntry>>
+        params: ValueGetterParams<Record<string, DataResponseDataEntry>>,
       ) => {
         if (!params.data) {
           return "";
@@ -407,7 +411,7 @@ const Table = memo(function Table({
       },
     };
 
-    tmpTableColumns.push(col);
+    tmpTableColumns.unshift(col);
 
     // Add column groups to table column definition
     tableColumnGroups.forEach((colGroup) => {
@@ -422,7 +426,7 @@ const Table = memo(function Table({
     startTime?: string,
     endTime?: string,
     mission?: string | null,
-    instrument?: string | null
+    instrument?: string | null,
   ) => {
     setLoading(true);
     setError(null);
@@ -435,8 +439,8 @@ const Table = memo(function Table({
     try {
       results = await Promise.all(
         layers.map((layer) =>
-          fetchLayerData(layer, startTime, endTime, mission, instrument)
-        )
+          fetchLayerData(layer, startTime, endTime, mission, instrument),
+        ),
       );
       setLoading(false);
     } catch (err) {
@@ -456,7 +460,7 @@ const Table = memo(function Table({
     startTime: string | undefined,
     endTime: string | undefined,
     mission?: string | null,
-    instrument?: string | null
+    instrument?: string | null,
   ): Promise<{ layer: DataLayer; result: DataResponse }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
@@ -476,7 +480,7 @@ const Table = memo(function Table({
         computedStartTime,
         computedEndTime,
         undefined,
-        layer.filter
+        layer.filter,
       );
       cancelHandles[layerFullId] = cancel;
       json()
@@ -501,7 +505,7 @@ const Table = memo(function Table({
     startTime?: string,
     endTime?: string,
     mission?: string | null,
-    instrument?: string | null
+    instrument?: string | null,
   ) => {
     let finalResults = [];
     if (tableEntity.data) {
@@ -512,7 +516,7 @@ const Table = memo(function Table({
         startTime,
         endTime,
         mission,
-        instrument
+        instrument,
       );
 
       if (error || aborted) {
@@ -530,7 +534,7 @@ const Table = memo(function Table({
           const metadata = getFieldMetadataForLayer(
             field,
             layer as DataLayer,
-            products
+            products,
           );
           if (metadata) {
             metadataCache[field] = metadata;
@@ -548,10 +552,15 @@ const Table = memo(function Table({
             if (
               key !== "timestamp" &&
               (!layer.transformTargets ||
-                (layer.transformTargets && layer.transformTargets.indexOf(key) > -1))
+                (layer.transformTargets &&
+                  layer.transformTargets.indexOf(key) > -1))
             ) {
               const fieldValue = processedResult[key];
-              if (fieldValue && typeof fieldValue === "object" && "value" in fieldValue) {
+              if (
+                fieldValue &&
+                typeof fieldValue === "object" &&
+                "value" in fieldValue
+              ) {
                 let transformedValue = fieldValue.value as number;
 
                 // Apply each transform
@@ -576,7 +585,10 @@ const Table = memo(function Table({
         Object.keys(processedResult).forEach((key) => {
           // Compute thresholds for result if metadata available for the field
           if (key !== "timestamp" && metadataCache[key]) {
-            const thresholds = applyFieldThresholds(metadataCache[key], processedResult);
+            const thresholds = applyFieldThresholds(
+              metadataCache[key],
+              processedResult,
+            );
             processedResult[key]._thresholds = thresholds;
           }
         });
@@ -762,8 +774,7 @@ const Table = memo(function Table({
       )}
     </div>
   );
-},
-arePropsEqual);
+}, arePropsEqual);
 
 function arePropsEqual(oldProps: TableProps, newProps: TableProps) {
   const propsEqual =
