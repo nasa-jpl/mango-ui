@@ -1,4 +1,4 @@
-import { DataResponseDataEntry, Product, ProductField } from "../types/api";
+import { DataResponseDataEntry, Dataset, Product, ProductField } from "../types/api";
 import { ComputedThresholds } from "../types/app";
 import { DataLayer } from "../types/view";
 
@@ -8,6 +8,23 @@ export function getProductForLayer(
 ): Product | undefined {
   return products.find(
     (d) => layer.mission === d.mission.id && layer.dataset === d.id
+  );
+}
+
+/**
+ * Returns the matching Dataset entry for a layer, if the data has been ingested.
+ * A match requires the product to exist and have a dataset with the same version and instrument.
+ */
+export function getDatasetForLayer(
+  layer: DataLayer,
+  products: Product[],
+  instrument?: string | null,
+): Dataset | undefined {
+  const product = getProductForLayer(layer, products);
+  if (!product) return undefined;
+  const layerInstrument = instrument ?? layer.instrument;
+  return product.datasets.find(
+    (ds) => ds.version_id === layer.version && ds.instrument_id === layerInstrument,
   );
 }
 
