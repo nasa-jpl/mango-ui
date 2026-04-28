@@ -229,9 +229,12 @@ export interface MapEntity extends Entity {
   layers?: MapLayer[];
 }
 
+export type TableColumnDisplayType = "text-chunk";
+
 export type TableColumn = {
   columnGroupId?: string;
   dateFormat?: DateFormat;
+  displayType?: TableColumnDisplayType;
   field: string;
   id: string;
   label?: string;

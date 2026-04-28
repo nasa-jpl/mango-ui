@@ -186,6 +186,7 @@ const Table = memo(function Table({
       );
       const product = getProductForLayer(pseudoLayer, products);
       const fieldId = `${column.layerId}.${column.field}`;
+      const isTextChunk = column.displayType === "text-chunk";
       const col: DataGridColumnDef = {
         field: fieldId,
         flex: tableEntity.compact
@@ -202,6 +203,16 @@ const Table = memo(function Table({
           `${column.field}${metadata?.unit ? ` (${metadata?.unit})` : ""}`,
         resizable: true,
         sortable: true,
+        wrapText: isTextChunk,
+        autoHeight: isTextChunk,
+        cellRenderer: isTextChunk
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (params: any) => (
+              <span style={{ whiteSpace: "pre-wrap" }}>
+                {params.valueFormatted ?? params.value}
+              </span>
+            )
+          : undefined,
         floatingFilterComponentParams: {
           onColumnPreview: () => {
             if (product) {
@@ -731,7 +742,9 @@ const Table = memo(function Table({
           selectedItemId={selectedPointId}
           onRowSelected={onRowSelected}
           onClearFilters={handleClearFilters}
-          onContentSizeChange={tableEntity.compact ? onCompactResize : undefined}
+          onContentSizeChange={
+            tableEntity.compact ? onCompactResize : undefined
+          }
           gridProps={{
             getRowClass: (params) => {
               let rowClass = "";

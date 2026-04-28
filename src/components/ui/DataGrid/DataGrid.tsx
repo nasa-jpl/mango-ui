@@ -5,12 +5,12 @@ import {
 } from "@ag-grid-community/core";
 import { cn, Input } from "@nasa-jpl/stellar-react";
 import { IRowNode } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css"; // Core CSS
+import "ag-grid-community/styles/ag-grid.css";
 import {
   AgGridReact,
   AgGridReactProps,
   CustomNoRowsOverlayProps,
-} from "ag-grid-react"; // React Grid Logic
+} from "ag-grid-react";
 import classNames from "classnames";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -125,10 +125,7 @@ export function DataGrid<T>({
     if (!api || !onContentSizeChange) return;
 
     const cols = api.getAllDisplayedColumns();
-    const totalColWidth = cols.reduce(
-      (sum, c) => sum + c.getActualWidth(),
-      0,
-    );
+    const totalColWidth = cols.reduce((sum, c) => sum + c.getActualWidth(), 0);
 
     if (lastReportedWidthRef.current === totalColWidth) return;
     lastReportedWidthRef.current = totalColWidth;
@@ -150,17 +147,17 @@ export function DataGrid<T>({
     ) as HTMLElement | null;
     const containerWidth = viewport?.clientWidth ?? wrapper.clientWidth;
 
-    const totalColWidth = cols.reduce(
-      (sum, c) => sum + c.getActualWidth(),
-      0,
-    );
+    const totalColWidth = cols.reduce((sum, c) => sum + c.getActualWidth(), 0);
     const remaining = containerWidth - totalColWidth;
     if (remaining <= 1) return;
 
     const lastCol = cols[cols.length - 1];
     api.applyColumnState({
       state: [
-        { colId: lastCol.getColId(), width: lastCol.getActualWidth() + remaining },
+        {
+          colId: lastCol.getColId(),
+          width: lastCol.getActualWidth() + remaining,
+        },
       ],
     });
   };
@@ -201,7 +198,6 @@ export function DataGrid<T>({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [compact, rowData]);
 
   const noRowsOverlayComponentParams = useMemo(() => {

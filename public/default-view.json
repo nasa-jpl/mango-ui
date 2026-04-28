@@ -1174,13 +1174,15 @@
                       "id": "61e8957b-ab74-4188-a975-569e0e103bba",
                       "field": "data",
                       "label": "Data (C)",
-                      "layerId": "43759d40-5b89-4b58-9fe4-bdb587d2e083"
+                      "layerId": "43759d40-5b89-4b58-9fe4-bdb587d2e083",
+                      "displayType": "text-chunk"
                     },
                     {
                       "id": "6d347034-0c00-4b0d-9ece-1877159b2cd0",
                       "field": "data",
                       "label": "Data (D)",
-                      "layerId": "e9e62bca-1e45-4a31-96f0-86c8a368f8c7"
+                      "layerId": "e9e62bca-1e45-4a31-96f0-86c8a368f8c7",
+                      "displayType": "text-chunk"
                     }
                   ],
                   "compact": true,
