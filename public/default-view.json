@@ -1109,7 +1109,7 @@
                     }
                   ],
                   "compact": false,
-                  "fitToGridWidth": true,
+                  "fitToGridWidth": false,
                   "applyThresholds": false,
                   "syncWithPageDateRange": true
                 }
@@ -1184,7 +1184,7 @@
                     }
                   ],
                   "compact": true,
-                  "fitToGridWidth": true,
+                  "fitToGridWidth": false,
                   "applyThresholds": false,
                   "syncWithPageDateRange": true
                 },

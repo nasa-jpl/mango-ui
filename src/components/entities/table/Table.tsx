@@ -45,6 +45,7 @@ export declare type TableProps = {
   enableEditing?: boolean;
   instrument?: string | null;
   mission?: string | null;
+  onCompactResize?: (width: number) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
   onEdit?: () => void;
@@ -89,6 +90,7 @@ const Table = memo(function Table({
   onDelete = () => {},
   onDuplicate = () => {},
   onEdit = () => {},
+  onCompactResize,
   compact = false,
 }: TableProps) {
   const [loading, setLoading] = useState(false);
@@ -717,7 +719,7 @@ const Table = memo(function Table({
           }
         />
       )}
-      {!compact && (
+      {
         <DataGrid
           error={error}
           idKey={idField}
@@ -729,6 +731,7 @@ const Table = memo(function Table({
           selectedItemId={selectedPointId}
           onRowSelected={onRowSelected}
           onClearFilters={handleClearFilters}
+          onContentSizeChange={tableEntity.compact ? onCompactResize : undefined}
           gridProps={{
             getRowClass: (params) => {
               let rowClass = "";
@@ -771,7 +774,7 @@ const Table = memo(function Table({
             },
           }}
         />
-      )}
+      }
     </div>
   );
 }, arePropsEqual);

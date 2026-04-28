@@ -33,6 +33,7 @@ export declare type EntityProps = {
   instrument?: string | null;
   loading?: boolean;
   mission?: string | null;
+  onCompactResize?: (width: number) => void;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: (entity: EntityType) => void;
   onDuplicate?: (entity: EntityType) => void;
@@ -62,6 +63,7 @@ export const Entity = (props: EntityProps) => {
     showHeader = entity.showHeader ?? true,
     compact = false,
     enableEditing = true,
+    onCompactResize,
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
     onSelectPoint = () => {},
@@ -117,6 +119,7 @@ export const Entity = (props: EntityProps) => {
           onDelete={() => onDelete(entity)}
           onDuplicate={() => onDuplicate(entity)}
           onEdit={() => onEdit(entity)}
+          onCompactResize={onCompactResize}
           selectedPoint={selectedPoint}
           compact={compact}
         />
