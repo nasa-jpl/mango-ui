@@ -114,7 +114,7 @@ export const ProductSelector = ({
 
   // Check if product has a subset_version field
   const hasSubsetVersionField = product?.available_fields.some(
-    (f) => f.name === "subset_version"
+    (f) => f.name === "subset_version",
   );
 
   // Update the selected product's hasSubsetVersionField flag when it changes
@@ -157,7 +157,7 @@ export const ProductSelector = ({
           ["subset_version"],
           newSelectedProduct.channels ?? [],
           dateRange.start,
-          dateRange.end
+          dateRange.end,
         );
 
         const data = await json();
@@ -165,7 +165,10 @@ export const ProductSelector = ({
           const subsetVersionSet = new Set<string>();
           data.data.forEach((point: DataResponseDataEntry) => {
             const subsetVersionValue = point.subset_version?.value;
-            if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+            if (
+              subsetVersionValue !== undefined &&
+              subsetVersionValue !== null
+            ) {
               subsetVersionSet.add(String(subsetVersionValue));
             }
           });
@@ -198,7 +201,6 @@ export const ProductSelector = ({
     newSelectedProduct.dataset,
     newSelectedProduct.version,
   ]);
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -443,7 +445,7 @@ export const ProductSelector = ({
               onChange={(e) => {
                 updateSelectedProduct({
                   ...newSelectedProduct,
-                  filter: e.target.value,
+                  filter: [e.target.value],
                 });
               }}
             />

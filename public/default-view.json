@@ -1033,6 +1033,7 @@
                     {
                       "id": "821289e1-2506-4a22-9173-c7bc99c32502",
                       "fields": ["soe_event", "comments", "meta", "time"],
+                      "filter": ["soe_event=K_MI", "soe_event=IPU"],
                       "dataset": "SOE_EVNT",
                       "endTime": "",
                       "mission": "GRACEFO",

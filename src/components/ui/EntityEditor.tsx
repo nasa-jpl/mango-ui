@@ -78,14 +78,14 @@ const separator = "----";
 
 const getLabelForSelectedProductOrLayer = (
   thing: SelectedProduct | DataLayer,
-  fields?: string[]
+  fields?: string[],
 ) => {
   return `${thing.mission} ${thing.instrument} ${thing.dataset} ${(
     fields || thing.fields
   ).join(", ")} ${(thing.channels || [])
     ?.map((c) => `(${c.id}: ${c.value})`)
     .join(" ")} (v${thing.version}) ${
-    typeof thing.filter === "string" ? `filter: ${thing.filter}` : ""
+    Array.isArray(thing.filter) && thing.filter.length > 0 ? `filter: ${thing.filter.join(", ")}` : ""
   }`;
 };
 
@@ -93,17 +93,17 @@ const getLabelForSelectedProductOrLayer = (
 const getMatchingSelectedProductForLayer = (
   layer: DataLayer,
   selectedProducts: SelectedProduct[],
-  fields?: string[]
+  fields?: string[],
 ): SelectedProduct | undefined => {
   return selectedProducts.find(
     (p) =>
       getLabelForSelectedProductOrLayer(p, fields || p.fields) ===
-      getLabelForSelectedProductOrLayer(layer, fields || layer.fields)
+      getLabelForSelectedProductOrLayer(layer, fields || layer.fields),
   );
 };
 
 const extractEntitySelectedProducts = (
-  entity: EntityType
+  entity: EntityType,
 ): SelectedProduct[] => {
   const layers = (entity as ChartEntity | TableEntity).layers || [];
   return layers.map((layer) => {
@@ -115,7 +115,7 @@ const extractEntitySelectedProducts = (
       mission: layer.mission,
       version: layer.version,
       instrument: layer.instrument,
-      ...(typeof layer.filter === "string" ? { filter: layer.filter } : null),
+      ...(Array.isArray(layer.filter) ? { filter: layer.filter } : null),
     } as SelectedProduct;
   });
 };
@@ -136,7 +136,7 @@ export const EntityEditor = ({
   }, []);
   const resizeObserverRef = useResizeObserver(onResize);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
-    extractEntitySelectedProducts(entity)
+    extractEntitySelectedProducts(entity),
   );
   const [prevSelectedProducts, setPrevSelectedProducts] = useState<
     SelectedProduct[]
@@ -149,7 +149,7 @@ export const EntityEditor = ({
       }
       return true;
     },
-    [newEntity.type]
+    [newEntity.type],
   );
 
   const entityTypes: {
@@ -191,7 +191,7 @@ export const EntityEditor = ({
       setPrevSelectedProducts(selectedProducts);
       setSelectedProducts(newSelectedProducts);
     },
-    [selectedProducts]
+    [selectedProducts],
   );
 
   useEffect(() => {
@@ -205,18 +205,18 @@ export const EntityEditor = ({
     (entityWithLayers.layers || []).forEach((layer) => {
       const oldSelectedProduct = getMatchingSelectedProductForLayer(
         layer,
-        prevSelectedProducts
+        prevSelectedProducts,
       );
       const newSelectedProduct = getMatchingSelectedProductForLayer(
         layer,
-        selectedProducts
+        selectedProducts,
       );
       // If an old matching selected product exists and a new one does not,
       // check for the existence of the old selected product and if found,
       // update layer to use this new product
       if (oldSelectedProduct && !newSelectedProduct) {
         const matchingNewProduct = selectedProducts.find(
-          (p) => p.id === oldSelectedProduct.id
+          (p) => p.id === oldSelectedProduct.id,
         );
         if (matchingNewProduct) {
           const newLayer = {
@@ -224,7 +224,7 @@ export const EntityEditor = ({
             ...matchingNewProduct,
             id: layer.id,
           };
-          if (typeof matchingNewProduct.filter !== "string") {
+          if (!Array.isArray(matchingNewProduct.filter)) {
             delete newLayer.filter;
           }
           newLayers.push(newLayer);
@@ -284,7 +284,7 @@ export const EntityEditor = ({
         syncWithPageDateRange: newEntity.syncWithPageDateRange,
         showHeader: newEntity.showHeader,
         dateRange: newEntity.dateRange,
-      })
+      }),
     );
   }
 
@@ -470,7 +470,7 @@ export const EntityEditor = ({
                                             };
                                           }
                                           return axis;
-                                        }
+                                        },
                                       ),
                                     };
                                     setNewEntity(updatedEntity);
@@ -516,10 +516,10 @@ export const EntityEditor = ({
                                       const updatedEntity = {
                                         ...newEntity,
                                         yAxes: (newEntity.yAxes || []).filter(
-                                          (axis) => axis.id !== yAxis.id
+                                          (axis) => axis.id !== yAxis.id,
                                         ),
                                         layers: (newEntity.layers || []).filter(
-                                          (layer) => layer.yAxisId !== yAxis.id
+                                          (layer) => layer.yAxisId !== yAxis.id,
                                         ),
                                       };
                                       setNewEntity(updatedEntity);
@@ -533,13 +533,16 @@ export const EntityEditor = ({
                                 {(newEntity.layers || [])
                                   .filter((l) => l.yAxisId === yAxis.id)
                                   .map((layer) => (
-                                    <div key={layer.id} className="flex flex-col gap-1">
+                                    <div
+                                      key={layer.id}
+                                      className="flex flex-col gap-1"
+                                    >
                                       <div className="flex gap-1">
                                         <Select
                                           onValueChange={(value) => {
                                             const selectedProduct =
                                               selectedProducts.find(
-                                                (p) => p.id === value
+                                                (p) => p.id === value,
                                               );
                                             const updatedEntity = {
                                               ...newEntity,
@@ -561,7 +564,7 @@ export const EntityEditor = ({
                                           value={
                                             getMatchingSelectedProductForLayer(
                                               layer,
-                                              selectedProducts
+                                              selectedProducts,
                                             )?.id
                                           }
                                         >
@@ -585,7 +588,7 @@ export const EntityEditor = ({
                                                 >
                                                   {getLabelForSelectedProductOrLayer(
                                                     selectedProduct,
-                                                    [selectedProduct.fields[0]]
+                                                    [selectedProduct.fields[0]],
                                                   )}
                                                 </SelectItem>
                                               ))}
@@ -599,7 +602,7 @@ export const EntityEditor = ({
                                             onChange={(e) => {
                                               debouncedColorChange(
                                                 e.target.value,
-                                                layer
+                                                layer,
                                               );
                                             }}
                                           />
@@ -611,14 +614,15 @@ export const EntityEditor = ({
                                             onClick={() => {
                                               const chartEntity: ChartEntity =
                                                 newEntity;
-                                              const updatedEntity: ChartEntity = {
-                                                ...chartEntity,
-                                                layers: (
-                                                  chartEntity.layers || []
-                                                ).filter(
-                                                  (l) => l.id !== layer.id
-                                                ),
-                                              };
+                                              const updatedEntity: ChartEntity =
+                                                {
+                                                  ...chartEntity,
+                                                  layers: (
+                                                    chartEntity.layers || []
+                                                  ).filter(
+                                                    (l) => l.id !== layer.id,
+                                                  ),
+                                                };
                                               setNewEntity(updatedEntity);
                                             }}
                                           >
@@ -626,94 +630,116 @@ export const EntityEditor = ({
                                           </Button>
                                         </Tooltip>
                                         <Popover>
-                                        <Tooltip content="Settings">
-                                          <PopoverTrigger asChild>
-                                            <Button variant="ghost" size="icon">
-                                              <MoreVertical size={16} />
-                                            </Button>
-                                          </PopoverTrigger>
-                                        </Tooltip>
-                                        <PopoverContent
-                                          collisionPadding={{ right: 16 }}
-                                        >
-                                          <div className="leading-none font-medium h-6">
-                                            Layer Settings
-                                          </div>
-                                          <div className="flex items-center gap-2 flex-col">
-                                            <InputForm
-                                              inlineLabelWidth={72}
-                                              layout="inline"
-                                              formSchema={z.object({
-                                                lineWidth: z.coerce
-                                                  .number()
-                                                  .min(0)
-                                                  .max(10),
-                                              })}
-                                              inputProps={{
-                                                type: "number",
-                                                step: 0.25,
-                                              }}
-                                              defaultValue={
-                                                (
-                                                  layer as ChartLayerLine
-                                                ).lineWidth?.toString() ?? "1"
-                                              }
-                                              name="lineWidth"
-                                              label="Line Width"
-                                              onChange={(value) => {
-                                                const chartLayer =
-                                                  layer as ChartLayerLine;
-                                                updateChartLayer({
-                                                  ...chartLayer,
-                                                  lineWidth: parseFloat(value),
-                                                });
-                                              }}
-                                            />
-                                            <InputForm
-                                              inlineLabelWidth={72}
-                                              layout="inline"
-                                              inputProps={{
-                                                type: "number",
-                                                step: 0.25,
-                                              }}
-                                              formSchema={z.object({
-                                                pointRadius: z.coerce
-                                                  .number()
-                                                  .min(0)
-                                                  .max(10),
-                                              })}
-                                              defaultValue={
-                                                (
-                                                  layer as ChartLayerLine
-                                                ).pointRadius?.toString() ??
-                                                "1.25"
-                                              }
-                                              name="pointRadius"
-                                              label="Point Width"
-                                              onChange={(value) => {
-                                                const chartLayer =
-                                                  layer as ChartLayerLine;
-                                                updateChartLayer({
-                                                  ...chartLayer,
-                                                  pointRadius:
-                                                    parseFloat(value),
-                                                });
-                                              }}
-                                            />
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
+                                          <Tooltip content="Settings">
+                                            <PopoverTrigger asChild>
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                              >
+                                                <MoreVertical size={16} />
+                                              </Button>
+                                            </PopoverTrigger>
+                                          </Tooltip>
+                                          <PopoverContent
+                                            collisionPadding={{ right: 16 }}
+                                          >
+                                            <div className="leading-none font-medium h-6">
+                                              Layer Settings
+                                            </div>
+                                            <div className="flex items-center gap-2 flex-col">
+                                              <InputForm
+                                                inlineLabelWidth={72}
+                                                layout="inline"
+                                                formSchema={z.object({
+                                                  lineWidth: z.coerce
+                                                    .number()
+                                                    .min(0)
+                                                    .max(10),
+                                                })}
+                                                inputProps={{
+                                                  type: "number",
+                                                  step: 0.25,
+                                                }}
+                                                defaultValue={
+                                                  (
+                                                    layer as ChartLayerLine
+                                                  ).lineWidth?.toString() ?? "1"
+                                                }
+                                                name="lineWidth"
+                                                label="Line Width"
+                                                onChange={(value) => {
+                                                  const chartLayer =
+                                                    layer as ChartLayerLine;
+                                                  updateChartLayer({
+                                                    ...chartLayer,
+                                                    lineWidth:
+                                                      parseFloat(value),
+                                                  });
+                                                }}
+                                              />
+                                              <InputForm
+                                                inlineLabelWidth={72}
+                                                layout="inline"
+                                                inputProps={{
+                                                  type: "number",
+                                                  step: 0.25,
+                                                }}
+                                                formSchema={z.object({
+                                                  pointRadius: z.coerce
+                                                    .number()
+                                                    .min(0)
+                                                    .max(10),
+                                                })}
+                                                defaultValue={
+                                                  (
+                                                    layer as ChartLayerLine
+                                                  ).pointRadius?.toString() ??
+                                                  "1.25"
+                                                }
+                                                name="pointRadius"
+                                                label="Point Width"
+                                                onChange={(value) => {
+                                                  const chartLayer =
+                                                    layer as ChartLayerLine;
+                                                  updateChartLayer({
+                                                    ...chartLayer,
+                                                    pointRadius:
+                                                      parseFloat(value),
+                                                  });
+                                                }}
+                                              />
+                                            </div>
+                                          </PopoverContent>
+                                        </Popover>
                                       </div>
-                                      {((layer as unknown as { subsetVersionCount?: number }).subsetVersionCount ?? 0) > 0 && (
+                                      {((
+                                        layer as unknown as {
+                                          subsetVersionCount?: number;
+                                        }
+                                      ).subsetVersionCount ?? 0) > 0 && (
                                         <div className="text-xs text-muted-foreground ml-2">
-                                          {(layer as unknown as { subsetVersionCount: number }).subsetVersionCount} subset version{((layer as unknown as { subsetVersionCount: number }).subsetVersionCount) === 1 ? "" : "s"}
+                                          {
+                                            (
+                                              layer as unknown as {
+                                                subsetVersionCount: number;
+                                              }
+                                            ).subsetVersionCount
+                                          }{" "}
+                                          subset version
+                                          {(
+                                            layer as unknown as {
+                                              subsetVersionCount: number;
+                                            }
+                                          ).subsetVersionCount === 1
+                                            ? ""
+                                            : "s"}
                                         </div>
                                       )}
                                     </div>
                                   ))}
                               </div>
                               {(newEntity.layers || []).filter(
-                                (l) => l.yAxisId === yAxis.id
+                                (l) => l.yAxisId === yAxis.id,
                               ).length === 0 && (
                                 <div className="text-muted-foreground">
                                   No layers on axis
@@ -800,7 +826,7 @@ export const EntityEditor = ({
                             const updatedEntity = {
                               ...newEntity,
                               columns: (newEntity.columns || []).concat(
-                                newColumn
+                                newColumn,
                               ),
                             };
                             setNewEntity(updatedEntity);
@@ -818,7 +844,7 @@ export const EntityEditor = ({
                         <div className="flex-1 flex flex-col gap-6">
                           {newEntity.columns.map((column, columnIndex) => {
                             const columnLayer = newEntity.layers.find(
-                              (l) => l.id === column.layerId
+                              (l) => l.id === column.layerId,
                             );
                             return (
                               <div
@@ -859,7 +885,7 @@ export const EntityEditor = ({
                                           const updatedEntity = {
                                             ...newEntity,
                                             columns: newEntity.columns.filter(
-                                              (col) => col.id !== column.id
+                                              (col) => col.id !== column.id,
                                             ),
                                             layers: newEntity.layers.filter(
                                               (layer) => {
@@ -869,10 +895,10 @@ export const EntityEditor = ({
                                                   newEntity.columns.find(
                                                     (c) =>
                                                       c.layerId === layer.id &&
-                                                      c.id !== column.id
+                                                      c.id !== column.id,
                                                   )
                                                 );
-                                              }
+                                              },
                                             ),
                                           };
                                           setNewEntity(updatedEntity);
@@ -888,7 +914,7 @@ export const EntityEditor = ({
                                         value.split(separator);
                                       const selectedProduct =
                                         selectedProducts.find(
-                                          (p) => p.id === id
+                                          (p) => p.id === id,
                                         );
                                       if (!selectedProduct) {
                                         return;
@@ -922,7 +948,7 @@ export const EntityEditor = ({
                                         });
                                         updatedEntity.layers =
                                           updatedEntity.layers.concat(
-                                            computedColumnLayer
+                                            computedColumnLayer,
                                           );
                                       } else {
                                         // Update the existing layer with the new field
@@ -939,8 +965,8 @@ export const EntityEditor = ({
                                                   ...new Set(
                                                     computedColumnLayer.fields.concat(
                                                       selectedProduct?.fields ||
-                                                        []
-                                                    )
+                                                        [],
+                                                    ),
                                                   ),
                                                 ],
                                                 id: computedColumnLayer.id,
@@ -968,7 +994,7 @@ export const EntityEditor = ({
                                             getMatchingSelectedProductForLayer(
                                               columnLayer,
                                               selectedProducts,
-                                              [column.field]
+                                              [column.field],
                                             )?.id
                                           }${separator}${column.field}`
                                         : ""
@@ -994,11 +1020,11 @@ export const EntityEditor = ({
                                               >
                                                 {getLabelForSelectedProductOrLayer(
                                                   selectedProduct,
-                                                  [f]
+                                                  [f],
                                                 )}
                                               </SelectItem>
                                             );
-                                          })
+                                          }),
                                         )}
                                     </SelectContent>
                                   </Select>
