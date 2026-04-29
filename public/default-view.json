@@ -1033,7 +1033,7 @@
                     {
                       "id": "821289e1-2506-4a22-9173-c7bc99c32502",
                       "fields": ["soe_event", "comments", "meta", "time"],
-                      "filter": ["soe_event=K_MI", "soe_event=IPU"],
+                      "filter": ["soe_event=K_MI", "soe_event=KAMI"],
                       "dataset": "SOE_EVNT",
                       "endTime": "",
                       "mission": "GRACEFO",
@@ -1078,6 +1078,7 @@
                     {
                       "id": "f7778a4d-4557-4efb-a9e4-d408a3c0afdb",
                       "fields": ["comments", "meta", "soe_event", "time"],
+                      "filter": ["soe_event=K_MI", "soe_event=KAMI"],
                       "dataset": "SOE_EVNT",
                       "endTime": "",
                       "mission": "GRACEFO",
