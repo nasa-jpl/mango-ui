@@ -306,22 +306,36 @@ export const ViewPage = ({
       title={viewPage.title}
       pageHeaderChildren={
         <>
-          <Button
-            variant="outline"
-            className="ml-2"
-            onClick={() => {
-              const endDate = new Date();
-              const startDate = new Date(
-                endDate.getTime() - 24 * 60 * 60 * 1000,
-              );
-              setDateRange({
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
-              });
-            }}
-          >
-            Latest 24hrs
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="select-none ml-2">
+                Latest <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {[
+                { label: "24 hours", days: 1 },
+                { label: "3 days", days: 3 },
+                { label: "7 days", days: 7 },
+              ].map(({ label, days }) => (
+                <DropdownMenuItem
+                  key={label}
+                  onClick={() => {
+                    const endDate = new Date();
+                    const startDate = new Date(
+                      endDate.getTime() - days * 24 * 60 * 60 * 1000,
+                    );
+                    setDateRange({
+                      start: startDate.toISOString(),
+                      end: endDate.toISOString(),
+                    });
+                  }}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <DateRangePicker
             dateFormat={viewPage.dateFormat}
             startDate={new Date(dateRange.start)}
