@@ -434,18 +434,22 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
-        {typeof selectedProduct.filter === "string" && (
+        {Array.isArray(selectedProduct.filter) && (
           <div className="flex flex-col gap-1 min-w-40">
             <Label size="sm">Filter</Label>
             <Input
-              placeholder="<field_name>=<value>"
+              placeholder="<field_name>=<value>, <field_name>=<value>"
               className="flex-1 w-full"
-              value={newSelectedProduct.filter || ""}
+              value={(newSelectedProduct.filter || []).join(", ")}
               sizeVariant="xs"
               onChange={(e) => {
+                const value = e.target.value;
                 updateSelectedProduct({
                   ...newSelectedProduct,
-                  filter: [e.target.value],
+                  filter: value
+                    .split(",")
+                    .map((f) => f.trim())
+                    .filter((f) => f.length > 0),
                 });
               }}
             />

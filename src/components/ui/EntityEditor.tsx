@@ -85,7 +85,9 @@ const getLabelForSelectedProductOrLayer = (
   ).join(", ")} ${(thing.channels || [])
     ?.map((c) => `(${c.id}: ${c.value})`)
     .join(" ")} (v${thing.version}) ${
-    Array.isArray(thing.filter) && thing.filter.length > 0 ? `filter: ${thing.filter.join(", ")}` : ""
+    Array.isArray(thing.filter) && thing.filter.length > 0
+      ? `filter: ${thing.filter.join(", ")}`
+      : ""
   }`;
 };
 
@@ -242,7 +244,7 @@ export const EntityEditor = ({
           ...newSelectedProduct,
           id: layer.id,
         };
-        if (typeof newSelectedProduct.filter !== "string") {
+        if (!Array.isArray(newSelectedProduct.filter)) {
           delete newLayer.filter;
         }
         newLayers.push(newLayer);
