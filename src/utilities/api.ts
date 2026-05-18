@@ -30,7 +30,7 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
 };
 
 export const getMissions = async (
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<
   {
     id: string;
@@ -46,7 +46,7 @@ export const getMissions = async (
 
 export const getProducts = async (
   missionId: string,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<Product[]> => {
   const url =
     config.endpoints.data +
@@ -56,6 +56,15 @@ export const getProducts = async (
   ).json();
   return response.data;
 };
+
+export class HttpError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
 
 export const getData = (
   missionId: string,
@@ -67,7 +76,7 @@ export const getData = (
   startTime: string,
   endTime: string,
   downsamplingFactor?: number,
-  filter?: string
+  filter?: string[],
 ) => {
   const fieldsString = fields.length
     ? `${fields.map((f) => `&fields=${f}`).join("")}`
@@ -77,8 +86,8 @@ export const getData = (
         .map((channel) => `&filter=${channel.id}=${channel.value}`)
         .join("")
     : "";
-  if (typeof filter === "string") {
-    filtersString += `&filter=${filter}`;
+  if (Array.isArray(filter) && filter.length > 0) {
+    filtersString += filter.map((f) => `&filter=${f}`).join("");
   }
   const url =
     config.endpoints.data +
@@ -99,13 +108,13 @@ export const getData = (
     new Promise<DataResponse>((resolve, reject) => {
       fetch(url, { signal: controller.signal, credentials: "include" })
         .then((response) => {
-          if (response.status >= 200 && response.status <= 400) {
+          if (response.ok) {
             response
               .json()
               .then((json) => {
                 if (response.status >= 400) {
                   throw new Error(
-                    (json as DataResponseError).detail || "Unknown error"
+                    (json as DataResponseError).detail || "Unknown error",
                   );
                 } else {
                   resolve(json as DataResponse);
@@ -115,7 +124,19 @@ export const getData = (
                 reject(error);
               });
           } else {
-            reject(new Error(response.statusText));
+            response
+              .json()
+              .then((json) => {
+                reject(
+                  new HttpError(
+                    (json as DataResponseError).detail || response.statusText,
+                    response.status
+                  )
+                );
+              })
+              .catch(() => {
+                reject(new HttpError(response.statusText, response.status));
+              });
           }
         })
         .catch((error) => {

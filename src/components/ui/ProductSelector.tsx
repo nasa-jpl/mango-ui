@@ -114,7 +114,7 @@ export const ProductSelector = ({
 
   // Check if product has a subset_version field
   const hasSubsetVersionField = product?.available_fields.some(
-    (f) => f.name === "subset_version"
+    (f) => f.name === "subset_version",
   );
 
   // Update the selected product's hasSubsetVersionField flag when it changes
@@ -157,7 +157,7 @@ export const ProductSelector = ({
           ["subset_version"],
           newSelectedProduct.channels ?? [],
           dateRange.start,
-          dateRange.end
+          dateRange.end,
         );
 
         const data = await json();
@@ -165,7 +165,10 @@ export const ProductSelector = ({
           const subsetVersionSet = new Set<string>();
           data.data.forEach((point: DataResponseDataEntry) => {
             const subsetVersionValue = point.subset_version?.value;
-            if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+            if (
+              subsetVersionValue !== undefined &&
+              subsetVersionValue !== null
+            ) {
               subsetVersionSet.add(String(subsetVersionValue));
             }
           });
@@ -198,7 +201,6 @@ export const ProductSelector = ({
     newSelectedProduct.dataset,
     newSelectedProduct.version,
   ]);
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -432,18 +434,22 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
-        {typeof selectedProduct.filter === "string" && (
+        {Array.isArray(selectedProduct.filter) && (
           <div className="flex flex-col gap-1 min-w-40">
             <Label size="sm">Filter</Label>
             <Input
-              placeholder="<field_name>=<value>"
+              placeholder="<field_name>=<value>, <field_name>=<value>"
               className="flex-1 w-full"
-              value={newSelectedProduct.filter || ""}
+              value={(newSelectedProduct.filter || []).join(", ")}
               sizeVariant="xs"
               onChange={(e) => {
+                const value = e.target.value;
                 updateSelectedProduct({
                   ...newSelectedProduct,
-                  filter: e.target.value,
+                  filter: value
+                    .split(",")
+                    .map((f) => f.trim())
+                    .filter((f) => f.length > 0),
                 });
               }}
             />

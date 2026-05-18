@@ -49,7 +49,7 @@ import {
   TimeSeriesPoint,
   YAxis,
 } from "../../../types/view";
-import { getData } from "../../../utilities/api";
+import { getData, HttpError } from "../../../utilities/api";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -58,6 +58,7 @@ import {
   pluralize,
 } from "../../../utilities/generic";
 import {
+  getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
@@ -143,6 +144,7 @@ export const Chart = ({
   const [loading, setLoading] = useState(true);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
+  const [hasNotIngestedLayers, setHasNotIngestedLayers] = useState(false);
   const cancelHandles: Record<string, () => void> = {};
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -469,6 +471,9 @@ export const Chart = ({
     if (error || aborted || !chartRef.current) {
       return;
     }
+
+    setHasNotIngestedLayers(results.some((r) => r.notIngested));
+
     // Process result points
     const processedData: {
       data_count: number;
@@ -926,7 +931,7 @@ export const Chart = ({
     endTime: string | undefined,
     mission?: string,
     instrument?: string
-  ): Promise<{ layer: ChartLayer; result: DataResponse }> => {
+  ): Promise<{ layer: ChartLayer; notIngested?: boolean; result: DataResponse }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
@@ -1036,7 +1041,15 @@ export const Chart = ({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            reject(error);
+            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+              resolve({
+                layer,
+                result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
+                notIngested: true,
+              });
+            } else {
+              reject(error);
+            }
           }
         });
     });
@@ -1077,6 +1090,7 @@ export const Chart = ({
     setError(null);
     let results: {
       layer: ChartLayer;
+      notIngested?: boolean;
       result: DataResponse;
     }[] = [];
     let aborted = false;
@@ -1426,26 +1440,39 @@ export const Chart = ({
           !error &&
           chartRef.current.data.datasets.every(
             (dataset) => dataset.data.length === 0
-          ) && (
-            <div
-              className={classNames(
-                "font-medium bg-gray-50 border rounded-sm text-sm py-1 px-3 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground",
-                { "chart-indicator-overlay--compact": compact }
-              )}
-              style={{
-                top: `${
-                  chartRef.current.chartArea.top +
-                  chartRef.current.chartArea.height / 2
-                }px`,
-                left: `${
-                  chartRef.current.chartArea.left +
-                  chartRef.current.chartArea.width / 2
-                }px`,
-              }}
-            >
-              No data available
-            </div>
-          )}
+          ) &&
+          (() => {
+            const layers = chartEntity.layers || [];
+            const instrument = instrumentProp;
+            const hasUningestedLayers = hasNotIngestedLayers || layers.some(
+              (layer) => !getDatasetForLayer(layer, products, instrument)
+            );
+            return (
+              <div
+                className={classNames(
+                  "font-medium border rounded-sm text-sm py-1 px-3 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%]",
+                  hasUningestedLayers
+                    ? "bg-amber-50 text-amber-700 border-amber-300"
+                    : "bg-gray-50 text-secondary-foreground",
+                  { "chart-indicator-overlay--compact": compact }
+                )}
+                style={{
+                  top: `${
+                    chartRef.current!.chartArea.top +
+                    chartRef.current!.chartArea.height / 2
+                  }px`,
+                  left: `${
+                    chartRef.current!.chartArea.left +
+                    chartRef.current!.chartArea.width / 2
+                  }px`,
+                }}
+              >
+                {hasUningestedLayers
+                  ? "No data ingested"
+                  : "No data available"}
+              </div>
+            );
+          })()}
       </>
     );
   };

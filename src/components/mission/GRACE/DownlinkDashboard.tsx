@@ -108,7 +108,7 @@ export function DownlinkDashboard({
     downlinkDashboardEntity: DownlinkDashboardEntity,
     additionalFields: string[],
     start: string,
-    end: string
+    end: string,
   ): Promise<{ product: string; result: DataResponse }> {
     return new Promise((resolve, reject) => {
       // TODO abort stale requests
@@ -127,7 +127,7 @@ export function DownlinkDashboard({
         start,
         end,
         undefined,
-        downlinkDashboardEntity.filter
+        downlinkDashboardEntity.filter,
       );
       cancelHandles[requestId] = cancel;
       json()
@@ -149,7 +149,7 @@ export function DownlinkDashboard({
 
   async function fetchAllData(
     downlinkDashboardEntity: DownlinkDashboardEntity,
-    dateRange: DateRange
+    dateRange: DateRange,
   ) {
     setLoading(true);
     setError(null);
@@ -183,7 +183,7 @@ export function DownlinkDashboard({
           defaultPassGapLimit: 0,
           gapField: "",
           instrument: "",
-          filter: "soe_event=IPU",
+          filter: ["soe_event=IPU"],
           products: [{ dataset: "soe_event", title: "" }],
           type: "downlink-dashboard",
           id: "",
@@ -191,7 +191,7 @@ export function DownlinkDashboard({
         },
         [],
         computedStartTime,
-        computedEndTime
+        computedEndTime,
       );
       ipuResets.result.data.forEach((d) => {
         d.soe_event_derived = { value: d.timestamp };
@@ -206,9 +206,9 @@ export function DownlinkDashboard({
             downlinkDashboardEntity,
             product.additionalFields || [],
             computedStartTime,
-            computedEndTime
-          )
-        )
+            computedEndTime,
+          ),
+        ),
       );
 
       const passFiles = await Promise.all(
@@ -218,9 +218,9 @@ export function DownlinkDashboard({
             downlinkDashboardEntity,
             product.additionalFields || [],
             computedStartTime,
-            computedEndTime
-          )
-        )
+            computedEndTime,
+          ),
+        ),
       );
 
       productReportFiles = productReportFiles.map((productReportFile) => {
@@ -278,7 +278,7 @@ export function DownlinkDashboard({
         const metadata = getFieldMetadataForLayer(
           downlinkDashboardEntity.gapField,
           pseudoLayer,
-          products
+          products,
         );
         let gaps: DataResponseDataEntry[] = [];
         if (metadata) {
@@ -298,8 +298,8 @@ export function DownlinkDashboard({
                 j2ToMs(
                   ((entry.last_data_point_t_tag.value as number) +
                     (entry.first_data_point_t_tag.value as number)) /
-                    2
-                )
+                    2,
+                ),
               ).toISOString(),
             },
             file_name: { value: entry.file_name.value },
@@ -316,7 +316,7 @@ export function DownlinkDashboard({
       // Gap detection
       const gapsBetweenPasses = passFiles.map(({ product, result }) => {
         const matchingConfig = downlinkDashboardEntity.products.find(
-          (p) => product === `${p.dataset}_PASS`
+          (p) => product === `${p.dataset}_PASS`,
         );
         const passGapLimit =
           matchingConfig?.passGapLimit ??
@@ -344,18 +344,18 @@ export function DownlinkDashboard({
             .sort(
               (a, b) =>
                 (a.first_data_point_t_tag.value as number) -
-                (b.first_data_point_t_tag.value as number)
+                (b.first_data_point_t_tag.value as number),
             )
             .forEach((data, i) => {
               const dataStartTime = j2ToMs(
-                data.first_data_point_t_tag.value as number
+                data.first_data_point_t_tag.value as number,
               );
               const dataEndTime = j2ToMs(
-                data.last_data_point_t_tag.value as number
+                data.last_data_point_t_tag.value as number,
               );
               const nextDataStartTime =
                 j2ToMs(
-                  result.data[i + 1]?.first_data_point_t_tag.value as number
+                  result.data[i + 1]?.first_data_point_t_tag.value as number,
                 ) || null;
 
               // TODO catch case of gap before first point?
@@ -371,10 +371,10 @@ export function DownlinkDashboard({
                 let closestEndTime = null;
                 result.data.forEach((_entry) => {
                   const _dataStartTime = j2ToMs(
-                    _entry.first_data_point_t_tag.value as number
+                    _entry.first_data_point_t_tag.value as number,
                   );
                   const _dataEndTime = j2ToMs(
-                    _entry.last_data_point_t_tag.value as number
+                    _entry.last_data_point_t_tag.value as number,
                   );
 
                   const inTimeWindow =
@@ -507,7 +507,7 @@ export function DownlinkDashboard({
           dataset: "IPU Resets",
           instrument,
           fields: ["comments", "createdby", "gps_time", "timestamp"],
-          filter: "soe_event=IPU",
+          filter: ["soe_event=IPU"],
           startTime: downlinkDashboardEntity.dateRange.start,
           endTime: downlinkDashboardEntity.dateRange.end,
         },
@@ -536,8 +536,8 @@ export function DownlinkDashboard({
     const ipuResetsDatasetStatus: Status = loading
       ? "loading"
       : data?.ipuResets?.result.data.length || error
-      ? "error"
-      : "nominal";
+        ? "error"
+        : "nominal";
     const ipuResetsRow: TimelineRowEntity = {
       id: generateUUID(),
       type: "timeline-row",
@@ -551,7 +551,7 @@ export function DownlinkDashboard({
       downlinkDashboardEntity.products.map((product, i) => {
         const passesForProduct =
           data?.passFiles.find(
-            (p) => p.product === `${product.dataset}_PASS`
+            (p) => p.product === `${product.dataset}_PASS`,
           ) ?? null;
 
         const passes = [
@@ -564,7 +564,7 @@ export function DownlinkDashboard({
         ];
         const productReportsForProduct =
           data?.productReportFiles.find(
-            (p) => p.product === `${product.dataset}_RPT`
+            (p) => p.product === `${product.dataset}_RPT`,
           ) ?? null;
         const productReports = [
           {
@@ -577,7 +577,7 @@ export function DownlinkDashboard({
 
         const gapsWithinPassesForProduct =
           data?.gapsWithinPasses.find(
-            (p) => p.product === `${product.dataset}_PASS`
+            (p) => p.product === `${product.dataset}_PASS`,
           ) ?? null;
         const gapsWithinPasses = [
           {
@@ -590,7 +590,7 @@ export function DownlinkDashboard({
 
         const gapsBetweenPassesForProduct =
           data?.gapsBetweenPasses.find(
-            (p) => p.product === `${product.dataset}_PASS`
+            (p) => p.product === `${product.dataset}_PASS`,
           ) ?? null;
         const gapsBetweenPasses = [
           {
@@ -605,7 +605,7 @@ export function DownlinkDashboard({
             layer: { id: "allGapsLayer" },
             result: {
               data: gapsBetweenPasses[0].result.data.concat(
-                gapsWithinPasses[0].result.data
+                gapsWithinPasses[0].result.data,
               ),
             },
           },
@@ -714,7 +714,7 @@ export function DownlinkDashboard({
           ],
         };
         const productFields = downlinkDashboardEntity.defaultFields.concat(
-          product.additionalFields || []
+          product.additionalFields || [],
         );
         const passesTable: TimelineRowSubrowEntity<TableEntity> = {
           id: i.toString() + "passtable",
@@ -891,8 +891,8 @@ export function DownlinkDashboard({
         const datasetStatus: Status = loading
           ? "loading"
           : allGapData[0].result.data.length || error
-          ? "error"
-          : "nominal";
+            ? "error"
+            : "nominal";
 
         const row: TimelineRowEntity = {
           id: i.toString(),
@@ -910,7 +910,7 @@ export function DownlinkDashboard({
           ],
         };
         return { row, datasetStatus };
-      })
+      }),
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
