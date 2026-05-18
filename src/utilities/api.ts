@@ -57,6 +57,15 @@ export const getProducts = async (
   return response.data;
 };
 
+export class HttpError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
 export const getData = (
   missionId: string,
   dataset: string,
@@ -99,7 +108,7 @@ export const getData = (
     new Promise<DataResponse>((resolve, reject) => {
       fetch(url, { signal: controller.signal, credentials: "include" })
         .then((response) => {
-          if (response.status >= 200 && response.status <= 400) {
+          if (response.ok) {
             response
               .json()
               .then((json) => {
@@ -115,7 +124,19 @@ export const getData = (
                 reject(error);
               });
           } else {
-            reject(new Error(response.statusText));
+            response
+              .json()
+              .then((json) => {
+                reject(
+                  new HttpError(
+                    (json as DataResponseError).detail || response.statusText,
+                    response.status
+                  )
+                );
+              })
+              .catch(() => {
+                reject(new HttpError(response.statusText, response.status));
+              });
           }
         })
         .catch((error) => {
