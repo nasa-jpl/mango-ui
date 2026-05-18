@@ -66,11 +66,11 @@
               "title": "Examples",
               "layout": [
                 {
-                  "h": 14,
                   "i": "fghyjqiqii",
-                  "w": 16,
                   "x": 0,
-                  "y": 0
+                  "y": 0,
+                  "w": 16,
+                  "h": 11
                 }
               ],
               "entities": [
@@ -142,7 +142,15 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "C"
+                      "instrument": "C",
+                      "transforms": [
+                        {
+                          "axis": "y",
+                          "type": "self",
+                          "multiply": 1000
+                        }
+                      ],
+                      "transformTargets": ["lpos_rms_start"]
                     },
                     {
                       "id": "48gneq",
@@ -152,7 +160,9 @@
                       "mission": "GRACEFO",
                       "version": "04",
                       "startTime": "2023-06-30T00:00:00.000000Z",
-                      "instrument": "D"
+                      "instrument": "D",
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
                     }
                   ],
                   "columns": [
@@ -165,28 +175,28 @@
                     },
                     {
                       "id": "2bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "resid_nobs",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "3bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "arc_length",
                       "label": "arc (hr)",
                       "layerId": "48gnes",
                       "columnGroupId": "ocimaom"
                     },
                     {
                       "id": "4bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_nobs",
                       "label": "#obs",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
                     },
                     {
                       "id": "5bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_mean",
                       "label": "mean",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
@@ -200,7 +210,7 @@
                     },
                     {
                       "id": "7bcgdwq87y398r4jiotrjgdfs",
-                      "field": "resid_rms",
+                      "field": "clkdd_rms",
                       "label": "RMS",
                       "layerId": "48gnes",
                       "columnGroupId": "nvjnjfk"
@@ -482,214 +492,321 @@
           "dateFormat": "short"
         },
         {
-          "dateFormat": "long",
           "id": "b91fe14b-f33f-46a1-9ee9-515fef55657a",
+          "url": "kbr1a_ddmi",
+          "title": "KBR1A Data and DDMI Plots",
           "sections": [
             {
+              "id": "e0607f6f-805d-4732-a581-b94504a15b78",
+              "title": "GRACE-FO KBR Ionospheric Combination (K-0.75Ka), K & Ka SNRs",
+              "layout": [
+                {
+                  "h": 7,
+                  "i": "c197b822-57ee-45cc-80cb-0abbac4da1bd",
+                  "w": 11,
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "h": 7,
+                  "i": "3ab3708f-1253-48bb-991b-f1b051dc32af",
+                  "w": 11,
+                  "x": 0,
+                  "y": 7
+                },
+                {
+                  "h": 8,
+                  "i": "a1b5b797-aab4-41f9-91ed-96a8a503816f",
+                  "w": 11,
+                  "x": 0,
+                  "y": 14
+                }
+              ],
               "entities": [
                 {
                   "id": "c197b822-57ee-45cc-80cb-0abbac4da1bd",
-                  "title": "KBR Ionospheric Combination (K-0.75Ka)",
                   "type": "chart",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["k_minus_0_75ka"],
-                      "id": "18155e0a-6363-4968-816c-b4ebff15b1e8",
-                      "color": "#002AFA",
-                      "instrument": "C",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
-                      "channels": []
-                    },
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["k_minus_0_75ka"],
-                      "id": "165a976b-757c-4e03-980e-52acaee2cf70",
-                      "color": "#f01e0d",
-                      "instrument": "D",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
-                      "channels": []
-                    }
-                  ],
+                  "title": "KBR Ionospheric Combination (K-0.75Ka)",
                   "yAxes": [
                     {
                       "id": "5655980e-5875-4cc1-af54-c55f109af337",
                       "label": "IC K Band Cycles"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "18155e0a-6363-4968-816c-b4ebff15b1e8",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["k_minus_0_75ka"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "165a976b-757c-4e03-980e-52acaee2cf70",
+                      "type": "line",
+                      "color": "#f01e0d",
+                      "fields": ["k_minus_0_75ka"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "5655980e-5875-4cc1-af54-c55f109af337",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "3ab3708f-1253-48bb-991b-f1b051dc32af",
-                  "title": "KBR K SNR",
                   "type": "chart",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["k_snr"],
-                      "id": "b7bfd4e8-4db6-4a88-902e-68453b5d02b2",
-                      "color": "#002AFA",
-                      "instrument": "C",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
-                      "channels": []
-                    },
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["k_snr"],
-                      "id": "e7dac343-7985-4a47-a9e8-e88985d0fe3b",
-                      "color": "#f00400",
-                      "instrument": "D",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
-                      "channels": []
-                    }
-                  ],
+                  "title": "KBR K SNR",
                   "yAxes": [
                     {
                       "id": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
                       "label": "K Band SNR 0.1db/Hz"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "b7bfd4e8-4db6-4a88-902e-68453b5d02b2",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["k_snr"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "e7dac343-7985-4a47-a9e8-e88985d0fe3b",
+                      "type": "line",
+                      "color": "#f00400",
+                      "fields": ["k_snr"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "7b02a77c-86bc-4f95-9200-fed3d8f8f334",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 },
                 {
                   "id": "a1b5b797-aab4-41f9-91ed-96a8a503816f",
-                  "title": "KBR Ka SNR",
                   "type": "chart",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["ka_snr"],
-                      "id": "17fef086-b939-44a6-b109-7819adcd6c3c",
-                      "color": "#002AFA",
-                      "instrument": "C",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
-                      "channels": []
-                    },
-                    {
-                      "dataset": "ICSNR",
-                      "endTime": "",
-                      "fields": ["ka_snr"],
-                      "id": "f61b785d-468a-4149-a4bc-a41ac8c1b524",
-                      "color": "#f0061a",
-                      "instrument": "D",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
-                      "channels": []
-                    }
-                  ],
+                  "title": "KBR Ka SNR",
                   "yAxes": [
                     {
                       "id": "76c4fd7c-5064-4105-8781-2413144f8038",
                       "label": "Ka Band SNR 0.1db/Hz"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "17fef086-b939-44a6-b109-7819adcd6c3c",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["ka_snr"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C"
+                    },
+                    {
+                      "id": "f61b785d-468a-4149-a4bc-a41ac8c1b524",
+                      "type": "line",
+                      "color": "#f0061a",
+                      "fields": ["ka_snr"],
+                      "dataset": "ICSNR",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "76c4fd7c-5064-4105-8781-2413144f8038",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "D"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 }
               ],
-              "id": "e0607f6f-805d-4732-a581-b94504a15b78",
-              "layout": [
-                {
-                  "i": "c197b822-57ee-45cc-80cb-0abbac4da1bd",
-                  "x": 0,
-                  "y": 0,
-                  "w": 11,
-                  "h": 7
-                },
-                {
-                  "i": "3ab3708f-1253-48bb-991b-f1b051dc32af",
-                  "x": 0,
-                  "y": 7,
-                  "w": 11,
-                  "h": 7
-                },
-                {
-                  "i": "a1b5b797-aab4-41f9-91ed-96a8a503816f",
-                  "x": 0,
-                  "y": 14,
-                  "w": 11,
-                  "h": 8
-                }
-              ],
-              "enableHeader": true,
               "defaultOpen": true,
-              "title": "GRACE-FO KBR Ionospheric Combination (K-0.75Ka), K & Ka SNRs"
+              "enableHeader": true
             },
             {
+              "id": "25810c4a-24ca-49f1-aead-cb9f736925eb",
+              "title": "GRACE-FO KBR Double Differenced Missed Interrupt (DDMI)",
+              "layout": [
+                {
+                  "h": 8,
+                  "i": "741094f4-c864-47be-ae08-b4e8e8cb88c1",
+                  "w": 11,
+                  "x": 0,
+                  "y": 0
+                }
+              ],
               "entities": [
                 {
                   "id": "741094f4-c864-47be-ae08-b4e8e8cb88c1",
-                  "title": "KBR Double Differenced Missed Interrupt (DDMI)",
                   "type": "chart",
-                  "syncWithPageDateRange": true,
-                  "layers": [
-                    {
-                      "dataset": "DDIC",
-                      "endTime": "",
-                      "fields": ["ddic"],
-                      "id": "0307212b-6e8e-4361-bcbf-8e20acfd9abe",
-                      "color": "#002AFA",
-                      "instrument": "Y",
-                      "type": "line",
-                      "mission": "GRACEFO",
-                      "startTime": "",
-                      "version": "00",
-                      "yAxisId": "bb2c74aa-d1a8-4eb7-a727-42cc2efb9c8c",
-                      "channels": []
-                    }
-                  ],
+                  "title": "KBR Double Differenced Missed Interrupt (DDMI)",
                   "yAxes": [
                     {
                       "id": "bb2c74aa-d1a8-4eb7-a727-42cc2efb9c8c",
                       "label": "K Band Cycles"
                     }
-                  ]
+                  ],
+                  "layers": [
+                    {
+                      "id": "0307212b-6e8e-4361-bcbf-8e20acfd9abe",
+                      "type": "line",
+                      "color": "#002AFA",
+                      "fields": ["ddic"],
+                      "dataset": "DDIC",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "00",
+                      "yAxisId": "bb2c74aa-d1a8-4eb7-a727-42cc2efb9c8c",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "Y"
+                    }
+                  ],
+                  "syncWithPageDateRange": true
                 }
               ],
-              "id": "25810c4a-24ca-49f1-aead-cb9f736925eb",
-              "layout": [
-                {
-                  "i": "741094f4-c864-47be-ae08-b4e8e8cb88c1",
-                  "x": 0,
-                  "y": 0,
-                  "w": 11,
-                  "h": 8
-                }
-              ],
-              "enableHeader": true,
               "defaultOpen": true,
-              "title": "GRACE-FO KBR Double Differenced Missed Interrupt (DDMI)"
+              "enableHeader": true
             }
           ],
-          "title": "KBR1A Data and DDMI Plots",
-          "url": "kbr1a_ddmi"
+          "dateFormat": "long"
+        },
+        {
+          "dateFormat": "long",
+          "id": "2f148d12-fc03-4544-b681-486312193584",
+          "sections": [
+            {
+              "entities": [
+                {
+                  "id": "7954fe24-c8a7-453c-8a46-bf8937e105a5",
+                  "type": "table",
+                  "title": "Missed Interrupt (C)",
+                  "layers": [],
+                  "columns": [
+                    {
+                      "id": "05a39b29-8f4a-430d-8054-616e1e2dc1cc",
+                      "field": "soe_event",
+                      "label": "Sensor/Event",
+                      "layerId": "80bc14c4-542c-4f68-ac91-43c2249778cc"
+                    },
+                    {
+                      "id": "110c58eb-b8fb-466d-ac60-408be38a7f85",
+                      "field": "meta",
+                      "label": "Meta",
+                      "layerId": "80bc14c4-542c-4f68-ac91-43c2249778cc"
+                    },
+                    {
+                      "id": "7c1cfd9d-01f4-41be-91f4-c29354c9b675",
+                      "field": "comments",
+                      "label": "Comments",
+                      "layerId": "80bc14c4-542c-4f68-ac91-43c2249778cc"
+                    }
+                  ],
+                  "compact": false,
+                  "fitToGridWidth": true,
+                  "applyThresholds": false,
+                  "syncWithPageDateRange": true
+                },
+                {
+                  "id": "4da6d58d-8653-4e8a-8a57-fef4cae85a29",
+                  "type": "table",
+                  "title": "Missed Interrupt (D)",
+                  "layers": [
+                    {
+                      "dataset": "SOE_EVNT",
+                      "endTime": "",
+                      "fields": ["comments", "meta", "soe_event", "time"],
+                      "id": "e4d9c33e-e12f-42e9-8a03-5edbb9968b0c",
+                      "instrument": "D",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "04",
+                      "channels": [],
+                      "filter": ["soe_event=KAMI"],
+                      "hasSubsetVersionField": false,
+                      "subsetVersionCount": 0
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "id": "031cd7c9-a955-4ce0-9b8f-27114f391e8c",
+                      "field": "soe_event",
+                      "label": "Sensor/Event",
+                      "layerId": "e4d9c33e-e12f-42e9-8a03-5edbb9968b0c"
+                    },
+                    {
+                      "id": "be7c2bc3-a240-4580-9371-cc2d7c608867",
+                      "field": "meta",
+                      "label": "Meta",
+                      "layerId": "f7778a4d-4557-4efb-a9e4-d408a3c0afdb"
+                    },
+                    {
+                      "id": "d168f8bf-4429-47ff-a1d4-3588ceecf9d0",
+                      "field": "comments",
+                      "label": "Comments",
+                      "layerId": "f7778a4d-4557-4efb-a9e4-d408a3c0afdb"
+                    }
+                  ],
+                  "compact": false,
+                  "fitToGridWidth": false,
+                  "applyThresholds": false,
+                  "syncWithPageDateRange": true
+                }
+              ],
+              "id": "07ed7928-071b-4ef3-a104-0cdb88e5e92e",
+              "layout": [
+                {
+                  "i": "7954fe24-c8a7-453c-8a46-bf8937e105a5",
+                  "x": 0,
+                  "y": 0,
+                  "w": 16,
+                  "h": 8
+                },
+                {
+                  "i": "4da6d58d-8653-4e8a-8a57-fef4cae85a29",
+                  "x": 0,
+                  "y": 8,
+                  "w": 16,
+                  "h": 7
+                }
+              ],
+              "enableHeader": false,
+              "defaultOpen": true,
+              "title": "New Section"
+            }
+          ],
+          "title": "Missed Interrupts",
+          "url": "missed_interrupts"
         }
       ],
       "title": "Downlink & Product Generation"
@@ -992,107 +1109,242 @@
           "sections": [
             {
               "id": "ccd2ed2a-012c-40ef-ad7f-c6ac9fe2ca80",
-              "title": "New Section",
+              "title": "Missed Interrupt",
               "layout": [
                 {
-                  "h": 9,
                   "i": "7954fe24-c8a7-453c-8a46-bf8937e105a5",
-                  "w": 16,
                   "x": 0,
-                  "y": 0
+                  "y": 0,
+                  "w": 9,
+                  "h": 7
                 },
                 {
-                  "h": 7,
-                  "i": "82d63ccf-49c6-416a-be1f-26d81edf72a7",
-                  "w": 16,
+                  "i": "4da6d58d-8653-4e8a-8a57-fef4cae85a29",
                   "x": 0,
-                  "y": 9
+                  "y": 7,
+                  "w": 16,
+                  "h": 6
                 }
               ],
               "entities": [
                 {
                   "id": "7954fe24-c8a7-453c-8a46-bf8937e105a5",
                   "type": "table",
-                  "title": "New Entity",
+                  "title": "Missed Interrupt (C)",
                   "layers": [
                     {
-                      "id": "a6a0c326-42af-4093-94e5-c2fa5ab815af",
-                      "fields": ["ang_accl_x"],
-                      "dataset": "ACC1A",
+                      "id": "821289e1-2506-4a22-9173-c7bc99c32502",
+                      "fields": ["soe_event", "comments", "meta", "time"],
+                      "filter": ["soe_event=K_MI", "soe_event=KAMI"],
+                      "dataset": "SOE_EVNT",
                       "endTime": "",
                       "mission": "GRACEFO",
                       "version": "04",
                       "channels": [],
                       "startTime": "",
                       "instrument": "C",
-                      "transforms": [
-                        {
-                          "add": 500,
-                          "axis": "y",
-                          "type": "self"
-                        },
-                        {
-                          "axis": "y",
-                          "type": "derived",
-                          "field": "lin_accl_y",
-                          "divide": true,
-                          "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                        }
-                      ]
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "id": "05a39b29-8f4a-430d-8054-616e1e2dc1cc",
+                      "field": "soe_event",
+                      "label": "Sensor/Event",
+                      "layerId": "821289e1-2506-4a22-9173-c7bc99c32502"
                     },
                     {
-                      "id": "75b25a7b-4d8e-4e20-ab74-394f2655a636",
-                      "fields": [
-                        "ang_accl_x",
-                        "lin_accl_y",
-                        "lin_accl_x",
-                        "lin_accl_z"
-                      ],
-                      "dataset": "ACC1A",
+                      "id": "110c58eb-b8fb-466d-ac60-408be38a7f85",
+                      "field": "meta",
+                      "label": "Meta",
+                      "layerId": "821289e1-2506-4a22-9173-c7bc99c32502"
+                    },
+                    {
+                      "id": "7c1cfd9d-01f4-41be-91f4-c29354c9b675",
+                      "field": "comments",
+                      "label": "Comments",
+                      "layerId": "821289e1-2506-4a22-9173-c7bc99c32502"
+                    }
+                  ],
+                  "compact": true,
+                  "fitToGridWidth": true,
+                  "applyThresholds": false,
+                  "syncWithPageDateRange": true
+                },
+                {
+                  "id": "4da6d58d-8653-4e8a-8a57-fef4cae85a29",
+                  "type": "table",
+                  "title": "Missed Interrupt (D)",
+                  "layers": [
+                    {
+                      "dataset": "SOE_EVNT",
+                      "endTime": "",
+                      "fields": ["comments", "meta", "soe_event", "time"],
+                      "id": "e4d9c33e-e12f-42e9-8a03-5edbb9968b0c",
+                      "instrument": "D",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "04",
+                      "channels": [],
+                      "filter": ["soe_event=K_MI"],
+                      "hasSubsetVersionField": false,
+                      "subsetVersionCount": 0
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "id": "031cd7c9-a955-4ce0-9b8f-27114f391e8c",
+                      "field": "soe_event",
+                      "label": "Sensor/Event",
+                      "layerId": "e4d9c33e-e12f-42e9-8a03-5edbb9968b0c"
+                    },
+                    {
+                      "id": "be7c2bc3-a240-4580-9371-cc2d7c608867",
+                      "field": "meta",
+                      "label": "Meta",
+                      "layerId": "f7778a4d-4557-4efb-a9e4-d408a3c0afdb"
+                    },
+                    {
+                      "id": "d168f8bf-4429-47ff-a1d4-3588ceecf9d0",
+                      "field": "comments",
+                      "label": "Comments",
+                      "layerId": "f7778a4d-4557-4efb-a9e4-d408a3c0afdb"
+                    }
+                  ],
+                  "compact": false,
+                  "fitToGridWidth": false,
+                  "applyThresholds": false,
+                  "syncWithPageDateRange": true
+                }
+              ],
+              "defaultOpen": true,
+              "enableHeader": true
+            },
+            {
+              "id": "8c0c568f-3671-4bbd-b9af-31de9c94e711",
+              "title": "Spacecraft Events & Problem Files",
+              "layout": [
+                {
+                  "i": "7191c676-4505-4a26-b017-f33f112b9db5",
+                  "x": 0,
+                  "y": 0,
+                  "w": 11,
+                  "h": 6
+                },
+                {
+                  "i": "92069942-6d1f-435f-9832-5693d5198111",
+                  "x": 0,
+                  "y": 13,
+                  "w": 16,
+                  "h": 6
+                },
+                {
+                  "i": "76b9e16b-4a45-43fb-80e2-f584610db145",
+                  "x": 0,
+                  "y": 6,
+                  "w": 8,
+                  "h": 7
+                }
+              ],
+              "entities": [
+                {
+                  "id": "7191c676-4505-4a26-b017-f33f112b9db5",
+                  "type": "table",
+                  "title": "Spacecraft Events (C & D)",
+                  "layers": [
+                    {
+                      "id": "43759d40-5b89-4b58-9fe4-bdb587d2e083",
+                      "fields": ["spacecraft_event", "data", "time"],
+                      "dataset": "SPACECRAFT_EVNT",
                       "endTime": "",
                       "mission": "GRACEFO",
                       "version": "04",
                       "channels": [],
                       "startTime": "",
-                      "instrument": "C"
+                      "instrument": "C",
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
+                    },
+                    {
+                      "id": "e9e62bca-1e45-4a31-96f0-86c8a368f8c7",
+                      "fields": ["spacecraft_event", "data", "time"],
+                      "dataset": "SPACECRAFT_EVNT",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "D",
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
                     }
                   ],
                   "columns": [
                     {
-                      "id": "3e31334d-c834-4f95-a7d9-4d3ba5cd09bc",
-                      "field": "ang_accl_x",
-                      "label": "derived and self",
-                      "layerId": "a6a0c326-42af-4093-94e5-c2fa5ab815af"
+                      "id": "61e8957b-ab74-4188-a975-569e0e103bba",
+                      "field": "data",
+                      "label": "Data (C)",
+                      "layerId": "43759d40-5b89-4b58-9fe4-bdb587d2e083",
+                      "displayType": "text-chunk"
                     },
                     {
-                      "id": "bc853b12-8647-4745-bf52-d9af97b7f585",
-                      "field": "lin_accl_y",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                      "id": "6d347034-0c00-4b0d-9ece-1877159b2cd0",
+                      "field": "data",
+                      "label": "Data (D)",
+                      "layerId": "e9e62bca-1e45-4a31-96f0-86c8a368f8c7",
+                      "displayType": "text-chunk"
+                    }
+                  ],
+                  "compact": true,
+                  "fitToGridWidth": false,
+                  "applyThresholds": false,
+                  "syncWithPageDateRange": true
+                },
+                {
+                  "id": "92069942-6d1f-435f-9832-5693d5198111",
+                  "type": "table",
+                  "title": "Problem Files (C & D)",
+                  "layers": [
+                    {
+                      "id": "43759d40-5b89-4b58-9fe4-bdb587d2e083",
+                      "fields": ["problem_files", "data"],
+                      "dataset": "PROBLEMFILES_EVNT",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "C",
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
                     },
                     {
-                      "id": "523e5bf5-c265-4cdf-a363-303c41e8efc7",
-                      "field": "lin_accl_x",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                      "id": "7fc9d793-ab88-40bd-8495-ab52739db180",
+                      "fields": ["problem_files", "data"],
+                      "dataset": "PROBLEMFILES_EVNT",
+                      "endTime": "",
+                      "mission": "GRACEFO",
+                      "version": "04",
+                      "channels": [],
+                      "startTime": "",
+                      "instrument": "D",
+                      "subsetVersionCount": 0,
+                      "hasSubsetVersionField": false
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "id": "61e8957b-ab74-4188-a975-569e0e103bba",
+                      "field": "data",
+                      "label": "Data (C)",
+                      "layerId": "43759d40-5b89-4b58-9fe4-bdb587d2e083"
                     },
                     {
-                      "id": "60fa7d2c-212c-49e0-8a65-3fe666cd768c",
-                      "field": "lin_accl_y",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                    },
-                    {
-                      "id": "34070d92-4247-4ef2-8d8a-a12c3261c665",
-                      "field": "lin_accl_z",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                    },
-                    {
-                      "id": "34070d92-4247-4ef2-8d8a-a12c3261c665",
-                      "field": "ang_accl_x",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                      "id": "08ef6eb9-7452-4ec5-ad0a-4128d87ed637",
+                      "field": "data",
+                      "label": "Data (D)",
+                      "layerId": "7fc9d793-ab88-40bd-8495-ab52739db180"
                     }
                   ],
                   "compact": false,
@@ -1101,69 +1353,42 @@
                   "syncWithPageDateRange": true
                 },
                 {
-                  "id": "82d63ccf-49c6-416a-be1f-26d81edf72a7",
-                  "type": "table",
+                  "id": "76b9e16b-4a45-43fb-80e2-f584610db145",
                   "title": "New Entity",
-                  "layers": [
-                    {
-                      "id": "a6a0c326-42af-4093-94e5-c2fa5ab815af",
-                      "fields": ["ang_accl_x"],
-                      "dataset": "ACC1A",
-                      "endTime": "",
-                      "mission": "GRACEFO",
-                      "version": "04",
-                      "channels": [],
-                      "startTime": "",
-                      "instrument": "C"
-                    },
-                    {
-                      "id": "75b25a7b-4d8e-4e20-ab74-394f2655a636",
-                      "fields": ["lin_accl_y", "lin_accl_x", "lin_accl_z"],
-                      "dataset": "ACC1A",
-                      "endTime": "",
-                      "mission": "GRACEFO",
-                      "version": "04",
-                      "channels": [],
-                      "startTime": "",
-                      "instrument": "D"
-                    }
-                  ],
+                  "type": "table",
+                  "syncWithPageDateRange": true,
                   "columns": [
                     {
-                      "id": "3e31334d-c834-4f95-a7d9-4d3ba5cd09bc",
-                      "field": "ang_accl_x",
-                      "label": "",
-                      "layerId": "a6a0c326-42af-4093-94e5-c2fa5ab815af"
+                      "field": "comments",
+                      "id": "e2458dd0-e6d3-4167-9dbe-48d08d495314",
+                      "layerId": "69461469-e454-47a4-86be-c50ffbc7fbbc",
+                      "label": "test"
                     },
                     {
-                      "id": "bc853b12-8647-4745-bf52-d9af97b7f585",
-                      "field": "lin_accl_y",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                    },
-                    {
-                      "id": "523e5bf5-c265-4cdf-a363-303c41e8efc7",
-                      "field": "lin_accl_x",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                    },
-                    {
-                      "id": "60fa7d2c-212c-49e0-8a65-3fe666cd768c",
-                      "field": "lin_accl_y",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
-                    },
-                    {
-                      "id": "34070d92-4247-4ef2-8d8a-a12c3261c665",
-                      "field": "lin_accl_z",
-                      "label": "",
-                      "layerId": "75b25a7b-4d8e-4e20-ab74-394f2655a636"
+                      "field": "soe_event",
+                      "id": "5ab74d1d-73da-4748-b881-ef3cd687427b",
+                      "layerId": "69461469-e454-47a4-86be-c50ffbc7fbbc",
+                      "label": "test2"
                     }
                   ],
-                  "compact": false,
+                  "layers": [
+                    {
+                      "dataset": "SOE_EVNT",
+                      "endTime": "",
+                      "fields": ["comments", "meta", "soe_event"],
+                      "id": "69461469-e454-47a4-86be-c50ffbc7fbbc",
+                      "instrument": "C",
+                      "mission": "GRACEFO",
+                      "startTime": "",
+                      "version": "04",
+                      "channels": [],
+                      "filter": ["soe_event=K_MI"],
+                      "hasSubsetVersionField": false,
+                      "subsetVersionCount": 0
+                    }
+                  ],
                   "fitToGridWidth": true,
-                  "applyThresholds": false,
-                  "syncWithPageDateRange": true
+                  "compact": true
                 }
               ],
               "defaultOpen": true,
@@ -1183,67 +1408,74 @@
               "title": "Examples",
               "layout": [
                 {
-                  "h": 7,
                   "i": "hisudhis",
-                  "w": 8,
                   "x": 0,
-                  "y": 7
+                  "y": 7,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 7,
                   "i": "sdfdgfhg",
-                  "w": 8,
                   "x": 8,
-                  "y": 0
+                  "y": 0,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 7,
                   "i": "sdf23edx",
-                  "w": 8,
                   "x": 0,
-                  "y": 0
+                  "y": 0,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 6,
                   "i": "3edfghtr",
-                  "w": 8,
                   "x": 0,
-                  "y": 14
+                  "y": 14,
+                  "w": 8,
+                  "h": 6
                 },
                 {
-                  "h": 6,
                   "i": "3efgtre",
-                  "w": 8,
                   "x": 8,
-                  "y": 14
+                  "y": 14,
+                  "w": 8,
+                  "h": 6
                 },
                 {
-                  "h": 7,
                   "i": "23eriufhdnjkw",
-                  "w": 8,
                   "x": 8,
-                  "y": 7
+                  "y": 7,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 7,
                   "i": "sfrgtef",
-                  "w": 8,
                   "x": 0,
-                  "y": 27
+                  "y": 28,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 7,
+                  "i": "hgjhnfgdfede",
+                  "x": 0,
+                  "y": 35,
+                  "w": 1,
+                  "h": 1
+                },
+                {
                   "i": "sdfgrtrw",
-                  "w": 8,
                   "x": 8,
-                  "y": 20
+                  "y": 20,
+                  "w": 8,
+                  "h": 7
                 },
                 {
-                  "h": 8,
                   "i": "hgjhnfgdfedee",
-                  "w": 8,
                   "x": 0,
-                  "y": 20
+                  "y": 20,
+                  "w": 8,
+                  "h": 8
                 }
               ],
               "entities": [
@@ -1828,11 +2060,11 @@
               "title": "New Section",
               "layout": [
                 {
-                  "h": 7,
                   "i": "70ae985d-6328-4954-9ea3-3c25dc591681",
-                  "w": 14,
                   "x": 0,
-                  "y": 0
+                  "y": 0,
+                  "w": 14,
+                  "h": 7
                 }
               ],
               "entities": [

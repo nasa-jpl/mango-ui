@@ -5,12 +5,12 @@ import {
 } from "@ag-grid-community/core";
 import { cn, Input } from "@nasa-jpl/stellar-react";
 import { IRowNode } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css"; // Core CSS
+import "ag-grid-community/styles/ag-grid.css";
 import {
   AgGridReact,
   AgGridReactProps,
   CustomNoRowsOverlayProps,
-} from "ag-grid-react"; // React Grid Logic
+} from "ag-grid-react";
 import classNames from "classnames";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -49,6 +49,7 @@ export declare type DataGridProps<T> = {
   idKey?: keyof T | undefined;
   loading?: boolean;
   onClearFilters?: (clearFn: () => void) => void;
+  onContentSizeChange?: (width: number) => void;
   onRowSelected?: (row: T | null) => void;
   rowData: T[];
   selectedItemId?: string | undefined;
@@ -67,6 +68,7 @@ export function DataGrid<T>({
   selectedItemId,
   onRowSelected = () => {},
   onClearFilters,
+  onContentSizeChange,
   idKey,
   compact = false,
   fitToGridWidth = false,
@@ -78,6 +80,8 @@ export function DataGrid<T>({
   error,
 }: DataGridProps<T>) {
   const gridRef = useRef<AgGridReact>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastReportedWidthRef = useRef<number | null>(null);
   const [gridReady, setGridReady] = useState(false);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
 
@@ -107,7 +111,7 @@ export function DataGrid<T>({
                 }
               }
             }
-          }
+          },
         );
       }
     }
@@ -119,23 +123,89 @@ export function DataGrid<T>({
     | SizeColumnsToContentStrategy
   >(() => {
     return {
-      type: fitToGridWidth ? "fitGridWidth" : "fitCellContents",
+      type: compact || !fitToGridWidth ? "fitCellContents" : "fitGridWidth",
     };
-  }, [fitToGridWidth]);
+  }, [fitToGridWidth, compact]);
+
+  const reportContentSize = () => {
+    const api = gridRef.current?.api;
+    if (!api || !onContentSizeChange) return;
+
+    const cols = api.getAllDisplayedColumns();
+    const totalColWidth = cols.reduce((sum, c) => sum + c.getActualWidth(), 0);
+
+    if (lastReportedWidthRef.current === totalColWidth) return;
+    lastReportedWidthRef.current = totalColWidth;
+    onContentSizeChange(totalColWidth);
+  };
+
+  const fillRemainingWidth = () => {
+    const api = gridRef.current?.api;
+    const wrapper = wrapperRef.current;
+    if (!api || !wrapper) return;
+
+    const cols = api.getAllDisplayedColumns();
+    if (cols.length === 0) return;
+
+    // Measure ag-grid's body viewport (the actual scrollable column area) when
+    // available — falls back to wrapper width.
+    const viewport = wrapper.querySelector(
+      ".ag-center-cols-viewport",
+    ) as HTMLElement | null;
+    const containerWidth = viewport?.clientWidth ?? wrapper.clientWidth;
+
+    const totalColWidth = cols.reduce((sum, c) => sum + c.getActualWidth(), 0);
+    const remaining = containerWidth - totalColWidth;
+    if (remaining <= 1) return;
+
+    const lastCol = cols[cols.length - 1];
+    api.applyColumnState({
+      state: [
+        {
+          colId: lastCol.getColId(),
+          width: lastCol.getActualWidth() + remaining,
+        },
+      ],
+    });
+  };
 
   useEffect(() => {
-    if (fitToGridWidth) {
-      gridRef.current?.api?.sizeColumnsToFit();
-    } else {
+    if (compact || !fitToGridWidth) {
       setTimeout(() => {
         gridRef.current?.api?.autoSizeColumns(
           gridRef.current?.api
             ?.getAllDisplayedColumns()
-            .map((col) => col.getColId())
+            .map((col) => col.getColId()),
         );
+        reportContentSize();
+        if (compact) {
+          // Defer past parent re-render so the wrapper is at its final width
+          // before we extend the last column.
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => fillRemainingWidth()),
+          );
+        }
       }, 15);
+    } else {
+      gridRef.current?.api?.sizeColumnsToFit();
     }
-  }, [fitToGridWidth, rowData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitToGridWidth, compact, rowData]);
+
+  useEffect(() => {
+    if (!compact || !wrapperRef.current) return;
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      // Defer to next frame so ag-grid's own viewport has reflowed before we measure.
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => fillRemainingWidth());
+    });
+    observer.observe(wrapperRef.current);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [compact, rowData]);
 
   const noRowsOverlayComponentParams = useMemo(() => {
     return {
@@ -148,12 +218,14 @@ export function DataGrid<T>({
     if (gridRef.current?.api) {
       gridRef.current.api.setGridOption(
         "quickFilterText",
-        event.currentTarget.value
+        event.currentTarget.value,
       );
     }
   };
 
-  const getFilterDisplayText = (filterModel: Record<string, unknown>): string => {
+  const getFilterDisplayText = (
+    filterModel: Record<string, unknown>,
+  ): string => {
     if (!filterModel) return "";
 
     const { type, filter, filterTo, operator } = filterModel as {
@@ -262,7 +334,7 @@ export function DataGrid<T>({
       gridRef.current.api.setGridOption("quickFilterText", "");
       // Clear the input field if it exists
       const filterInput = document.getElementById(
-        "filter-text-box"
+        "filter-text-box",
       ) as HTMLInputElement;
       if (filterInput) {
         filterInput.value = "";
@@ -278,6 +350,7 @@ export function DataGrid<T>({
 
   return (
     <div
+      ref={wrapperRef}
       className={classNames("ag-theme-stellar", {
         "ag-theme-stellar--compact": compact,
       })}
@@ -307,7 +380,7 @@ export function DataGrid<T>({
             <div
               key={filter.column}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+                "inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground",
               )}
             >
               <span className="font-semibold">{filter.displayName}:</span>

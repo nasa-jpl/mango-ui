@@ -50,6 +50,10 @@ export declare type SectionProps = {
   selectedPoint: DataResponseDataEntry | null;
 };
 
+const REACT_GRID_LAYOUT_COL_NUM = 16;
+const REACT_GRID_LAYOUT_ROW_HEIGHT = 44; // px
+const REACT_GRID_LAYOUT_MARGIN = 8; // px
+
 export const Section = ({
   dateRange,
   dateBounds,
@@ -75,12 +79,22 @@ export const Section = ({
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
+  const [compactSizes, setCompactSizes] = useState<
+    Record<string, { w: number }>
+  >({});
   const MemoizedReactGridLayout = useMemo(
     () => WidthProvider(ReactGridLayout),
-    []
+    [],
   );
   const resizable =
     typeof section.resizable === "boolean" ? section.resizable : true;
+  const adjustedLayout = useMemo(
+    () =>
+      layout.map((item) =>
+        item.i in compactSizes ? { ...item, w: compactSizes[item.i].w } : item,
+      ),
+    [layout, compactSizes],
+  );
   const onLayoutChange = (layouts: Layout[]) => {
     const newSection = { ...section };
     newSection.layout = layouts.map((layout) => {
@@ -140,6 +154,21 @@ export const Section = ({
     }
   };
 
+  const onCompactResize = (entityId: string, totalWidth: number) => {
+    if (!wrapperRef) return;
+    const containerWidth = wrapperRef.clientWidth;
+    const margin = REACT_GRID_LAYOUT_MARGIN;
+    const cols = REACT_GRID_LAYOUT_COL_NUM;
+    const colWidth = (containerWidth - margin * (cols - 1)) / cols;
+    const fitted = Math.max(
+      1,
+      Math.round((totalWidth + margin) / (colWidth + margin)),
+    );
+    // Pad by one grid column so the rightmost data column isn't clipped by borders/scrollbar.
+    const w = Math.min(fitted + 1, cols);
+    setCompactSizes((prev) => ({ ...prev, [entityId]: { w } }));
+  };
+
   const renderEntity = (e: EntityType) => (
     <Entity
       products={products}
@@ -159,6 +188,7 @@ export const Section = ({
       selectedPoint={selectedPoint}
       mission={mission}
       instrument={instrument}
+      onCompactResize={(width: number) => onCompactResize(e.id, width)}
     />
   );
 
@@ -173,7 +203,7 @@ export const Section = ({
         <div
           className={classNames(
             "border-t sticky top-0 w-full bg-background z-[1] shadow-[0_1px_0_0_hsl(var(--border))]",
-            { "": open }
+            { "": open },
           )}
         >
           <Button
@@ -225,12 +255,12 @@ export const Section = ({
           <MemoizedReactGridLayout
             measureBeforeMount={false} // TODO not working right yet with true, existing bug with the library
             draggableHandle=".entity-drag-handle"
-            margin={[8, 8]}
+            margin={[REACT_GRID_LAYOUT_MARGIN, REACT_GRID_LAYOUT_MARGIN]}
             containerPadding={[0, 0]}
-            rowHeight={44}
-            cols={16}
+            rowHeight={REACT_GRID_LAYOUT_ROW_HEIGHT}
+            cols={REACT_GRID_LAYOUT_COL_NUM}
             className="layout"
-            layout={layout}
+            layout={adjustedLayout}
             onLayoutChange={onLayoutChange}
             onDragStart={onDragStart}
             onDragStop={onDragStop}

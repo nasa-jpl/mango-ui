@@ -30,7 +30,7 @@ export const getView = async (signal?: AbortSignal): Promise<View> => {
 };
 
 export const getMissions = async (
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<
   {
     id: string;
@@ -46,7 +46,7 @@ export const getMissions = async (
 
 export const getProducts = async (
   missionId: string,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<Product[]> => {
   const url =
     config.endpoints.data +
@@ -76,7 +76,7 @@ export const getData = (
   startTime: string,
   endTime: string,
   downsamplingFactor?: number,
-  filter?: string
+  filter?: string[],
 ) => {
   const fieldsString = fields.length
     ? `${fields.map((f) => `&fields=${f}`).join("")}`
@@ -86,8 +86,8 @@ export const getData = (
         .map((channel) => `&filter=${channel.id}=${channel.value}`)
         .join("")
     : "";
-  if (typeof filter === "string") {
-    filtersString += `&filter=${filter}`;
+  if (Array.isArray(filter) && filter.length > 0) {
+    filtersString += filter.map((f) => `&filter=${f}`).join("");
   }
   const url =
     config.endpoints.data +
@@ -112,7 +112,13 @@ export const getData = (
             response
               .json()
               .then((json) => {
-                resolve(json as DataResponse);
+                if (response.status >= 400) {
+                  throw new Error(
+                    (json as DataResponseError).detail || "Unknown error",
+                  );
+                } else {
+                  resolve(json as DataResponse);
+                }
               })
               .catch((error) => {
                 reject(error);

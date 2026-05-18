@@ -65,16 +65,12 @@
 
 /* Warning rows with zebra striping */
 .table .warning-row.ag-row-even,
-.table
-  .ag-theme-stellar
-  .ag-row-hover.warning-row.ag-row-even:not(.ag-row-selected)::before {
+.table .ag-theme-stellar .ag-row-hover.warning-row.ag-row-even:not(.ag-row-selected)::before {
   background: rgba(255, 220, 140, 0.35);
 }
 
 .table .warning-row.ag-row-odd,
-.table
-  .ag-theme-stellar
-  .ag-row-hover.warning-row.ag-row-odd:not(.ag-row-selected)::before {
+.table .ag-theme-stellar .ag-row-hover.warning-row.ag-row-odd:not(.ag-row-selected)::before {
   background: rgba(255, 220, 140, 0.5);
 }
 

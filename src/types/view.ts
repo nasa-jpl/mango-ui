@@ -105,7 +105,7 @@ export interface DownlinkDashboardEntity extends Entity {
   dateRange: DateRange;
   defaultFields: string[];
   defaultPassGapLimit: number; // ms limit for gaps between passes
-  filter?: string;
+  filter?: string[];
   gapField: string; // e.g. time_gap_max
   instrument: string;
   products: DownlinkDashProduct[];
@@ -147,7 +147,7 @@ export type DataLayer = {
   dataset: string;
   endTime: string;
   fields: string[];
-  filter?: string; // e.g. "field=value"
+  filter?: string[]; // e.g. "field=value"
   id: string;
   instrument: string;
   label?: string;
@@ -229,9 +229,12 @@ export interface MapEntity extends Entity {
   layers?: MapLayer[];
 }
 
+export type TableColumnDisplayType = "text-chunk";
+
 export type TableColumn = {
   columnGroupId?: string;
   dateFormat?: DateFormat;
+  displayType?: TableColumnDisplayType;
   field: string;
   id: string;
   label?: string;
