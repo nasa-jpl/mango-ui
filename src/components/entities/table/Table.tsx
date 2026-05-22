@@ -300,9 +300,9 @@ const Table = memo(function Table({
             return "-";
           }
 
-          if (typeof params.value === "number") {
-            return parseFloat(params.value.toPrecision(4));
-          }
+          // if (typeof params.value === "number") {
+          //   return parseFloat(params.value.toPrecision(4));
+          // }
 
           return params.value;
         },
@@ -321,9 +321,10 @@ const Table = memo(function Table({
             return fieldData;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
-            if (typeof fieldData.value === "number") {
-              return parseFloat(fieldData.value.toPrecision(4));
-            }
+            // mlucas: Commenting this out. See https://github.com/nasa-jpl/mango-ui/issues/158?issue=nasa-jpl%7Cmango-ui%7C190.
+            // if (typeof fieldData.value === "number") {
+            //   return parseFloat(fieldData.value.toPrecision(4));
+            // }
             return fieldData.value;
           }
           if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
@@ -477,8 +478,12 @@ const Table = memo(function Table({
     startTime: string | undefined,
     endTime: string | undefined,
     mission?: string | null,
-    instrument?: string | null
-  ): Promise<{ layer: DataLayer; notIngested?: boolean; result: DataResponse }> => {
+    instrument?: string | null,
+  ): Promise<{
+    layer: DataLayer;
+    notIngested?: boolean;
+    result: DataResponse;
+  }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
@@ -511,10 +516,24 @@ const Table = memo(function Table({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+            if (
+              error instanceof HttpError &&
+              error.status >= 400 &&
+              error.status < 500
+            ) {
               resolve({
                 layer,
-                result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
+                result: {
+                  data: [],
+                  data_begin: "",
+                  data_count: 0,
+                  data_end: "",
+                  downsampling_factor: 1,
+                  from_isotimestamp: "",
+                  nominal_data_interval_seconds: null,
+                  query_elapsed_ms: 0,
+                  to_isotimestamp: "",
+                },
                 notIngested: true,
               });
             } else {
@@ -745,9 +764,12 @@ const Table = memo(function Table({
       {
         <DataGrid
           error={error}
-          hasUningestedLayers={hasNotIngestedLayers || tableEntity.layers.some(
-            (layer) => !getDatasetForLayer(layer, products, instrument)
-          )}
+          hasUningestedLayers={
+            hasNotIngestedLayers ||
+            tableEntity.layers.some(
+              (layer) => !getDatasetForLayer(layer, products, instrument),
+            )
+          }
           idKey={idField}
           fitToGridWidth={!!tableEntity.fitToGridWidth}
           compact={tableEntity.compact}
