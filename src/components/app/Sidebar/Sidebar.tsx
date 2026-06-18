@@ -112,7 +112,7 @@ export const Sidebar = ({
           to="products"
         >
           <SidebarLink
-            title="Products"
+            title="Product Catalog"
             icon={<Database size={16} />}
             variant="primary-link"
           />
@@ -148,7 +148,7 @@ export const Sidebar = ({
                       className={(activeNav) =>
                         getNavLinkClass(
                           activeNav.isActive,
-                          `view/${pageGroup.url}/${page.url}`
+                          `view/${pageGroup.url}/${page.url}`,
                         )
                       }
                       to={`view/${pageGroup.url}/${page.url}`}
