@@ -157,3 +157,5 @@ Error responses include a `detail` field; use it for user-facing messages.
 **Styling**: Use Tailwind classes where possible, supplement with CSS modules or global CSS in `variables.css` for theme consistency.
 
 **Fetching time-series data**: Use `getData()`, call `.json()` to trigger fetch, handle `.cancel()` in cleanup (e.g., useEffect return).
+
+**Updating release notes**: When shipping a user-visible change (new feature, notable fix, UX change), add an entry to the `recentHighlights` array at the top of `src/routes/HomePage.tsx`. This array drives the "What's new" section on the home page. Include a short title, the PR number (if applicable), and a one-sentence description. Trim the oldest entry when adding a new one so the list stays at ~4 items.
