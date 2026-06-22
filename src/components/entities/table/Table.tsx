@@ -511,7 +511,7 @@ const Table = memo(function Table({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+            if (error instanceof HttpError && error.status === 404) {
               resolve({
                 layer,
                 result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
