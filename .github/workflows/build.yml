@@ -72,14 +72,14 @@ jobs:
           retention-days: 2 # limit imposed by GitHub organization
 
   build_podman_image:
-    name: Build Podman Image
+    name: Build Image
     environment: mango_ui
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test_mango_ui]
     if: |
       needs.test_mango_ui.result == 'success' &&
       (
-        github.ref == 'refs/heads/develop' ||
+        github.ref == 'refs/heads/task/podman' ||
         startsWith(github.ref, 'refs/tags/')
       )
     steps:
