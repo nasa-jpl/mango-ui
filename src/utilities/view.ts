@@ -210,7 +210,7 @@ export function formatYValue(tickValue: number | string | null): string {
     return tickValue;
   }
   const formattedValue =
-    Math.abs(tickValue) < 0.001 || Math.abs(tickValue) > 9999
+    Math.abs(tickValue) < 0.0001 || Math.abs(tickValue) > 9999
       ? format("~e")(tickValue)
       : format("~g")(tickValue);
 
