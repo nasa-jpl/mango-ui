@@ -1226,7 +1226,7 @@ export const Chart = ({
         },
         plugins: {
           legend: {
-            display: false,
+            display: !compact,
           },
           tooltip: {
             enabled: false,
