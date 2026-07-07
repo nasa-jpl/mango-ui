@@ -49,7 +49,12 @@ import {
   TimeSeriesPoint,
   YAxis,
 } from "../../../types/view";
+import { toast } from "sonner";
 import { getData, HttpError } from "../../../utilities/api";
+import {
+  isWithinSubsetVersionMaxRange,
+  SUBSET_VERSION_MAX_RANGE_DAYS,
+} from "../../../utilities/time";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -602,74 +607,11 @@ export const Chart = ({
       processedData[i] = { layer, pointsByField: newPointsByField, ...rest };
     });
 
-    // Expand layers with subset_version into alternating colors
-    const expandedProcessedData = processedData.flatMap((item) => {
-        const { layer, pointsByField } = item;
-
-        // Only process ChartLayerLine
-        if (!isChartLayerLine(layer)) {
-          return [item];
-        }
-
-        const primaryField = layer.fields[0];
-
-        // Skip if the primary field data doesn't exist
-        if (!pointsByField[primaryField]) {
-          return [item];
-        }
-
-        // Check if any point has subset_version data
-        const hasSubsetVersion = pointsByField[primaryField].some(
-          (point) => point.raw.subset_version?.value !== undefined
-        );
-
-        if (!hasSubsetVersion) {
-          return [item];
-        }
-
-        // Group points by subset_version
-        const groups: Record<string, CustomChartData[]> = {};
-
-        pointsByField[primaryField].forEach((point) => {
-          const subsetVersionValue = point.raw.subset_version?.value?.toString() || "unknown";
-          if (!groups[subsetVersionValue]) {
-            groups[subsetVersionValue] = [];
-          }
-          groups[subsetVersionValue].push(point);
-        });
-
-        // Create a virtual layer for each subset_version with alternating colors
-        return Object.entries(groups)
-          .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
-          .map(([subsetVersionValue, groupPoints], index) => {
-            // Alternate between blue and red for subset_versions
-            const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
-
-            const virtualLayer = {
-              ...layer,
-              color: color,
-              // Update label to include subset_version
-              label: layer.label
-                ? `${layer.label} (subset_version=${subsetVersionValue})`
-                : `subset_version=${subsetVersionValue}`,
-            };
-
-            return {
-              ...item,
-              layer: virtualLayer,
-              pointsByField: {
-                ...pointsByField,
-                [primaryField]: groupPoints,
-              },
-            };
-          });
-      });
-
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<
       "line" | "bar" | "scatter" | "bubble",
       CustomChartData[]
-    >[] = expandedProcessedData
+    >[] = processedData
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
@@ -687,32 +629,12 @@ export const Chart = ({
           if (isLineLayer) {
             const isDownsampled = downsampling_factor !== 1;
 
-            // Count unique subset_versions in the data
-            const subsetVersionSet = new Set<string>();
-            const primaryField = layer.fields[0];
-            if (pointsByField[primaryField]) {
-              pointsByField[primaryField].forEach((point) => {
-                const subsetVersionValue = point.raw.subset_version?.value;
-                if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
-                  subsetVersionSet.add(String(subsetVersionValue));
-                }
-              });
-            }
-            const subsetVersionCount = subsetVersionSet.size;
-
-            // Store count on layer for EntityEditor to use
-            const layerWithCount: typeof layer & { subsetVersionCount: number } = {
-              ...layer,
-              subsetVersionCount,
-            };
-
             return {
               ...commonConfig, // TODO would be nice to render these outside of the canvas in order to better format
               // and control these labels
               // TODO what should these labels contain metadata wise? Fairly verbose right now.
               data: pointsByField[layer.fields[0]],
               type: "line",
-              layer: layerWithCount,
               label:
                 layer.label ||
                 `${missionLabel} ${instrument} ${layer.dataset} ${
@@ -998,36 +920,43 @@ export const Chart = ({
         }
       }
 
-      // Include groupBy field if specified
-      let fieldsToFetch = layer.fields;
-      let shouldSkipDownsampling = false;
-      if (isChartLayerLine(layer)) {
-        // Include subset_version field if the product has it
+      // subset_version only exists in full-resolution data, so a
+      // subset_version filter requires fetching at full resolution. Within
+      // the supported short-range window, force full resolution; beyond it,
+      // drop the filter and downsample as usual.
+      let layerFilter = layer.filter;
+      if (
+        Array.isArray(layerFilter) &&
+        layerFilter.some((f) => f.trim().startsWith("subset_version="))
+      ) {
         if (
-          (layer as ChartLayer & { hasSubsetVersionField?: boolean }).hasSubsetVersionField &&
-          !fieldsToFetch.includes("subset_version")
+          isWithinSubsetVersionMaxRange(computedStartTime, computedEndTime)
         ) {
-          fieldsToFetch = [...fieldsToFetch, "subset_version"];
-          // Skip downsampling when fetching subset_version data
-          shouldSkipDownsampling = true;
+          downsamplingFactor = 1;
+        } else {
+          layerFilter = layerFilter.filter(
+            (f) => !f.trim().startsWith("subset_version=")
+          );
+          // Fixed id so repeated fetches/layers update one toast instead of stacking
+          toast.warning(
+            `Subset versions are unavailable for time ranges beyond ${SUBSET_VERSION_MAX_RANGE_DAYS} days. Showing data for all subset versions.`,
+            { id: "subset-version-range-warning", richColors: true }
+          );
         }
       }
-
-      // Build filter string from existing filter
-      const filterString = layer.filter;
 
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        fieldsToFetch,
+        layer.fields,
         layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        shouldSkipDownsampling ? undefined : downsamplingFactor,
-        filterString
+        downsamplingFactor,
+        layerFilter
       );
       cancelHandles[layerFullId] = cancel;
       json()

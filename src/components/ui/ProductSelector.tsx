@@ -25,7 +25,14 @@ import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { getData } from "../../utilities/api";
+import {
+  isWithinSubsetVersionMaxRange,
+  SUBSET_VERSION_MAX_RANGE_DAYS,
+} from "../../utilities/time";
 import { SelectedProduct } from "./EntityEditor";
+
+// Sentinel value for the "All" subset version option (no filter applied)
+const ALL_SUBSET_VERSIONS = "__all__";
 
 export declare type ProductSelectorProps = {
   dateRange?: DateRange;
@@ -128,72 +135,76 @@ export const ProductSelector = ({
       updateSelectedProduct({
         ...newSelectedProduct,
         hasSubsetVersionField,
-        subsetVersionCount: 0, // Reset count when field changes
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSubsetVersionField]);
 
-  // Fetch and count subset versions when product has the field and selection is complete
+  // Subset version filtering is only available over short time ranges
+  const subsetVersionAvailable =
+    !!dateRange && isWithinSubsetVersionMaxRange(dateRange.start, dateRange.end);
+
+  // Unique subset_version values available for the current selection
+  const [subsetVersions, setSubsetVersions] = useState<string[]>([]);
+
+  // Fetch the available subset versions when the product has the field, the
+  // selection is complete, and the time range is short enough for subset
+  // version filtering
   useEffect(() => {
     if (
       !hasSubsetVersionField ||
+      !subsetVersionAvailable ||
       !newSelectedProduct.mission ||
       !newSelectedProduct.instrument ||
       !newSelectedProduct.dataset ||
       !newSelectedProduct.version ||
       !dateRange
     ) {
+      setSubsetVersions([]);
       return;
     }
 
-    const fetchSubsetVersionCount = async () => {
-      try {
-        const { json } = getData(
-          newSelectedProduct.mission,
-          newSelectedProduct.dataset,
-          newSelectedProduct.instrument,
-          newSelectedProduct.version,
-          ["subset_version"],
-          newSelectedProduct.channels ?? [],
-          dateRange.start,
-          dateRange.end,
-        );
-
-        const data = await json();
-        if (data && data.data && Array.isArray(data.data)) {
-          const subsetVersionSet = new Set<string>();
-          data.data.forEach((point: DataResponseDataEntry) => {
-            const subsetVersionValue = point.subset_version?.value;
-            if (
-              subsetVersionValue !== undefined &&
-              subsetVersionValue !== null
-            ) {
-              subsetVersionSet.add(String(subsetVersionValue));
-            }
-          });
-          const count = subsetVersionSet.size;
-          // Update selected product with the count
-          if (count > 0) {
-            updateSelectedProduct({
-              ...newSelectedProduct,
-              subsetVersionCount: count,
-            });
+    const { json, cancel } = getData(
+      newSelectedProduct.mission,
+      newSelectedProduct.dataset,
+      newSelectedProduct.instrument,
+      newSelectedProduct.version,
+      ["subset_version"],
+      newSelectedProduct.channels ?? [],
+      dateRange.start,
+      dateRange.end,
+      // subset_version only exists in full-resolution data; without an
+      // explicit factor the server may pick a downsampled resolution and
+      // reject the request
+      1,
+    );
+    json()
+      .then((data) => {
+        const subsetVersionSet = new Set<string>();
+        (data?.data || []).forEach((point: DataResponseDataEntry) => {
+          const subsetVersionValue = point.subset_version?.value;
+          if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+            subsetVersionSet.add(String(subsetVersionValue));
           }
-        }
-      } catch (error: unknown) {
-        const err = error as Error;
-        if (err?.name === "AbortError") {
+        });
+        setSubsetVersions(
+          [...subsetVersionSet].sort((a, b) =>
+            a.localeCompare(b, "en", { numeric: true }),
+          ),
+        );
+      })
+      .catch((error: unknown) => {
+        if ((error as Error)?.name === "AbortError") {
           return;
         }
+        setSubsetVersions([]);
         console.error("Error fetching subset versions:", error);
-      }
-    };
-
-    fetchSubsetVersionCount();
+      });
+    return cancel;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     hasSubsetVersionField,
+    subsetVersionAvailable,
     dateRange?.start,
     dateRange?.end,
     newSelectedProduct.mission,
@@ -201,6 +212,12 @@ export const ProductSelector = ({
     newSelectedProduct.dataset,
     newSelectedProduct.version,
   ]);
+
+  // The subset version currently applied via the product's filter, if any
+  const selectedSubsetVersion = (newSelectedProduct.filter || [])
+    .find((f) => f.trim().startsWith("subset_version="))
+    ?.split("=")[1]
+    ?.trim();
 
   return (
     <div className="flex flex-col gap-4">
@@ -434,6 +451,52 @@ export const ProductSelector = ({
             </SelectContent>
           </Select>
         </div>
+        {hasSubsetVersionField &&
+          subsetVersionAvailable &&
+          subsetVersions.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <Label size="sm">Subset Version</Label>
+              <Select
+                onValueChange={(value) => {
+                  // Applied as a subset_version=<value> filter on the layer
+                  const otherFilters = (newSelectedProduct.filter || []).filter(
+                    (f) => !f.trim().startsWith("subset_version="),
+                  );
+                  const updated = { ...newSelectedProduct };
+                  if (value === ALL_SUBSET_VERSIONS) {
+                    if (Array.isArray(newSelectedProduct.filter)) {
+                      updated.filter = otherFilters;
+                    }
+                  } else {
+                    updated.filter = [
+                      ...otherFilters,
+                      `subset_version=${value}`,
+                    ];
+                  }
+                  updateSelectedProduct(updated);
+                }}
+                value={selectedSubsetVersion ?? ALL_SUBSET_VERSIONS}
+              >
+                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent size="xs">
+                  <SelectItem size="xs" value={ALL_SUBSET_VERSIONS}>
+                    All
+                  </SelectItem>
+                  {subsetVersions.map((subsetVersion) => (
+                    <SelectItem
+                      size="xs"
+                      value={subsetVersion}
+                      key={subsetVersion}
+                    >
+                      {subsetVersion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         {Array.isArray(selectedProduct.filter) && (
           <div className="flex flex-col gap-1 min-w-40">
             <Label size="sm">Filter</Label>
@@ -456,6 +519,15 @@ export const ProductSelector = ({
           </div>
         )}
       </div>
+      {hasSubsetVersionField &&
+        !subsetVersionAvailable &&
+        selectedSubsetVersion !== undefined && (
+          <div className="text-xs text-amber-600">
+            Subset versions are unavailable for time ranges beyond{" "}
+            {SUBSET_VERSION_MAX_RANGE_DAYS} days. Showing data for all subset
+            versions.
+          </div>
+        )}
     </div>
   );
 };
