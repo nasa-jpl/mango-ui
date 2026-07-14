@@ -151,14 +151,23 @@ export default function HomePage() {
         </section>
 
         <section className="bg-background rounded border overflow-hidden">
+          <div className="p-4 text-sm">
+            <span className="text-gray-600">Product count: </span>
+            <span className="font-semibold">
+              {loadingInitialData ? "Loading…" : products.length}
+            </span>
+          </div>
+        </section>
+
+        <section className="bg-background rounded border overflow-hidden">
           <div className="px-3 py-2 border-b bg-gray-50 font-medium">
             Software versions
           </div>
           <dl className="p-4 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
             <dt className="text-gray-600">Release</dt>
-            <dd className="font-mono">{release || "—"}</dd>
+            <dd className="font-mono font-semibold">{release || "—"}</dd>
             <dt className="text-gray-600">Git commit</dt>
-            <dd className="font-mono">
+            <dd className="font-mono font-semibold">
               {commitHash ? (
                 <a
                   className="text-blue-600 hover:underline"
@@ -172,8 +181,6 @@ export default function HomePage() {
                 "—"
               )}
             </dd>
-            <dt className="text-gray-600">Product count</dt>
-            <dd>{loadingInitialData ? "Loading…" : products.length}</dd>
           </dl>
         </section>
       </div>
