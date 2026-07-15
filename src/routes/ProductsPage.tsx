@@ -7,13 +7,14 @@ import { View } from "../types/view";
 
 export default function ProductsPage() {
   // TODO type outlet context instead of duplicating
-  const [, , products, setProductPreview, loadingInitialData] =
+  const [, , products, setProductPreview, , loadingInitialData] =
     useOutletContext<
       [
         View,
         never,
         Product[],
         React.Dispatch<React.SetStateAction<ProductPreview>>,
+        never,
         boolean
       ]
     >();
