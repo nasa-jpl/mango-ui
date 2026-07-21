@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 MANGO UI is a React/TypeScript frontend for the GRACE satellite missions monitoring tool. It enables visualization and analysis of telemetry data from multiple missions, with features for data comparison, plotting, and export.
 
 ### Tech Stack
+
 - **Framework**: React 18 + TypeScript, Vite for build/dev
 - **UI**: Tailwind CSS, NASA JPL Stellar React design system, Radix UI components
 - **Data visualization**: Chart.js, D3 scales/formatting, Cesium 3D maps, ag-grid
@@ -24,6 +25,7 @@ MANGO UI is a React/TypeScript frontend for the GRACE satellite missions monitor
 ### Development Setup
 
 The project requires:
+
 1. **Self-signed certificates** for HTTPS dev server:
    ```bash
    brew install mkcert
@@ -83,7 +85,7 @@ src/
 
 ### Building & Deployment
 
-Production builds are static HTML/CSS/JS (Cesium assets copied separately). The `base` path is configurable via `VITE_APP_PATH` environment variable. Docker image available; runtime injects `VITE_API_URL` and `VITE_MANGO_DOCS_URL`.
+Production builds are static HTML/CSS/JS (Cesium assets copied separately). The `base` path is configurable via `VITE_APP_PATH` environment variable. Podman image available; runtime injects `VITE_API_URL` and `VITE_MANGO_DOCS_URL`.
 
 ### View State & Persistence
 
@@ -106,6 +108,7 @@ Each level has a UUID `id`, `title`, and `url`. Entities can contain data layers
 **Saving views**: Call `saveView(view)` to persist; uses toast for feedback. Backend stores as JSON under key `"default-view"`.
 
 **Creating entities**: Factory functions in `utilities/view.ts` ensure all required fields are present:
+
 - `createView()` — with default bounds and empty home page
 - `createViewPage(params)` — with UUID and empty sections
 - `createEntity(params)` — infers type, auto-adds type-specific fields (e.g., `columns` for tables)
@@ -113,6 +116,7 @@ Each level has a UUID `id`, `title`, and `url`. Entities can contain data layers
 - `duplicateEntity(entity, section)` and `duplicateSection(section)` — deep clone with new UUIDs and grid layout updates
 
 **Data transformations**: Chart layers support two transform types:
+
 - `"self"` — arithmetic on the layer's own values (add, subtract, multiply, divide)
 - `"derived"` — use matching time-series points from another layer (e.g., compute ratio of two measurements)
 
@@ -121,12 +125,14 @@ Helper: `applyLayerTransforms(point, layer, data, index)` applies transforms in 
 ### API Client Patterns
 
 All API calls are in `utilities/api.ts`. Pattern:
+
 - Uses native `fetch` with `credentials: "include"` (sends session cookies)
 - URLs built from `config.endpoints.data` + template strings (placeholders like `{MISSION}`, `{INSTRUMENT}` replaced)
 - Error handling: status 200–400 is success; ≥400 or ≠2xx shows toast error and throws
 - All requests include `Content-Type: application/json` header
 
 **Key functions**:
+
 - `getView(signal?)` — fetch view JSON from backend, returns `View`. Includes optional AbortSignal for cancellation.
 - `saveView(view)` — POST view back to backend, shows success toast
 - `getMissions(signal)` — fetch list of available missions
@@ -134,13 +140,16 @@ All API calls are in `utilities/api.ts`. Pattern:
 - `getData(missionId, dataset, instrumentId, version, fields, channels, startTime, endTime, downsamplingFactor?, filter?)` — **lazy fetch** for time-series data
 
 **getData() is special**: Returns an object with methods:
+
 ```ts
 {
   json(): Promise<DataResponse>  // Call to trigger fetch; resolves with data or rejects
   cancel(): void                 // Call to abort the fetch mid-flight (AbortController)
 }
 ```
+
 This allows you to kick off the request and cancel it if the user navigates away before it completes. Query params include:
+
 - `from_isotimestamp` / `to_isotimestamp` — time range (ISO 8601)
 - `fields=timestamp&fields=fieldName` — requested fields
 - `filter=channelId=value` — optional channel filters
@@ -157,3 +166,5 @@ Error responses include a `detail` field; use it for user-facing messages.
 **Styling**: Use Tailwind classes where possible, supplement with CSS modules or global CSS in `variables.css` for theme consistency.
 
 **Fetching time-series data**: Use `getData()`, call `.json()` to trigger fetch, handle `.cancel()` in cleanup (e.g., useEffect return).
+
+**Updating release notes**: When shipping a user-visible change (new feature, notable fix, UX change), add an entry to the `recentHighlights` array at the top of `src/routes/HomePage.tsx`. This array drives the "What's new" section on the home page. Include a short title, the PR number (if applicable), and a one-sentence description. Trim the oldest entry when adding a new one so the list stays at ~4 items.
