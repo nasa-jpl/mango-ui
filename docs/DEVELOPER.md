@@ -79,3 +79,21 @@ To build the docker image, run:
 To spin up a docker container on your local machine run this command and replace `RUNTIME_API_URL` with the API URL. Replace `RUNTIME_DOCS_URL` with the runtime url pointing to the deployed Mango Docs:
 
 `docker run --name mango-ui -p 5174:5174 -v ./.cert:/app/.cert -e VITE_API_URL="{RUNTIME_API_URL}" -e VITE_MANGO_DOCS_URL="{RUNTIME_DOCS_URL}" mango-ui`
+
+### Build-time metadata (release + git commit)
+
+The home page shows the release name and git commit hash of the running build. These come from two build-time (not runtime) env vars, read by Vite while `npm run build:force` executes inside the image:
+
+- `VITE_APP_RELEASE` — branch or tag name (e.g. `develop`, `v1.2.0`)
+- `VITE_GIT_COMMIT_HASH` — full commit SHA
+
+CI passes these automatically via `docker build --build-arg` (see `.github/workflows/build.yml`). For a manual local Docker build that should show real values on the home page, pass them yourself:
+
+```
+docker build \
+  --build-arg VITE_APP_RELEASE=$(git rev-parse --abbrev-ref HEAD) \
+  --build-arg VITE_GIT_COMMIT_HASH=$(git rev-parse HEAD) \
+  -t mango-ui .
+```
+
+If you omit them, the image builds fine but the home page renders `—` in both fields.
