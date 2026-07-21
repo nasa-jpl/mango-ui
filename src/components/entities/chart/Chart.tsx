@@ -1,5 +1,9 @@
 import {
   Button,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,6 +31,7 @@ import { Mode } from "chartjs-plugin-zoom/types/options";
 import classNames from "classnames";
 import { debounce, throttle } from "lodash-es";
 import {
+  Copy,
   CopyPlus,
   Minus,
   MoreVertical,
@@ -35,8 +40,16 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Root, createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import {
   DataResponse,
   DataResponseDataEntry,
@@ -62,6 +75,7 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
+import { formatDateGPS } from "../../../utilities/time";
 import {
   applyLayerTransforms,
   formatYValue,
@@ -145,6 +159,11 @@ export const Chart = ({
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
   const [hasNotIngestedLayers, setHasNotIngestedLayers] = useState(false);
+  // Data captured on right-click, used to populate the copy context menu.
+  const [copyMenu, setCopyMenu] = useState<{
+    rows: { label: string; value: string }[];
+    timestamp: string;
+  } | null>(null);
   const cancelHandles: Record<string, () => void> = {};
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1055,6 +1074,87 @@ export const Chart = ({
     });
   };
 
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied to clipboard`);
+    } catch {
+      toast.error(`Unable to copy ${label.toLowerCase()}`);
+    }
+  };
+
+  // On right-click, capture the data point(s) under the cursor so the context
+  // menu can offer to copy their timestamp / values. Suppressing the menu
+  // (preventDefault) when there is nothing under the cursor stops the Radix
+  // ContextMenuTrigger from opening an empty menu.
+  const onChartContextMenu = (event: ReactMouseEvent<HTMLCanvasElement>) => {
+    const chart = chartRef.current;
+    if (!chart) {
+      event.preventDefault();
+      return;
+    }
+    const elements = chart.getElementsAtEventForMode(
+      event.nativeEvent,
+      "index",
+      { intersect: false },
+      false
+    );
+    if (!elements.length) {
+      event.preventDefault();
+      return;
+    }
+
+    const rows = elements
+      .map(({ datasetIndex, index }) => {
+        const dataset = chart.data.datasets[datasetIndex] as
+          | (typeof chart.data.datasets)[number] & { layer?: ChartLayer }
+          | undefined;
+        const point = dataset?.data[index];
+        if (!dataset || !point) {
+          return null;
+        }
+        const layer = dataset.layer;
+        // Describe the series so the menu makes clear exactly which value is
+        // being copied. Include the plotted field and any channels, since
+        // sibling series often share mission/instrument/dataset and differ
+        // only by those.
+        const channelSuffix = layer?.channels?.length
+          ? ` (${layer.channels
+              .map((channel) => `${channel.id}: ${channel.value}`)
+              .join(", ")})`
+          : "";
+        const descriptor = [
+          missionProp ?? layer?.mission,
+          instrumentProp ?? layer?.instrument,
+          layer?.dataset,
+          layer?.fields?.[0],
+        ]
+          .filter(Boolean)
+          .join(" ");
+        const label =
+          layer?.label ||
+          (descriptor ? descriptor + channelSuffix : "") ||
+          dataset.label ||
+          "";
+        const value = point.tooltipLabel || formatYValue(point.y);
+        return { label, value };
+      })
+      .filter((row): row is { label: string; value: string } => row !== null);
+
+    if (!rows.length) {
+      event.preventDefault();
+      return;
+    }
+
+    const firstDataset = chart.data.datasets[elements[0].datasetIndex];
+    const firstPoint = firstDataset?.data[elements[0].index];
+    setCopyMenu({
+      timestamp: firstPoint ? formatDateGPS(new Date(firstPoint.x)) : "",
+      rows,
+    });
+    // Don't preventDefault — let the ContextMenu open at the cursor.
+  };
+
   const onPointClick = (
     _: ChartEvent,
     elements: ActiveElement[],
@@ -1587,7 +1687,38 @@ export const Chart = ({
         })}
       >
         <div className="chart-canvas-container">
-          <canvas ref={canvasRef} id={`chart-${chartEntity.id}`} role="img" />
+          <ContextMenu>
+            <ContextMenuTrigger asChild onContextMenu={onChartContextMenu}>
+              <canvas
+                ref={canvasRef}
+                id={`chart-${chartEntity.id}`}
+                role="img"
+              />
+            </ContextMenuTrigger>
+            {copyMenu && (
+              <ContextMenuContent>
+                {!!copyMenu.timestamp && (
+                  <ContextMenuItem
+                    onClick={() =>
+                      copyToClipboard(copyMenu.timestamp, "Timestamp")
+                    }
+                  >
+                    <Copy size={16} className="mr-1" /> Copy timestamp (
+                    <span className="font-bold">{copyMenu.timestamp}</span>)
+                  </ContextMenuItem>
+                )}
+                {copyMenu.rows.map((row, index) => (
+                  <ContextMenuItem
+                    key={`${index}_${row.label}`}
+                    onClick={() => copyToClipboard(row.value, "Value")}
+                  >
+                    <Copy size={16} className="mr-1" />{" "}
+                    {row.label ? `Copy ${row.label} value` : "Copy value"}
+                  </ContextMenuItem>
+                ))}
+              </ContextMenuContent>
+            )}
+          </ContextMenu>
           {renderChartOverlays()}
         </div>
       </div>
