@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "mutate": ["src/utilities/**/*.ts", "!src/utilities/**/*.test.ts"],
+  "reporters": ["html", "clear-text", "progress"],
+  "htmlReporter": {
+    "fileName": "test-metrics/mutation/mutation-report.html"
+  },
+  "tempDirName": ".stryker-tmp",
+  "incremental": false
+}

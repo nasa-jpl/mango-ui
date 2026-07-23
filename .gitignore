@@ -35,3 +35,8 @@ e2e-test-results/
 
 # env
 .env
+
+# test coverage & mutation testing
+coverage
+.stryker-tmp
+test-metrics/
