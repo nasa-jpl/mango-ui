@@ -91,6 +91,26 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
     subsequent `until` branch overwrites; for a since-present threshold it is unchanged.
     Equivalent (and entangled with the D3 overwrite bug).
 
+### Phase 1.4b — `generic.ts` saturated (commit: generic tests)
+
+- Extended `src/utilities/generic.test.ts` (node env) with `getDataLayerId` channels branch,
+  `convertHexToRGBA` (6-/3-digit, `#`-optional, fractional vs whole-number-percentage opacity
+  incl. the `1` and `>100` boundaries, invalid→`#000000` catch), and `fetchWithProgress`
+  (streamed chunks with progress/complete payload assertions, sub-200 & 3xx boundary rejects,
+  non-2xx error, no-body `failure` event, rejected-fetch error, `cancel()` no-throw) using a
+  mocked streaming `Response`.
+- New `src/utilities/generic.dom.test.ts` (jsdom env) for `downloadJSON` (Blob content type +
+  size, `createElement("a")`, click, object-URL create/revoke) and `isMacOs` (navigator
+  platform true/false).
+- `generic.ts` mutation (file total): **14.04% → 92.98%** (covered 92.98%); no-coverage 0;
+  survivors 20 → **8**. The 8 residual survivors are all equivalent internal-state mutants in
+  `fetchWithProgress` (L12/L13 initial `loading`/`chunks` values overwritten by `_resetLocals`;
+  L21 `controller?.` optional chaining where `controller` is always set first; L28 the `|| ""`
+  fallback only reachable on an empty body, where both variants still error; L37/L38/L85 the
+  internal `loading` toggles in the read loop/finally; L94 the `cancel()` body whose
+  `AbortController` effect isn't observable through the mocked stream). Not observable without
+  asserting on private state.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
