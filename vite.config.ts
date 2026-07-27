@@ -64,7 +64,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
-      include: ["./src/**/*.test.ts"],
+      include: ["./src/**/*.test.{ts,tsx}"],
+      // Default to the fast node environment; component tests opt into jsdom per-file
+      // with `// @vitest-environment jsdom`. Do not force jsdom on pure-logic tests.
+      environment: "node",
+      setupFiles: ["./src/test-utils/setup.ts"],
       outputFile: {
         json: "unit-test-results/json-results.json",
         junit: "unit-test-results/junit-results.xml",

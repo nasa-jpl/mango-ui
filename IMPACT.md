@@ -12,17 +12,17 @@ Re-ran the §2 commands on `add-testing` (HEAD `b80d385`, whose parent is the ba
 commit `022829f`; `b80d385` only adds strategy docs, so source is unchanged). Results
 match §2 exactly:
 
-| Metric | §2 | Reproduced |
-|---|---|---|
-| Unit tests | 10 / 3 files | 10 / 3 files |
-| Statement coverage (app) | 3.26% | 3.26% |
-| Branch coverage (app) | 47.61% | 47.61% |
-| Function coverage (app) | 17.44% | 17.44% |
-| Statement coverage (`src/utilities/`) | 33.45% | 33.45% |
-| Mutation score, total | 21.70% | 21.70% |
-| Mutation score, covered | 83.92% | 83.92% |
-| Killed / timeout / survived / no-cov | 117 / — / 23 / 410 | 117 / 3 / 23 / 410 |
-| Mutation runtime | ~7s | ~8s |
+| Metric                                | §2                 | Reproduced         |
+| ------------------------------------- | ------------------ | ------------------ |
+| Unit tests                            | 10 / 3 files       | 10 / 3 files       |
+| Statement coverage (app)              | 3.26%              | 3.26%              |
+| Branch coverage (app)                 | 47.61%             | 47.61%             |
+| Function coverage (app)               | 17.44%             | 17.44%             |
+| Statement coverage (`src/utilities/`) | 33.45%             | 33.45%             |
+| Mutation score, total                 | 21.70%             | 21.70%             |
+| Mutation score, covered               | 83.92%             | 83.92%             |
+| Killed / timeout / survived / no-cov  | 117 / — / 23 / 410 | 117 / 3 / 23 / 410 |
+| Mutation runtime                      | ~7s                | ~8s                |
 
 Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 
@@ -30,10 +30,10 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 
 ## Defects / suspected defects
 
-| # | Location | Description | Status |
-|---|---|---|---|
-| D1 | `src/utilities/api.ts` | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1 |
-| D2 | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output. | Open — to be killed in Phase 1 |
+| #   | Location                    | Description                                                                                                                                                              | Status                         |
+| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| D1  | `src/utilities/api.ts`      | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1 |
+| D2  | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output.                                          | Open — to be killed in Phase 1 |
 
 ## Surviving mutants killed (running count vs. 23 baseline)
 
@@ -53,4 +53,15 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 ## Per-phase metric snapshots
 
 ### Phase 0 — Infrastructure (in progress)
+
 - Start: baseline as above. No product code changes permitted this phase.
+- **Node**: repo `.nvmrc` pins `v24.14.0` (`.npmrc` has `engine-strict=true`); installs
+  require node ≥20.19 (`@cesium/engine`). Baseline metrics reproduced identically on both
+  node 18 and 24, so measurement is version-stable.
+- **Dev dependencies added** (Phase 0.2, required for DOM/component testing):
+  `jsdom@^24.1.0`, `@testing-library/react@^14.3.1`, `@testing-library/jest-dom@^6.4.6`,
+  `@testing-library/user-event@^14.5.2`. No runtime/product deps changed.
+- **Steps 1–2 done**: vitest `include` now `./src/**/*.test.{ts,tsx}`; default env `node`,
+  jsdom opt-in per-file via `// @vitest-environment jsdom`; setup file
+  `src/test-utils/setup.ts` (jest-dom matchers). Verified render + user-event work; the
+  10 existing tests still pass. Gates green (unit/lint/lint:css/build).
