@@ -40,3 +40,13 @@ e2e-test-results/
 coverage
 .stryker-tmp
 test-metrics/
+# ...but keep the small, diffable machine-readable metric summaries committed as an
+# additive baseline trail (see TESTING_STRATEGY.md §5/§7). Bulky/regenerated outputs
+# (HTML reports, lcov) stay ignored above.
+!test-metrics/
+!test-metrics/coverage/
+test-metrics/coverage/*
+!test-metrics/coverage/coverage-summary.json
+!test-metrics/mutation/
+test-metrics/mutation/*
+!test-metrics/mutation/mutation.json

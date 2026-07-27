@@ -89,3 +89,11 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 - **Step 6 done (TZ pinning)**: `test` and `test:unit` scripts now run under `TZ=UTC`.
   Explicit non-UTC time cases will be added with the `time.ts` work in Phase 1. 10 tests
   still pass under UTC.
+- **Step 7 done (machine-readable baseline committed)** — resolves Q2. Adjusted
+  `.gitignore` to keep ignoring bulky/regenerated outputs (HTML report, `lcov.info`,
+  `.stryker-tmp`) but **un-ignore** the two small diffable summaries. Committed:
+  `test-metrics/coverage/coverage-summary.json`, `test-metrics/mutation/mutation.json`,
+  and preserved the authored `test-metrics/baseline.md` record (was untracked/ignored).
+  Regenerated numbers match §2/prior: utilities coverage 33.45%, mutation 21.70% total /
+  83.92% covered, 117/3/23/410, 10 tests. These JSON files are the additive machine-readable
+  baseline for before/after diffs (§5/§7).
