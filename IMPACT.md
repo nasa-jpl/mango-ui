@@ -111,6 +111,23 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   `AbortController` effect isn't observable through the mocked stream). Not observable without
   asserting on private state.
 
+### Phase 1.3 — `time.ts` saturated (commit: time tests + TZ fix)
+
+- New `src/utilities/time.test.ts` (4 tests): `toDatetimelocalStr` truncation,
+  `toUTCms` (UTC parse incl. documented `1646180940000` example + ISO round-trip), `j2ToMs`
+  (multiple values + the 2000-01-01T12:00:00Z epoch), `formatDateGPS` (seconds-precision,
+  zone-stripped).
+- **Fixed a Phase 0.6 gap**: `test:mutation` was `stryker run` (no `TZ`), so Stryker and its
+  spawned vitest workers ran in the host timezone. `formatDateGPS` (via
+  `stellar-react`'s `formatDateISO`) formats in local time and `Intl` caches the default zone
+  at process start, so a runtime `process.env.TZ` change in the setup file does **not** work —
+  it must be set at process start. Changed the script to `TZ=UTC stryker run`. (This surfaced a
+  real latent TZ dependency in `formatDateGPS`, now guarded.)
+- `time.ts` mutation (file total): **0% → 88.89%**; no-coverage 0; survivors 1 —
+  `time.ts:22` `value + "Z"` → `value + ""` in `toUTCms`. Equivalent under the pinned UTC
+  timezone (with/without the `Z`, a zone-less datetime parses identically when the host is
+  UTC); it is precisely the kind of bug the UTC pin exists to normalize.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
