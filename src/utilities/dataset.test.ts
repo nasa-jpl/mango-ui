@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { generateTestProduct } from "../../e2e-tests/utilities/product";
-import { generateTestChartLayer } from "../../e2e-tests/utilities/view";
+import { generateTestProduct } from "../test-utils/factories/product";
+import { generateTestChartLayer } from "../test-utils/factories/view";
 import { getFieldMetadataForLayer, getProductForLayer } from "./product";
 
 test("getProductForLayer", () => {
@@ -88,7 +88,7 @@ test("getProductForLayer", () => {
   expect(getProductForLayer(layer, [])).to.be.undefined;
   expect(getProductForLayer(layer, [dataset3])).to.be.undefined;
   expect(getProductForLayer(layer, [dataset1, dataset2, dataset3])).to.deep.eq(
-    dataset1
+    dataset1,
   );
 });
 
@@ -119,6 +119,6 @@ test("getFieldMetadataForLayer", () => {
   ];
   expect(getFieldMetadataForLayer("foo", layer, [])).to.be.undefined;
   expect(getFieldMetadataForLayer("field1", layer, [dataset1])).to.deep.eq(
-    dataset1.available_fields[0]
+    dataset1.available_fields[0],
   );
 });

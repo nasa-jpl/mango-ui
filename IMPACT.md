@@ -81,3 +81,8 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   (diffable artifact); `incremental: true` with `incrementalFile: .stryker-tmp/incremental.json`.
   Re-ran: mutation score unchanged — total **21.70%**, covered **83.92%**, killed 117 /
   timeout 3 / survived 23 / no-cov 410 (== §2). Scope still logic-only (`src/utilities/**`).
+- **Step 5 done (factories relocated)**: moved `generic.ts`/`product.ts`/`view.ts` from
+  `e2e-tests/utilities/` → `src/test-utils/factories/`, fixed relative imports, and updated
+  the two unit tests (`dataset.test.ts`, `view.test.ts`). The inverted dependency (unit
+  tests importing from the e2e tree) is removed. No e2e spec imported these, so no e2e
+  changes needed. 10 tests still pass; gates green.

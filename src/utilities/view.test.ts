@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import {
   generateTestChartLayer,
   generateTestDataEntry,
-} from "../../e2e-tests/utilities/view";
+} from "../test-utils/factories/view";
 import { TimeSeriesPoint } from "../types/view";
 import {
   applyLayerTransform,

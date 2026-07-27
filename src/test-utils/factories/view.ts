@@ -1,7 +1,7 @@
-import { generateUniqueName } from "../../e2e-tests/utilities/generic";
-import { DataResponseDataEntry } from "../../src/types/api";
-import { ChartLayer } from "../../src/types/view";
-import { generateUUID } from "../../src/utilities/generic";
+import { DataResponseDataEntry } from "../../types/api";
+import { ChartLayer } from "../../types/view";
+import { generateUUID } from "../../utilities/generic";
+import { generateUniqueName } from "./generic";
 
 export const generateTestChartLayer = (): ChartLayer => {
   return {
