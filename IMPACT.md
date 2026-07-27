@@ -30,14 +30,45 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 
 ## Defects / suspected defects
 
-| #   | Location                    | Description                                                                                                                                                              | Status                         |
-| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
-| D1  | `src/utilities/api.ts`      | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1 |
-| D2  | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output.                                          | Open — to be killed in Phase 1 |
+| #   | Location                    | Description                                                                                                                                                              | Status                                                                   |
+| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| D1  | `src/utilities/api.ts`      | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1                                           |
+| D2  | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output.                                          | **Fixed** — killed by asserting `formatYValue(123.456789) === "123.457"` |
 
 ## Surviving mutants killed (running count vs. 23 baseline)
 
-- Killed so far: **0 / 23**.
+- Killed so far: **20 / 23** (18 in `view.ts`; the 2 in `product.ts` are handled in the
+  product commit).
+- **3 remaining `view.ts` mutants are equivalent** (behavior-preserving), documented and
+  intentionally not "killable" without asserting on unreachable states:
+  - `view.ts:131` `while (step < points.length)` → `<= `: the extra iteration only ever
+    reads `points[index ± points.length]`, which is always out of `[0, length-1]`, so it
+    can never find a new match. Provably equivalent.
+  - `view.ts:126` early-return guard `if (pointAtIndex && pointAtIndex.x === dateString)`
+    (ConditionalExpression `false`) and its block (BlockStatement `{}`): removing the fast
+    path falls through to the loop, whose `step === 0` iteration reads `points[index]` — the
+    same element — and returns it. Provably equivalent.
+
+  These 3 keep `view.ts` at a real ceiling of 98.08% total / 98.55% covered; chasing them
+  would require asserting on states the code cannot reach.
+
+### Phase 1.1 — `view.ts` saturated (commit: view tests)
+
+- Added 15 tests to `src/utilities/view.test.ts` (10 → 25 unit tests total across the repo
+  after this commit's file; suite green).
+- Killed survivors via: self multiply/divide assignment ops; derived subtract/divide;
+  derived "missing referenced layer returns value unchanged" (kills the `&&`→`||` and
+  `if (matchingLayer && field)`→`true` mutants, which otherwise dereference `undefined`);
+  unknown-transform-type guard (kills the `=== "derived"`→`true` else-if mutant);
+  backward-scan `findMatchingPoint` (kills the `index - step` arithmetic and the left-match
+  conditional); x-axis transform application (kills the `=== "x"` conditional/string and the
+  `=== "y"`→`true` mutants); `formatYValue` boundary + high-precision + non-numeric-string
+  assertions.
+- Also filled the no-coverage regions per Phase 1.4: type guards, `createView`/`createViewPage`/
+  `createViewPageGroup`/`createEntity`/`createDataLayer`, `duplicateEntity`/`duplicateSection`
+  (new-UUID + layout-remap + source-immutability), and a `createView` JSON round-trip.
+- `view.ts` mutation (file total): **42.79% → 98.08%** (covered 98.55%); no-coverage
+  mutants 98 → 1; survivors 21 → 3 (all equivalent, above).
 
 ## Open questions for maintainers
 
