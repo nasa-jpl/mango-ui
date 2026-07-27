@@ -2,10 +2,14 @@
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
   "mutate": ["src/utilities/**/*.ts", "!src/utilities/**/*.test.ts"],
-  "reporters": ["html", "clear-text", "progress"],
+  "reporters": ["html", "json", "clear-text", "progress"],
   "htmlReporter": {
     "fileName": "test-metrics/mutation/mutation-report.html"
   },
+  "jsonReporter": {
+    "fileName": "test-metrics/mutation/mutation.json"
+  },
   "tempDirName": ".stryker-tmp",
-  "incremental": false
+  "incremental": true,
+  "incrementalFile": ".stryker-tmp/incremental.json"
 }

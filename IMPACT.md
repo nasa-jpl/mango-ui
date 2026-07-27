@@ -77,3 +77,7 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   - Canvas Chart.js / ag-grid render paths intentionally **not** excluded yet: they still
     contain untested logic that is the Phase 2 worklist. Threshold-level exclusions for
     those render paths will be applied in Phase 5, not as report deletions (anti-gaming).
+- **Step 4 done (Stryker)**: added `json` reporter → `test-metrics/mutation/mutation.json`
+  (diffable artifact); `incremental: true` with `incrementalFile: .stryker-tmp/incremental.json`.
+  Re-ran: mutation score unchanged — total **21.70%**, covered **83.92%**, killed 117 /
+  timeout 3 / survived 23 / no-cov 410 (== §2). Scope still logic-only (`src/utilities/**`).
