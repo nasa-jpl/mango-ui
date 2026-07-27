@@ -57,8 +57,11 @@ jobs:
           npm run lint:css
         shell: bash
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run unit tests with coverage
+        run: npm run test:unit -- --coverage
+
+      - name: Run mutation tests
+        run: npm run test:mutation
 
       # - name: Run e2e tests
       #   run: npx playwright test
@@ -68,6 +71,24 @@ jobs:
         with:
           name: e2e-test-results
           path: e2e-test-results/
+          retention-days: 2 # limit imposed by GitHub organization
+
+      # Upload metrics artifacts on every run for before/after diffing (TESTING_STRATEGY.md
+      # §7). No thresholds/gating here yet — that is Phase 5.
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: test-metrics/coverage/
+          retention-days: 2 # limit imposed by GitHub organization
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: mutation-report
+          path: test-metrics/mutation/
           retention-days: 2 # limit imposed by GitHub organization
 
   build_image:

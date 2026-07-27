@@ -97,3 +97,16 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   Regenerated numbers match §2/prior: utilities coverage 33.45%, mutation 21.70% total /
   83.92% covered, 117/3/23/410, 10 tests. These JSON files are the additive machine-readable
   baseline for before/after diffs (§5/§7).
+- **Step 8 done (CI artifacts, no gating)**: in `.github/workflows/build.yml` `test_mango_ui`
+  job — unit step now runs with `--coverage`, added a mutation step (`npm run test:mutation`),
+  and added `upload-artifact` steps for `test-metrics/coverage/` and `test-metrics/mutation/`
+  (retention 2 days per org limit). No thresholds/gating (that is Phase 5). Deploy job
+  (`build_image`) and the commented-out e2e step left untouched.
+
+### Phase 0 — EXIT
+
+All 8 infra steps complete; no product code changed. Gates green (unit/lint/lint:css/build).
+Metric deltas vs. §2 baseline: **none** on the meaningful scopes — `src/utilities/` coverage
+33.45%, mutation 21.70% total / 83.92% covered, 117/3/23/410, 10 tests / 3 files. (Whole-app
+statement % is 2.60% under the new `all:true` config vs. 3.26% config-less; de-emphasized per
+§5, documented above.) Ready for Phase 1.
