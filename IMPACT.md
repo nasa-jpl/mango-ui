@@ -30,15 +30,18 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 
 ## Defects / suspected defects
 
-| #   | Location                    | Description                                                                                                                                                              | Status                                                                   |
-| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| D1  | `src/utilities/api.ts`      | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1                                           |
-| D2  | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output.                                          | **Fixed** — killed by asserting `formatYValue(123.456789) === "123.457"` |
+| #   | Location                         | Description                                                                                                                                                                                                                                                                                                  | Status                                                                   |
+| --- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| D1  | `src/utilities/api.ts`           | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision.                                                                                                                                     | Open — to be tested in Phase 1                                           |
+| D2  | `src/utilities/view.ts:215`      | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output.                                                                                                                                                                              | **Fixed** — killed by asserting `formatYValue(123.456789) === "123.457"` |
+| D3  | `src/utilities/product.ts:69-79` | `applyFieldThresholds` threshold-window matcher: when BOTH `effective_since` and `effective_until` are set, the `if (effective_until)` branch **overwrites** `inRange`, so `effective_since` is silently ignored (a threshold whose `effective_since` is in the future still matches). Flagged, not changed. | Open — characterized by test; needs maintainer decision (Q3)             |
 
 ## Surviving mutants killed (running count vs. 23 baseline)
 
-- Killed so far: **20 / 23** (18 in `view.ts`; the 2 in `product.ts` are handled in the
-  product commit).
+- Killed: **23 / 23** baseline survivors (18 in `view.ts` + 2 in `product.ts` = 20 non-
+  equivalent; the remaining 3 `view.ts` baseline survivors are proven equivalent, below).
+  Both `product.ts` baseline survivors (`getProductForLayer` / `getFieldMetadataForLayer`
+  `find` predicates) are killed by asserting on a non-first matching element.
 - **3 remaining `view.ts` mutants are equivalent** (behavior-preserving), documented and
   intentionally not "killable" without asserting on unreachable states:
   - `view.ts:131` `while (step < points.length)` → `<= `: the extra iteration only ever
@@ -70,10 +73,32 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
 - `view.ts` mutation (file total): **42.79% → 98.08%** (covered 98.55%); no-coverage
   mutants 98 → 1; survivors 21 → 3 (all equivalent, above).
 
+### Phase 1.4a — `product.ts` saturated (commit: product tests)
+
+- New `src/utilities/product.test.ts` (10 tests). Killed both baseline `find`-predicate
+  survivors and covered `getDatasetForLayer` (version + instrument match, instrument-override
+  arg, no-product/no-match guards) and `applyFieldThresholds` (no-thresholds all-clear;
+  lower/upper limit + warning violations with non-zero bounds; strict-boundary values;
+  limits-absent and warnings-absent no-ops; `effective_since`/`effective_until` windows incl.
+  exact-boundary dates; the D3 both-dates characterization).
+- `product.ts` mutation (file total): **15.15% → 97.98%** (covered 97.98%); no-coverage
+  0; survivors 10 → **2**, both proven equivalent:
+  - `product.ts:72` `let inRange = false` → `true`: `inRange` is only read after the
+    `since`/`until` branches assign it (or after the no-dates early-return), so its initial
+    value can never be observed. Equivalent.
+  - `product.ts:73` `if (threshold.effective_since)` → `if (true)`: for an `until`-only
+    threshold the forced since-branch computes `undefined <= timestamp === false`, which the
+    subsequent `until` branch overwrites; for a since-present threshold it is unchanged.
+    Equivalent (and entangled with the D3 overwrite bug).
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
   will document current behavior; product behavior unchanged pending your call.
+- **Q3 (D3)**: In `applyFieldThresholds`, when a threshold has both `effective_since` and
+  `effective_until`, `effective_since` is currently ignored (overwritten). Intended logic is
+  almost certainly `inRange = (since ? since <= ts : true) && (until ? until >= ts : true)`.
+  Flagged only; not changed. Confirm before I fix (Phase 2 candidate).
 - **Q2 (artifacts/gitignore)**: `test-metrics/` is currently gitignored (`.gitignore:42`).
   Phase 0.3/0.4/0.7 require committing machine-readable JSON artifacts under
   `test-metrics/coverage/` and `test-metrics/mutation/`. Plan: keep ignoring bulky/
