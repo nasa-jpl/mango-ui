@@ -145,6 +145,30 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   Both only differ for an empty-but-present `filter` array, where `[].map(...).join("")` is
   `""`, i.e. no observable change to the query string.
 
+### Phase 1 — EXIT
+
+Exit criterion (§6 Phase 1.5): **utilities mutation score ≥ 85% total**. Achieved with wide
+margin. No product code changed; three suspected defects flagged (D1/D3 open for maintainers,
+D2 fixed as it was a missing assertion, not a code change).
+
+| Scope (`src/utilities/`) | Mutation total              | Baseline (§2) | Stmt coverage | Baseline |
+| ------------------------ | --------------------------- | ------------- | ------------- | -------- |
+| **All utilities**        | **96.93%** (covered 97.10%) | 21.70%        | **100%**      | 33.45%   |
+| `api.ts`                 | 98.37%                      | 0%            | 100%          | 0%       |
+| `generic.ts`             | 92.98%                      | 14.04%        | 100%          | ~28%     |
+| `product.ts`             | 97.98%                      | 15.15%        | 100%          | ~26%     |
+| `time.ts`                | 88.89%                      | 0%            | 100%          | 0%       |
+| `view.ts`                | 98.08%                      | 42.79%        | 100%          | ~61%     |
+
+- Mutants: **530 killed / 6 timeout / 16 survived / 1 no-coverage** (was 117 / 3 / 23 / 410).
+- Unit tests: **10 → 73** across **7** files. Suite runtime ~0.5s; mutation ~23s.
+- The **16 residual survivors are all documented equivalent mutants** (view 3, generic 8,
+  product 2, time 1, api 2) — see the per-file notes above; none is a real behavioral gap.
+- All §8 gates green: `test:unit` (73), `lint`, `lint:css`, `build` (tsc strict).
+- Whole-app statement coverage rose **2.60% → 7.96%**, function coverage → 54.5% (utilities
+  fully covered). Per §5 this whole-app number stays de-emphasized; the headline is the
+  scoped utilities mutation score.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

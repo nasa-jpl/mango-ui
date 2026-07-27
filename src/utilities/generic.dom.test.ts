@@ -10,8 +10,8 @@ test("downloadJSON creates, clicks, and revokes an object-URL anchor", () => {
   // jsdom does not implement object URLs, so install assertable stubs.
   const originalCreate = URL.createObjectURL;
   const originalRevoke = URL.revokeObjectURL;
-  const createObjectURL = vi.fn(() => "blob:mock-url");
-  const revokeObjectURL = vi.fn();
+  const createObjectURL = vi.fn<[Blob], string>(() => "blob:mock-url");
+  const revokeObjectURL = vi.fn<[string], void>();
   URL.createObjectURL =
     createObjectURL as unknown as typeof URL.createObjectURL;
   URL.revokeObjectURL =
@@ -30,7 +30,7 @@ test("downloadJSON creates, clicks, and revokes an object-URL anchor", () => {
 
     expect(createObjectURL).toHaveBeenCalledTimes(1);
     // The blob passed to createObjectURL carries the serialized JSON, pretty-printed.
-    const blobArg = createObjectURL.mock.calls[0][0] as Blob;
+    const blobArg = createObjectURL.mock.calls[0][0];
     expect(blobArg.type).toBe("application/json");
     expect(blobArg.size).toBe(JSON.stringify(obj, null, 2).length);
     expect(createElement).toHaveBeenCalledWith("a");

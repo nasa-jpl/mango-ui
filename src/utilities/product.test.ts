@@ -125,10 +125,13 @@ const makeField = (
   qc_thresholds,
 });
 
-const makeEntry = (value: number): DataResponseDataEntry => ({
-  timestamp: "2021-06-01T00:00:00Z",
-  temp: { value },
-});
+// The DataResponseDataEntry index signature and its `timestamp: string` member are a
+// declared intersection that object literals can't satisfy directly, so cast through unknown.
+const makeEntry = (value: number): DataResponseDataEntry =>
+  ({
+    timestamp: "2021-06-01T00:00:00Z",
+    temp: { value },
+  }) as unknown as DataResponseDataEntry;
 
 const NO_VIOLATIONS = {
   limits: { lower: false, lower_value: null, upper: false, upper_value: null },
