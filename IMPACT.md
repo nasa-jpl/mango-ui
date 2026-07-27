@@ -86,3 +86,6 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   the two unit tests (`dataset.test.ts`, `view.test.ts`). The inverted dependency (unit
   tests importing from the e2e tree) is removed. No e2e spec imported these, so no e2e
   changes needed. 10 tests still pass; gates green.
+- **Step 6 done (TZ pinning)**: `test` and `test:unit` scripts now run under `TZ=UTC`.
+  Explicit non-UTC time cases will be added with the `time.ts` work in Phase 1. 10 tests
+  still pass under UTC.

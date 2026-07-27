@@ -15,12 +15,12 @@
     "lint:css": "stylelint 'src/**/*.css'",
     "lint:css:fix": "stylelint 'src/**/*.css' --fix",
     "preview": "vite preview --port 5174 --host",
-    "test": "vitest",
+    "test": "TZ=UTC vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:codegen": "playwright codegen https://localhost:5173",
     "test:e2e:debug": "PWDEBUG=1 playwright test --workers=1 --project=chromium",
-    "test:unit": "vitest run",
+    "test:unit": "TZ=UTC vitest run",
     "test:mutation": "stryker run"
   },
   "dependencies": {
