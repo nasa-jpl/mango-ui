@@ -128,6 +128,23 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   timezone (with/without the `Z`, a zone-less datetime parses identically when the host is
   UTC); it is precisely the kind of bug the UTC pin exists to normalize.
 
+### Phase 1.2 — `api.ts` saturated (commit: api tests)
+
+- New `src/utilities/api.test.ts` (21 tests) with mocked `fetch` (`vi.stubGlobal`) and mocked
+  `sonner` toast. Covers: `getView` headers/credentials/URL + success + `>400` throw+toast +
+  sub-200 throw + the D1 3xx/400 characterization; `getMissions`/`getProducts` data + URL
+  interpolation; `HttpError` shape; `getData` full + minimal URL construction, lazy
+  fetch-until-`json()`, success parse, non-ok `HttpError` (detail / statusText fallback /
+  non-JSON fallback), the ok-branch `status>=400` sub-block (detail + "Unknown error"),
+  ok-branch parse failure, rejected fetch, and `cancel()` aborting the controller; `saveView`
+  POST body/URL + success toast + `>400` throw + 400/sub-200 boundaries.
+- **D1 flagged, not changed**: `getView`/`saveView` accept HTTP **200–400 inclusive** as
+  success (3xx redirects and a bare 400 succeed). Characterization tests pin this; see Q1.
+- `api.ts` mutation (file total): **0% → 98.37%** (covered 98.37%); no-coverage 6 → **0**;
+  survivors 8 → **2**, both equivalent: `api.ts:89` `filter.length > 0` → `true` and → `>= 0`.
+  Both only differ for an empty-but-present `filter` array, where `[].map(...).join("")` is
+  `""`, i.e. no observable change to the query string.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
