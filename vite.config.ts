@@ -74,6 +74,23 @@ export default defineConfig(({ mode }) => {
         junit: "unit-test-results/junit-results.xml",
       },
       reporters: ["verbose", "json", "junit"],
+      coverage: {
+        provider: "v8",
+        all: true,
+        include: ["src/**"],
+        reporter: ["text", "lcov", "json-summary"],
+        reportsDirectory: "test-metrics/coverage",
+        exclude: [
+          // Non-logic / non-runnable sources.
+          "src/types/**",
+          "src/main.tsx",
+          // Test scaffolding.
+          "src/**/*.test.{ts,tsx}",
+          "src/test-utils/**",
+          // Canvas/WebGL render paths (§5): cover via extraction + e2e smoke, not here.
+          "src/components/entities/map/**",
+        ],
+      },
     },
   };
 });

@@ -65,3 +65,15 @@ Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
   jsdom opt-in per-file via `// @vitest-environment jsdom`; setup file
   `src/test-utils/setup.ts` (jest-dom matchers). Verified render + user-event work; the
   10 existing tests still pass. Gates green (unit/lint/lint:css/build).
+- **Step 3 done (coverage config)**: v8, `all: true`, `include: ["src/**"]`, reporters
+  `text`/`lcov`/`json-summary`, output `test-metrics/coverage/`. Exclusions: `src/types/**`,
+  `src/main.tsx`, test files, `src/test-utils/**`, Cesium render path
+  `src/components/entities/map/**`.
+  - Per-scope number that matters is unchanged: `src/utilities/` = **33.45%** (== §2).
+    Test count 10, mutation unaffected.
+  - Whole-app statement % moved 3.26% → **2.60%**: `all: true` + explicit `include: src/**`
+    enlarges the denominator (10,562 stmts) vs. the config-less baseline run. Per §5 this
+    global number is never a headline; recording the shift for transparency.
+  - Canvas Chart.js / ag-grid render paths intentionally **not** excluded yet: they still
+    contain untested logic that is the Phase 2 worklist. Threshold-level exclusions for
+    those render paths will be applied in Phase 5, not as report deletions (anti-gaming).
