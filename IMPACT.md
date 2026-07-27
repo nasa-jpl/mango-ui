@@ -1,0 +1,56 @@
+# IMPACT.md — Testing Strategy Implementation Log
+
+Contemporaneous log of the testing-strategy work described in `TESTING_STRATEGY.md`.
+Records defects found, mutants killed, per-phase metric snapshots, and open questions
+for maintainers. Baseline reference is `TESTING_STRATEGY.md` §2 (commit `022829f`).
+
+---
+
+## Baseline reproduction (pre-change)
+
+Re-ran the §2 commands on `add-testing` (HEAD `b80d385`, whose parent is the baseline
+commit `022829f`; `b80d385` only adds strategy docs, so source is unchanged). Results
+match §2 exactly:
+
+| Metric | §2 | Reproduced |
+|---|---|---|
+| Unit tests | 10 / 3 files | 10 / 3 files |
+| Statement coverage (app) | 3.26% | 3.26% |
+| Branch coverage (app) | 47.61% | 47.61% |
+| Function coverage (app) | 17.44% | 17.44% |
+| Statement coverage (`src/utilities/`) | 33.45% | 33.45% |
+| Mutation score, total | 21.70% | 21.70% |
+| Mutation score, covered | 83.92% | 83.92% |
+| Killed / timeout / survived / no-cov | 117 / — / 23 / 410 | 117 / 3 / 23 / 410 |
+| Mutation runtime | ~7s | ~8s |
+
+Survivor distribution: 21 in `view.ts`, 2 in `product.ts` (= 23).
+
+---
+
+## Defects / suspected defects
+
+| # | Location | Description | Status |
+|---|---|---|---|
+| D1 | `src/utilities/api.ts` | Treats HTTP status 200–400 as success, which includes 3xx redirects. Per §1/Phase 1.2 this is flagged, not changed. Needs a characterization test + maintainer decision. | Open — to be tested in Phase 1 |
+| D2 | `src/utilities/view.ts:215` | `formatYValue` d3 format specifier `"~g"` → `""` mutant survives: tests call the function but never assert on formatted output. | Open — to be killed in Phase 1 |
+
+## Surviving mutants killed (running count vs. 23 baseline)
+
+- Killed so far: **0 / 23**.
+
+## Open questions for maintainers
+
+- **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
+  will document current behavior; product behavior unchanged pending your call.
+- **Q2 (artifacts/gitignore)**: `test-metrics/` is currently gitignored (`.gitignore:42`).
+  Phase 0.3/0.4/0.7 require committing machine-readable JSON artifacts under
+  `test-metrics/coverage/` and `test-metrics/mutation/`. Plan: keep ignoring bulky/
+  regenerated outputs (HTML report, lcov, `.stryker-tmp`) but un-ignore the small JSON
+  summaries (`coverage-summary.json`, mutation `metrics.json`/`mutation.json`) so before/
+  after is a diffable committed trail per §5 ("Preserve baselines").
+
+## Per-phase metric snapshots
+
+### Phase 0 — Infrastructure (in progress)
+- Start: baseline as above. No product code changes permitted this phase.
