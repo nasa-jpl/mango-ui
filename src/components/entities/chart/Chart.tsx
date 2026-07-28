@@ -89,6 +89,7 @@ import ChartTooltip from "./ChartTooltip";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
+  countUniqueSubsetVersions,
   createNotIngestedDataResponse,
   deriveFieldPoints,
   expandLayerBySubsetVersion,
@@ -610,20 +611,9 @@ export const Chart = ({
             const isDownsampled = downsampling_factor !== 1;
 
             // Count unique subset_versions in the data
-            const subsetVersionSet = new Set<string>();
-            const primaryField = layer.fields[0];
-            if (pointsByField[primaryField]) {
-              pointsByField[primaryField].forEach((point) => {
-                const subsetVersionValue = point.raw.subset_version?.value;
-                if (
-                  subsetVersionValue !== undefined &&
-                  subsetVersionValue !== null
-                ) {
-                  subsetVersionSet.add(String(subsetVersionValue));
-                }
-              });
-            }
-            const subsetVersionCount = subsetVersionSet.size;
+            const subsetVersionCount = countUniqueSubsetVersions(
+              pointsByField[layer.fields[0]],
+            );
 
             // Store count on layer for EntityEditor to use
             const layerWithCount: typeof layer & {

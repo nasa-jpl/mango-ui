@@ -10,6 +10,7 @@ import type { CustomChartData } from "./Chart";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
+  countUniqueSubsetVersions,
   createNotIngestedDataResponse,
   deriveFieldPoints,
   expandLayerBySubsetVersion,
@@ -452,6 +453,33 @@ test("expandLayerBySubsetVersion labels without a base label and falls back to '
   const result = expandLayerBySubsetVersion(item);
   expect(result).toHaveLength(1);
   expect(result[0].layer.label).toBe("subset_version=unknown");
+});
+
+// --- countUniqueSubsetVersions ----------------------------------------------
+
+test("countUniqueSubsetVersions returns 0 for undefined or empty points", () => {
+  expect(countUniqueSubsetVersions(undefined)).toBe(0);
+  expect(countUniqueSubsetVersions([])).toBe(0);
+});
+
+test("countUniqueSubsetVersions returns 0 when no point carries a subset_version", () => {
+  expect(countUniqueSubsetVersions([point(), point()])).toBe(0);
+});
+
+test("countUniqueSubsetVersions counts distinct values and ignores duplicates", () => {
+  expect(countUniqueSubsetVersions([point(2), point(2), point(10)])).toBe(2);
+});
+
+test("countUniqueSubsetVersions ignores null and undefined but counts falsy values like 0", () => {
+  expect(countUniqueSubsetVersions([point(null), point(), point(0)])).toBe(1);
+});
+
+test("countUniqueSubsetVersions returns 0 when every value is null", () => {
+  expect(countUniqueSubsetVersions([point(null), point(null)])).toBe(0);
+});
+
+test("countUniqueSubsetVersions coerces to string so 2 and '2' are the same version", () => {
+  expect(countUniqueSubsetVersions([point(2), point("2")])).toBe(1);
 });
 
 // --- createNotIngestedDataResponse ------------------------------------------

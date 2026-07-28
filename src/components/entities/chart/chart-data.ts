@@ -237,6 +237,25 @@ export function expandLayerBySubsetVersion(
 }
 
 /**
+ * Count the number of distinct `subset_version` values across a field's points, coercing
+ * each value to a string and ignoring `null`/`undefined`. Returns 0 when there are no points.
+ */
+export function countUniqueSubsetVersions(
+  points: CustomChartData[] | undefined,
+): number {
+  const subsetVersionSet = new Set<string>();
+  if (points) {
+    points.forEach((point) => {
+      const subsetVersionValue = point.raw.subset_version?.value;
+      if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+        subsetVersionSet.add(String(subsetVersionValue));
+      }
+    });
+  }
+  return subsetVersionSet.size;
+}
+
+/**
  * Derive the chart points for a single field of one data entry. Callers are expected to
  * have already skipped entries with a missing field value or non-string timestamp (the
  * same guard is repeated here defensively so the function is self-contained):

@@ -245,6 +245,22 @@ The 60-line body moved verbatim; `Chart.tsx` now calls `processedData.flatMap(ex
 - Aggregate mutated scope: **97.53% → 97.70%** (717 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **100 → 107** across **8** files. All §8 gates green.
 
+### Phase 2.4 — `Chart.tsx` subset_version counting extracted (commit: countUniqueSubsetVersions)
+
+Fourth `Chart.tsx` slice. Extracted the "count unique subset_versions in the data" block from
+the Chart.js dataset builder into `countUniqueSubsetVersions(points)` in `chart-data.ts`
+(coerces each value to a string, ignores `null`/`undefined`, returns 0 for no points).
+`Chart.tsx` now calls it with `pointsByField[layer.fields[0]]`. **Behavior-preserving**:
+`build` + `lint` green, all prior tests pass.
+
+- New tests: **34 → 40** in `chart-data.test.ts` — undefined/empty → 0, no-version → 0,
+  distinct-vs-duplicate counting, null/undefined excluded while `0` still counts, all-null → 0,
+  and string coercion (`2` and `"2"` collapse to one).
+- `chart-data.ts` mutation: **100.00%** (201 killed, 0 survived) on the first run — the
+  falsy-`0` and all-null cases pre-empted the usual `!== null`/`!== undefined` survivors.
+- Aggregate mutated scope: **97.70% → 97.75%** (731 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **107 → 113** across **8** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
