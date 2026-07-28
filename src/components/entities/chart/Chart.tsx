@@ -48,7 +48,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Root, createRoot } from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 import { toast } from "sonner";
 import {
   DataResponse,
@@ -62,7 +62,7 @@ import {
   TimeSeriesPoint,
   YAxis,
 } from "../../../types/view";
-import { getData, HttpError } from "../../../utilities/api";
+import { getData } from "../../../utilities/api";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -86,6 +86,13 @@ import EntityHeader from "../../page/EntityHeader";
 import { Tooltip } from "../../ui/Tooltip";
 import "./Chart.css";
 import ChartTooltip from "./ChartTooltip";
+import {
+  computeDownsamplingFactor,
+  computeFetchWindow,
+  createNotIngestedDataResponse,
+  isNotIngestedError,
+  resolveFetchFields,
+} from "./chart-data";
 
 ChartJS.register(zoomPlugin);
 
@@ -175,7 +182,7 @@ export const Chart = ({
         chartEntity: ChartEntity,
         dateRange: DateRange,
         mission,
-        instrument
+        instrument,
       ) =>
         visualizeChartLayers(
           layers || [],
@@ -184,11 +191,11 @@ export const Chart = ({
           dateRange.start,
           dateRange.end,
           mission,
-          instrument
+          instrument,
         ),
-      100
+      100,
     ),
-    []
+    [],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,12 +209,12 @@ export const Chart = ({
           dateRange.start,
           dateRange.end,
           mission,
-          instrument
+          instrument,
         ),
       500,
-      { leading: false, trailing: true }
+      { leading: false, trailing: true },
     ),
-    []
+    [],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -216,7 +223,7 @@ export const Chart = ({
       leading: false,
       trailing: true,
     }),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -229,7 +236,7 @@ export const Chart = ({
   const computedDateRange = useMemo(
     () =>
       chartEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
-    [chartEntity.syncWithPageDateRange, dateRange]
+    [chartEntity.syncWithPageDateRange, dateRange],
   );
 
   useEffect(() => {
@@ -240,7 +247,7 @@ export const Chart = ({
         chartEntity,
         computedDateRange,
         missionProp,
-        instrumentProp
+        instrumentProp,
       );
     }
     // Use JSON.stringify for deep comparison (recommended)
@@ -276,7 +283,7 @@ export const Chart = ({
     layers: ChartLayer[],
     products: Product[],
     chartEntity: ChartEntity,
-    syncWithDateRange: boolean = true
+    syncWithDateRange: boolean = true,
   ) => {
     // Only perform an update if the zoom/pan was triggered by the user
     // to prevent loopback after debounced visualizeChartLayers call
@@ -296,7 +303,7 @@ export const Chart = ({
           chartEntity,
           newDateRange,
           missionProp,
-          instrumentProp
+          instrumentProp,
         );
       }
     }
@@ -316,14 +323,14 @@ export const Chart = ({
           chartEntity.layers as ChartLayer[],
           products,
           chartEntity,
-          chartEntity.syncWithPageDateRange
+          chartEntity.syncWithPageDateRange,
         );
       chartRef.current.options.plugins.zoom.zoom.onZoomComplete = () =>
         onZoomComplete(
           chartEntity.layers as ChartLayer[],
           products,
           chartEntity,
-          chartEntity.syncWithPageDateRange
+          chartEntity.syncWithPageDateRange,
         );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -395,7 +402,7 @@ export const Chart = ({
       if (!axisLabel) {
         // Find layers associated with this axis
         const associatedLayers = chartEntity.layers?.filter(
-          (layer) => layer.yAxisId === axis.id
+          (layer) => layer.yAxisId === axis.id,
         );
 
         if (associatedLayers?.length) {
@@ -403,7 +410,7 @@ export const Chart = ({
           const metadata = getFieldMetadataForLayer(
             associatedLayers[0].fields[0],
             associatedLayers[0],
-            products
+            products,
           );
           axisLabel = metadata?.unit || "";
         }
@@ -426,7 +433,7 @@ export const Chart = ({
           ) {
             const grace = toDimension(
               (scale as LinearScale).options.grace || "",
-              1
+              1,
             );
             scale.min -= scale.min * grace;
             scale.max += scale.max * grace;
@@ -462,7 +469,7 @@ export const Chart = ({
     startTime?: string,
     endTime?: string,
     _mission?: string,
-    _instrument?: string
+    _instrument?: string,
   ) => {
     if (!chartRef.current) {
       return;
@@ -484,7 +491,7 @@ export const Chart = ({
       startTime,
       endTime,
       _mission,
-      _instrument
+      _instrument,
     );
 
     if (error || aborted || !chartRef.current) {
@@ -511,7 +518,7 @@ export const Chart = ({
           const fieldMetadata = getFieldMetadataForLayer(
             field,
             layer,
-            products
+            products,
           );
           const fieldValue = d[field];
           const timestamp = d.timestamp;
@@ -530,10 +537,10 @@ export const Chart = ({
             if (!fieldMetadata) return;
             if (
               fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "min"
+                ({ type }) => type === "min",
               ) &&
               fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "max"
+                ({ type }) => type === "max",
               )
             ) {
               // Compute middle time of aggregation window
@@ -541,7 +548,7 @@ export const Chart = ({
               const halfFieldDataIntervalMS =
                 ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
               const middleTime = new Date(
-                pointTimestampMS + halfFieldDataIntervalMS
+                pointTimestampMS + halfFieldDataIntervalMS,
               ).toISOString();
 
               // Use the min and max set to the middle of the window
@@ -561,7 +568,7 @@ export const Chart = ({
               }
             } else if (
               fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "avg"
+                ({ type }) => type === "avg",
               )
             ) {
               points.push({
@@ -581,7 +588,7 @@ export const Chart = ({
       const firstFieldMetadata = getFieldMetadataForLayer(
         layer.fields[0],
         layer,
-        products
+        products,
       );
       return {
         layer,
@@ -610,7 +617,7 @@ export const Chart = ({
                   point,
                   layer,
                   processedData,
-                  j
+                  j,
                 ) as CustomChartData;
               }
               return point;
@@ -623,66 +630,67 @@ export const Chart = ({
 
     // Expand layers with subset_version into alternating colors
     const expandedProcessedData = processedData.flatMap((item) => {
-        const { layer, pointsByField } = item;
+      const { layer, pointsByField } = item;
 
-        // Only process ChartLayerLine
-        if (!isChartLayerLine(layer)) {
-          return [item];
+      // Only process ChartLayerLine
+      if (!isChartLayerLine(layer)) {
+        return [item];
+      }
+
+      const primaryField = layer.fields[0];
+
+      // Skip if the primary field data doesn't exist
+      if (!pointsByField[primaryField]) {
+        return [item];
+      }
+
+      // Check if any point has subset_version data
+      const hasSubsetVersion = pointsByField[primaryField].some(
+        (point) => point.raw.subset_version?.value !== undefined,
+      );
+
+      if (!hasSubsetVersion) {
+        return [item];
+      }
+
+      // Group points by subset_version
+      const groups: Record<string, CustomChartData[]> = {};
+
+      pointsByField[primaryField].forEach((point) => {
+        const subsetVersionValue =
+          point.raw.subset_version?.value?.toString() || "unknown";
+        if (!groups[subsetVersionValue]) {
+          groups[subsetVersionValue] = [];
         }
-
-        const primaryField = layer.fields[0];
-
-        // Skip if the primary field data doesn't exist
-        if (!pointsByField[primaryField]) {
-          return [item];
-        }
-
-        // Check if any point has subset_version data
-        const hasSubsetVersion = pointsByField[primaryField].some(
-          (point) => point.raw.subset_version?.value !== undefined
-        );
-
-        if (!hasSubsetVersion) {
-          return [item];
-        }
-
-        // Group points by subset_version
-        const groups: Record<string, CustomChartData[]> = {};
-
-        pointsByField[primaryField].forEach((point) => {
-          const subsetVersionValue = point.raw.subset_version?.value?.toString() || "unknown";
-          if (!groups[subsetVersionValue]) {
-            groups[subsetVersionValue] = [];
-          }
-          groups[subsetVersionValue].push(point);
-        });
-
-        // Create a virtual layer for each subset_version with alternating colors
-        return Object.entries(groups)
-          .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
-          .map(([subsetVersionValue, groupPoints], index) => {
-            // Alternate between blue and red for subset_versions
-            const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
-
-            const virtualLayer = {
-              ...layer,
-              color: color,
-              // Update label to include subset_version
-              label: layer.label
-                ? `${layer.label} (subset_version=${subsetVersionValue})`
-                : `subset_version=${subsetVersionValue}`,
-            };
-
-            return {
-              ...item,
-              layer: virtualLayer,
-              pointsByField: {
-                ...pointsByField,
-                [primaryField]: groupPoints,
-              },
-            };
-          });
+        groups[subsetVersionValue].push(point);
       });
+
+      // Create a virtual layer for each subset_version with alternating colors
+      return Object.entries(groups)
+        .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
+        .map(([subsetVersionValue, groupPoints], index) => {
+          // Alternate between blue and red for subset_versions
+          const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
+
+          const virtualLayer = {
+            ...layer,
+            color: color,
+            // Update label to include subset_version
+            label: layer.label
+              ? `${layer.label} (subset_version=${subsetVersionValue})`
+              : `subset_version=${subsetVersionValue}`,
+          };
+
+          return {
+            ...item,
+            layer: virtualLayer,
+            pointsByField: {
+              ...pointsByField,
+              [primaryField]: groupPoints,
+            },
+          };
+        });
+    });
 
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<
@@ -712,7 +720,10 @@ export const Chart = ({
             if (pointsByField[primaryField]) {
               pointsByField[primaryField].forEach((point) => {
                 const subsetVersionValue = point.raw.subset_version?.value;
-                if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+                if (
+                  subsetVersionValue !== undefined &&
+                  subsetVersionValue !== null
+                ) {
                   subsetVersionSet.add(String(subsetVersionValue));
                 }
               });
@@ -720,7 +731,9 @@ export const Chart = ({
             const subsetVersionCount = subsetVersionSet.size;
 
             // Store count on layer for EntityEditor to use
-            const layerWithCount: typeof layer & { subsetVersionCount: number } = {
+            const layerWithCount: typeof layer & {
+              subsetVersionCount: number;
+            } = {
               ...layer,
               subsetVersionCount,
             };
@@ -743,7 +756,7 @@ export const Chart = ({
                         .join(", ")})`
                     : ""
                 } (v${layer.version}) (${data_count} point${pluralize(
-                  data_count
+                  data_count,
                 )}, 1:${downsampling_factor} scale)`,
               // smooth the downsampling a tiny fraction to ease artifacting
               tension: isDownsampled ? 0.01 : 0,
@@ -881,7 +894,7 @@ export const Chart = ({
             }
           }
           return { ...commonConfig, data: [] };
-        }
+        },
       );
 
     // Update chartJS dataset list
@@ -904,20 +917,20 @@ export const Chart = ({
       const computedStartTime = startTime || layers[0].startTime;
       const computedEndTime = endTime || layers[0].endTime;
       chartRef.current.options.scales.x.min = new Date(
-        computedStartTime
+        computedStartTime,
       ).getTime();
       chartRef.current.options.scales.x.max = new Date(
-        computedEndTime
+        computedEndTime,
       ).getTime();
 
       // Set suggested min/max on chart if no points were returned for this time range
       // since otherwise ChartJS will default to today's date when no data are loaded
       if (!results.find((item) => item.result.data_count > 0)) {
         chartRef.current.options.scales.x.suggestedMin = new Date(
-          computedStartTime
+          computedStartTime,
         );
         chartRef.current.options.scales.x.suggestedMax = new Date(
-          computedEndTime
+          computedEndTime,
         );
       } else {
         // If we do have points, clear the suggested min/max so that it can be
@@ -949,30 +962,22 @@ export const Chart = ({
     startTime: string | undefined,
     endTime: string | undefined,
     mission?: string,
-    instrument?: string
-  ): Promise<{ layer: ChartLayer; notIngested?: boolean; result: DataResponse }> => {
+    instrument?: string,
+  ): Promise<{
+    layer: ChartLayer;
+    notIngested?: boolean;
+    result: DataResponse;
+  }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
       cancelHandles[layerFullId]();
     }
     return new Promise((resolve, reject) => {
-      let computedStartTime = startTime || layer.startTime;
-      let computedEndTime = endTime || layer.endTime;
-      if (typeof layer.windowBuffer === "number") {
-        const newStartTimeDate = new Date(computedStartTime);
-        newStartTimeDate.setDate(newStartTimeDate.getDate() - 1);
-        computedStartTime = newStartTimeDate.toISOString();
-
-        const newEndTimeDate = new Date(computedEndTime);
-        newEndTimeDate.setDate(newEndTimeDate.getDate() + 1);
-        computedEndTime = newEndTimeDate.toISOString();
-      }
-
-      // Compute aggregation factor
-      const durationSeconds =
-        (new Date(computedEndTime).getTime() -
-          new Date(computedStartTime).getTime()) /
-        1000;
+      const {
+        startTime: computedStartTime,
+        endTime: computedEndTime,
+        durationSeconds,
+      } = computeFetchWindow(startTime, endTime, layer);
 
       const chartSize = chartRef.current?.width || 1000; // TODO store in state?
 
@@ -982,27 +987,13 @@ export const Chart = ({
           mission: mission ?? layer.mission,
           instrument: instrument ?? layer.instrument,
         },
-        products
+        products,
       );
-      let downsamplingFactor = 1;
-      if (product) {
-        for (let i = 0; i < product.available_resolutions.length; i++) {
-          const resolution = product.available_resolutions[i];
-          const nextResolution = product.available_resolutions[i + 1];
-          const pointsForDuration =
-            durationSeconds / resolution.nominal_data_interval_seconds;
-          const nextPointsForDuration = nextResolution
-            ? durationSeconds / nextResolution.nominal_data_interval_seconds
-            : null;
-          if (
-            pointsForDuration > chartSize &&
-            (nextPointsForDuration == null || nextPointsForDuration < chartSize)
-          ) {
-            downsamplingFactor = resolution.downsampling_factor;
-            break;
-          }
-        }
-      }
+      const downsamplingFactor = computeDownsamplingFactor(
+        product,
+        durationSeconds,
+        chartSize,
+      );
 
       if (chartEntity.data) {
         const matchingData = chartEntity.data
@@ -1017,20 +1008,9 @@ export const Chart = ({
         }
       }
 
-      // Include groupBy field if specified
-      let fieldsToFetch = layer.fields;
-      let shouldSkipDownsampling = false;
-      if (isChartLayerLine(layer)) {
-        // Include subset_version field if the product has it
-        if (
-          (layer as ChartLayer & { hasSubsetVersionField?: boolean }).hasSubsetVersionField &&
-          !fieldsToFetch.includes("subset_version")
-        ) {
-          fieldsToFetch = [...fieldsToFetch, "subset_version"];
-          // Skip downsampling when fetching subset_version data
-          shouldSkipDownsampling = true;
-        }
-      }
+      // Include groupBy field if specified, and decide whether to skip downsampling
+      const { fieldsToFetch, shouldSkipDownsampling } =
+        resolveFetchFields(layer);
 
       // Build filter string from existing filter
       const filterString = layer.filter;
@@ -1046,7 +1026,7 @@ export const Chart = ({
         computedStartTime,
         computedEndTime,
         shouldSkipDownsampling ? undefined : downsamplingFactor,
-        filterString
+        filterString,
       );
       cancelHandles[layerFullId] = cancel;
       json()
@@ -1060,10 +1040,10 @@ export const Chart = ({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+            if (isNotIngestedError(error)) {
               resolve({
                 layer,
-                result: { data: [], data_begin: "", data_count: 0, data_end: "", downsampling_factor: 1, from_isotimestamp: "", nominal_data_interval_seconds: null, query_elapsed_ms: 0, to_isotimestamp: "" },
+                result: createNotIngestedDataResponse(),
                 notIngested: true,
               });
             } else {
@@ -1097,7 +1077,7 @@ export const Chart = ({
       event.nativeEvent,
       "index",
       { intersect: false },
-      false
+      false,
     );
     if (!elements.length) {
       event.preventDefault();
@@ -1107,7 +1087,7 @@ export const Chart = ({
     const rows = elements
       .map(({ datasetIndex, index }) => {
         const dataset = chart.data.datasets[datasetIndex] as
-          | (typeof chart.data.datasets)[number] & { layer?: ChartLayer }
+          | ((typeof chart.data.datasets)[number] & { layer?: ChartLayer })
           | undefined;
         const point = dataset?.data[index];
         if (!dataset || !point) {
@@ -1158,7 +1138,7 @@ export const Chart = ({
   const onPointClick = (
     _: ChartEvent,
     elements: ActiveElement[],
-    chart: CustomChartType
+    chart: CustomChartType,
   ) => {
     const element = elements[0];
     if (!element) {
@@ -1184,7 +1164,7 @@ export const Chart = ({
     startTime?: string,
     endTime?: string,
     mission?: string,
-    instrument?: string
+    instrument?: string,
   ) => {
     setLoading(true);
     setError(null);
@@ -1205,9 +1185,9 @@ export const Chart = ({
             startTime,
             endTime,
             mission,
-            instrument
-          )
-        )
+            instrument,
+          ),
+        ),
       );
       setLoading(false);
     } catch (err) {
@@ -1225,7 +1205,7 @@ export const Chart = ({
   const renderTooltip = (
     context: TooltipModel<"line">,
     missionLabel?: string,
-    instrument?: string
+    instrument?: string,
   ) => {
     //@ts-expect-error incorrect typings from library
     const tooltipModel = context.tooltip;
@@ -1260,7 +1240,7 @@ export const Chart = ({
             {point.dataset.layer.version}):
           </>
         )}
-      />
+      />,
     );
   };
 
@@ -1366,7 +1346,7 @@ export const Chart = ({
                   chartEntity.layers || [],
                   products,
                   chartEntity,
-                  chartEntity.syncWithPageDateRange
+                  chartEntity.syncWithPageDateRange,
                 );
               },
             },
@@ -1379,7 +1359,7 @@ export const Chart = ({
                   chartEntity.layers || [],
                   products,
                   chartEntity,
-                  chartEntity.syncWithPageDateRange
+                  chartEntity.syncWithPageDateRange,
                 );
               },
             },
@@ -1449,7 +1429,7 @@ export const Chart = ({
       chartRef.current.update();
       if (chartRef.current.options.plugins?.zoom?.zoom?.onZoomComplete) {
         chartRef.current.options.plugins.zoom.zoom.onZoomComplete(
-          chartRef.current.getContext()
+          chartRef.current.getContext(),
         );
       }
     }
@@ -1460,7 +1440,7 @@ export const Chart = ({
       chartRef.current.update();
       if (chartRef.current.options.plugins?.zoom?.zoom?.onZoomComplete) {
         chartRef.current.options.plugins.zoom.zoom.onZoomComplete(
-          chartRef.current.getContext()
+          chartRef.current.getContext(),
         );
       }
     }
@@ -1489,7 +1469,7 @@ export const Chart = ({
               style={{
                 left: `${
                   chartRef.current.scales.x.getPixelForValue(
-                    hoverDate.getTime()
+                    hoverDate.getTime(),
                   ) - chartRef.current.chartArea.left
                 }px`,
               }}
@@ -1500,7 +1480,7 @@ export const Chart = ({
           <div
             className={classNames(
               "chart-loading-indicator font-medium bg-gray-50 border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] text-secondary-foreground",
-              { "chart-indicator-overlay--compact": compact }
+              { "chart-indicator-overlay--compact": compact },
             )}
             style={{
               top: `${
@@ -1520,7 +1500,7 @@ export const Chart = ({
           <div
             className={classNames(
               "font-medium border rounded-sm text-[10px] py-0.5 px-2 pointer-events-none absolute translate-x-[-50%] translate-y-[-50%] bg-red-100 text-red-600 border-red-500 max-w-[310px]",
-              { "chart-indicator-overlay--compact": compact }
+              { "chart-indicator-overlay--compact": compact },
             )}
             style={{
               top: `${
@@ -1539,14 +1519,16 @@ export const Chart = ({
         {!isLoading &&
           !error &&
           chartRef.current.data.datasets.every(
-            (dataset) => dataset.data.length === 0
+            (dataset) => dataset.data.length === 0,
           ) &&
           (() => {
             const layers = chartEntity.layers || [];
             const instrument = instrumentProp;
-            const hasUningestedLayers = hasNotIngestedLayers || layers.some(
-              (layer) => !getDatasetForLayer(layer, products, instrument)
-            );
+            const hasUningestedLayers =
+              hasNotIngestedLayers ||
+              layers.some(
+                (layer) => !getDatasetForLayer(layer, products, instrument),
+              );
             return (
               <div
                 className={classNames(
@@ -1554,7 +1536,7 @@ export const Chart = ({
                   hasUningestedLayers
                     ? "bg-amber-50 text-amber-700 border-amber-300"
                     : "bg-gray-50 text-secondary-foreground",
-                  { "chart-indicator-overlay--compact": compact }
+                  { "chart-indicator-overlay--compact": compact },
                 )}
                 style={{
                   top: `${
@@ -1567,9 +1549,7 @@ export const Chart = ({
                   }px`,
                 }}
               >
-                {hasUningestedLayers
-                  ? "No data ingested"
-                  : "No data available"}
+                {hasUningestedLayers ? "No data ingested" : "No data available"}
               </div>
             );
           })()}

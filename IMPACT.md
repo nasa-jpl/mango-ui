@@ -169,6 +169,35 @@ D2 fixed as it was a missing assertion, not a code change).
   fully covered). Per §5 this whole-app number stays de-emphasized; the headline is the
   scoped utilities mutation score.
 
+## Phase 2 — Extract logic from components, then test it
+
+### Phase 2.1 — `Chart.tsx` fetch-orchestration decisions extracted (commit: chart-data)
+
+First PR-sized slice of `Chart.tsx` (1730 lines). Extracted the pure fetch-orchestration
+decision logic buried inside the `fetchLayerData` Promise executor into a new React-/Chart.js-
+free module `src/components/entities/chart/chart-data.ts`, then refactored `Chart.tsx` to call
+it. The refactor is **behavior-preserving** (verbatim logic move; `build` + `lint` green, all
+prior tests still pass).
+
+- Extracted functions: `computeFetchWindow` (start/end resolution + one-day `windowBuffer`
+  padding + duration), `computeDownsamplingFactor` (coarsest-resolution-that-keeps-≥1-point-
+  per-pixel selection), `resolveFetchFields` (subset_version field/skip-downsampling decision),
+  `isNotIngestedError` (4xx `HttpError` → not-ingested), `createNotIngestedDataResponse`.
+- Removed now-dead inline blocks and the unused `HttpError` import from `Chart.tsx`.
+- New `src/components/entities/chart/chart-data.test.ts` — **19 tests** characterizing current
+  behavior, incl. boundaries: `windowBuffer === 0` (presence not truthiness), empty-string time
+  fallback (`||` vs `&&`), strict `>`/`<` chart-width comparisons, last-resolution `nextPoints
+== null` branch, subset_version dedupe + event-layer exclusion, and the 400/499/500/399
+  `isNotIngestedError` edges.
+- Added `chart-data.ts` to Stryker `mutate` scope (`stryker.config.json`).
+- `chart-data.ts` mutation: **100.00%** (79 killed, 0 survived, 0 no-cov). The one initial
+  survivor (`chart-data.ts:88` `nextPointsForDuration == null` → `false`, equivalent for any
+  positive chart width) was killed with a legitimate zero-width characterization case, valid
+  now that the function is a standalone pure unit.
+- Aggregate mutated scope (utilities + chart-data): **96.93% → 97.31%** total
+  (609 killed / 6 timeout / 16 survived / 1 no-cov). Unit tests **73 → 92** across **8** files.
+  All §8 gates green (`test:unit`, `lint`, `lint:css`, `build`).
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

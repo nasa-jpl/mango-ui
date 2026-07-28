@@ -1,7 +1,11 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
-  "mutate": ["src/utilities/**/*.ts", "!src/utilities/**/*.test.ts"],
+  "mutate": [
+    "src/utilities/**/*.ts",
+    "!src/utilities/**/*.test.ts",
+    "src/components/entities/chart/chart-data.ts"
+  ],
   "reporters": ["html", "json", "clear-text", "progress"],
   "htmlReporter": {
     "fileName": "test-metrics/mutation/mutation-report.html"
