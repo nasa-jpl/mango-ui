@@ -91,6 +91,7 @@ import {
   computeFetchWindow,
   createNotIngestedDataResponse,
   deriveFieldPoints,
+  expandLayerBySubsetVersion,
   isNotIngestedError,
   resolveFetchFields,
 } from "./chart-data";
@@ -582,68 +583,9 @@ export const Chart = ({
     });
 
     // Expand layers with subset_version into alternating colors
-    const expandedProcessedData = processedData.flatMap((item) => {
-      const { layer, pointsByField } = item;
-
-      // Only process ChartLayerLine
-      if (!isChartLayerLine(layer)) {
-        return [item];
-      }
-
-      const primaryField = layer.fields[0];
-
-      // Skip if the primary field data doesn't exist
-      if (!pointsByField[primaryField]) {
-        return [item];
-      }
-
-      // Check if any point has subset_version data
-      const hasSubsetVersion = pointsByField[primaryField].some(
-        (point) => point.raw.subset_version?.value !== undefined,
-      );
-
-      if (!hasSubsetVersion) {
-        return [item];
-      }
-
-      // Group points by subset_version
-      const groups: Record<string, CustomChartData[]> = {};
-
-      pointsByField[primaryField].forEach((point) => {
-        const subsetVersionValue =
-          point.raw.subset_version?.value?.toString() || "unknown";
-        if (!groups[subsetVersionValue]) {
-          groups[subsetVersionValue] = [];
-        }
-        groups[subsetVersionValue].push(point);
-      });
-
-      // Create a virtual layer for each subset_version with alternating colors
-      return Object.entries(groups)
-        .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
-        .map(([subsetVersionValue, groupPoints], index) => {
-          // Alternate between blue and red for subset_versions
-          const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
-
-          const virtualLayer = {
-            ...layer,
-            color: color,
-            // Update label to include subset_version
-            label: layer.label
-              ? `${layer.label} (subset_version=${subsetVersionValue})`
-              : `subset_version=${subsetVersionValue}`,
-          };
-
-          return {
-            ...item,
-            layer: virtualLayer,
-            pointsByField: {
-              ...pointsByField,
-              [primaryField]: groupPoints,
-            },
-          };
-        });
-    });
+    const expandedProcessedData = processedData.flatMap(
+      expandLayerBySubsetVersion,
+    );
 
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<

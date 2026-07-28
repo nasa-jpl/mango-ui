@@ -6,12 +6,15 @@ import {
 } from "../../../types/api";
 import { ChartLayer } from "../../../types/view";
 import { HttpError } from "../../../utilities/api";
+import type { CustomChartData } from "./Chart";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
   createNotIngestedDataResponse,
   deriveFieldPoints,
+  expandLayerBySubsetVersion,
   isNotIngestedError,
+  ProcessedLayerData,
   resolveFetchFields,
 } from "./chart-data";
 
@@ -336,6 +339,119 @@ test("deriveFieldPoints returns [] when downsampled aggregations are unusable", 
   expect(
     deriveFieldPoints(entry({ min: 1, max: 9 }), "temp", meta(["max"]), 2, 60),
   ).toEqual([]);
+});
+
+// --- expandLayerBySubsetVersion ---------------------------------------------
+
+function point(subsetVersion?: number | string | null): CustomChartData {
+  const raw: Record<string, unknown> = { timestamp: TS };
+  if (subsetVersion !== undefined) {
+    raw.subset_version = { value: subsetVersion };
+  }
+  return {
+    x: TS,
+    y: 1,
+    selected: false,
+    raw: raw as unknown as CustomChartData["raw"],
+  };
+}
+
+function processed(
+  overrides: Partial<ProcessedLayerData> = {},
+): ProcessedLayerData {
+  return {
+    data_count: 3,
+    downsampling_factor: 1,
+    layer: lineLayer({ fields: ["temp"] }),
+    pointsByField: { temp: [] },
+    unit: "K",
+    ...overrides,
+  };
+}
+
+test("expandLayerBySubsetVersion returns non-line layers unchanged even with expandable data", () => {
+  // Event primary field has subset_version points, so only the line-layer guard keeps it as-is.
+  const item = processed({
+    layer: eventLayer({ fields: ["evt"] }),
+    pointsByField: { evt: [point(1), point(2)] },
+  });
+  expect(expandLayerBySubsetVersion(item)).toEqual([item]);
+});
+
+test("expandLayerBySubsetVersion returns the item unchanged when primary-field data is missing", () => {
+  const item = processed({ pointsByField: {} });
+  expect(expandLayerBySubsetVersion(item)).toEqual([item]);
+});
+
+test("expandLayerBySubsetVersion returns the item unchanged when no point has a subset_version", () => {
+  const item = processed({ pointsByField: { temp: [point(), point()] } });
+  expect(expandLayerBySubsetVersion(item)).toEqual([item]);
+});
+
+test("expandLayerBySubsetVersion splits into numerically-sorted, alternating-colored virtual layers", () => {
+  // Non-integer keys ('v2'/'v10') so Object.entries preserves insertion order and the
+  // explicit numeric .sort is what produces the final ordering.
+  const p2a = point("v2");
+  const p10 = point("v10");
+  const p2b = point("v2");
+  const otherFieldPoint = point();
+  const item = processed({
+    layer: lineLayer({ fields: ["temp"], label: "L" }),
+    // Insertion order (v10, v2) differs from the numeric sort (v2, v10).
+    pointsByField: { temp: [p10, p2a, p2b], humidity: [otherFieldPoint] },
+    data_count: 7,
+    unit: "C",
+  });
+
+  const result = expandLayerBySubsetVersion(item);
+
+  expect(result).toHaveLength(2);
+  // Numeric sort places v2 before v10 (lexicographic would put v10 first).
+  expect(result[0].layer.label).toBe("L (subset_version=v2)");
+  expect((result[0].layer as { color?: string }).color).toBe("#0000FF");
+  expect(result[0].pointsByField.temp).toEqual([p2a, p2b]);
+  expect(result[1].layer.label).toBe("L (subset_version=v10)");
+  expect((result[1].layer as { color?: string }).color).toBe("#FF0000");
+  expect(result[1].pointsByField.temp).toEqual([p10]);
+  // Other fields and item metadata are preserved (object spreads).
+  expect(result[0].pointsByField.humidity).toEqual([otherFieldPoint]);
+  expect(result[0].data_count).toBe(7);
+  expect(result[0].unit).toBe("C");
+});
+
+test("expandLayerBySubsetVersion expands when only some points carry a subset_version", () => {
+  // 'some' (not 'every') semantics: one point with, one without → still expands, and the
+  // missing subset_version groups under 'unknown' (via optional chaining).
+  const item = processed({
+    pointsByField: { temp: [point(5), point()] },
+  });
+  const result = expandLayerBySubsetVersion(item);
+  expect(result.map((r) => r.layer.label)).toEqual([
+    "subset_version=5",
+    "subset_version=unknown",
+  ]);
+});
+
+test("expandLayerBySubsetVersion alternates colors across three or more groups", () => {
+  const item = processed({
+    pointsByField: { temp: [point(1), point(2), point(3)] },
+  });
+  const result = expandLayerBySubsetVersion(item);
+  expect(result.map((r) => (r.layer as { color?: string }).color)).toEqual([
+    "#0000FF",
+    "#FF0000",
+    "#0000FF",
+  ]);
+});
+
+test("expandLayerBySubsetVersion labels without a base label and falls back to 'unknown'", () => {
+  const item = processed({
+    layer: lineLayer({ fields: ["temp"], label: undefined }),
+    pointsByField: { temp: [point(null)] },
+  });
+  const result = expandLayerBySubsetVersion(item);
+  expect(result).toHaveLength(1);
+  expect(result[0].layer.label).toBe("subset_version=unknown");
 });
 
 // --- createNotIngestedDataResponse ------------------------------------------

@@ -223,6 +223,28 @@ point-building block moved (verbatim). `build` + `lint` green, all prior tests p
 - Aggregate mutated scope: **97.31% → 97.53%** (666 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **92 → 100** across **8** files. All §8 gates green.
 
+### Phase 2.3 — `Chart.tsx` subset_version layer expansion extracted (commit: expandLayerBySubsetVersion)
+
+Third `Chart.tsx` slice. Extracted the `processedData.flatMap` block that splits a line layer
+carrying `subset_version` data into one alternating-colored virtual layer per version into
+`expandLayerBySubsetVersion(item)` (+ exported `ProcessedLayerData` type) in `chart-data.ts`.
+The 60-line body moved verbatim; `Chart.tsx` now calls `processedData.flatMap(expandLayerBySubsetVersion)`.
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **27 → 34** in `chart-data.test.ts` — non-line/no-data/no-version passthrough,
+  numeric-sorted alternating blue/red virtual layers, `some` (not `every`) presence, `unknown`
+  fallback, spread preservation of other fields/metadata, and 3-group color alternation.
+- `chart-data.ts` mutation: **100.00%** (187 killed, 0 survived). Six initial survivors were
+  killed after two insights worth recording:
+  - The `.sort` survived because `Object.entries` **auto-numeric-sorts integer-like string
+    keys**, making the explicit sort redundant for `"2"`/`"10"`; switching the test to
+    non-integer keys (`"v2"`/`"v10"`) — where `Object.entries` preserves insertion order —
+    exercises the real sort and kills both `.sort`-removal and comparator mutants.
+  - The line-layer guard and `some`/optional-chaining mutants needed items that would _actually
+    expand_ (event layer with subset_version data; a mix of points with and without a version).
+- Aggregate mutated scope: **97.53% → 97.70%** (717 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **100 → 107** across **8** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

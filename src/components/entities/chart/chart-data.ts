@@ -156,6 +156,86 @@ export function createNotIngestedDataResponse(): DataResponse {
   };
 }
 
+/** One processed layer ready for Chart.js dataset construction. */
+export type ProcessedLayerData = {
+  data_count: number;
+  downsampling_factor: number;
+  layer: ChartLayer;
+  pointsByField: Record<string, CustomChartData[]>;
+  unit: string;
+};
+
+/**
+ * Expand a processed line layer that carries `subset_version` data into one virtual layer
+ * per subset_version, each with an alternating blue/red color and a subset_version-labeled
+ * name. Non-line layers, layers missing primary-field data, and layers without any
+ * subset_version values are returned unchanged (as a single-item array).
+ */
+export function expandLayerBySubsetVersion(
+  item: ProcessedLayerData,
+): ProcessedLayerData[] {
+  const { layer, pointsByField } = item;
+
+  // Only process ChartLayerLine
+  if (!isChartLayerLine(layer)) {
+    return [item];
+  }
+
+  const primaryField = layer.fields[0];
+
+  // Skip if the primary field data doesn't exist
+  if (!pointsByField[primaryField]) {
+    return [item];
+  }
+
+  // Check if any point has subset_version data
+  const hasSubsetVersion = pointsByField[primaryField].some(
+    (point) => point.raw.subset_version?.value !== undefined,
+  );
+
+  if (!hasSubsetVersion) {
+    return [item];
+  }
+
+  // Group points by subset_version
+  const groups: Record<string, CustomChartData[]> = {};
+
+  pointsByField[primaryField].forEach((point) => {
+    const subsetVersionValue =
+      point.raw.subset_version?.value?.toString() || "unknown";
+    if (!groups[subsetVersionValue]) {
+      groups[subsetVersionValue] = [];
+    }
+    groups[subsetVersionValue].push(point);
+  });
+
+  // Create a virtual layer for each subset_version with alternating colors
+  return Object.entries(groups)
+    .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
+    .map(([subsetVersionValue, groupPoints], index) => {
+      // Alternate between blue and red for subset_versions
+      const color = index % 2 === 0 ? "#0000FF" : "#FF0000";
+
+      const virtualLayer = {
+        ...layer,
+        color: color,
+        // Update label to include subset_version
+        label: layer.label
+          ? `${layer.label} (subset_version=${subsetVersionValue})`
+          : `subset_version=${subsetVersionValue}`,
+      };
+
+      return {
+        ...item,
+        layer: virtualLayer,
+        pointsByField: {
+          ...pointsByField,
+          [primaryField]: groupPoints,
+        },
+      };
+    });
+}
+
 /**
  * Derive the chart points for a single field of one data entry. Callers are expected to
  * have already skipped entries with a missing field value or non-string timestamp (the
