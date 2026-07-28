@@ -90,6 +90,7 @@ import {
   computeDownsamplingFactor,
   computeFetchWindow,
   createNotIngestedDataResponse,
+  deriveFieldPoints,
   isNotIngestedError,
   resolveFetchFields,
 } from "./chart-data";
@@ -524,61 +525,13 @@ export const Chart = ({
           const timestamp = d.timestamp;
           if (!fieldValue || typeof timestamp !== "string") return;
 
-          // Case where downsampling is not applied
-          const points: CustomChartData[] = [];
-          if (result.downsampling_factor === 1) {
-            points.push({
-              x: timestamp,
-              y: fieldValue.value as number,
-              raw: d,
-              selected: false,
-            });
-          } else {
-            if (!fieldMetadata) return;
-            if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "min",
-              ) &&
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "max",
-              )
-            ) {
-              // Compute middle time of aggregation window
-              const pointTimestampMS = new Date(timestamp).getTime();
-              const halfFieldDataIntervalMS =
-                ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
-              const middleTime = new Date(
-                pointTimestampMS + halfFieldDataIntervalMS,
-              ).toISOString();
-
-              // Use the min and max set to the middle of the window
-              points.push({
-                x: middleTime,
-                y: fieldValue.min as number,
-                raw: d,
-                selected: false,
-              });
-              if (fieldValue.min !== fieldValue.max) {
-                points.push({
-                  x: middleTime,
-                  y: fieldValue.max as number,
-                  raw: d,
-                  selected: false,
-                });
-              }
-            } else if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "avg",
-              )
-            ) {
-              points.push({
-                x: timestamp,
-                y: fieldValue.avg as number,
-                raw: d,
-                selected: false,
-              });
-            }
-          }
+          const points = deriveFieldPoints(
+            d,
+            field,
+            fieldMetadata,
+            result.downsampling_factor,
+            result.nominal_data_interval_seconds,
+          );
           if (!pointsByField[field]) {
             pointsByField[field] = [];
           }

@@ -1,10 +1,16 @@
 import { expect, test } from "vitest";
+import {
+  DataResponseDataEntry,
+  ProductAggregationType,
+  ProductField,
+} from "../../../types/api";
 import { ChartLayer } from "../../../types/view";
 import { HttpError } from "../../../utilities/api";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
   createNotIngestedDataResponse,
+  deriveFieldPoints,
   isNotIngestedError,
   resolveFetchFields,
 } from "./chart-data";
@@ -241,6 +247,95 @@ test("isNotIngestedError is false for non-4xx statuses and non-HttpErrors", () =
   expect(isNotIngestedError(new Error("plain"))).toBe(false);
   expect(isNotIngestedError("not-an-error")).toBe(false);
   expect(isNotIngestedError(null)).toBe(false);
+});
+
+// --- deriveFieldPoints ------------------------------------------------------
+
+const TS = "2020-01-01T00:00:00.000Z";
+
+function meta(types: ProductAggregationType[]): ProductField {
+  return {
+    name: "temp",
+    type: "float",
+    unit: "K",
+    is_channel_id: false,
+    supported_aggregations: types.map((type) => ({ field_name: "temp", type })),
+  };
+}
+
+function entry(
+  fieldValue: Partial<
+    Record<"value" | "min" | "max" | "avg" | "centroid", number>
+  >,
+  field = "temp",
+  timestamp: unknown = TS,
+): DataResponseDataEntry {
+  return { timestamp, [field]: fieldValue } as unknown as DataResponseDataEntry;
+}
+
+test("deriveFieldPoints returns a single raw point when downsampling is off", () => {
+  const d = entry({ value: 42 });
+  expect(deriveFieldPoints(d, "temp", null, 1, null)).toEqual([
+    { x: TS, y: 42, raw: d, selected: false },
+  ]);
+});
+
+test("deriveFieldPoints returns [] when the field value or timestamp is invalid", () => {
+  // Missing field value
+  expect(
+    deriveFieldPoints(entry({ value: 1 }), "other", null, 1, null),
+  ).toEqual([]);
+  // Non-string timestamp
+  expect(
+    deriveFieldPoints(entry({ value: 1 }, "temp", 123), "temp", null, 1, null),
+  ).toEqual([]);
+});
+
+test("deriveFieldPoints returns [] when downsampled without field metadata", () => {
+  expect(deriveFieldPoints(entry({ value: 1 }), "temp", null, 2, 60)).toEqual(
+    [],
+  );
+});
+
+test("deriveFieldPoints emits min and max points at the window midpoint when they differ", () => {
+  const d = entry({ min: 1, max: 9 });
+  // nominal 60s → midpoint is +30s from the timestamp.
+  expect(deriveFieldPoints(d, "temp", meta(["min", "max"]), 2, 60)).toEqual([
+    { x: "2020-01-01T00:00:30.000Z", y: 1, raw: d, selected: false },
+    { x: "2020-01-01T00:00:30.000Z", y: 9, raw: d, selected: false },
+  ]);
+});
+
+test("deriveFieldPoints emits a single midpoint point when min equals max", () => {
+  const d = entry({ min: 5, max: 5 });
+  expect(deriveFieldPoints(d, "temp", meta(["min", "max"]), 2, 60)).toEqual([
+    { x: "2020-01-01T00:00:30.000Z", y: 5, raw: d, selected: false },
+  ]);
+});
+
+test("deriveFieldPoints places the midpoint at the timestamp when the interval is null", () => {
+  const d = entry({ min: 1, max: 9 });
+  const points = deriveFieldPoints(d, "temp", meta(["min", "max"]), 2, null);
+  expect(points[0].x).toBe(TS);
+});
+
+test("deriveFieldPoints uses avg at the raw timestamp when only avg is supported", () => {
+  const d = entry({ avg: 7 });
+  expect(deriveFieldPoints(d, "temp", meta(["avg"]), 2, 60)).toEqual([
+    { x: TS, y: 7, raw: d, selected: false },
+  ]);
+});
+
+test("deriveFieldPoints returns [] when downsampled aggregations are unusable", () => {
+  // Only min (no max, no avg): neither aggregation branch applies (guards the max predicate).
+  expect(
+    deriveFieldPoints(entry({ min: 1 }), "temp", meta(["min"]), 2, 60),
+  ).toEqual([]);
+  // Only max (no min, no avg): the min/max branch requires BOTH, so still [] (guards the
+  // min predicate — a broken predicate would wrongly enter the branch).
+  expect(
+    deriveFieldPoints(entry({ min: 1, max: 9 }), "temp", meta(["max"]), 2, 60),
+  ).toEqual([]);
 });
 
 // --- createNotIngestedDataResponse ------------------------------------------

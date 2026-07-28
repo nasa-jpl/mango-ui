@@ -198,6 +198,31 @@ prior tests still pass).
   (609 killed / 6 timeout / 16 survived / 1 no-cov). Unit tests **73 → 92** across **8** files.
   All §8 gates green (`test:unit`, `lint`, `lint:css`, `build`).
 
+### Phase 2.2 — `Chart.tsx` per-entry point-derivation extracted (commit: deriveFieldPoints)
+
+Second `Chart.tsx` slice. Extracted the per-data-entry point-derivation logic from the
+`visualizeChartLayers` `processedData.map` (the downsampling min/max/avg → chart-point rules)
+into `deriveFieldPoints` in `chart-data.ts`. Again **behavior-preserving**: the caller keeps
+its `!fieldValue || typeof timestamp !== "string"` guard and its `pointsByField` key
+creation, so the exact "empty vs absent field key" semantics are unchanged; only the ~55-line
+point-building block moved (verbatim). `build` + `lint` green, all prior tests pass.
+
+- `deriveFieldPoints(d, field, fieldMetadata, downsamplingFactor, nominalDataIntervalSeconds)`
+  covers: no-downsampling raw point; downsampled min+max → midpoint min (+max when they
+  differ); avg-only → raw-timestamp avg point; and the empty cases (no metadata, unusable
+  aggregations, invalid field/timestamp).
+- Uses a type-only `import type { CustomChartData } from "./Chart"` (no runtime cycle; no
+  `import/no-cycle` rule configured). Note: the workspace's format-on-save import-cleaner
+  strips not-yet-used imports between edits — add imports and their first use in the _same_
+  edit to avoid a transient removal.
+- New tests: **19 → 27** in `chart-data.test.ts`, incl. midpoint arithmetic (`nominal/2*1000`,
+  `+` offset, null-interval → timestamp), `min !== max` dedupe, and symmetric min-only/max-only
+  cases that prove the min/max branch requires **both** aggregations.
+- `chart-data.ts` mutation: **100.00%** (136 killed, 0 survived). Two initial survivors on the
+  `type === "min"` predicate were killed by the "max-only aggregations" characterization case.
+- Aggregate mutated scope: **97.31% → 97.53%** (666 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **92 → 100** across **8** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
