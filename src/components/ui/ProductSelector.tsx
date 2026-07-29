@@ -26,6 +26,7 @@ import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { getData } from "../../utilities/api";
 import { SelectedProduct } from "./EntityEditor";
+import { isSelectedProductComplete } from "./entity-editor-utils";
 
 export declare type ProductSelectorProps = {
   dateRange?: DateRange;
@@ -55,13 +56,7 @@ export const ProductSelector = ({
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
-    if (
-      updatedSelectedProduct.mission &&
-      updatedSelectedProduct.instrument &&
-      updatedSelectedProduct.dataset &&
-      updatedSelectedProduct.fields.length &&
-      updatedSelectedProduct.version
-    ) {
+    if (isSelectedProductComplete(updatedSelectedProduct)) {
       onChange(updatedSelectedProduct);
     }
     setNewSelectedProduct(updatedSelectedProduct);

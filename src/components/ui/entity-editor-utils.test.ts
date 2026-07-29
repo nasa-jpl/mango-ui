@@ -5,6 +5,7 @@ import {
   extractEntitySelectedProducts,
   getLabelForSelectedProductOrLayer,
   getMatchingSelectedProductForLayer,
+  isSelectedProductComplete,
 } from "./entity-editor-utils";
 
 function selectedProduct(
@@ -113,6 +114,30 @@ test("getMatchingSelectedProductForLayer applies the fields override to both sid
   // With an override both labels use ["a"], producing a match.
   expect(getMatchingSelectedProductForLayer(layer, [product], ["a"])?.id).toBe(
     "p",
+  );
+});
+
+// --- isSelectedProductComplete ----------------------------------------------
+
+test("isSelectedProductComplete is true when all required fields are present", () => {
+  expect(isSelectedProductComplete(selectedProduct())).toBe(true);
+});
+
+test("isSelectedProductComplete is false when any single required field is missing", () => {
+  expect(isSelectedProductComplete(selectedProduct({ mission: "" }))).toBe(
+    false,
+  );
+  expect(isSelectedProductComplete(selectedProduct({ instrument: "" }))).toBe(
+    false,
+  );
+  expect(isSelectedProductComplete(selectedProduct({ dataset: "" }))).toBe(
+    false,
+  );
+  expect(isSelectedProductComplete(selectedProduct({ fields: [] }))).toBe(
+    false,
+  );
+  expect(isSelectedProductComplete(selectedProduct({ version: "" }))).toBe(
+    false,
   );
 });
 

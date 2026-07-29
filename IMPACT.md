@@ -289,6 +289,23 @@ imports all three back (incl. `getLabelForSelectedProductOrLayer`, still used di
 - Aggregate mutated scope: **97.75% → 97.86%** (770 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **113 → 124** across **9** files. All §8 gates green.
 
+### Phase 2.5b — `ProductSelector.tsx` completeness gate extracted (commit: isSelectedProductComplete)
+
+Second `EntityEditor`-area slice. Extracted the `updateSelectedProduct` completeness guard
+(`mission && instrument && dataset && fields.length && version`) from `ProductSelector.tsx` into
+`isSelectedProductComplete(product)` in the shared `entity-editor-utils.ts`. The call site is now
+`if (isSelectedProductComplete(updatedSelectedProduct))`. Wrapped in `Boolean(...)` so the return
+is a true boolean — behaviorally identical inside the `if`. `build` + `lint` green.
+
+- New tests: **2** (all-present → true; a single-missing case per field → false) — 13 in the file.
+- `entity-editor-utils.ts` mutation: **100.00%** (49 killed, 0 survived). The five single-missing
+  cases kill every `&&`→`||` mutant (turning any `&&` into `||` lets a truthy neighbor through in
+  at least one case).
+- Recurring tooling note (again): the formatter stripped the test's not-yet-used
+  `isSelectedProductComplete` import between edits; re-added after the usages existed.
+- Aggregate mutated scope: **97.86% → 97.88%** (780 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **124 → 126** across **9** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

@@ -40,6 +40,22 @@ export const getMatchingSelectedProductForLayer = (
   );
 };
 
+/**
+ * A selected product is "complete" (ready to be emitted via onChange) once it has a mission,
+ * instrument, dataset, at least one field, and a version.
+ */
+export const isSelectedProductComplete = (
+  product: SelectedProduct,
+): boolean => {
+  return Boolean(
+    product.mission &&
+    product.instrument &&
+    product.dataset &&
+    product.fields.length &&
+    product.version,
+  );
+};
+
 export const extractEntitySelectedProducts = (
   entity: EntityType,
 ): SelectedProduct[] => {
