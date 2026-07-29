@@ -22,11 +22,14 @@ import {
 } from "@nasa-jpl/stellar-react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
+import { Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { getData } from "../../utilities/api";
 import { SelectedProduct } from "./EntityEditor";
-import { isSelectedProductComplete } from "./entity-editor-utils";
+import {
+  countSubsetVersionsInDataResponse,
+  isSelectedProductComplete,
+} from "./entity-editor-utils";
 
 export declare type ProductSelectorProps = {
   dateRange?: DateRange;
@@ -156,25 +159,13 @@ export const ProductSelector = ({
         );
 
         const data = await json();
-        if (data && data.data && Array.isArray(data.data)) {
-          const subsetVersionSet = new Set<string>();
-          data.data.forEach((point: DataResponseDataEntry) => {
-            const subsetVersionValue = point.subset_version?.value;
-            if (
-              subsetVersionValue !== undefined &&
-              subsetVersionValue !== null
-            ) {
-              subsetVersionSet.add(String(subsetVersionValue));
-            }
+        const count = countSubsetVersionsInDataResponse(data);
+        // Update selected product with the count
+        if (count > 0) {
+          updateSelectedProduct({
+            ...newSelectedProduct,
+            subsetVersionCount: count,
           });
-          const count = subsetVersionSet.size;
-          // Update selected product with the count
-          if (count > 0) {
-            updateSelectedProduct({
-              ...newSelectedProduct,
-              subsetVersionCount: count,
-            });
-          }
         }
       } catch (error: unknown) {
         const err = error as Error;

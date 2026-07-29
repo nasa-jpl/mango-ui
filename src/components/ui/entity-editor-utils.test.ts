@@ -1,12 +1,28 @@
 import { expect, test } from "vitest";
+import { DataResponse, DataResponseDataEntry } from "../../types/api";
 import { ChartEntity, DataLayer, Entity as EntityType } from "../../types/view";
 import type { SelectedProduct } from "./EntityEditor";
 import {
+  countSubsetVersionsInDataResponse,
   extractEntitySelectedProducts,
   getLabelForSelectedProductOrLayer,
   getMatchingSelectedProductForLayer,
   isSelectedProductComplete,
 } from "./entity-editor-utils";
+
+function dataEntry(
+  subsetVersion?: number | string | null,
+): DataResponseDataEntry {
+  const entry: Record<string, unknown> = { timestamp: "t" };
+  if (subsetVersion !== undefined) {
+    entry.subset_version = { value: subsetVersion };
+  }
+  return entry as unknown as DataResponseDataEntry;
+}
+
+function response(entries: DataResponseDataEntry[]): DataResponse {
+  return { data: entries } as unknown as DataResponse;
+}
 
 function selectedProduct(
   overrides: Partial<SelectedProduct> = {},
@@ -115,6 +131,56 @@ test("getMatchingSelectedProductForLayer applies the fields override to both sid
   expect(getMatchingSelectedProductForLayer(layer, [product], ["a"])?.id).toBe(
     "p",
   );
+});
+
+// --- countSubsetVersionsInDataResponse --------------------------------------
+
+test("countSubsetVersionsInDataResponse returns 0 for missing or malformed responses", () => {
+  expect(countSubsetVersionsInDataResponse(null)).toBe(0);
+  expect(countSubsetVersionsInDataResponse(undefined)).toBe(0);
+  // data.data is not an array
+  expect(
+    countSubsetVersionsInDataResponse({
+      data: null,
+    } as unknown as DataResponse),
+  ).toBe(0);
+  expect(countSubsetVersionsInDataResponse(response([]))).toBe(0);
+});
+
+test("countSubsetVersionsInDataResponse returns 0 when no entry carries a subset_version", () => {
+  expect(
+    countSubsetVersionsInDataResponse(response([dataEntry(), dataEntry()])),
+  ).toBe(0);
+});
+
+test("countSubsetVersionsInDataResponse counts distinct values and ignores duplicates", () => {
+  expect(
+    countSubsetVersionsInDataResponse(
+      response([dataEntry(2), dataEntry(2), dataEntry(10)]),
+    ),
+  ).toBe(2);
+});
+
+test("countSubsetVersionsInDataResponse ignores null/undefined but counts falsy values like 0", () => {
+  expect(
+    countSubsetVersionsInDataResponse(
+      response([dataEntry(null), dataEntry(), dataEntry(0)]),
+    ),
+  ).toBe(1);
+});
+
+test("countSubsetVersionsInDataResponse returns 0 when every value is null", () => {
+  expect(
+    countSubsetVersionsInDataResponse(
+      response([dataEntry(null), dataEntry(null)]),
+    ),
+  ).toBe(0);
+});
+
+test("countSubsetVersionsInDataResponse coerces to string so 2 and '2' are one version", () => {
+  expect(
+    countSubsetVersionsInDataResponse(response([dataEntry(2), dataEntry("2")])),
+  ).toBe(1);
 });
 
 // --- isSelectedProductComplete ----------------------------------------------

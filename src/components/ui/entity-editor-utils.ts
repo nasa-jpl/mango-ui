@@ -1,3 +1,4 @@
+import { DataResponse } from "../../types/api";
 import {
   ChartEntity,
   DataLayer,
@@ -54,6 +55,25 @@ export const isSelectedProductComplete = (
     product.fields.length &&
     product.version,
   );
+};
+
+/**
+ * Count the distinct `subset_version` values in a fetched data response, coercing each value
+ * to a string and ignoring `null`/`undefined`. Returns 0 for a missing/malformed response.
+ */
+export const countSubsetVersionsInDataResponse = (
+  data: DataResponse | null | undefined,
+): number => {
+  const subsetVersionSet = new Set<string>();
+  if (data && Array.isArray(data.data)) {
+    data.data.forEach((point) => {
+      const subsetVersionValue = point.subset_version?.value;
+      if (subsetVersionValue !== undefined && subsetVersionValue !== null) {
+        subsetVersionSet.add(String(subsetVersionValue));
+      }
+    });
+  }
+  return subsetVersionSet.size;
 };
 
 export const extractEntitySelectedProducts = (

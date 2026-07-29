@@ -306,6 +306,28 @@ is a true boolean — behaviorally identical inside the `if`. `build` + `lint` g
 - Aggregate mutated scope: **97.86% → 97.88%** (780 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **124 → 126** across **9** files. All §8 gates green.
 
+### Phase 2.6 — `ProductSelector.tsx` subset_version count derivation extracted (commit: countSubsetVersionsInDataResponse)
+
+Third `EntityEditor`-area slice. Extracted the `Set`-building block from `ProductSelector.tsx`'s
+fetch `useEffect` into `countSubsetVersionsInDataResponse(data)` in `entity-editor-utils.ts`
+(guards a missing/malformed response, coerces values to strings, ignores `null`/`undefined`).
+The call site is now `const count = countSubsetVersionsInDataResponse(await json())`.
+**Behavior-preserving**: `data && data.data && Array.isArray(data.data)` collapses to
+`data && Array.isArray(data.data)` (`Array.isArray` already implies a truthy array), and the
+`if (count > 0)` update path is unchanged. Also dropped the now-unused `DataResponseDataEntry`
+import from `ProductSelector.tsx`.
+
+- New tests: **6** in `entity-editor-utils.test.ts` (19 in file) — null/undefined/malformed → 0,
+  empty/no-version → 0, distinct-vs-duplicate, null/undefined excluded while `0` counts, all-null → 0,
+  string coercion.
+- `entity-editor-utils.ts` mutation: **100.00%** (64 killed, 0 survived) first run.
+- Recurring tooling note (again): the formatter stripped the not-yet-used `DataResponse` import in
+  the source (added in a separate edit from the function) — `tsc` build caught it (`TS2552` +
+  implicit-any on `point`); re-added once the function referenced it. Reinforces adding imports and
+  first use in the **same** edit.
+- Aggregate mutated scope: **97.88% → 97.92%** (795 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **126 → 132** across **9** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
