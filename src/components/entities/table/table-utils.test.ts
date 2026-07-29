@@ -1,11 +1,58 @@
 import { expect, test } from "vitest";
+import type {
+  ComputedThresholds,
+  ProcessedDataResponseDataEntry,
+} from "../../../types/app";
+import type { TableColumn } from "../../../types/view";
 import {
+  deriveRowTrippedStatus,
   formatTableCellValue,
   formatTimestampValue,
   getAGGridFilterType,
   getFieldDisplayValue,
   TableFieldValue,
 } from "./table-utils";
+
+type TrippedFlags = Partial<{
+  limitLower: boolean;
+  limitUpper: boolean;
+  warnLower: boolean;
+  warnUpper: boolean;
+}>;
+
+function thresholds(flags: TrippedFlags = {}): ComputedThresholds {
+  return {
+    limits: {
+      lower: !!flags.limitLower,
+      lower_value: null,
+      upper: !!flags.limitUpper,
+      upper_value: null,
+    },
+    warnings: {
+      lower: !!flags.warnLower,
+      lower_value: null,
+      upper: !!flags.warnUpper,
+      upper_value: null,
+    },
+  };
+}
+
+function col(layerId: string, field: string): TableColumn {
+  return { id: `${layerId}.${field}`, field, layerId };
+}
+
+function rowWithCell(
+  layerId: string,
+  field: string,
+  cell: unknown,
+): Record<string, ProcessedDataResponseDataEntry> {
+  return {
+    [layerId]: {
+      timestamp: "t",
+      [field]: cell,
+    },
+  } as unknown as Record<string, ProcessedDataResponseDataEntry>;
+}
 
 // --- getAGGridFilterType ----------------------------------------------------
 
@@ -83,5 +130,89 @@ test("formatTimestampValue truncates to the day when collapsing by day", () => {
 test("formatTimestampValue truncates at the offset boundary otherwise", () => {
   expect(formatTimestampValue("2020-01-02T03:04:05+00:00", false)).toBe(
     "2020-01-02T03:04:05",
+  );
+});
+
+// --- deriveRowTrippedStatus -------------------------------------------------
+
+test("deriveRowTrippedStatus is nominal with no columns or no row data", () => {
+  expect(deriveRowTrippedStatus(rowWithCell("L", "f", { value: 1 }), [])).toBe(
+    "nominal",
+  );
+  expect(deriveRowTrippedStatus(null, [col("L", "f")])).toBe("nominal");
+  expect(deriveRowTrippedStatus(undefined, [col("L", "f")])).toBe("nominal");
+});
+
+test("deriveRowTrippedStatus skips columns whose layer/field is absent from the row", () => {
+  const row = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ limitLower: true }),
+  });
+  // layer id not present
+  expect(deriveRowTrippedStatus(row, [col("X", "f")])).toBe("nominal");
+  // field not present in the layer entry
+  expect(deriveRowTrippedStatus(row, [col("L", "g")])).toBe("nominal");
+});
+
+test("deriveRowTrippedStatus skips cells that are missing or lack computed thresholds", () => {
+  expect(
+    deriveRowTrippedStatus(rowWithCell("L", "f", undefined), [col("L", "f")]),
+  ).toBe("nominal");
+  expect(
+    deriveRowTrippedStatus(rowWithCell("L", "f", { value: 1 }), [
+      col("L", "f"),
+    ]),
+  ).toBe("nominal");
+});
+
+test("deriveRowTrippedStatus is nominal when a cell has thresholds but none are tripped", () => {
+  const row = rowWithCell("L", "f", { value: 1, _thresholds: thresholds() });
+  expect(deriveRowTrippedStatus(row, [col("L", "f")])).toBe("nominal");
+});
+
+test("deriveRowTrippedStatus returns error when a limit (lower or upper) is tripped", () => {
+  const lower = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ limitLower: true }),
+  });
+  const upper = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ limitUpper: true }),
+  });
+  expect(deriveRowTrippedStatus(lower, [col("L", "f")])).toBe("error");
+  expect(deriveRowTrippedStatus(upper, [col("L", "f")])).toBe("error");
+});
+
+test("deriveRowTrippedStatus returns warning when only a warning (lower or upper) is tripped", () => {
+  const lower = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ warnLower: true }),
+  });
+  const upper = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ warnUpper: true }),
+  });
+  expect(deriveRowTrippedStatus(lower, [col("L", "f")])).toBe("warning");
+  expect(deriveRowTrippedStatus(upper, [col("L", "f")])).toBe("warning");
+});
+
+test("deriveRowTrippedStatus prioritizes a tripped limit over a tripped warning", () => {
+  const row = rowWithCell("L", "f", {
+    value: 1,
+    _thresholds: thresholds({ limitLower: true, warnUpper: true }),
+  });
+  expect(deriveRowTrippedStatus(row, [col("L", "f")])).toBe("error");
+});
+
+test("deriveRowTrippedStatus continues past skipped columns to find a later tripped one", () => {
+  const row = {
+    L: {
+      timestamp: "t",
+      a: { value: 1 },
+      b: { value: 1, _thresholds: thresholds({ limitUpper: true }) },
+    },
+  } as unknown as Record<string, ProcessedDataResponseDataEntry>;
+  expect(deriveRowTrippedStatus(row, [col("L", "a"), col("L", "b")])).toBe(
+    "error",
   );
 });

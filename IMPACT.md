@@ -370,6 +370,32 @@ First `Table.tsx` slice. Extracted four pure helpers from the ag-grid column con
 - Aggregate mutated scope: **97.95% → 98.10%** (873 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **136 → 148** across **10** files. All §8 gates green.
 
+### Phase 2.9 — `Table.tsx` row threshold-status derivation extracted (commit: deriveRowTrippedStatus)
+
+Second `Table.tsx` slice. Extracted the derived-column `cellRenderer`'s tripped-status loop into
+`deriveRowTrippedStatus(rowData, columns)` in `table-utils.ts` — scans a row's columns and returns
+`"error"` (any limit tripped) → `"warning"` (any warning tripped) → `"nominal"`, skipping columns
+without computed thresholds. The `cellRenderer` now calls it and renders the `StatusBadge`.
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **8** in `table-utils.test.ts` (20 in file) — empty-columns/null/undefined row →
+  nominal; absent layer/field skip; missing cell / no `_thresholds` skip; thresholds-present-but-
+  untripped → nominal; limit lower/upper → error; warning-only lower/upper → warning; limit-over-
+  warning precedence; and continue-past-skip to a later tripped column.
+- `table-utils.ts` mutation: **100.00%** (97 killed + 1 timeout, 0 survived).
+- Cleanup that killed 3 initial survivors (all **equivalent mutants**): removed a **redundant early
+  `continue`** (`if (!limits.lower && !limits.upper && !warnings.lower && !warnings.upper) continue;`).
+  When all four flags are false, skipping vs. falling through both yield `"nominal"` (the two later
+  `if`s are false), so the skip was dead — it only spawned equivalent mutants and forced the
+  `warnings.lower || warnings.upper` check to be always-true when reached. Same pattern as 2.8's
+  fallthrough-case grouping: delete provably-dead code rather than chase equivalent mutants.
+- Recurring tooling note (again): the four type-only imports (`ComputedThresholds`,
+  `ProcessedDataResponseDataEntry`, `Status`, `TableColumn`) were stripped because I added them in a
+  **separate** edit from `deriveRowTrippedStatus`; `tsc` build caught it (`TS2552`/`TS2304`). Re-added
+  once the function referenced them. (When possible, add import + first use in one `multi_edit`.)
+- Aggregate mutated scope: **98.10% → 98.17%** (904 killed / 7 timeout / 16 survived / 1 no-cov).
+  Unit tests **148 → 156** across **10** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

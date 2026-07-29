@@ -22,7 +22,6 @@ import {
 } from "../../../types/app.ts";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
-import { Status } from "../../../types/status.ts";
 import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
 import { getData, HttpError } from "../../../utilities/api";
@@ -40,6 +39,7 @@ import { Tooltip } from "../../ui/Tooltip.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 import {
+  deriveRowTrippedStatus,
   formatTableCellValue,
   formatTimestampValue,
   getAGGridFilterType,
@@ -333,42 +333,10 @@ const Table = memo(function Table({
           return <>{params.valueFormatted}</>;
         }
 
-        let tripped: Status = "nominal";
-        for (let i = 0; i < tableEntity.columns.length; i++) {
-          const column = tableEntity.columns[i];
-
-          // For each column, see if the row has tripped any thresholds
-          if (
-            !params.data ||
-            !(column.layerId in params.data) ||
-            !(column.field in params.data[column.layerId]) ||
-            !params.data[column.layerId][column.field] ||
-            !params.data[column.layerId][column.field]._thresholds
-          ) {
-            continue;
-          }
-          const { limits, warnings }: ComputedThresholds =
-            params.data[column.layerId][column.field]._thresholds;
-
-          if (
-            !limits.lower &&
-            !limits.upper &&
-            !warnings.lower &&
-            !warnings.upper
-          ) {
-            continue;
-          }
-
-          if (limits.lower || limits.upper) {
-            tripped = "error";
-            break;
-          }
-
-          if (warnings.lower || warnings.upper) {
-            tripped = "warning";
-            break;
-          }
-        }
+        const tripped = deriveRowTrippedStatus(
+          params.data,
+          tableEntity.columns,
+        );
         return (
           <span className="derived-column">
             <StatusBadge status={tripped} /> {params.valueFormatted}

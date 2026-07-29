@@ -1,4 +1,10 @@
 import type { ProductField } from "../../../types/api";
+import type {
+  ComputedThresholds,
+  ProcessedDataResponseDataEntry,
+} from "../../../types/app";
+import type { Status } from "../../../types/status";
+import type { TableColumn } from "../../../types/view";
 
 /** The per-field cell shape inside a `DataResponseDataEntry` (a partial aggregation record). */
 export type TableFieldValue = Partial<
@@ -80,4 +86,43 @@ export function formatTimestampValue(
     return value.split("T")[0];
   }
   return value.split("+")[0];
+}
+
+/**
+ * Derive the overall threshold status for a table row: `"error"` if any column's computed
+ * limit is tripped, otherwise `"warning"` if any warning is tripped, otherwise `"nominal"`.
+ * Columns without threshold data (or with no tripped flags) are skipped.
+ */
+export function deriveRowTrippedStatus(
+  rowData: Record<string, ProcessedDataResponseDataEntry> | null | undefined,
+  columns: TableColumn[],
+): Status {
+  let tripped: Status = "nominal";
+  for (let i = 0; i < columns.length; i++) {
+    const column = columns[i];
+
+    // For each column, see if the row has tripped any thresholds
+    if (
+      !rowData ||
+      !(column.layerId in rowData) ||
+      !(column.field in rowData[column.layerId]) ||
+      !rowData[column.layerId][column.field] ||
+      !rowData[column.layerId][column.field]._thresholds
+    ) {
+      continue;
+    }
+    const { limits, warnings }: ComputedThresholds =
+      rowData[column.layerId][column.field]._thresholds!;
+
+    if (limits.lower || limits.upper) {
+      tripped = "error";
+      break;
+    }
+
+    if (warnings.lower || warnings.upper) {
+      tripped = "warning";
+      break;
+    }
+  }
+  return tripped;
 }
