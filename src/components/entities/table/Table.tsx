@@ -39,6 +39,12 @@ import StatusBadge from "../../ui/StatusBadge.tsx";
 import { Tooltip } from "../../ui/Tooltip.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
+import {
+  formatTableCellValue,
+  formatTimestampValue,
+  getAGGridFilterType,
+  getFieldDisplayValue,
+} from "./table-utils";
 
 export declare type TableProps = {
   compact?: boolean;
@@ -57,25 +63,6 @@ export declare type TableProps = {
   showHeader?: boolean;
   tableEntity: TableEntity;
 };
-
-function getAGGridFilterType(type: ProductField["type"] | string) {
-  switch (type) {
-    case "int":
-      return "agNumberColumnFilter";
-    case "float":
-      return "agNumberColumnFilter";
-    case "str":
-      return "agTextColumnFilter";
-    case "bool":
-      return "agTextColumnFilter";
-    case "datetime":
-      return "agDateColumnFilter";
-    case "dict":
-      return "agTextColumnFilter";
-    default:
-      return true;
-  }
-}
 
 const Table = memo(function Table({
   dateRange,
@@ -289,23 +276,8 @@ const Table = memo(function Table({
           }
           return params.valueFormatted;
         },
-        valueFormatter: (params) => {
-          if (metadata?.type === "datetime" && column.dateFormat === "short") {
-            return params.value.split("T")[0];
-          } else if (metadata?.type === "datetime") {
-            return params.value.split("+")[0];
-          }
-
-          if (params.value === "") {
-            return "-";
-          }
-
-          // if (typeof params.value === "number") {
-          //   return parseFloat(params.value.toPrecision(4));
-          // }
-
-          return params.value;
-        },
+        valueFormatter: (params) =>
+          formatTableCellValue(params.value, metadata?.type, column.dateFormat),
         valueGetter: (
           params: ValueGetterParams<Record<string, DataResponseDataEntry>>,
         ) => {
@@ -317,25 +289,7 @@ const Table = memo(function Table({
             return "";
           }
           const fieldData = params.data[column.layerId][column.field];
-          if (typeof fieldData !== "object") {
-            return fieldData;
-          }
-          if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
-            // mlucas: Commenting this out. See https://github.com/nasa-jpl/mango-ui/issues/158?issue=nasa-jpl%7Cmango-ui%7C190.
-            // if (typeof fieldData.value === "number") {
-            //   return parseFloat(fieldData.value.toPrecision(4));
-            // }
-            return fieldData.value;
-          }
-          if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
-            return fieldData.avg;
-          }
-          if (
-            Object.prototype.hasOwnProperty.call(fieldData, "min") &&
-            Object.prototype.hasOwnProperty.call(fieldData, "max")
-          ) {
-            return `${fieldData.min} – ${fieldData.max}`;
-          }
+          return getFieldDisplayValue(fieldData);
         },
       };
 
@@ -371,12 +325,8 @@ const Table = memo(function Table({
         }
         return Object.values(params.data)[0].timestamp ?? "";
       },
-      valueFormatter: (params) => {
-        if (shouldCollapseByDay) {
-          return params.value.split("T")[0];
-        }
-        return params.value.split("+")[0];
-      },
+      valueFormatter: (params) =>
+        formatTimestampValue(params.value, shouldCollapseByDay),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cellRenderer: (params: any) => {
         if (!tableEntity.applyThresholds) {

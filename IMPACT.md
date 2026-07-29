@@ -346,6 +346,30 @@ version, date range). The call site is now `if (!shouldFetchSubsetVersionCount(.
 - Aggregate mutated scope: **97.92% → 97.95%** (807 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **132 → 136** across **9** files. All §8 gates green.
 
+### Phase 2.8 — `Table.tsx` pure formatters/mappers extracted (commit: table-utils)
+
+First `Table.tsx` slice. Extracted four pure helpers from the ag-grid column config into a new
+`src/components/entities/table/table-utils.ts` (added to the Stryker `mutate` scope):
+
+- `getAGGridFilterType(type)` — field type → ag-grid floating-filter type.
+- `getFieldDisplayValue(fieldData)` — cell display value (`value` → `avg` → `min – max` range).
+- `formatTableCellValue(value, type, dateFormat)` — data column `valueFormatter` core.
+- `formatTimestampValue(value, collapseByDay)` — derived timestamp column `valueFormatter`.
+
+`Table.tsx`'s `valueFormatter`/`valueGetter` arrows now delegate to these. **Behavior-preserving**:
+`build` + `lint` green, all prior tests pass.
+
+- New tests: **12** in `table-utils.test.ts` (10 test files total) — every filter-type branch incl.
+  unknown → `true`; value/avg/min–max precedence and the undefined/partial-range cases; datetime
+  short vs full, non-datetime guard, empty → `-`, passthrough; and both timestamp branches.
+- `table-utils.ts` mutation: **100.00%** (66 killed, 0 survived). Two initial survivors were
+  **equivalent mutants**: emptying `case "int"` fell through to `case "float"` (identical return),
+  same for `case "str"`→`case "bool"`. Fixed by **grouping the fallthrough cases**
+  (`case "int": case "float": return …`), an idiomatic simplification that makes each group's
+  single return killable.
+- Aggregate mutated scope: **97.95% → 98.10%** (873 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **136 → 148** across **10** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
