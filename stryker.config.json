@@ -4,7 +4,8 @@
   "mutate": [
     "src/utilities/**/*.ts",
     "!src/utilities/**/*.test.ts",
-    "src/components/entities/chart/chart-data.ts"
+    "src/components/entities/chart/chart-data.ts",
+    "src/components/ui/entity-editor-utils.ts"
   ],
   "reporters": ["html", "json", "clear-text", "progress"],
   "htmlReporter": {

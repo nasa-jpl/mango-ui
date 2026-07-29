@@ -261,6 +261,34 @@ the Chart.js dataset builder into `countUniqueSubsetVersions(points)` in `chart-
 - Aggregate mutated scope: **97.70% → 97.75%** (731 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **107 → 113** across **8** files. All §8 gates green.
 
+### Phase 2.5a — `EntityEditor.tsx` pure helpers extracted (commit: entity-editor-utils)
+
+First `EntityEditor.tsx` slice. The component (1051 lines) is almost entirely JSX + stateful
+handlers; its only cleanly-testable logic is three pure module-level helpers, extracted verbatim
+into a new `src/components/ui/entity-editor-utils.ts` (added to the Stryker `mutate` scope):
+
+- `getLabelForSelectedProductOrLayer(thing, fields?)` — canonical label / equality key builder.
+- `getMatchingSelectedProductForLayer(layer, selectedProducts, fields?)` — label-equality `.find`.
+- `extractEntitySelectedProducts(entity)` — maps layers → selected products (fresh `generateUUID`).
+
+`SelectedProduct` stays defined in (and exported from) `EntityEditor.tsx` because
+`ProductsSelector.tsx` / `ProductSelector.tsx` import it from there; the utils file uses a
+type-only `import type { SelectedProduct }` (erased, no runtime cycle). `EntityEditor.tsx` now
+imports all three back (incl. `getLabelForSelectedProductOrLayer`, still used directly at ~L981 —
+`tsc` build caught the missing import that vitest/Stryker's transform did not).
+
+- New tests: **11** in `entity-editor-utils.test.ts` (9 test files total). Cover full label with
+  channels+filter, empty/absent channel & filter segments, multi-channel space separator, the
+  `fields` override on both label sides, matching + no-match, id generation, filter-only-when-array,
+  and no-layers → `[]`.
+- `entity-editor-utils.ts` mutation: **100.00%** (39 killed, 0 survived). Notes:
+  - Removed a **provably-dead `?.`** (`(thing.channels || [])?.map` — `x || []` is never nullish),
+    an otherwise-equivalent mutant, as a behavior-preserving cleanup.
+  - The product-side `fields || p.fields` survivors needed a test where `p.fields` **differs** from
+    the override (otherwise `false`/`&&` mutants coincide with the original).
+- Aggregate mutated scope: **97.75% → 97.86%** (770 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **113 → 124** across **9** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
