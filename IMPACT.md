@@ -328,6 +328,24 @@ import from `ProductSelector.tsx`.
 - Aggregate mutated scope: **97.88% → 97.92%** (795 killed / 6 timeout / 16 survived / 1 no-cov).
   Unit tests **126 → 132** across **9** files. All §8 gates green.
 
+### Phase 2.7 — `ProductSelector.tsx` fetch-guard predicate extracted (commit: shouldFetchSubsetVersionCount)
+
+Fourth `EntityEditor`-area slice. Extracted the fetch `useEffect`'s early-return guard from
+`ProductSelector.tsx` into `shouldFetchSubsetVersionCount(product, hasSubsetVersionField, dateRange)`
+in `entity-editor-utils.ts` — the positive form (all of: has-field, mission, instrument, dataset,
+version, date range). The call site is now `if (!shouldFetchSubsetVersionCount(...)) return;`.
+**Behavior-preserving** (De Morgan of the original `|| return`).
+
+- Trade-off: extracting the guard removed TS's control-flow narrowing of `dateRange`, so the two
+  `getData(... dateRange.start, dateRange.end)` reads now use `dateRange!` (the predicate proves
+  it's defined). A commented non-null assertion is the minimal fix; the alternative (a `dateRange`
+  type-guard) can't narrow a single param when the predicate also checks the product.
+- New tests: **4** in `entity-editor-utils.test.ts` (23 in file) — all-complete → true; missing
+  field-flag (false/undefined) → false; each missing selection field → false; no date range → false.
+- `entity-editor-utils.ts` mutation: **100.00%** (76 killed, 0 survived) first run.
+- Aggregate mutated scope: **97.92% → 97.95%** (807 killed / 6 timeout / 16 survived / 1 no-cov).
+  Unit tests **132 → 136** across **9** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

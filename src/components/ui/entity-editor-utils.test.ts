@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { DataResponse, DataResponseDataEntry } from "../../types/api";
+import { DateRange } from "../../types/time";
 import { ChartEntity, DataLayer, Entity as EntityType } from "../../types/view";
 import type { SelectedProduct } from "./EntityEditor";
 import {
@@ -8,7 +9,10 @@ import {
   getLabelForSelectedProductOrLayer,
   getMatchingSelectedProductForLayer,
   isSelectedProductComplete,
+  shouldFetchSubsetVersionCount,
 } from "./entity-editor-utils";
+
+const dateRange: DateRange = { start: "2020-01-01", end: "2020-01-02" };
 
 function dataEntry(
   subsetVersion?: number | string | null,
@@ -181,6 +185,60 @@ test("countSubsetVersionsInDataResponse coerces to string so 2 and '2' are one v
   expect(
     countSubsetVersionsInDataResponse(response([dataEntry(2), dataEntry("2")])),
   ).toBe(1);
+});
+
+// --- shouldFetchSubsetVersionCount ------------------------------------------
+
+test("shouldFetchSubsetVersionCount is true when the field exists and selection + range are complete", () => {
+  expect(
+    shouldFetchSubsetVersionCount(selectedProduct(), true, dateRange),
+  ).toBe(true);
+});
+
+test("shouldFetchSubsetVersionCount is false when the product lacks a subset_version field", () => {
+  expect(
+    shouldFetchSubsetVersionCount(selectedProduct(), false, dateRange),
+  ).toBe(false);
+  expect(
+    shouldFetchSubsetVersionCount(selectedProduct(), undefined, dateRange),
+  ).toBe(false);
+});
+
+test("shouldFetchSubsetVersionCount is false when any selection field is missing", () => {
+  expect(
+    shouldFetchSubsetVersionCount(
+      selectedProduct({ mission: "" }),
+      true,
+      dateRange,
+    ),
+  ).toBe(false);
+  expect(
+    shouldFetchSubsetVersionCount(
+      selectedProduct({ instrument: "" }),
+      true,
+      dateRange,
+    ),
+  ).toBe(false);
+  expect(
+    shouldFetchSubsetVersionCount(
+      selectedProduct({ dataset: "" }),
+      true,
+      dateRange,
+    ),
+  ).toBe(false);
+  expect(
+    shouldFetchSubsetVersionCount(
+      selectedProduct({ version: "" }),
+      true,
+      dateRange,
+    ),
+  ).toBe(false);
+});
+
+test("shouldFetchSubsetVersionCount is false when there is no date range", () => {
+  expect(
+    shouldFetchSubsetVersionCount(selectedProduct(), true, undefined),
+  ).toBe(false);
 });
 
 // --- isSelectedProductComplete ----------------------------------------------

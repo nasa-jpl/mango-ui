@@ -29,6 +29,7 @@ import { SelectedProduct } from "./EntityEditor";
 import {
   countSubsetVersionsInDataResponse,
   isSelectedProductComplete,
+  shouldFetchSubsetVersionCount,
 } from "./entity-editor-utils";
 
 export declare type ProductSelectorProps = {
@@ -135,12 +136,11 @@ export const ProductSelector = ({
   // Fetch and count subset versions when product has the field and selection is complete
   useEffect(() => {
     if (
-      !hasSubsetVersionField ||
-      !newSelectedProduct.mission ||
-      !newSelectedProduct.instrument ||
-      !newSelectedProduct.dataset ||
-      !newSelectedProduct.version ||
-      !dateRange
+      !shouldFetchSubsetVersionCount(
+        newSelectedProduct,
+        hasSubsetVersionField,
+        dateRange,
+      )
     ) {
       return;
     }
@@ -154,8 +154,9 @@ export const ProductSelector = ({
           newSelectedProduct.version,
           ["subset_version"],
           newSelectedProduct.channels ?? [],
-          dateRange.start,
-          dateRange.end,
+          // shouldFetchSubsetVersionCount guarantees dateRange is defined here.
+          dateRange!.start,
+          dateRange!.end,
         );
 
         const data = await json();

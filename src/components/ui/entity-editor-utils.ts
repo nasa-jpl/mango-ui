@@ -1,4 +1,5 @@
 import { DataResponse } from "../../types/api";
+import { DateRange } from "../../types/time";
 import {
   ChartEntity,
   DataLayer,
@@ -54,6 +55,25 @@ export const isSelectedProductComplete = (
     product.dataset &&
     product.fields.length &&
     product.version,
+  );
+};
+
+/**
+ * Whether a subset_version count fetch should run: the product must expose a subset_version
+ * field and have a complete mission/instrument/dataset/version selection, with a date range set.
+ */
+export const shouldFetchSubsetVersionCount = (
+  product: SelectedProduct,
+  hasSubsetVersionField: boolean | undefined,
+  dateRange: DateRange | undefined,
+): boolean => {
+  return Boolean(
+    hasSubsetVersionField &&
+    product.mission &&
+    product.instrument &&
+    product.dataset &&
+    product.version &&
+    dateRange,
   );
 };
 
