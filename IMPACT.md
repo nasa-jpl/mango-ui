@@ -449,6 +449,26 @@ our unit strategy). Went to `Map.tsx` instead. Extracted two pure helpers into a
 - Aggregate mutated scope: **98.22% → 98.26%** (952 killed / 7 timeout / 16 survived / 1 no-cov).
   Unit tests **159 → 167** across **11** files. All §8 gates green.
 
+### Phase 2.12 — `Map.tsx` point extraction added (commit: extractMapPoints)
+
+Second `Map.tsx` slice. Extracted the layer-results → plottable-points flattening from
+`visualizeMapLayers` into `extractMapPoints(results)` in `map-utils.ts`; also moved the `Location`
+type there (it was declared in `Map.tsx` but imported nowhere else). Returns
+`{ downsampling, points }` — `downsampling` is the last result's factor (drives point vs. polyline
+render), `points` are lat/lng pairs with location-less entries skipped.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **4** in `map-utils.test.ts` (12 in file) — empty results → `{1, []}`; collect points +
+  downsampling factor; skip missing/null locations; accumulate across results keeping the last factor.
+- `map-utils.ts` mutation: **100.00%** (30 killed, 0 survived) — first run clean.
+- Recurring tooling note (4th/5th time this task): the `DataResponse` type import (in the _source_)
+  and `extractMapPoints` (in the _test_) were each auto-stripped when added a step before their first
+  use; `tsc` caught both (`TS2552`/`TS2304`). Re-added. This quirk is now consistent enough that the
+  reliable workaround is: **never add an import in a separate edit from its first usage.**
+- Aggregate mutated scope: **98.26% → 98.28%** (962 killed / 7 timeout / 16 survived / 1 no-cov).
+  Unit tests **167 → 171** across **11** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

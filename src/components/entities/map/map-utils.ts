@@ -1,4 +1,9 @@
-import type { ProductResolution } from "../../../types/api";
+import type { DataResponse, ProductResolution } from "../../../types/api";
+
+export declare type Location = {
+  latitude: number;
+  longitude: number;
+};
 
 /** Duration between two ISO timestamps, in seconds (`end - start`). */
 export function getDurationSeconds(startTime: string, endTime: string): number {
@@ -28,4 +33,32 @@ export function computeDownsamplingFactor(
     }
   }
   return downsamplingFactor;
+}
+
+/**
+ * Flatten fetched layer results into plottable lat/lng points, skipping entries with no location.
+ * `downsampling` reflects the last result's downsampling factor (drives point vs. polyline rendering).
+ */
+export function extractMapPoints(results: { result: DataResponse }[]): {
+  downsampling: number;
+  points: Location[];
+} {
+  let downsampling = 1;
+  const points: Location[] = [];
+
+  results.forEach(({ result }) => {
+    downsampling = result.downsampling_factor;
+    result.data.forEach((d) => {
+      const location = d.location as unknown as Location | undefined;
+      if (!location) {
+        return;
+      }
+      points.push({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    });
+  });
+
+  return { downsampling, points };
 }

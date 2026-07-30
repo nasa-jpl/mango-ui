@@ -1,12 +1,27 @@
 import { expect, test } from "vitest";
-import type { ProductResolution } from "../../../types/api";
-import { computeDownsamplingFactor, getDurationSeconds } from "./map-utils";
+import type { DataResponse, ProductResolution } from "../../../types/api";
+import {
+  computeDownsamplingFactor,
+  extractMapPoints,
+  getDurationSeconds,
+} from "./map-utils";
 
 function res(
   downsampling_factor: number,
   nominal_data_interval_seconds: number,
 ): ProductResolution {
   return { downsampling_factor, nominal_data_interval_seconds };
+}
+
+function pt(latitude: number, longitude: number) {
+  return { location: { latitude, longitude } };
+}
+
+function layerResult(
+  downsampling_factor: number,
+  data: unknown[],
+): { result: DataResponse } {
+  return { result: { downsampling_factor, data } as unknown as DataResponse };
 }
 
 // --- getDurationSeconds -----------------------------------------------------
@@ -63,4 +78,46 @@ test("computeDownsamplingFactor treats a point count equal to the cap as over th
   const exact = res(1, 10); // 1000 / 10 = 100 points
   const coarser = res(4, 20); // 1000 / 20 = 50 points
   expect(computeDownsamplingFactor([exact, coarser], 1000, 100)).toBe(4);
+});
+
+// --- extractMapPoints -------------------------------------------------------
+
+test("extractMapPoints returns downsampling 1 and no points for empty results", () => {
+  expect(extractMapPoints([])).toEqual({ downsampling: 1, points: [] });
+});
+
+test("extractMapPoints collects lat/lng points and the result's downsampling factor", () => {
+  expect(extractMapPoints([layerResult(4, [pt(10, 20), pt(30, 40)])])).toEqual({
+    downsampling: 4,
+    points: [
+      { latitude: 10, longitude: 20 },
+      { latitude: 30, longitude: 40 },
+    ],
+  });
+});
+
+test("extractMapPoints skips entries whose location is missing or null", () => {
+  expect(
+    extractMapPoints([
+      layerResult(1, [pt(1, 1), {}, { location: null }, pt(2, 2)]),
+    ]),
+  ).toEqual({
+    downsampling: 1,
+    points: [
+      { latitude: 1, longitude: 1 },
+      { latitude: 2, longitude: 2 },
+    ],
+  });
+});
+
+test("extractMapPoints accumulates points across results and keeps the last downsampling factor", () => {
+  expect(
+    extractMapPoints([layerResult(2, [pt(1, 2)]), layerResult(8, [pt(3, 4)])]),
+  ).toEqual({
+    downsampling: 8,
+    points: [
+      { latitude: 1, longitude: 2 },
+      { latitude: 3, longitude: 4 },
+    ],
+  });
 });

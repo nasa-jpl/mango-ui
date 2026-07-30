@@ -19,17 +19,16 @@ import {
   MIN_ZOOM_DISTANCE,
   gibsTilingScheme,
 } from "./lib/gibs";
-import { computeDownsamplingFactor, getDurationSeconds } from "./map-utils";
+import {
+  computeDownsamplingFactor,
+  extractMapPoints,
+  getDurationSeconds,
+} from "./map-utils";
 
 export declare type MapProps = {
   dateRange: DateRange;
   mapEntity: MapEntity;
   products: Product[];
-};
-
-export declare type Location = {
-  latitude: number;
-  longitude: number;
 };
 
 export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
@@ -153,21 +152,8 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       return;
     }
 
-    let downsampling = 1;
-    const points: { latitude: number; longitude: number }[] = [];
-
     // TODO: does it make sense to support multiple layers for the map view?
-    results.map(({ result }) => {
-      downsampling = result.downsampling_factor;
-      result.data.forEach((d) => {
-        const location: Location = d.location as unknown as Location;
-        if (!location) return;
-        points.push({
-          latitude: location["latitude"],
-          longitude: location["longitude"],
-        });
-      });
-    });
+    const { downsampling, points } = extractMapPoints(results);
 
     setHasData(points.length > 0);
 
