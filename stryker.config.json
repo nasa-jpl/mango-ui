@@ -5,6 +5,7 @@
     "src/utilities/**/*.ts",
     "!src/utilities/**/*.test.ts",
     "src/components/entities/chart/chart-data.ts",
+    "src/components/entities/map/map-utils.ts",
     "src/components/entities/table/table-utils.ts",
     "src/components/ui/entity-editor-utils.ts"
   ],

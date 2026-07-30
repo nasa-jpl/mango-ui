@@ -421,6 +421,34 @@ Third `Table.tsx` slice. Two extractions into `table-utils.ts`:
 - Aggregate mutated scope: **98.17% → 98.22%** (932 killed / 7 timeout / 16 survived / 1 no-cov).
   Unit tests **156 → 159** across **10** files. All §8 gates green.
 
+### Phase 2.11 — `Map.tsx` downsampling logic extracted (commit: map-utils)
+
+Pivoted from `CustomFilter.tsx` — **it has no extractable logic** (28-line presentational component:
+a single `onColumnPreview &&` render guard around a `<Button>`; nothing for Stryker to target under
+our unit strategy). Went to `Map.tsx` instead. Extracted two pure helpers into a new
+`src/components/entities/map/map-utils.ts` (added to the Stryker `mutate` scope):
+
+- `getDurationSeconds(startTime, endTime)` — ISO span in seconds.
+- `computeDownsamplingFactor(resolutions, durationSeconds, maxPointNumber)` — the resolution-picking
+  loop (finest resolution under the point cap, else coarsest). `fetchLayerData` now calls both;
+  `product?.available_resolutions ?? []` replaces the old `if (product)` guard.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **8** in `map-utils.test.ts` (11 test files total) — duration positive/reversed;
+  factor for empty resolutions → 1, finest-under-cap, skip-until-fits, coarsest fallback, lone
+  resolution, and an exact-cap boundary.
+- `map-utils.ts` mutation: **100.00%** (20 killed, 0 survived).
+- Two survivors fixed before green:
+  - **Equivalent mutant** (`/`→`*` in the next-resolution point estimate): `nextPointsForDuration`
+    was only ever null-checked, never used numerically, so its magnitude was dead. Replaced the whole
+    computation with `nextResolution == null` — behavior-identical, simpler, and no dead arithmetic to
+    mutate. (Same "delete dead code" theme as 2.8–2.10.)
+  - **Boundary gap** (`<`→`<=` on the point cap): added a test where a resolution yields _exactly_
+    the cap (1000/10 = 100 points) and must be skipped, pinning the strict `<`.
+- Aggregate mutated scope: **98.22% → 98.26%** (952 killed / 7 timeout / 16 survived / 1 no-cov).
+  Unit tests **159 → 167** across **11** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

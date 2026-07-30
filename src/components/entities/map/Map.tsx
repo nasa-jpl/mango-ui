@@ -19,6 +19,7 @@ import {
   MIN_ZOOM_DISTANCE,
   gibsTilingScheme,
 } from "./lib/gibs";
+import { computeDownsamplingFactor, getDurationSeconds } from "./map-utils";
 
 export declare type MapProps = {
   dateRange: DateRange;
@@ -50,7 +51,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     layer: MapLayer,
     products: Product[],
     startTime: string | undefined,
-    endTime: string | undefined
+    endTime: string | undefined,
   ): Promise<{ layer: MapLayer; result: DataResponse }> => {
     const layerFullId = getDataLayerId(layer);
     if (cancelHandles[layerFullId]) {
@@ -61,33 +62,17 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       const computedEndTime = endTime || layer.endTime;
 
       // Compute aggregation factor
-      const durationSeconds =
-        (new Date(computedEndTime).getTime() -
-          new Date(computedStartTime).getTime()) /
-        1000;
+      const durationSeconds = getDurationSeconds(
+        computedStartTime,
+        computedEndTime,
+      );
 
       const product = getProductForLayer(layer, products);
-      let downsamplingFactor = 1;
-
-      if (product) {
-        for (let i = 0; i < product.available_resolutions.length; i++) {
-          const resolution = product.available_resolutions[i];
-          const nextResolution = product.available_resolutions[i + 1];
-          const pointsForDuration =
-            durationSeconds / resolution.nominal_data_interval_seconds;
-          const nextPointsForDuration = nextResolution
-            ? durationSeconds / nextResolution.nominal_data_interval_seconds
-            : null;
-
-          if (
-            pointsForDuration < MAX_POINT_NUMBER ||
-            nextPointsForDuration == null
-          ) {
-            downsamplingFactor = resolution.downsampling_factor;
-            break;
-          }
-        }
-      }
+      const downsamplingFactor = computeDownsamplingFactor(
+        product?.available_resolutions ?? [],
+        durationSeconds,
+        MAX_POINT_NUMBER,
+      );
 
       const { json, cancel } = getData(
         layer.mission,
@@ -99,7 +84,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor
+        downsamplingFactor,
       );
       cancelHandles[layerFullId] = cancel;
       json()
@@ -123,7 +108,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     layers: MapLayer[],
     products: Product[],
     startTime?: string,
-    endTime?: string
+    endTime?: string,
   ) => {
     setLoading(true);
     setError(null);
@@ -136,8 +121,8 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     try {
       results = await Promise.all(
         layers.map((layer) =>
-          fetchLayerData(layer, products, startTime, endTime)
-        )
+          fetchLayerData(layer, products, startTime, endTime),
+        ),
       );
       setLoading(false);
     } catch (err) {
@@ -156,13 +141,13 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
     layers: MapLayer[],
     products: Product[],
     startTime?: string,
-    endTime?: string
+    endTime?: string,
   ) => {
     const { results, error, aborted } = await fetchAllLayerData(
       layers,
       products,
       startTime,
-      endTime
+      endTime,
     );
     if (error || aborted || !mapRef.current) {
       return;
@@ -316,7 +301,7 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
       mapEntity.layers || [],
       products,
       dateRange.start,
-      dateRange.end
+      dateRange.end,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange, products, mapEntity.layers]);
