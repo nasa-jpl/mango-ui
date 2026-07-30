@@ -327,3 +327,40 @@ export function deriveFieldPoints(
   }
   return points;
 }
+
+/**
+ * Resolve a dimension value that may be an absolute number or a percentage string
+ * (e.g. `"25%"`) into an absolute value relative to `dimension`.
+ */
+export function toDimension(value: number | string, dimension: number): number {
+  return typeof value === "string" && value.endsWith("%")
+    ? (parseFloat(value) / 100) * dimension
+    : +value;
+}
+
+/**
+ * Horizontal position (px) for the chart tooltip: centered on the caret but clamped so it
+ * stays within the viewport's right edge (with a 20px margin).
+ */
+export function computeTooltipLeft(
+  triggerLeft: number,
+  caretX: number,
+  tooltipWidth: number,
+  innerWidth: number,
+  scrollX: number,
+): number {
+  return Math.min(
+    innerWidth - tooltipWidth - 20,
+    triggerLeft + scrollX - tooltipWidth / 2 + caretX,
+  );
+}
+
+/** Vertical position (px) for the chart tooltip: above the caret by the tooltip height plus a gap. */
+export function computeTooltipTop(
+  triggerTop: number,
+  caretY: number,
+  tooltipHeight: number,
+  scrollY: number,
+): number {
+  return triggerTop + scrollY - tooltipHeight + caretY - 12;
+}

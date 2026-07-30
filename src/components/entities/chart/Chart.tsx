@@ -95,6 +95,7 @@ import {
   expandLayerBySubsetVersion,
   isNotIngestedError,
   resolveFetchFields,
+  toDimension,
 } from "./chart-data";
 
 ChartJS.register(zoomPlugin);
@@ -136,12 +137,6 @@ type CustomChartType = ChartJS<
   "line" | "bar" | "scatter" | "bubble",
   CustomChartData[]
 >;
-
-function toDimension(value: number | string, dimension: number) {
-  return typeof value === "string" && value.endsWith("%")
-    ? (parseFloat(value) / 100) * dimension
-    : +value;
-}
 
 export const Chart = ({
   chartEntity,

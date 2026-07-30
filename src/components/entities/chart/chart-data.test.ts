@@ -10,6 +10,8 @@ import type { CustomChartData } from "./Chart";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
+  computeTooltipLeft,
+  computeTooltipTop,
   countUniqueSubsetVersions,
   createNotIngestedDataResponse,
   deriveFieldPoints,
@@ -17,6 +19,7 @@ import {
   isNotIngestedError,
   ProcessedLayerData,
   resolveFetchFields,
+  toDimension,
 } from "./chart-data";
 
 function lineLayer(overrides: Partial<ChartLayer> = {}): ChartLayer {
@@ -500,4 +503,37 @@ test("createNotIngestedDataResponse returns a fresh empty response", () => {
   expect(createNotIngestedDataResponse()).not.toBe(
     createNotIngestedDataResponse(),
   );
+});
+
+// --- toDimension ------------------------------------------------------------
+
+test("toDimension resolves a percentage string relative to the dimension", () => {
+  expect(toDimension("25%", 200)).toBe(50);
+  expect(toDimension("50%", 1)).toBe(0.5);
+});
+
+test("toDimension coerces a non-percentage value to an absolute number", () => {
+  expect(toDimension("30", 200)).toBe(30);
+  expect(toDimension(40, 200)).toBe(40);
+});
+
+// --- computeTooltipLeft -----------------------------------------------------
+
+test("computeTooltipLeft centers on the caret when it fits within the viewport", () => {
+  // 100 + 5 - 40/2 + 10 = 95, which is less than 1000 - 40 - 20 = 940.
+  expect(computeTooltipLeft(100, 10, 40, 1000, 5)).toBe(95);
+});
+
+test("computeTooltipLeft clamps to the right viewport edge with a 20px margin", () => {
+  // 900 + 5 - 20 + 10 = 895 exceeds 500 - 40 - 20 = 440, so it clamps to 440.
+  expect(computeTooltipLeft(900, 10, 40, 500, 5)).toBe(440);
+});
+
+// --- computeTooltipTop ------------------------------------------------------
+
+test("computeTooltipTop positions the tooltip above the caret", () => {
+  // 200 + 5 - 40 + 10 - 12 = 163
+  expect(computeTooltipTop(200, 10, 40, 5)).toBe(163);
+  // 0 + 0 - 30 + 4 - 12 = -38
+  expect(computeTooltipTop(0, 4, 30, 0)).toBe(-38);
 });

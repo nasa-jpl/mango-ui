@@ -469,6 +469,32 @@ render), `points` are lat/lng pairs with location-less entries skipped.
 - Aggregate mutated scope: **98.26% → 98.28%** (962 killed / 7 timeout / 16 survived / 1 no-cov).
   Unit tests **167 → 171** across **11** files. All §8 gates green.
 
+### Phase 2.13 — chart pure helpers extracted (commit: toDimension + tooltip position)
+
+Scanned the remaining `entities/` components and found `Timeline.tsx` (only a trivial `left+150 > width`
+flip flag), `TimelineRow.tsx`, `Text.tsx` — nothing worth extracting. The real targets were in the
+chart pair:
+
+- `toDimension(value, dimension)` — parses an absolute number or `"%"` string relative to a dimension.
+  Was a module-level (non-exported, untested) helper in `Chart.tsx`; moved into `chart-data.ts` and
+  imported back. Used once (linear-scale `grace`).
+- `computeTooltipLeft(...)` / `computeTooltipTop(...)` — the tooltip's viewport-clamped `left` and
+  above-caret `top` math, previously inline in `ChartTooltip.tsx`'s style object (window-dependent, so
+  effectively untestable in place). Now pure functions taking `innerWidth`/`scrollX`/`scrollY` as
+  args; `ChartTooltip.tsx` passes `window.*`. The confusing `- -tooltip.caretY` double-negative is now
+  a plain `+ caretY`.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **5** in `chart-data.test.ts` (45 in file) — percentage vs. absolute dimension; tooltip
+  left both fitting and clamped-to-edge; tooltip top with a positive and a negative result.
+- `chart-data.ts` mutation: **100.00%** (201 → **226** killed, 0 survived) — first run clean.
+- Recurring tooling note (6th time): the `chart-data` import in `ChartTooltip.tsx` was auto-stripped
+  in the gap between adding it and adding its usage (`TS2304`). Re-added. For the test file I avoided
+  this by adding imports + tests in a **single** `multi_edit`.
+- Aggregate mutated scope: **98.28% → 98.32%** (987 killed / 7 timeout / 16 survived / 1 no-cov).
+  Unit tests **171 → 176** across **11** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
