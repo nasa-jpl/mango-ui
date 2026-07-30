@@ -5,13 +5,27 @@ import type {
 } from "../../../types/app";
 import type { TableColumn } from "../../../types/view";
 import {
+  buildThresholdTooltip,
   deriveRowTrippedStatus,
   formatTableCellValue,
   formatTimestampValue,
   getAGGridFilterType,
   getFieldDisplayValue,
+  getRowThresholdClass,
   TableFieldValue,
 } from "./table-utils";
+
+function thresholdValues(
+  lowerValue: number | null,
+  upperValue: number | null,
+): ComputedThresholds["limits"] {
+  return {
+    lower: false,
+    lower_value: lowerValue,
+    upper: false,
+    upper_value: upperValue,
+  };
+}
 
 type TrippedFlags = Partial<{
   limitLower: boolean;
@@ -214,5 +228,49 @@ test("deriveRowTrippedStatus continues past skipped columns to find a later trip
   } as unknown as Record<string, ProcessedDataResponseDataEntry>;
   expect(deriveRowTrippedStatus(row, [col("L", "a"), col("L", "b")])).toBe(
     "error",
+  );
+});
+
+// --- getRowThresholdClass ---------------------------------------------------
+
+test("getRowThresholdClass maps a threshold status to its row CSS class", () => {
+  expect(getRowThresholdClass("error")).toBe("limit-row");
+  expect(getRowThresholdClass("warning")).toBe("warning-row");
+  expect(getRowThresholdClass("nominal")).toBe("");
+  // any non-error/warning status yields no class
+  expect(getRowThresholdClass("loading")).toBe("");
+});
+
+// --- buildThresholdTooltip --------------------------------------------------
+
+test("buildThresholdTooltip renders each limit/warning value on its own line", () => {
+  expect(
+    buildThresholdTooltip(
+      "Temp",
+      thresholdValues(10, 90),
+      thresholdValues(20, 80),
+    ),
+  ).toBe(
+    "Field: Temp \n" +
+      "Lower limit value: 10 \n" +
+      "Upper limit value: 90 \n" +
+      "Lower warning value: 20 \n" +
+      "Upper warning value: 80",
+  );
+});
+
+test("buildThresholdTooltip renders a dash for each missing (null) threshold value", () => {
+  expect(
+    buildThresholdTooltip(
+      "Temp",
+      thresholdValues(null, null),
+      thresholdValues(null, null),
+    ),
+  ).toBe(
+    "Field: Temp \n" +
+      "Lower limit value: - \n" +
+      "Upper limit value: - \n" +
+      "Lower warning value: - \n" +
+      "Upper warning value: -",
   );
 });

@@ -396,6 +396,31 @@ without computed thresholds. The `cellRenderer` now calls it and renders the `St
 - Aggregate mutated scope: **98.10% → 98.17%** (904 killed / 7 timeout / 16 survived / 1 no-cov).
   Unit tests **148 → 156** across **10** files. All §8 gates green.
 
+### Phase 2.10 — `Table.tsx` row-class de-dup + tooltip builder extracted (commit: threshold-tooltip+row-class)
+
+Third `Table.tsx` slice. Two extractions into `table-utils.ts`:
+
+- `getRowThresholdClass(status)` — maps a `Status` to the ag-grid row class (`error`→`limit-row`,
+  `warning`→`warning-row`, else `""`). The `gridProps.getRowClass` loop was a **near-verbatim
+  duplicate** of `deriveRowTrippedStatus` (same scan + the same redundant early-`continue` removed in
+  2.9), so `getRowClass` now reuses `deriveRowTrippedStatus` + this mapper — deleting ~35 lines of
+  duplicated logic.
+- `buildThresholdTooltip(label, limits, warnings)` — builds the multi-line cell tooltip string used
+  by `tooltipValueGetter` from `applyFieldThresholds`' `ComputedThresholds`.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **3** in `table-utils.test.ts` (23 in file) — row-class for error/warning/nominal + a
+  non-error/warning status (`loading`) → `""`; tooltip with all values present (each on its own line)
+  and with all values null → dash per line (kills every `?? "-"` and each string-literal segment).
+- `table-utils.ts` mutation: **100.00%** (125 killed + 1 timeout, 0 survived).
+- Recurring tooling note (3rd time): the two new import names (`buildThresholdTooltip`,
+  `getRowThresholdClass`) were **auto-stripped from the _test_ file's import block** between edits
+  (they were briefly unused), causing `ReferenceError`/`TS2304`. Re-added once the test bodies
+  referenced them. Lesson reinforced: add an import and its first use within a single edit.
+- Aggregate mutated scope: **98.17% → 98.22%** (932 killed / 7 timeout / 16 survived / 1 no-cov).
+  Unit tests **156 → 159** across **10** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

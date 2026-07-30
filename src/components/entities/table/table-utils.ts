@@ -126,3 +126,29 @@ export function deriveRowTrippedStatus(
   }
   return tripped;
 }
+
+/** Map a derived row threshold status to its ag-grid row CSS class (empty when nominal). */
+export function getRowThresholdClass(status: Status): string {
+  if (status === "error") {
+    return "limit-row";
+  }
+  if (status === "warning") {
+    return "warning-row";
+  }
+  return "";
+}
+
+/** Build the multi-line cell tooltip describing a field's computed limit/warning threshold values. */
+export function buildThresholdTooltip(
+  label: string | undefined,
+  limits: ComputedThresholds["limits"],
+  warnings: ComputedThresholds["warnings"],
+): string {
+  return (
+    `Field: ${label} \n` +
+    `Lower limit value: ${limits.lower_value ?? "-"} \n` +
+    `Upper limit value: ${limits.upper_value ?? "-"} \n` +
+    `Lower warning value: ${warnings.lower_value ?? "-"} \n` +
+    `Upper warning value: ${warnings.upper_value ?? "-"}`
+  );
+}

@@ -39,11 +39,13 @@ import { Tooltip } from "../../ui/Tooltip.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
 import {
+  buildThresholdTooltip,
   deriveRowTrippedStatus,
   formatTableCellValue,
   formatTimestampValue,
   getAGGridFilterType,
   getFieldDisplayValue,
+  getRowThresholdClass,
 } from "./table-utils";
 
 export declare type TableProps = {
@@ -266,13 +268,7 @@ const Table = memo(function Table({
               params.data[column.layerId],
             );
 
-            const tooltipText =
-              `Field: ${column.label} \n` +
-              `Lower limit value: ${limits.lower_value ?? "-"} \n` +
-              `Upper limit value: ${limits.upper_value ?? "-"} \n` +
-              `Lower warning value: ${warnings.lower_value ?? "-"} \n` +
-              `Upper warning value: ${warnings.upper_value ?? "-"}`;
-            return tooltipText;
+            return buildThresholdTooltip(column.label, limits, warnings);
           }
           return params.valueFormatted;
         },
@@ -701,45 +697,10 @@ const Table = memo(function Table({
             tableEntity.compact ? onCompactResize : undefined
           }
           gridProps={{
-            getRowClass: (params) => {
-              let rowClass = "";
-              for (let i = 0; i < tableEntity.columns.length; i++) {
-                const column = tableEntity.columns[i];
-
-                // For each column, see if the row has tripped any thresholds
-                if (
-                  !params.data ||
-                  !(column.layerId in params.data) ||
-                  !(column.field in params.data[column.layerId]) ||
-                  !params.data[column.layerId][column.field] ||
-                  !params.data[column.layerId][column.field]._thresholds
-                ) {
-                  continue;
-                }
-                const { limits, warnings }: ComputedThresholds =
-                  params.data[column.layerId][column.field]._thresholds;
-
-                if (
-                  !limits.lower &&
-                  !limits.upper &&
-                  !warnings.lower &&
-                  !warnings.upper
-                ) {
-                  continue;
-                }
-
-                if (limits.lower || limits.upper) {
-                  rowClass = "limit-row";
-                  break;
-                }
-
-                if (warnings.lower || warnings.upper) {
-                  rowClass = "warning-row";
-                  break;
-                }
-              }
-              return rowClass;
-            },
+            getRowClass: (params) =>
+              getRowThresholdClass(
+                deriveRowTrippedStatus(params.data, tableEntity.columns),
+              ),
           }}
         />
       }
