@@ -495,10 +495,41 @@ chart pair:
 - Aggregate mutated scope: **98.28% → 98.32%** (987 killed / 7 timeout / 16 survived / 1 no-cov).
   Unit tests **171 → 176** across **11** files. All §8 gates green.
 
+### Phase 2.14 — `components/page/` section transforms extracted (commit: page transforms)
+
+Scanned `components/page/`: `Entity.tsx` is pure entity-type dispatch, `EntityHeader.tsx`/
+`CustomGridItem.tsx` are presentational. `ViewPage.tsx`'s handlers hold the real logic, wrapped in
+`if (!viewPage) return` guards, `confirm()` dialogs, and `onPageChange` side effects. Extracted the two
+**clearly-correct** section-level cores into `utilities/view.ts` (already tested + in Stryker scope),
+mirroring the existing `duplicateEntity(entity, section): Section` shape:
+
+- `removeEntityFromSection(section, entityId)` — the subtle bit: it splices the layout entry by the
+  entity's **array index** (not by matching `layout.i`), replacing the inline block in `onEntityDelete`.
+- `replaceEntityInSection(section, entity)` — id-matched swap, replacing the inline block in `onEntitySave`.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **4** in `view.test.ts` — remove by index leaving others + source-not-mutated; remove with
+  absent id (no-op); replace matching (identity-checked) + non-match no-op.
+- Both new functions: **100%** mutation (no survivors in lines 304–332), first run clean.
+- **Bonus**: while here, closed the last **no-coverage** mutant in `view.ts` — `findMatchingPoint`'s
+  `dateString = ""` default param (added a test calling it without the arg). The 3 remaining `view.ts`
+  survivors (126:7, 126:54, 131:10) are **equivalent mutants**: the fast-path `return points[index]`
+  duplicates loop step 0 (`points[index - 0]`), and `step < length` → `<=` only adds a harmless extra
+  iteration — neither is observable. Left as-is.
+- `view.ts` mutation: **98.21% → 98.66%** (215 → **218** killed, 0 no-cov, 3 equivalent survivors).
+- Aggregate mutated scope: **98.32% → 98.44%** (1004 killed / 7 timeout / 16 survived / **0 no-cov**).
+  Unit tests **176 → 181** across **11** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
   will document current behavior; product behavior unchanged pending your call.
+- **Q4 (D4)**: In `ViewPage.tsx` `onAddEntity`, the new section layout is built as
+  `newLayout = [...s.layout, newItem]` and then assigned `layout: s.layout.concat(newLayout)`, which
+  yields `s.layout` **duplicated** plus the new item (existing `layout.i` keys appear twice). Almost
+  certainly a bug — intended is likely `layout: newLayout`. **Not extracted or changed** (would enshrine
+  the bug in a test); flagged for your call. If confirmed, I'll add `addEntityToSection` + a fixing test.
 - **Q3 (D3)**: In `applyFieldThresholds`, when a threshold has both `effective_since` and
   `effective_until`, `effective_since` is currently ignored (overwritten). Intended logic is
   almost certainly `inRange = (since ? since <= ts : true) && (until ? until >= ts : true)`.

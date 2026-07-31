@@ -30,6 +30,8 @@ import {
   isTableEntity,
   isTextEntity,
   isTimelineRowEntity,
+  removeEntityFromSection,
+  replaceEntityInSection,
 } from "./view";
 
 const chartLayer1 = generateTestChartLayer();
@@ -400,6 +402,11 @@ test("findMatchingPoint scans backwards from the start index", () => {
   );
 });
 
+test("findMatchingPoint uses an empty-string default dateString when none is provided", () => {
+  // Called without a dateString (defaults to ""), only a point whose x === "" matches.
+  expect(findMatchingPoint([pt("", 5)], 0)).to.deep.eq(pt("", 5));
+});
+
 test("applyLayerTransform self multiply and divide", () => {
   const point = pt("2030-01-01T00:00:00.000Z", 0);
   expect(
@@ -634,6 +641,81 @@ test("duplicateEntity appends a clone with a new id and layout, leaving the sour
   // Source section must not be mutated.
   expect(section.entities).toHaveLength(1);
   expect(section.layout).toHaveLength(1);
+});
+
+test("removeEntityFromSection drops the entity and its layout entry by index, leaving others", () => {
+  const a = createEntity({ title: "A" });
+  const b = createEntity({ title: "B" });
+  const c = createEntity({ title: "C" });
+  const section: Section = {
+    id: "section-1",
+    title: "Section",
+    entities: [a, b, c],
+    layout: [
+      { i: "L0", w: 1, h: 1, x: 0, y: 0 },
+      { i: "L1", w: 1, h: 1, x: 1, y: 0 },
+      { i: "L2", w: 1, h: 1, x: 2, y: 0 },
+    ],
+  };
+
+  const result = removeEntityFromSection(section, b.id);
+
+  // Entity b removed, a and c kept in order.
+  expect(result.entities.map((e) => e.id)).toEqual([a.id, c.id]);
+  // Layout entry at b's index (1) is removed.
+  expect(result.layout.map((l) => l.i)).toEqual(["L0", "L2"]);
+
+  // Source section is not mutated.
+  expect(section.entities).toHaveLength(3);
+  expect(section.layout).toHaveLength(3);
+});
+
+test("removeEntityFromSection returns unchanged entities and layout when the id is absent", () => {
+  const a = createEntity({ title: "A" });
+  const section: Section = {
+    id: "section-1",
+    title: "Section",
+    entities: [a],
+    layout: [{ i: "L0", w: 1, h: 1, x: 0, y: 0 }],
+  };
+
+  const result = removeEntityFromSection(section, "missing-id");
+
+  expect(result.entities.map((e) => e.id)).toEqual([a.id]);
+  expect(result.layout.map((l) => l.i)).toEqual(["L0"]);
+});
+
+test("replaceEntityInSection swaps the matching entity and leaves the rest untouched", () => {
+  const a = createEntity({ title: "A" });
+  const b = createEntity({ title: "B" });
+  const section: Section = {
+    id: "section-1",
+    title: "Section",
+    entities: [a, b],
+    layout: [],
+  };
+  const updatedB = { ...b, title: "B updated" };
+
+  const result = replaceEntityInSection(section, updatedB);
+
+  expect(result.entities[0]).toBe(a);
+  expect(result.entities[1]).toBe(updatedB);
+  expect(result.entities[1].title).toBe("B updated");
+});
+
+test("replaceEntityInSection leaves entities unchanged when no id matches", () => {
+  const a = createEntity({ title: "A" });
+  const section: Section = {
+    id: "section-1",
+    title: "Section",
+    entities: [a],
+    layout: [],
+  };
+  const stranger = createEntity({ title: "Z" });
+
+  const result = replaceEntityInSection(section, stranger);
+
+  expect(result.entities).toEqual([a]);
 });
 
 test("duplicateSection deep-clones with fresh ids and remaps layout entries", () => {

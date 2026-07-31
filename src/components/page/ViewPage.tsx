@@ -28,6 +28,8 @@ import {
   createEntity,
   duplicateEntity,
   duplicateSection,
+  removeEntityFromSection,
+  replaceEntityInSection,
 } from "../../utilities/view";
 import { useConfirm } from "../ui/AlertDialogProvider";
 import { DateRangePicker } from "../ui/DateRangePicker";
@@ -125,20 +127,7 @@ export const ViewPage = ({
         ...viewPage,
         sections: viewPage?.sections.map((s) => {
           if (s.id === section.id) {
-            const newEntities: Entity[] = [];
-            const newLayout = [...s.layout];
-            s.entities.forEach((e, i) => {
-              if (e.id === entity.id) {
-                newLayout.splice(i, 1);
-              } else {
-                newEntities.push(e);
-              }
-            });
-            return {
-              ...s,
-              entities: newEntities,
-              layout: newLayout,
-            };
+            return removeEntityFromSection(s, entity.id);
           }
           return s;
         }),
@@ -183,15 +172,7 @@ export const ViewPage = ({
         ...viewPage,
         sections: viewPage?.sections.map((s) => {
           if (s.id === section.id) {
-            return {
-              ...s,
-              entities: s.entities.map((e) => {
-                if (e.id === entity.id) {
-                  return entity;
-                }
-                return e;
-              }),
-            };
+            return replaceEntityInSection(s, entity);
           }
           return s;
         }),

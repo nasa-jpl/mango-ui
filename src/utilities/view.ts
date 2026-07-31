@@ -301,6 +301,36 @@ export function duplicateEntity(entity: Entity, section: Section): Section {
   };
 }
 
+export function removeEntityFromSection(
+  section: Section,
+  entityId: string,
+): Section {
+  const newEntities: Entity[] = [];
+  const newLayout: SectionLayout[] = [...section.layout];
+  section.entities.forEach((entity, i) => {
+    if (entity.id === entityId) {
+      newLayout.splice(i, 1);
+    } else {
+      newEntities.push(entity);
+    }
+  });
+  return {
+    ...section,
+    entities: newEntities,
+    layout: newLayout,
+  };
+}
+
+export function replaceEntityInSection(
+  section: Section,
+  entity: Entity,
+): Section {
+  return {
+    ...section,
+    entities: section.entities.map((e) => (e.id === entity.id ? entity : e)),
+  };
+}
+
 export function duplicateSection(section: Section): Section {
   const newSection = structuredClone(section);
   newSection.id = generateUUID();
