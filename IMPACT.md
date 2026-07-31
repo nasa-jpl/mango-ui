@@ -521,6 +521,39 @@ mirroring the existing `duplicateEntity(entity, section): Section` shape:
 - Aggregate mutated scope: **98.32% → 98.44%** (1004 killed / 7 timeout / 16 survived / **0 no-cov**).
   Unit tests **176 → 181** across **11** files. All §8 gates green.
 
+### Phase 2.15 — `components/ui/` date-range validation extracted (commit: date-range-utils)
+
+Moved into `ui/`. `EntityHeader`/`Page`/`Tabs`/`Tooltip`/`StatusBadge` are presentational; `EntityEditor`
+is already served by `entity-editor-utils.ts`. The rich target was `DateRangePicker.tsx`'s
+`handleDateRangePickerEvent` — a branchy error-string ladder (required / invalid / out-of-range /
+counterpart-invalid / start-after-end / valid). Extracted the pure core into new
+`src/components/ui/date-range-utils.ts` as `validateDateRangeInput(...)`, returning a discriminated
+union `{ valid: false; error } | { valid: true; startDate; endDate }`; the component keeps only the
+`setState`/`onChange` side effects. Added to the Stryker `mutate` scope.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **12** in `date-range-utils.test.ts` (new 12th test file) — every error branch (both
+  `from`/`to` verbs), min/max out-of-range, counterpart-invalid for both verbs, start-after-end,
+  valid resolution for `from` and `to`, and short (date-only) format.
+- `date-range-utils.ts` mutation: **89.74%** (70 killed, **8 survived**, 0 no-cov).
+- The 8 survivors are **equivalent mutants under the project-mandated `TZ=UTC`** (`package.json`
+  `test:unit`/`test:mutation` both set `TZ=UTC`):
+  - `parseAsUtc` `Z`-handling (`endsWith("Z")`, the `+ "Z"` append) — appending/omitting `Z` yields the
+    same UTC instant under UTC; the branch only matters for non-UTC clients (its stated purpose:
+    "otherwise 7 hours will be added"), which can't be exercised in-suite without changing `TZ`.
+  - the short-format `+= "T00:00:00"` append — redundant because `parseDateStringISO` parses a
+    date-only string (with `Z`) to the same midnight the append would produce.
+    Both blocks are faithful to the original component and serve real production paths, so I did **not**
+    delete them to inflate the score. Killed the one genuinely-observable survivor (`eventVerb` `"end"`
+    literal) with an "invalid edited date while editing `to`" test.
+- Design tweak vs. the original: replaced the empty-string-error discriminant with an explicit
+  `valid` boolean tag so TS narrows the success branch (an `error: ""` union does not narrow).
+- Aggregate mutated scope: **98.44% → 97.83%** (1074 killed / 7 timeout / **24 survived** / 0 no-cov).
+  The percentage dips because this slice adds 70 killed **and** 8 honest equivalent survivors to the
+  denominator (survived 16 → 24); net killed rose 1004 → 1074. Unit tests **181 → 193** across **12**
+  files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test

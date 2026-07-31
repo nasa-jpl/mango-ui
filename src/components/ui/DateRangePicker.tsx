@@ -1,16 +1,8 @@
 import {
   Button,
   DateRangePicker as DateRangePickerStellar,
-  parseDateStringISO,
 } from "@nasa-jpl/stellar-react";
-import {
-  endOfDay,
-  format,
-  isAfter,
-  isBefore,
-  isValid,
-  startOfDay,
-} from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { CalendarArrowDown, Eraser } from "lucide-react";
 import {
   KeyboardEvent,
@@ -22,6 +14,7 @@ import {
 import { DateRange, TZDate } from "react-day-picker";
 import { DateFormat } from "../../types/view";
 import { formatDateGPS } from "../../utilities/time";
+import { validateDateRangeInput } from "./date-range-utils";
 
 export declare type DateRangePickerProps = {
   dateFormat?: DateFormat;
@@ -49,7 +42,7 @@ export function DateRangePicker({
 
   useEffect(() => {
     const dateRangeString = `${formatDateGPS(startDate)}_${formatDateGPS(
-      endDate
+      endDate,
     )}`;
     if (dateRangeString !== prevPropDateRange) {
       setPrevPropDateRange(dateRangeString);
@@ -73,7 +66,7 @@ export function DateRangePicker({
         onChange(startDate, endDate);
       }
     },
-    [dateFormat, onChange]
+    [dateFormat, onChange],
   );
 
   const formatDate = useCallback(
@@ -84,67 +77,48 @@ export function DateRangePicker({
         return formatDateGPS(date);
       }
     },
-    [dateFormat]
+    [dateFormat],
   );
 
   const handleDateRangePickerEvent = useCallback(
     (
       e: KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement>,
       which: "from" | "to",
-      inputValues: { from: string; to: string }
+      inputValues: { from: string; to: string },
     ) => {
-      let dateString = (e.target as HTMLInputElement).value;
-      let otherDateString = inputValues[which === "from" ? "to" : "from"];
-      if (dateFormat === "short") {
-        dateString += "T00:00:00";
-        otherDateString += "T00:00:00";
-      }
-      // Treat GPS time string as UTC otherwise 7 hours will be added
-      const eventDate = dateString.endsWith("Z")
-        ? parseDateStringISO(dateString)
-        : parseDateStringISO(dateString + "Z");
-      const eventVerb = which === "from" ? "start" : "end";
-      const otherDate = otherDateString.endsWith("Z")
-        ? parseDateStringISO(otherDateString)
-        : parseDateStringISO(otherDateString + "Z");
-      const otherDateVerb = which === "from" ? "end" : "start";
-      if (!dateString) {
-        setDateRangeError(
-          `${eventVerb === "start" ? "Start" : "End"} date required`
-        );
-      } else if (!eventDate || !isValid(eventDate)) {
-        setDateRangeError(`Invalid ${eventVerb} date`);
-      } else if (isBefore(eventDate, minDate) || isAfter(eventDate, maxDate)) {
-        setDateRangeError("Date out of range");
-      } else if (!otherDate || !isValid(otherDate)) {
-        setDateRangeError(`Invalid ${otherDateVerb} date`);
+      const dateString = (e.target as HTMLInputElement).value;
+      const otherDateString = inputValues[which === "from" ? "to" : "from"];
+      const result = validateDateRangeInput({
+        dateString,
+        otherDateString,
+        which,
+        dateFormat,
+        minDate,
+        maxDate,
+      });
+      if (!result.valid) {
+        setDateRangeError(result.error);
       } else {
-        const startDate = which === "from" ? eventDate : otherDate;
-        const endDate = which === "to" ? eventDate : otherDate;
-        if (isBefore(endDate, startDate)) {
-          setDateRangeError("Start date must precede end date");
-        } else {
-          setDateRangeError("");
-          setDateRange({ from: startDate, to: endDate });
-          onDateChange(startDate, endDate);
-        }
+        setDateRangeError("");
+        setDateRange({ from: result.startDate, to: result.endDate });
+        onDateChange(result.startDate, result.endDate);
       }
     },
-    [maxDate, minDate, onDateChange, dateFormat]
+    [maxDate, minDate, onDateChange, dateFormat],
   );
 
   const onDateRangeKeyUp = useCallback(
     (
       e: KeyboardEvent<HTMLInputElement>,
       which: "from" | "to",
-      inputValues: { from: string; to: string }
+      inputValues: { from: string; to: string },
     ) => {
       const { key } = e;
       if (key === "Enter") {
         handleDateRangePickerEvent(e, which, inputValues);
       }
     },
-    [handleDateRangePickerEvent]
+    [handleDateRangePickerEvent],
   );
 
   const memoizedDatePicker = useMemo(
@@ -162,7 +136,7 @@ export function DateRangePicker({
           setDateRange(d);
           onDateChange(
             new Date(d.from || startDate),
-            new Date(d.to || endDate)
+            new Date(d.to || endDate),
           );
           setDateRangeError("");
         }}
@@ -188,7 +162,7 @@ export function DateRangePicker({
                 });
                 onDateChange(
                   new Date(startOfDay(new TZDate(new Date(), "UTC"))),
-                  new Date(endOfDay(new TZDate(new Date(), "UTC")))
+                  new Date(endOfDay(new TZDate(new Date(), "UTC"))),
                 );
                 setDateRangeError("");
               }}
@@ -210,7 +184,7 @@ export function DateRangePicker({
       startDate,
       minDate,
       maxDate,
-    ]
+    ],
   );
 
   return (
