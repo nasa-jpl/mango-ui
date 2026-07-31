@@ -554,6 +554,26 @@ union `{ valid: false; error } | { valid: true; startDate; endDate }`; the compo
   denominator (survived 16 → 24); net killed rose 1004 → 1074. Unit tests **181 → 193** across **12**
   files. All §8 gates green.
 
+### Phase 2.16 — `DataGrid` filter-text rendering extracted (commit: data-grid-utils)
+
+`DataGrid.tsx`'s `getFilterDisplayText` — a pure, recursive ag-grid filter-model → display-string
+mapper (13-case `switch` for comparison/text/blank types + an AND/OR combined branch that recurses).
+Moved verbatim into new `src/components/ui/DataGrid/data-grid-utils.ts` (added to Stryker scope); the
+component keeps calling it from `updateActiveFilters`.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **8** in `data-grid-utils.test.ts` (13th test file) — nullish model; all six numeric
+  comparisons; `inRange` (both bounds); the four quoted string-match types; blank/notBlank; unknown
+  type falling back to the raw value and to `""`; and AND/OR combination with uppercased operator.
+- `data-grid-utils.ts` mutation: **100.00%** (51 killed, 0 survived).
+- One survivor fixed before green: `let text = ""` → the initializer is **dead** (every `switch` path,
+  including `default`, reassigns `text`), so the mutant was equivalent. Changed to `let text: string;`
+  (TS definite-assignment is satisfied via the exhaustive `default`), eliminating the dead code and the
+  mutant. (Same "delete dead code" theme as 2.8–2.11.)
+- Aggregate mutated scope: **97.83% → 97.92%** (1125 killed / 7 timeout / 24 survived / 0 no-cov).
+  Unit tests **193 → 201** across **13** files. All §8 gates green.
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
