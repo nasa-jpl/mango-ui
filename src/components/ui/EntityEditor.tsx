@@ -49,6 +49,7 @@ import {
   extractEntitySelectedProducts,
   getLabelForSelectedProductOrLayer,
   getMatchingSelectedProductForLayer,
+  splitSelectedProductsByField,
 } from "./entity-editor-utils";
 import { InputForm } from "./InputForm";
 import ProductsSelector from "./ProductsSelector";
@@ -225,17 +226,7 @@ export const EntityEditor = ({
     // If switching from table to anything else, split up the selected products with multiple fields
     // into selected products with single fields
     if (newEntity.type === "table" && type !== "table") {
-      const newSelectedProducts: SelectedProduct[] = [];
-      selectedProducts.forEach((selectedProduct) => {
-        selectedProduct.fields.forEach((field) => {
-          newSelectedProducts.push({
-            ...selectedProduct,
-            fields: [field],
-            id: generateUUID(),
-          });
-        });
-      });
-      setSelectedProducts(newSelectedProducts);
+      setSelectedProducts(splitSelectedProductsByField(selectedProducts));
     }
     setNewEntity(
       createEntity({

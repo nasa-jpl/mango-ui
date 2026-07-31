@@ -96,6 +96,27 @@ export const countSubsetVersionsInDataResponse = (
   return subsetVersionSet.size;
 };
 
+/**
+ * Split each selected product with multiple fields into one selected product per field, each with a
+ * fresh id. Used when switching an entity away from "table" (where a single layer can carry multiple
+ * fields) to a type whose layers each map to a single field.
+ */
+export const splitSelectedProductsByField = (
+  selectedProducts: SelectedProduct[],
+): SelectedProduct[] => {
+  const result: SelectedProduct[] = [];
+  selectedProducts.forEach((selectedProduct) => {
+    selectedProduct.fields.forEach((field) => {
+      result.push({
+        ...selectedProduct,
+        fields: [field],
+        id: generateUUID(),
+      });
+    });
+  });
+  return result;
+};
+
 export const extractEntitySelectedProducts = (
   entity: EntityType,
 ): SelectedProduct[] => {

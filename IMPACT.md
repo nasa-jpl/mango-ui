@@ -574,6 +574,39 @@ component keeps calling it from `updateActiveFilters`.
 - Aggregate mutated scope: **97.83% → 97.92%** (1125 killed / 7 timeout / 24 survived / 0 no-cov).
   Unit tests **193 → 201** across **13** files. All §8 gates green.
 
+### Phase 2.17 — `EntityEditor` product-splitting extracted (commit: split-products)
+
+Following the "close out Phase 2" survey, took the strongest remaining pure-logic candidate:
+`EntityEditor.tsx`'s `handleEntityTypeChange` splits multi-field selected products into one product
+per field when switching an entity away from `table`. Extracted that array transform into
+`splitSelectedProductsByField(selectedProducts): SelectedProduct[]` in the existing
+`entity-editor-utils.ts` (already in Stryker scope); the handler keeps only the `setSelectedProducts`/
+`createEntity` side effects and the `type === "table"` guard.
+
+**Behavior-preserving**: `build` + `lint` green, all prior tests pass.
+
+- New tests: **4** in `entity-editor-utils.test.ts` (27 in file) — multi-field split; property
+  preservation + fresh distinct ids; order-preserving flatten across products; empty input and
+  no-fields product both yielding `[]`.
+- `entity-editor-utils.ts` mutation: **100.00%** (82 killed, 0 survived) — clean on first run.
+- Aggregate mutated scope: **97.92% → 97.93%** (1131 killed / 7 timeout / 24 survived / 0 no-cov).
+  Unit tests **201 → 205** across **13** files. All §8 gates green.
+
+### Phase 2 close-out survey (for maintainers)
+
+Ran a codebase-wide scan for remaining high-value extraction targets. Finding: the easily-testable
+pure logic has largely been extracted into the 11 Stryker-scoped util modules; the remaining component
+code is increasingly **imperative/side-effect-bound** (chart.js instance manipulation, async API
+orchestration, React state mutation). Prioritized remainder:
+
+- **Tier 1 — flagged correctness bugs (highest value):** resolve Q1 (`api.ts` 3xx window), Q3
+  (`applyFieldThresholds` ignores `effective_since`), Q4 (`ViewPage.onAddEntity` layout duplication),
+  and **new Q5** below. Each is a small fix + regression test pending a maintainer decision.
+- **Tier 2 — genuine pure logic still worth extracting:** `Table.buildTableColumns` (column-def
+  assembly); `DownlinkDashboard` dataset-status derivation (small, and see Q5).
+- **Tier 3 — low ROI, recommend skipping:** `Chart.tsx` zoom/axis helpers (chart.js-bound),
+  `ProductSelector` (logic inlined in JSX), async fetchers, modals/sidebar (presentational).
+
 ## Open questions for maintainers
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
@@ -583,6 +616,12 @@ component keeps calling it from `updateActiveFilters`.
   yields `s.layout` **duplicated** plus the new item (existing `layout.i` keys appear twice). Almost
   certainly a bug — intended is likely `layout: newLayout`. **Not extracted or changed** (would enshrine
   the bug in a test); flagged for your call. If confirmed, I'll add `addEntityToSection` + a fixing test.
+- **Q5 (D5)**: In `DownlinkDashboard.tsx`, the per-dataset status is
+  `loading ? "loading" : (data?…result.data.length || error) ? "error" : "nominal"`. The
+  `data.length` term means a dataset that **successfully returned rows** is marked `"error"`, and
+  an empty-but-successful fetch is `"nominal"` — this looks inverted. Likely intended is just
+  `error ? "error" : "nominal"` (or gate on `!data.length && error`). Flagged only; not changed.
+  If confirmed, I'll extract `computeDatasetStatus(loading, hasData, error)` + a fixing test.
 - **Q3 (D3)**: In `applyFieldThresholds`, when a threshold has both `effective_since` and
   `effective_until`, `effective_since` is currently ignored (overwritten). Intended logic is
   almost certainly `inRange = (since ? since <= ts : true) && (until ? until >= ts : true)`.

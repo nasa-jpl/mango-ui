@@ -10,6 +10,7 @@ import {
   getMatchingSelectedProductForLayer,
   isSelectedProductComplete,
   shouldFetchSubsetVersionCount,
+  splitSelectedProductsByField,
 } from "./entity-editor-utils";
 
 const dateRange: DateRange = { start: "2020-01-01", end: "2020-01-02" };
@@ -315,5 +316,48 @@ test("extractEntitySelectedProducts includes filter only when it is an array", (
 test("extractEntitySelectedProducts returns [] when the entity has no layers", () => {
   expect(
     extractEntitySelectedProducts({ type: "chart" } as unknown as EntityType),
+  ).toEqual([]);
+});
+
+// --- splitSelectedProductsByField ------------------------------------------
+
+test("splitSelectedProductsByField splits a multi-field product into one product per field", () => {
+  const result = splitSelectedProductsByField([
+    selectedProduct({ id: "p1", fields: ["a", "b", "c"] }),
+  ]);
+  expect(result).toHaveLength(3);
+  expect(result.map((p) => p.fields)).toEqual([["a"], ["b"], ["c"]]);
+});
+
+test("splitSelectedProductsByField preserves other product properties and assigns fresh ids", () => {
+  const result = splitSelectedProductsByField([
+    selectedProduct({ id: "p1", mission: "GRACE", fields: ["a", "b"] }),
+  ]);
+  expect(result).toHaveLength(2);
+  result.forEach((p) => {
+    expect(p.mission).toBe("GRACE");
+    expect(p.instrument).toBe("I");
+    expect(p.dataset).toBe("D");
+    expect(p.version).toBe("1");
+  });
+  // Each split product gets a new id distinct from the source and from each other.
+  const ids = result.map((p) => p.id);
+  expect(ids[0]).not.toBe("p1");
+  expect(ids[0]).not.toBe(ids[1]);
+});
+
+test("splitSelectedProductsByField flattens across multiple products in order", () => {
+  const result = splitSelectedProductsByField([
+    selectedProduct({ id: "p1", fields: ["a", "b"] }),
+    selectedProduct({ id: "p2", dataset: "D2", fields: ["c"] }),
+  ]);
+  expect(result.map((p) => p.fields)).toEqual([["a"], ["b"], ["c"]]);
+  expect(result.map((p) => p.dataset)).toEqual(["D", "D", "D2"]);
+});
+
+test("splitSelectedProductsByField returns [] for no products and drops products with no fields", () => {
+  expect(splitSelectedProductsByField([])).toEqual([]);
+  expect(
+    splitSelectedProductsByField([selectedProduct({ fields: [] })]),
   ).toEqual([]);
 });
