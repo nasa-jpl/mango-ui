@@ -63,8 +63,18 @@ jobs:
       - name: Run mutation tests
         run: npm run test:mutation
 
-      # - name: Run e2e tests
-      #   run: npx playwright test
+      # Diffable before/after metrics on every PR (§Phase-5.3 / §7). Runs even when a
+      # gate above fails so the numbers are always visible. Reporting only — the gates
+      # are the vitest coverage thresholds and the Stryker `break` threshold.
+      - name: Publish metrics summary
+        if: ${{ !cancelled() }}
+        run: node scripts/metrics-summary.mjs
+
+      - name: Run e2e tests
+        run: npx playwright test --project=chromium
+        env:
+          VITE_APP_TITLE: ${{ vars.VITE_APP_TITLE}}
+          VITE_APP_PATH: ${{ vars.VITE_APP_PATH}}
 
       - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}

@@ -11,6 +11,11 @@
     "src/components/ui/date-range-utils.ts",
     "src/components/ui/entity-editor-utils.ts"
   ],
+  "thresholds": {
+    "high": 97,
+    "low": 90,
+    "break": 95
+  },
   "reporters": ["html", "json", "clear-text", "progress"],
   "htmlReporter": {
     "fileName": "test-metrics/mutation/mutation-report.html"

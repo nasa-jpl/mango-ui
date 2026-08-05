@@ -90,6 +90,93 @@ export default defineConfig(({ mode }) => {
           // Canvas/WebGL render paths (§5): cover via extraction + e2e smoke, not here.
           "src/components/entities/map/**",
         ],
+        // Phase 5 ratchets (§5 "Ratchets, not aspirational thresholds"): per-scope
+        // floors set slightly below current reality so coverage can only go up. NO
+        // global threshold (the repo-wide number is meaningless with `all: true` and
+        // by-design-untested canvas/route code — §5 "Never headline a single global
+        // number"). Only scopes we have deliberately invested in are gated here; raise
+        // these as later work lands. Baselines captured from
+        // test-metrics/coverage/coverage-summary.json.
+        thresholds: {
+          // Pure core — must stay saturated (§4). Aggregate: L/S/F 100, B 95.73
+          // (product.ts drags branches to 87.75 per-file).
+          "src/utilities/**": {
+            lines: 99,
+            statements: 99,
+            functions: 99,
+            branches: 87,
+          },
+          // Extracted pure-logic modules (also under the Stryker scope). Fully
+          // covered today — keep them there.
+          "src/components/entities/chart/chart-data.ts": {
+            lines: 100,
+            statements: 100,
+            functions: 100,
+            branches: 100,
+          },
+          "src/components/entities/table/table-utils.ts": {
+            lines: 100,
+            statements: 100,
+            functions: 100,
+            branches: 100,
+          },
+          "src/components/ui/DataGrid/data-grid-utils.ts": {
+            lines: 100,
+            statements: 100,
+            functions: 100,
+            branches: 100,
+          },
+          "src/components/ui/date-range-utils.ts": {
+            lines: 100,
+            statements: 100,
+            functions: 100,
+            branches: 100,
+          },
+          "src/components/ui/entity-editor-utils.ts": {
+            lines: 100,
+            statements: 100,
+            functions: 100,
+            branches: 100,
+          },
+          // Interaction/wiring components characterized in Phase 3.
+          "src/components/app/SaveViewModal.tsx": {
+            lines: 98,
+            statements: 98,
+            functions: 70,
+            branches: 98,
+          },
+          "src/components/ui/AlertDialogProvider.tsx": {
+            lines: 96,
+            statements: 96,
+            functions: 85,
+            branches: 85,
+          },
+          "src/components/ui/ProductsSelector.tsx": {
+            lines: 90,
+            statements: 90,
+            functions: 80,
+            branches: 92,
+          },
+          "src/components/ui/ProductSelector.tsx": {
+            lines: 58,
+            statements: 58,
+            functions: 35,
+            branches: 43,
+          },
+          // Directory ratchets for scopes that are broadly covered.
+          "src/components/app/Sidebar/**": {
+            lines: 98,
+            statements: 98,
+            functions: 74,
+            branches: 93,
+          },
+          "src/hooks/**": {
+            lines: 87,
+            statements: 87,
+            functions: 95,
+            branches: 72,
+          },
+        },
       },
     },
   };

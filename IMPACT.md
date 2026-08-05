@@ -607,7 +607,263 @@ orchestration, React state mutation). Prioritized remainder:
 - **Tier 3 — low ROI, recommend skipping:** `Chart.tsx` zoom/axis helpers (chart.js-bound),
   `ProductSelector` (logic inlined in JSX), async fetchers, modals/sidebar (presentational).
 
+## Phase 3 — Component tests (React Testing Library + user-event)
+
+Scope per §6: **selective** component tests for interaction/wiring that pure-logic unit tests
+cannot reach — rendered DOM, controlled inputs, async success/error branches, callback contracts.
+Components (`.tsx`) remain **out** of the Stryker `mutate` scope (§5 anti-gaming); these are
+behavioral tests, not mutation-scored. Harness (Phase 0.2): jsdom opt-in per file via
+`// @vitest-environment jsdom`, `@testing-library/react` + `user-event`, jest-dom matchers from
+`src/test-utils/setup.ts`. Note: RTL auto-cleanup is **not** globally registered (setup.ts stays
+node-safe for pure tests), so component test files call `cleanup()` in `afterEach` explicitly.
+
+### Phase 3.1 — `SaveViewModal.tsx` (commit: SaveViewModal component test)
+
+First component test. `SaveViewModal` is a self-contained Radix `Dialog` form with a real branch
+set and one mockable dependency (`saveView` from `utilities/api`). New
+`src/components/app/SaveViewModal.test.tsx` (**8 tests**, jsdom) covering: closed → nothing
+rendered; open → dialog shown with Save disabled; incorrect password keeps Save disabled;
+correct password (case-insensitive) enables Save; click-Save success path calls
+`saveView(view)` → `onSave(view)` → `onClose`; Enter-key submit; save-failure path shows the
+error message and calls **neither** `onSave` nor `onClose`; Cancel closes without saving.
+`saveView` mocked via `vi.mock`.
+
+- Unit+component tests **205 → 213** across **14** files (1 new `.tsx` file). All §8 gates green
+  (`test:unit` under `TZ=UTC`, `lint`, `lint:css`, `build`). Mutation scope/score unchanged
+  (no `.tsx` added to Stryker).
+- **New Q6 (security, see below)** surfaced while reading the component.
+
+### Phase 3.2 — `AlertDialogProvider.tsx` (commit: AlertDialogProvider tests)
+
+The app-wide `alert`/`confirm`/`prompt` primitive (Radix `AlertDialog` + a context/reducer +
+`useConfirm`/`usePrompt`/`useAlert` hooks). New `src/components/ui/AlertDialogProvider.test.tsx`
+(**11 tests**) in two layers:
+
+- **Pure reducer (`alertDialogReducer`), 5 tests:** `close` flips only `open`; `alert` opens with
+  the `"Okay"` cancel default + `outline` variant; `confirm` defaults cancel to `"Cancel"` and
+  preserves custom labels/variants; `prompt` carries `defaultValue`/`title`; unknown action returns
+  the same state reference. (The reducer is genuinely pure but lives in a `.tsx`, so it is unit-
+  tested but **not** added to the Stryker `mutate` scope per §5.)
+- **Provider behavior via a test consumer (jsdom), 6 tests:** `confirm` resolves `true` on the
+  action button and `false` on cancel; custom action/cancel labels render and work; `prompt`
+  renders a pre-filled, editable input and its submit resolves the promise; `prompt` cancel resolves
+  `false`; `alert` shows only a single dismiss button (no submit) and resolves `false`.
+- **Environment note (not a bug):** the `prompt` submit reads its value via the legacy
+  `event.currentTarget.prompt` named-form-control getter, which **jsdom does not implement**
+  (the input _is_ form-associated — `input.form` is non-null — but `form.<name>` access returns
+  `undefined`). So the exact returned-string round-trip is asserted at the browser/E2E layer
+  (Phase 4), not here. Verified real DOM association in-test before concluding this is a jsdom gap.
+- Unit+component tests **213 → 224** across **15** files. All §8 gates green. Mutation scope/score
+  unchanged.
+
+### Phase 3.3 — `ProductsSelector.tsx` + `ProductSelector.tsx` (commit: product selector tests)
+
+The product-picker pair used by `EntityEditor`. Two new test files:
+
+- **`ProductsSelector.test.tsx` (9 tests)** — the list orchestrator. Its own logic is pure
+  array-transform button handlers, so the child `ProductSelector` (Radix-`Select`-heavy) and
+  `Tooltip` (needs a provider) are **mocked/stubbed** to isolate it. Covers: renders one child per
+  product + an Add button; **Add Product** appends a blank product with a fresh `generateUUID` id;
+  **Delete** removes the product; **Duplicate** inserts a copy after the original with a new id;
+  **Filter toggle** adds `filter: []` when absent and deletes the `filter` key when present; and the
+  **subset-version badge** singular/plural/absent rendering.
+- **`ProductSelector.test.tsx` (5 tests)** — the single-product form. The mission/instrument/
+  dataset/version dropdowns are Radix `Select` (option lists are trivial dedup/filter derivations)
+  and the field picker is a cmdk `Command`; both are pointer-capture/portal-bound and **deferred to
+  the E2E layer (Phase 4)**. The component-only logic that _is_ robustly testable — the **Filter
+  input** — is covered: renders only when `filter` is an array; pre-fills from the array;
+  parses `"a=1, b=2"` → `["a=1","b=2"]`; trims whitespace and drops empty segments; and, critically,
+  **only emits `onChange` when the product is complete** (`isSelectedProductComplete` gate — verified
+  no emission for an incomplete product). `getData` mocked (subset effect gated off).
+- Unit+component tests **224 → 238** across **17** files. All §8 gates green (`tsc` build caught a
+  `beforeEach` return-type slip, fixed). Mutation scope/score unchanged (no `.tsx` in Stryker).
+
+### Phase 3.4 — `Sidebar.tsx` (commit: Sidebar component test)
+
+App navigation shell (`react-router` `NavLink`s + page-group tree + save-view control). New
+`src/components/app/Sidebar/Sidebar.test.tsx` (**6 tests**), rendered inside a `MemoryRouter`;
+`saveView` (pulled in transitively via the embedded `SaveViewModal`) is mocked. Covers: the
+**Loading** placeholder + static nav links (Home/Products/Manage/Help) when `view` is undefined;
+**page-group/page rendering** with correct resolved `href` (`/view/{group.url}/{page.url}`);
+**`viewSavingEnabled` true** shows the "Save View Changes" button (and hides "View up-to-date");
+**`viewSavingEnabled` false** shows the disabled "View up-to-date" button (and hides Save);
+clicking "Save View Changes" **opens the embedded `SaveViewModal`** (password field appears);
+and the **Help** link points at `config.endpoints.docs` with `target="_blank"`.
+
+- Unit+component tests **238 → 244** across **18** files. All §8 gates green. Mutation scope/score
+  unchanged.
+
+### Phase 3.5 — `EntityEditor.tsx` (commit: EntityEditor component test)
+
+The ~1000-line entity configuration form. Its heavy dependencies are stubbed to isolate its own
+form wiring: the live `Entity` preview (Chart.js/Cesium/ag-grid), the `ProductsSelector` child,
+`InputForm`, and `Tooltip` (provider-bound) are mocked; `ResizeObserver` is polyfilled (used by
+`useResizeObserver`). New `src/components/ui/EntityEditor.test.tsx` (**5 tests**): renders the
+"Edit Entity" header with Done/Discard and the **title pre-filled** from `entity.title`;
+**Discard Changes → `onCancel`**; **Done → `onSave`** with the current entity; **editing the title
+is reflected in the saved entity** (edit → Done → `onSave` carries the new title); and the tab
+gating (**Products enabled**, **Events/Transformations disabled**). The entity-type Radix `Select`
+and the per-layer/column Radix sub-forms are portal/pointer-bound and **deferred to E2E (Phase 4)**;
+their pure extraction (`splitSelectedProductsByField`, `extractEntitySelectedProducts`, etc.) is
+already 100% mutation-tested in `entity-editor-utils`.
+
+- Unit+component tests **244 → 249** across **19** files. All §8 gates green (`lint` caught a
+  `member-ordering` slip in the RO stub, fixed). Mutation scope/score unchanged.
+
+### Phase 3 — EXIT
+
+Selective component tests complete for the §6 target set. **6 new test files, 44 new tests**
+(baseline unit suite **205 → 249**, files **13 → 19**):
+
+| Phase | Component                                      | Tests |
+| ----- | ---------------------------------------------- | ----- |
+| 3.1   | `SaveViewModal`                                | 8     |
+| 3.2   | `AlertDialogProvider` (reducer + provider)     | 11    |
+| 3.3   | `ProductsSelector` (9) + `ProductSelector` (5) | 14    |
+| 3.4   | `Sidebar`                                      | 6     |
+| 3.5   | `EntityEditor`                                 | 5     |
+
+Standing decisions held throughout: **no `.tsx` added to the Stryker `mutate` scope** (§5 anti-
+gaming — components are behavior-tested, not mutation-scored); heavy/portal/pointer-capture-bound
+Radix widgets (`Select`, cmdk `Command`, calendar `DateRangePicker`) and the jsdom named-form-control
+gap are **explicitly deferred to the E2E layer (Phase 4)** rather than asserted flakily. All §8 gates
+(`test:unit` under `TZ=UTC`, `lint`, `lint:css`, `build`) green at each step. `DateRangePicker`
+component test remains **deprioritized** (its logic is already unit-tested via `validateDateRangeInput`
+and its interaction is fully stellar-`DateRangePicker`-mediated). Ready for Phase 4 (E2E).
+
+## Phase 4 — E2E critical journeys (Playwright)
+
+Delivered the §4/§Phase-4 goal: route-mocked, no-live-backend Playwright journeys covering the
+real-browser flows deferred from Phase 3. All run **chromium-only** as the PR gate.
+
+### Infrastructure
+
+- **`e2e-tests/utilities/mockApi.ts`** — `setupApiMocks(page, overrides?)` intercepts every data
+  request via `page.route()` (regex matchers) and serves deterministic fixtures, so there is **no
+  live-backend dependency**:
+  - `GET …/ui/fetch/default-view` → `{ data: <view> }`
+  - `POST …/ui/store/default-view` → `{}` **and captures the POST body** into `savedViewBodies`
+  - `GET …/missions/` → `{ data: [GRACE-FO] }`
+  - `GET …/missions/{id}/products` → `{ data: [<product>] }`
+  - `GET …/instruments/{id}/data…` → empty `DataResponse`
+    Exports a deterministic `makeView()` (one page-group → `Page A` → `Section One` → chart entity
+    `My Chart`) and a `PRODUCT` with `temperature`/`pressure` float fields. Fixtures use fixed
+    ids/urls/labels (not the random factory names) so selectors are stable.
+- **`playwright.config.ts` webServer fixed** (§3.6/§Phase-4.3): `command` is now
+  `npm run build && npm run preview` (the build must exist before `preview`), `timeout` raised
+  `10s → 180s`, and `reuseExistingServer: !CI` to avoid rebuilds locally.
+- **CI re-enabled** (`.github/workflows/build.yml`): the commented-out e2e step is now
+  `npx playwright test --project=chromium` with `VITE_APP_TITLE`/`VITE_APP_PATH` env so the
+  webServer build uses the correct base path. (firefox/webkit remain available for a nightly job.)
+
+### Journeys (6 new tests across 5 specs, + the 2 pre-existing specs)
+
+- **`ViewJourney.spec.ts`** — loads the mocked view; Sidebar shows the group; navigating to `Page A`
+  renders the page banner + `Section One` + `My Chart` with the loading placeholder gone (products
+  mocked).
+- **`EntityEditor.spec.ts` (2)** — the **deferred Radix flows**: (a) switch entity type via the Radix
+  `Select` (Chart→Table), edit the Title, `Done`, and see the renamed entity persisted on the page;
+  (b) add a product and drive the **mission → instrument → dataset → field (cmdk `Command`) →
+  version** cascade, asserting the chosen field is reflected. Editor opened via the chart header's
+  hover-revealed More-options menu.
+- **`SaveView.spec.ts`** — mutate the view (Add Section) → Sidebar "Save View Changes" → password
+  gate (`"This will be a secret"`) → Save → **asserts the captured POST body shape** contains the
+  new section under `data.pageGroups[0].pages[0].sections`.
+- **`DateRange.spec.ts`** — the `DateRangePicker` typed path: an invalid entry surfaces
+  `"Invalid start date"` on Enter; a valid in-bounds entry clears it.
+- **`RenameSection.spec.ts`** — the **prompt value round-trip** that jsdom could not verify (Phase
+  3.2): section "…" → Rename → prompt pre-filled with the current title → type a new name → Okay →
+  the new title round-trips into the section header.
+
+### Results / notes
+
+- CI-simulated run (`CI=1 … --project=chromium`): **7 passed, 1 skipped** — the pre-existing
+  `Entities.spec.ts` (real-backend) still `test.skip`s under CI by design; `Navigation.spec.ts` and
+  all 6 new tests pass. Local full-suite run of the 6 new specs is green.
+- Playwright chromium browser binary had to be installed (`npx playwright install chromium`); CI
+  already does `npx playwright install --with-deps`.
+- The deferred-flow debts from Phase 3 (Radix `Select`, cmdk `Command`, `DateRangePicker` typed
+  validation, and the legacy named-form-control `prompt` value round-trip) are now **covered at the
+  browser layer** as promised.
+
+## Phase 5 — Ratchet and gate
+
+Turned the accumulated coverage/mutation work into **enforced CI gates** plus a diffable
+metrics trail, following §5 "Ratchets, not aspirational thresholds" and "Never headline a
+single global number".
+
+### 5.1 Per-scope coverage ratchets (`vite.config.ts`)
+
+Added `coverage.thresholds` with **per-directory and per-file glob keys only — no global
+threshold** (the repo-wide number is meaningless under `all: true` with by-design-untested
+canvas/route code). Floors set slightly below current reality so coverage can only go up:
+
+| Scope                                                                                                       | L   | S   | F   | B   | (current)         |
+| ----------------------------------------------------------------------------------------------------------- | --- | --- | --- | --- | ----------------- |
+| `src/utilities/**`                                                                                          | 99  | 99  | 99  | 87  | 100/100/100/95.73 |
+| extracted logic (`chart-data`, `table-utils`, `data-grid-utils`, `date-range-utils`, `entity-editor-utils`) | 100 | 100 | 100 | 100 | all 100           |
+| `src/components/app/SaveViewModal.tsx`                                                                      | 98  | 98  | 70  | 98  | 100/100/71/100    |
+| `src/components/ui/AlertDialogProvider.tsx`                                                                 | 96  | 96  | 85  | 85  | 98/98/89/89       |
+| `src/components/ui/ProductsSelector.tsx`                                                                    | 90  | 90  | 80  | 92  | 93/93/83/94       |
+| `src/components/ui/ProductSelector.tsx`                                                                     | 58  | 58  | 35  | 43  | 61/61/38/45       |
+| `src/components/app/Sidebar/**`                                                                             | 98  | 98  | 74  | 93  | 100/100/77/96     |
+| `src/hooks/**`                                                                                              | 87  | 87  | 95  | 72  | 89/89/100/75      |
+
+- **Semantics verified empirically**: vitest glob thresholds are checked against the
+  _aggregate_ of files matching the glob. Confirmed by temporarily raising the utilities
+  branch floor to 99 → `ERROR: Coverage for branches (95.73%) does not meet
+"src/utilities/**" threshold (99%)`, then reverting. `VITEST_EXIT=1` on breach, `0` when met.
+- `map/**` is intentionally **excluded from coverage** (§5 canvas policy) so it is not
+  thresholded here — it is covered by mutation only.
+- `EntityEditor.tsx` (heavy component, exercised via Phase 4 e2e) is deliberately **not**
+  coverage-gated to avoid render-coverage chasing.
+
+### 5.2 Mutation `break` gate (`stryker.config.json`)
+
+Added `"thresholds": { "high": 97, "low": 90, "break": 95 }`. Current score **97.93%**
+(1131 Killed / 7 Timeout / 24 Survived / 0 NoCoverage → detected 1138/1162), so the run
+passes with headroom: Stryker logs _"Final mutation score of 97.93 is greater than or equal
+to break threshold 95"_ and exits 0. The mutated scope is unchanged (§5 — pure logic only,
+no `.tsx`). Raise `break` toward 97 as survivors are eliminated.
+
+### 5.3 Diffable metrics summary (CI)
+
+- **`scripts/metrics-summary.mjs`** parses `test-metrics/coverage/coverage-summary.json` and
+  `test-metrics/mutation/mutation.json` and emits a Markdown table (gated-scope coverage +
+  mutation score/status counts) to `$GITHUB_STEP_SUMMARY` and stdout. Reporting only — it
+  never fails the build (the thresholds do). The repo-wide line number is shown labelled
+  _informational only; not gated_.
+- **`.github/workflows/build.yml`**: new `Publish metrics summary` step (`if: !cancelled()`,
+  so numbers appear even when a gate fails). The existing `Run unit tests with coverage`
+  (now threshold-gated) and `Run mutation tests` (now `break`-gated) steps become the actual
+  gates; e2e was re-enabled in Phase 4.
+
+### Results / notes
+
+- All §8 gates green after the change: `test:unit --coverage` (thresholds pass, 249 tests),
+  `test:mutation` (break pass), `build`, `lint`, `lint:css`.
+- Repo-wide line coverage rose **15.25% → 28.07%** over Phases 1–3 (informational).
+- Metrics artifacts (`coverage-summary.json`, `mutation.json`) regenerated as the machine-
+  readable baseline for future before/after diffs.
+
 ## Open questions for maintainers
+
+> **STATUS — PENDING MAINTAINER RULINGS (carried into Phase 3+).** As of the start of Phase 3
+> (component tests), **Q1, Q3, Q4, Q5 remain unresolved** and are blocking the associated
+> correctness fixes. Per project policy, none of these behaviors have been changed — each is only
+> characterized by a test that pins the _current_ (suspected-buggy) behavior, so the suite stays
+> green and the defect is documented rather than silently "fixed". Once a ruling is given I will
+> land the minimal fix + a regression test (and, where noted, extract a small pure helper).
+> Q2 (artifacts/gitignore) is **resolved** (Phase 0.7). Phase 3 proceeds independently of these
+> rulings because it tests component interaction/wiring, not the disputed logic.
+
+| #   | Location                          | Suspected defect                                      | Blocks                              | Ruling                     |
+| --- | --------------------------------- | ----------------------------------------------------- | ----------------------------------- | -------------------------- |
+| Q1  | `api.ts`                          | 200–400 success window accepts 3xx                    | characterization test only          | **pending**                |
+| Q3  | `product.ts applyFieldThresholds` | `effective_since` ignored when both dates set         | 1-line fix + test                   | **pending**                |
+| Q4  | `ViewPage.onAddEntity`            | section layout duplicated on add                      | fix + `addEntityToSection` + test   | **pending**                |
+| Q5  | `DownlinkDashboard`               | dataset with rows marked `"error"` (inverted)         | fix + `computeDatasetStatus` + test | **pending**                |
+| Q6  | `SaveViewModal.tsx`               | hard-coded plaintext admin password, client-only gate | security review                     | **pending (non-blocking)** |
 
 - **Q1 (D1)**: Is the 200–400 success window in `api.ts` intentional (accepting 3xx)? Test
   will document current behavior; product behavior unchanged pending your call.
@@ -626,6 +882,12 @@ orchestration, React state mutation). Prioritized remainder:
   `effective_until`, `effective_since` is currently ignored (overwritten). Intended logic is
   almost certainly `inRange = (since ? since <= ts : true) && (until ? until >= ts : true)`.
   Flagged only; not changed. Confirm before I fix (Phase 2 candidate).
+- **Q6 (security, surfaced in Phase 3.1)**: `SaveViewModal.tsx` gates the "make this the default
+  view for all users" action behind a **hard-coded plaintext string** compared entirely
+  client-side (`const secret = "This will be a secret"; allowSave = secret.toLowerCase() === password.toLowerCase()`).
+  This is not a real access control — anyone can read it from the bundle or bypass it. The actual
+  authorization must live server-side in `saveView`. **Non-blocking for Phase 3** (the component
+  test pins current behavior); flagged for a security review. Not changed.
 - **Q2 (artifacts/gitignore)**: `test-metrics/` is currently gitignored (`.gitignore:42`).
   Phase 0.3/0.4/0.7 require committing machine-readable JSON artifacts under
   `test-metrics/coverage/` and `test-metrics/mutation/`. Plan: keep ignoring bulky/
