@@ -100,20 +100,6 @@ const ProductsSelector = ({
               <Trash2 />
             </Button>
           </div>
-          {((product as unknown as { subsetVersionCount?: number })
-            .subsetVersionCount ?? 0) > 0 && (
-            <div className="text-xs text-muted-foreground">
-              {
-                (product as unknown as { subsetVersionCount: number })
-                  .subsetVersionCount
-              }{" "}
-              subset version
-              {(product as unknown as { subsetVersionCount: number })
-                .subsetVersionCount === 1
-                ? ""
-                : "s"}
-            </div>
-          )}
         </div>
       ))}
       <Button
