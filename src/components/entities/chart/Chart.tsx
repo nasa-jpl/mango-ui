@@ -75,9 +75,12 @@ import {
   pluralize,
 } from "../../../utilities/generic";
 import {
+  fieldUsesPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
+  productHasPerRowUnitField,
+  resolveFieldUnit,
 } from "../../../utilities/product";
 import { formatDateGPS } from "../../../utilities/time";
 import {
@@ -159,6 +162,10 @@ export const Chart = ({
 }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<CustomChartType | null>();
+  // Units resolved from fetched data (keyed by data-layer id), used to label
+  // axes for products whose unit lives in a per-row `unit` column rather than
+  // on the field metadata. Populated during visualizeChartLayers.
+  const resolvedUnitByLayerRef = useRef<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
@@ -409,7 +416,14 @@ export const Chart = ({
             associatedLayers[0],
             products,
           );
-          axisLabel = metadata?.unit || "";
+          // Fall back to the per-row unit resolved from fetched data when the
+          // field carries no static unit (case-2 products like IHK/LHK).
+          axisLabel =
+            metadata?.unit ||
+            resolvedUnitByLayerRef.current[
+              getDataLayerId(associatedLayers[0])
+            ] ||
+            "";
         }
       }
       const position = axis.position || "left";
@@ -587,9 +601,18 @@ export const Chart = ({
         layer,
         products,
       );
+      // Resolves to the static unit when defined, otherwise reads the per-row
+      // `unit` column for case-2 products (IHK/LHK/OFFRED). The unit is
+      // constant across the query, so one resolved value labels the series.
+      const unit = resolveFieldUnit(
+        firstFieldMetadata,
+        getProductForLayer(layer, products),
+        result.data
+      );
+      resolvedUnitByLayerRef.current[getDataLayerId(layer)] = unit;
       return {
         layer,
-        unit: firstFieldMetadata?.unit || "",
+        unit,
         pointsByField,
         data_count: result.data_count,
         downsampling_factor: result.downsampling_factor,
@@ -859,6 +882,11 @@ export const Chart = ({
       };
     }
 
+    // Re-apply axis configuration now that per-row units have been resolved
+    // from the freshly fetched data (the axis effect is keyed on layers, not
+    // data, so it won't otherwise pick up a resolved per-row unit).
+    configureChartAxes(chartEntity.yAxes || []);
+
     // Trigger a chartJS update
     chartRef.current.update();
   };
@@ -965,17 +993,47 @@ export const Chart = ({
         }
       }
 
+      // Products in the IHK/LHK/OFFRED family carry the measurement unit in a
+      // per-row `unit` column rather than on the field metadata (see
+      // product.ts). Fetch it so the axis/tooltip can display the resolved
+      // unit. The `unit` column is a non-aggregable string, so we must force
+      // downsampling_factor=1 (not merely omit it — an omitted factor lets
+      // the server auto-pick a factor >1 for wide ranges and then reject the
+      // request). The unit is constant across the query, so one fetched value
+      // labels the whole series.
+      let fieldsToFetch = layer.fields;
+      let forceDownsamplingFactorOne = false;
+      if (isChartLayerLine(layer)) {
+        if (
+          productHasPerRowUnitField(product) &&
+          !fieldsToFetch.includes("unit") &&
+          layer.fields.some((f) =>
+            fieldUsesPerRowUnit(
+              getFieldMetadataForLayer(
+                f,
+                { ...layer, mission: mission ?? layer.mission },
+                products
+              ),
+              product
+            )
+          )
+        ) {
+          fieldsToFetch = [...fieldsToFetch, "unit"];
+          forceDownsamplingFactorOne = true;
+        }
+      }
+
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        layer.fields,
+        fieldsToFetch,
         layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor,
+        forceDownsamplingFactorOne ? 1 : downsamplingFactor,
         layerFilter,
       );
       cancelHandles[layerFullId] = cancel;
