@@ -71,7 +71,6 @@ export type SelectedProduct = Pick<
   | "id"
 > & {
   hasSubsetVersionField?: boolean;
-  subsetVersionCount?: number;
 };
 
 const separator = "----";
@@ -714,29 +713,6 @@ export const EntityEditor = ({
                                           </PopoverContent>
                                         </Popover>
                                       </div>
-                                      {((
-                                        layer as unknown as {
-                                          subsetVersionCount?: number;
-                                        }
-                                      ).subsetVersionCount ?? 0) > 0 && (
-                                        <div className="text-xs text-muted-foreground ml-2">
-                                          {
-                                            (
-                                              layer as unknown as {
-                                                subsetVersionCount: number;
-                                              }
-                                            ).subsetVersionCount
-                                          }{" "}
-                                          subset version
-                                          {(
-                                            layer as unknown as {
-                                              subsetVersionCount: number;
-                                            }
-                                          ).subsetVersionCount === 1
-                                            ? ""
-                                            : "s"}
-                                        </div>
-                                      )}
                                     </div>
                                   ))}
                               </div>
