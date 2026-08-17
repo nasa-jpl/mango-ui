@@ -115,22 +115,3 @@ test("Filter toggle removes an existing filter", async () => {
   const next = onChange.mock.calls[0][0] as SelectedProduct[];
   expect("filter" in next[0]).toBe(false);
 });
-
-test("renders a singular subset-version badge for a count of 1", () => {
-  const { container } = renderSelector([
-    makeProduct({ id: "a", subsetVersionCount: 1 }),
-  ]);
-  expect(container.textContent).toMatch(/1 subset version(?!s)/);
-});
-
-test("renders a plural subset-version badge for a count > 1", () => {
-  const { container } = renderSelector([
-    makeProduct({ id: "a", subsetVersionCount: 3 }),
-  ]);
-  expect(container.textContent).toMatch(/3 subset versions/);
-});
-
-test("renders no subset-version badge when count is 0 or absent", () => {
-  const { container } = renderSelector([makeProduct({ id: "a" })]);
-  expect(container.textContent).not.toMatch(/subset version/);
-});

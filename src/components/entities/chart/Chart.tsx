@@ -75,7 +75,11 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
-import { formatDateGPS } from "../../../utilities/time";
+import {
+  formatDateGPS,
+  isWithinSubsetVersionMaxRange,
+  SUBSET_VERSION_MAX_RANGE_DAYS,
+} from "../../../utilities/time";
 import {
   applyLayerTransforms,
   formatYValue,
@@ -89,12 +93,9 @@ import ChartTooltip from "./ChartTooltip";
 import {
   computeDownsamplingFactor,
   computeFetchWindow,
-  countUniqueSubsetVersions,
   createNotIngestedDataResponse,
   deriveFieldPoints,
-  expandLayerBySubsetVersion,
   isNotIngestedError,
-  resolveFetchFields,
   toDimension,
 } from "./chart-data";
 
@@ -578,16 +579,11 @@ export const Chart = ({
       processedData[i] = { layer, pointsByField: newPointsByField, ...rest };
     });
 
-    // Expand layers with subset_version into alternating colors
-    const expandedProcessedData = processedData.flatMap(
-      expandLayerBySubsetVersion,
-    );
-
     // @ts-expect-error TODO chartjs is difficult to type dynamically here
     const newChartJSDatasets: ChartDataset<
       "line" | "bar" | "scatter" | "bubble",
       CustomChartData[]
-    >[] = expandedProcessedData
+    >[] = processedData
       .filter(({ layer }) => !layer.hidden)
       .map(
         ({ pointsByField, layer, data_count, downsampling_factor, unit }) => {
@@ -604,27 +600,12 @@ export const Chart = ({
           };
           if (isLineLayer) {
             const isDownsampled = downsampling_factor !== 1;
-
-            // Count unique subset_versions in the data
-            const subsetVersionCount = countUniqueSubsetVersions(
-              pointsByField[layer.fields[0]],
-            );
-
-            // Store count on layer for EntityEditor to use
-            const layerWithCount: typeof layer & {
-              subsetVersionCount: number;
-            } = {
-              ...layer,
-              subsetVersionCount,
-            };
-
             return {
               ...commonConfig, // TODO would be nice to render these outside of the canvas in order to better format
               // and control these labels
               // TODO what should these labels contain metadata wise? Fairly verbose right now.
               data: pointsByField[layer.fields[0]],
               type: "line",
-              layer: layerWithCount,
               label:
                 layer.label ||
                 `${missionLabel} ${instrument} ${layer.dataset} ${
@@ -869,7 +850,7 @@ export const Chart = ({
         },
         products,
       );
-      const downsamplingFactor = computeDownsamplingFactor(
+      let downsamplingFactor = computeDownsamplingFactor(
         product,
         durationSeconds,
         chartSize,
@@ -888,25 +869,41 @@ export const Chart = ({
         }
       }
 
-      // Include groupBy field if specified, and decide whether to skip downsampling
-      const { fieldsToFetch, shouldSkipDownsampling } =
-        resolveFetchFields(layer);
-
-      // Build filter string from existing filter
-      const filterString = layer.filter;
+      // subset_version only exists in full-resolution data, so a
+      // subset_version filter requires fetching at full resolution. Within
+      // the supported short-range window, force full resolution; beyond it,
+      // drop the filter and downsample as usual.
+      let layerFilter = layer.filter;
+      if (
+        Array.isArray(layerFilter) &&
+        layerFilter.some((f) => f.trim().startsWith("subset_version="))
+      ) {
+        if (isWithinSubsetVersionMaxRange(computedStartTime, computedEndTime)) {
+          downsamplingFactor = 1;
+        } else {
+          layerFilter = layerFilter.filter(
+            (f) => !f.trim().startsWith("subset_version="),
+          );
+          // Fixed id so repeated fetches/layers update one toast instead of stacking
+          toast.warning(
+            `Subset versions are unavailable for time ranges beyond ${SUBSET_VERSION_MAX_RANGE_DAYS} days. Showing data for all subset versions.`,
+            { id: "subset-version-range-warning", richColors: true },
+          );
+        }
+      }
 
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        fieldsToFetch,
+        layer.fields,
         layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        shouldSkipDownsampling ? undefined : downsamplingFactor,
-        filterString,
+        downsamplingFactor,
+        layerFilter,
       );
       cancelHandles[layerFullId] = cancel;
       json()

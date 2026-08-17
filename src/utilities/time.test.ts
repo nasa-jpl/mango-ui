@@ -1,5 +1,12 @@
 import { expect, test } from "vitest";
-import { formatDateGPS, j2ToMs, toDatetimelocalStr, toUTCms } from "./time";
+import {
+  SUBSET_VERSION_MAX_RANGE_DAYS,
+  formatDateGPS,
+  isWithinSubsetVersionMaxRange,
+  j2ToMs,
+  toDatetimelocalStr,
+  toUTCms,
+} from "./time";
 
 test("toDatetimelocalStr truncates an ISO string to minute precision", () => {
   expect(toDatetimelocalStr("2022-03-02T00:36:00.000Z")).toBe(
@@ -38,4 +45,42 @@ test("formatDateGPS returns YYYY-MM-DDTHH:MM:SS (seconds precision, no zone)", (
   expect(formatDateGPS(new Date("2030-11-05T09:08:07Z"))).toBe(
     "2030-11-05T09:08:07",
   );
+});
+
+// --- isWithinSubsetVersionMaxRange ------------------------------------------
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Build a range of an exact duration off a fixed UTC anchor, so the boundary
+// cases stay derived from SUBSET_VERSION_MAX_RANGE_DAYS rather than hardcoded.
+function rangeOf(durationMs: number): [string, string] {
+  const start = "2020-01-01T00:00:00.000Z";
+  return [start, new Date(Date.parse(start) + durationMs).toISOString()];
+}
+
+test("isWithinSubsetVersionMaxRange accepts a range shorter than the maximum", () => {
+  const [start, end] = rangeOf(DAY_MS);
+  expect(isWithinSubsetVersionMaxRange(start, end)).toBe(true);
+});
+
+test("isWithinSubsetVersionMaxRange is inclusive at exactly the maximum", () => {
+  const [start, end] = rangeOf(SUBSET_VERSION_MAX_RANGE_DAYS * DAY_MS);
+  expect(isWithinSubsetVersionMaxRange(start, end)).toBe(true);
+});
+
+test("isWithinSubsetVersionMaxRange rejects a range one millisecond over the maximum", () => {
+  const [start, end] = rangeOf(SUBSET_VERSION_MAX_RANGE_DAYS * DAY_MS + 1);
+  expect(isWithinSubsetVersionMaxRange(start, end)).toBe(false);
+});
+
+test("isWithinSubsetVersionMaxRange treats an inverted range as within bounds", () => {
+  // end before start yields a negative duration, trivially <= the maximum.
+  const [start, end] = rangeOf(-DAY_MS);
+  expect(isWithinSubsetVersionMaxRange(start, end)).toBe(true);
+});
+
+test("isWithinSubsetVersionMaxRange returns false when either bound is unparseable", () => {
+  // Comparisons against NaN are always false, so a bad bound disables filtering.
+  expect(isWithinSubsetVersionMaxRange("not-a-date", "2020-01-02")).toBe(false);
+  expect(isWithinSubsetVersionMaxRange("2020-01-01", "not-a-date")).toBe(false);
 });

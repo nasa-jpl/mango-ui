@@ -37,3 +37,19 @@ export function j2ToMs(x: number) {
 export function formatDateGPS(date: Date) {
   return formatDateISO(date).substring(0, 19);
 }
+
+/**
+ * Maximum time range (in days) over which subset version filtering is
+ * available. Per science, subset versions only need to be differentiable over
+ * short timescales.
+ */
+export const SUBSET_VERSION_MAX_RANGE_DAYS = 5;
+
+/**
+ * Returns true if the time range is short enough for subset version filtering
+ * to be available.
+ */
+export function isWithinSubsetVersionMaxRange(start: string, end: string) {
+  const durationMs = new Date(end).getTime() - new Date(start).getTime();
+  return durationMs <= SUBSET_VERSION_MAX_RANGE_DAYS * 24 * 60 * 60 * 1000;
+}

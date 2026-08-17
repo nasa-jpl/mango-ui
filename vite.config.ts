@@ -158,10 +158,10 @@ export default defineConfig(({ mode }) => {
             branches: 92,
           },
           "src/components/ui/ProductSelector.tsx": {
-            lines: 58,
-            statements: 58,
-            functions: 35,
-            branches: 43,
+            lines: 82,
+            statements: 82,
+            functions: 44,
+            branches: 90,
           },
           // Directory ratchets for scopes that are broadly covered.
           "src/components/app/Sidebar/**": {
