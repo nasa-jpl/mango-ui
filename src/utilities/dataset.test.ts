@@ -85,8 +85,8 @@ test("getProductForLayer", () => {
       is_channel_id: false,
     },
   ];
-  expect(getProductForLayer(layer, [])).to.be.undefined;
-  expect(getProductForLayer(layer, [dataset3])).to.be.undefined;
+  expect(getProductForLayer(layer, [])).toBeUndefined();
+  expect(getProductForLayer(layer, [dataset3])).toBeUndefined();
   expect(getProductForLayer(layer, [dataset1, dataset2, dataset3])).to.deep.eq(
     dataset1,
   );
@@ -117,7 +117,7 @@ test("getFieldMetadataForLayer", () => {
       is_channel_id: false,
     },
   ];
-  expect(getFieldMetadataForLayer("foo", layer, [])).to.be.undefined;
+  expect(getFieldMetadataForLayer("foo", layer, [])).toBeUndefined();
   expect(getFieldMetadataForLayer("field1", layer, [dataset1])).to.deep.eq(
     dataset1.available_fields[0],
   );
