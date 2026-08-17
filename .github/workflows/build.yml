@@ -57,17 +57,48 @@ jobs:
           npm run lint:css
         shell: bash
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run unit tests with coverage
+        run: npm run test:unit -- --coverage
 
-      # - name: Run e2e tests
-      #   run: npx playwright test
+      - name: Run mutation tests
+        run: npm run test:mutation
+
+      # Diffable before/after metrics on every PR (§Phase-5.3 / §7). Runs even when a
+      # gate above fails so the numbers are always visible. Reporting only — the gates
+      # are the vitest coverage thresholds and the Stryker `break` threshold.
+      - name: Publish metrics summary
+        if: ${{ !cancelled() }}
+        run: node scripts/metrics-summary.mjs
+
+      - name: Run e2e tests
+        run: npx playwright test --project=chromium
+        env:
+          VITE_APP_TITLE: ${{ vars.VITE_APP_TITLE}}
+          VITE_APP_PATH: ${{ vars.VITE_APP_PATH}}
 
       - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: e2e-test-results
           path: e2e-test-results/
+          retention-days: 2 # limit imposed by GitHub organization
+
+      # Upload metrics artifacts on every run for before/after diffing (TESTING_STRATEGY.md
+      # §7). No thresholds/gating here yet — that is Phase 5.
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: test-metrics/coverage/
+          retention-days: 2 # limit imposed by GitHub organization
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: mutation-report
+          path: test-metrics/mutation/
           retention-days: 2 # limit imposed by GitHub organization
 
   build_image:

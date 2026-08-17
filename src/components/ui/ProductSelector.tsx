@@ -30,6 +30,10 @@ import {
   SUBSET_VERSION_MAX_RANGE_DAYS,
 } from "../../utilities/time";
 import { SelectedProduct } from "./EntityEditor";
+import {
+  isSelectedProductComplete,
+  shouldFetchSubsetVersionCount,
+} from "./entity-editor-utils";
 
 // Sentinel value for the "All" subset version option (no filter applied)
 const ALL_SUBSET_VERSIONS = "__all__";
@@ -62,13 +66,7 @@ export const ProductSelector = ({
 
   const updateSelectedProduct = (updatedSelectedProduct: SelectedProduct) => {
     // TODO handle channels
-    if (
-      updatedSelectedProduct.mission &&
-      updatedSelectedProduct.instrument &&
-      updatedSelectedProduct.dataset &&
-      updatedSelectedProduct.fields.length &&
-      updatedSelectedProduct.version
-    ) {
+    if (isSelectedProductComplete(updatedSelectedProduct)) {
       onChange(updatedSelectedProduct);
     }
     setNewSelectedProduct(updatedSelectedProduct);
@@ -142,7 +140,8 @@ export const ProductSelector = ({
 
   // Subset version filtering is only available over short time ranges
   const subsetVersionAvailable =
-    !!dateRange && isWithinSubsetVersionMaxRange(dateRange.start, dateRange.end);
+    !!dateRange &&
+    isWithinSubsetVersionMaxRange(dateRange.start, dateRange.end);
 
   // Unique subset_version values available for the current selection
   const [subsetVersions, setSubsetVersions] = useState<string[]>([]);
@@ -152,13 +151,11 @@ export const ProductSelector = ({
   // version filtering
   useEffect(() => {
     if (
-      !hasSubsetVersionField ||
-      !subsetVersionAvailable ||
-      !newSelectedProduct.mission ||
-      !newSelectedProduct.instrument ||
-      !newSelectedProduct.dataset ||
-      !newSelectedProduct.version ||
-      !dateRange
+      !shouldFetchSubsetVersionCount(
+        newSelectedProduct,
+        hasSubsetVersionField,
+        dateRange,
+      )
     ) {
       setSubsetVersions([]);
       return;
@@ -171,13 +168,14 @@ export const ProductSelector = ({
       newSelectedProduct.version,
       ["subset_version"],
       newSelectedProduct.channels ?? [],
-      dateRange.start,
-      dateRange.end,
+      dateRange!.start,
+      dateRange!.end,
       // subset_version only exists in full-resolution data; without an
       // explicit factor the server may pick a downsampled resolution and
       // reject the request
       1,
     );
+
     json()
       .then((data) => {
         const subsetVersionSet = new Set<string>();

@@ -48,7 +48,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Root, createRoot } from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 import { toast } from "sonner";
 import {
   DataResponse,
@@ -62,11 +62,7 @@ import {
   TimeSeriesPoint,
   YAxis,
 } from "../../../types/view";
-import { getData, HttpError } from "../../../utilities/api";
-import {
-  isWithinSubsetVersionMaxRange,
-  SUBSET_VERSION_MAX_RANGE_DAYS,
-} from "../../../utilities/time";
+import { getData } from "../../../utilities/api";
 import {
   convertHexToRGBA,
   getDataLayerId,
@@ -79,7 +75,11 @@ import {
   getFieldMetadataForLayer,
   getProductForLayer,
 } from "../../../utilities/product";
-import { formatDateGPS } from "../../../utilities/time";
+import {
+  formatDateGPS,
+  isWithinSubsetVersionMaxRange,
+  SUBSET_VERSION_MAX_RANGE_DAYS,
+} from "../../../utilities/time";
 import {
   applyLayerTransforms,
   formatYValue,
@@ -90,6 +90,14 @@ import EntityHeader from "../../page/EntityHeader";
 import { Tooltip } from "../../ui/Tooltip";
 import "./Chart.css";
 import ChartTooltip from "./ChartTooltip";
+import {
+  computeDownsamplingFactor,
+  computeFetchWindow,
+  createNotIngestedDataResponse,
+  deriveFieldPoints,
+  isNotIngestedError,
+  toDimension,
+} from "./chart-data";
 
 ChartJS.register(zoomPlugin);
 
@@ -130,12 +138,6 @@ type CustomChartType = ChartJS<
   "line" | "bar" | "scatter" | "bubble",
   CustomChartData[]
 >;
-
-function toDimension(value: number | string, dimension: number) {
-  return typeof value === "string" && value.endsWith("%")
-    ? (parseFloat(value) / 100) * dimension
-    : +value;
-}
 
 export const Chart = ({
   chartEntity,
@@ -521,61 +523,13 @@ export const Chart = ({
           const timestamp = d.timestamp;
           if (!fieldValue || typeof timestamp !== "string") return;
 
-          // Case where downsampling is not applied
-          const points: CustomChartData[] = [];
-          if (result.downsampling_factor === 1) {
-            points.push({
-              x: timestamp,
-              y: fieldValue.value as number,
-              raw: d,
-              selected: false,
-            });
-          } else {
-            if (!fieldMetadata) return;
-            if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "min",
-              ) &&
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "max",
-              )
-            ) {
-              // Compute middle time of aggregation window
-              const pointTimestampMS = new Date(timestamp).getTime();
-              const halfFieldDataIntervalMS =
-                ((result.nominal_data_interval_seconds || 0) / 2) * 1000;
-              const middleTime = new Date(
-                pointTimestampMS + halfFieldDataIntervalMS,
-              ).toISOString();
-
-              // Use the min and max set to the middle of the window
-              points.push({
-                x: middleTime,
-                y: fieldValue.min as number,
-                raw: d,
-                selected: false,
-              });
-              if (fieldValue.min !== fieldValue.max) {
-                points.push({
-                  x: middleTime,
-                  y: fieldValue.max as number,
-                  raw: d,
-                  selected: false,
-                });
-              }
-            } else if (
-              fieldMetadata.supported_aggregations.find(
-                ({ type }) => type === "avg",
-              )
-            ) {
-              points.push({
-                x: timestamp,
-                y: fieldValue.avg as number,
-                raw: d,
-                selected: false,
-              });
-            }
-          }
+          const points = deriveFieldPoints(
+            d,
+            field,
+            fieldMetadata,
+            result.downsampling_factor,
+            result.nominal_data_interval_seconds,
+          );
           if (!pointsByField[field]) {
             pointsByField[field] = [];
           }
@@ -646,7 +600,6 @@ export const Chart = ({
           };
           if (isLineLayer) {
             const isDownsampled = downsampling_factor !== 1;
-
             return {
               ...commonConfig, // TODO would be nice to render these outside of the canvas in order to better format
               // and control these labels
@@ -881,23 +834,11 @@ export const Chart = ({
       cancelHandles[layerFullId]();
     }
     return new Promise((resolve, reject) => {
-      let computedStartTime = startTime || layer.startTime;
-      let computedEndTime = endTime || layer.endTime;
-      if (typeof layer.windowBuffer === "number") {
-        const newStartTimeDate = new Date(computedStartTime);
-        newStartTimeDate.setDate(newStartTimeDate.getDate() - 1);
-        computedStartTime = newStartTimeDate.toISOString();
-
-        const newEndTimeDate = new Date(computedEndTime);
-        newEndTimeDate.setDate(newEndTimeDate.getDate() + 1);
-        computedEndTime = newEndTimeDate.toISOString();
-      }
-
-      // Compute aggregation factor
-      const durationSeconds =
-        (new Date(computedEndTime).getTime() -
-          new Date(computedStartTime).getTime()) /
-        1000;
+      const {
+        startTime: computedStartTime,
+        endTime: computedEndTime,
+        durationSeconds,
+      } = computeFetchWindow(startTime, endTime, layer);
 
       const chartSize = chartRef.current?.width || 1000; // TODO store in state?
 
@@ -909,25 +850,11 @@ export const Chart = ({
         },
         products,
       );
-      let downsamplingFactor = 1;
-      if (product) {
-        for (let i = 0; i < product.available_resolutions.length; i++) {
-          const resolution = product.available_resolutions[i];
-          const nextResolution = product.available_resolutions[i + 1];
-          const pointsForDuration =
-            durationSeconds / resolution.nominal_data_interval_seconds;
-          const nextPointsForDuration = nextResolution
-            ? durationSeconds / nextResolution.nominal_data_interval_seconds
-            : null;
-          if (
-            pointsForDuration > chartSize &&
-            (nextPointsForDuration == null || nextPointsForDuration < chartSize)
-          ) {
-            downsamplingFactor = resolution.downsampling_factor;
-            break;
-          }
-        }
-      }
+      let downsamplingFactor = computeDownsamplingFactor(
+        product,
+        durationSeconds,
+        chartSize,
+      );
 
       if (chartEntity.data) {
         const matchingData = chartEntity.data
@@ -990,24 +917,10 @@ export const Chart = ({
         .catch((error) => {
           if (!isAbortError(error)) {
             delete cancelHandles[layerFullId];
-            if (
-              error instanceof HttpError &&
-              error.status >= 400 &&
-              error.status < 500
-            ) {
+            if (isNotIngestedError(error)) {
               resolve({
                 layer,
-                result: {
-                  data: [],
-                  data_begin: "",
-                  data_count: 0,
-                  data_end: "",
-                  downsampling_factor: 1,
-                  from_isotimestamp: "",
-                  nominal_data_interval_seconds: null,
-                  query_elapsed_ms: 0,
-                  to_isotimestamp: "",
-                },
+                result: createNotIngestedDataResponse(),
                 notIngested: true,
               });
             } else {

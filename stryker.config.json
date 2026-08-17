@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "mutate": [
+    "src/utilities/**/*.ts",
+    "!src/utilities/**/*.test.ts",
+    "src/components/entities/chart/chart-data.ts",
+    "src/components/entities/map/map-utils.ts",
+    "src/components/entities/table/table-utils.ts",
+    "src/components/ui/DataGrid/data-grid-utils.ts",
+    "src/components/ui/date-range-utils.ts",
+    "src/components/ui/entity-editor-utils.ts"
+  ],
+  "thresholds": {
+    "high": 97,
+    "low": 90,
+    "break": 95
+  },
+  "reporters": ["html", "json", "clear-text", "progress"],
+  "htmlReporter": {
+    "fileName": "test-metrics/mutation/mutation-report.html"
+  },
+  "jsonReporter": {
+    "fileName": "test-metrics/mutation/mutation.json"
+  },
+  "tempDirName": ".stryker-tmp",
+  "incremental": true,
+  "incrementalFile": ".stryker-tmp/incremental.json"
+}

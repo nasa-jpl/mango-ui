@@ -41,7 +41,7 @@ export function formatDateGPS(date: Date) {
 /**
  * Maximum time range (in days) over which subset version filtering is
  * available. Per science, subset versions only need to be differentiable over
- * short timescales (<= 3 days).
+ * short timescales.
  */
 export const SUBSET_VERSION_MAX_RANGE_DAYS = 5;
 

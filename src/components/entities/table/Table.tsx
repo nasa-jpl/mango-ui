@@ -22,7 +22,6 @@ import {
 } from "../../../types/app.ts";
 import { DataGridColumnDef } from "../../../types/data-grid";
 import { ProductPreview } from "../../../types/page.ts";
-import { Status } from "../../../types/status.ts";
 import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
 import { getData, HttpError } from "../../../utilities/api";
@@ -39,6 +38,15 @@ import StatusBadge from "../../ui/StatusBadge.tsx";
 import { Tooltip } from "../../ui/Tooltip.tsx";
 import { CustomFilter } from "./CustomFilter.tsx";
 import "./Table.css";
+import {
+  buildThresholdTooltip,
+  deriveRowTrippedStatus,
+  formatTableCellValue,
+  formatTimestampValue,
+  getAGGridFilterType,
+  getFieldDisplayValue,
+  getRowThresholdClass,
+} from "./table-utils";
 
 export declare type TableProps = {
   compact?: boolean;
@@ -57,25 +65,6 @@ export declare type TableProps = {
   showHeader?: boolean;
   tableEntity: TableEntity;
 };
-
-function getAGGridFilterType(type: ProductField["type"] | string) {
-  switch (type) {
-    case "int":
-      return "agNumberColumnFilter";
-    case "float":
-      return "agNumberColumnFilter";
-    case "str":
-      return "agTextColumnFilter";
-    case "bool":
-      return "agTextColumnFilter";
-    case "datetime":
-      return "agDateColumnFilter";
-    case "dict":
-      return "agTextColumnFilter";
-    default:
-      return true;
-  }
-}
 
 const Table = memo(function Table({
   dateRange,
@@ -279,33 +268,12 @@ const Table = memo(function Table({
               params.data[column.layerId],
             );
 
-            const tooltipText =
-              `Field: ${column.label} \n` +
-              `Lower limit value: ${limits.lower_value ?? "-"} \n` +
-              `Upper limit value: ${limits.upper_value ?? "-"} \n` +
-              `Lower warning value: ${warnings.lower_value ?? "-"} \n` +
-              `Upper warning value: ${warnings.upper_value ?? "-"}`;
-            return tooltipText;
+            return buildThresholdTooltip(column.label, limits, warnings);
           }
           return params.valueFormatted;
         },
-        valueFormatter: (params) => {
-          if (metadata?.type === "datetime" && column.dateFormat === "short") {
-            return params.value.split("T")[0];
-          } else if (metadata?.type === "datetime") {
-            return params.value.split("+")[0];
-          }
-
-          if (params.value === "") {
-            return "-";
-          }
-
-          // if (typeof params.value === "number") {
-          //   return parseFloat(params.value.toPrecision(4));
-          // }
-
-          return params.value;
-        },
+        valueFormatter: (params) =>
+          formatTableCellValue(params.value, metadata?.type, column.dateFormat),
         valueGetter: (
           params: ValueGetterParams<Record<string, DataResponseDataEntry>>,
         ) => {
@@ -317,25 +285,7 @@ const Table = memo(function Table({
             return "";
           }
           const fieldData = params.data[column.layerId][column.field];
-          if (typeof fieldData !== "object") {
-            return fieldData;
-          }
-          if (Object.prototype.hasOwnProperty.call(fieldData, "value")) {
-            // mlucas: Commenting this out. See https://github.com/nasa-jpl/mango-ui/issues/158?issue=nasa-jpl%7Cmango-ui%7C190.
-            // if (typeof fieldData.value === "number") {
-            //   return parseFloat(fieldData.value.toPrecision(4));
-            // }
-            return fieldData.value;
-          }
-          if (Object.prototype.hasOwnProperty.call(fieldData, "avg")) {
-            return fieldData.avg;
-          }
-          if (
-            Object.prototype.hasOwnProperty.call(fieldData, "min") &&
-            Object.prototype.hasOwnProperty.call(fieldData, "max")
-          ) {
-            return `${fieldData.min} – ${fieldData.max}`;
-          }
+          return getFieldDisplayValue(fieldData);
         },
       };
 
@@ -371,54 +321,18 @@ const Table = memo(function Table({
         }
         return Object.values(params.data)[0].timestamp ?? "";
       },
-      valueFormatter: (params) => {
-        if (shouldCollapseByDay) {
-          return params.value.split("T")[0];
-        }
-        return params.value.split("+")[0];
-      },
+      valueFormatter: (params) =>
+        formatTimestampValue(params.value, shouldCollapseByDay),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cellRenderer: (params: any) => {
         if (!tableEntity.applyThresholds) {
           return <>{params.valueFormatted}</>;
         }
 
-        let tripped: Status = "nominal";
-        for (let i = 0; i < tableEntity.columns.length; i++) {
-          const column = tableEntity.columns[i];
-
-          // For each column, see if the row has tripped any thresholds
-          if (
-            !params.data ||
-            !(column.layerId in params.data) ||
-            !(column.field in params.data[column.layerId]) ||
-            !params.data[column.layerId][column.field] ||
-            !params.data[column.layerId][column.field]._thresholds
-          ) {
-            continue;
-          }
-          const { limits, warnings }: ComputedThresholds =
-            params.data[column.layerId][column.field]._thresholds;
-
-          if (
-            !limits.lower &&
-            !limits.upper &&
-            !warnings.lower &&
-            !warnings.upper
-          ) {
-            continue;
-          }
-
-          if (limits.lower || limits.upper) {
-            tripped = "error";
-            break;
-          }
-
-          if (warnings.lower || warnings.upper) {
-            tripped = "warning";
-            break;
-          }
-        }
+        const tripped = deriveRowTrippedStatus(
+          params.data,
+          tableEntity.columns,
+        );
         return (
           <span className="derived-column">
             <StatusBadge status={tripped} /> {params.valueFormatted}
@@ -783,45 +697,10 @@ const Table = memo(function Table({
             tableEntity.compact ? onCompactResize : undefined
           }
           gridProps={{
-            getRowClass: (params) => {
-              let rowClass = "";
-              for (let i = 0; i < tableEntity.columns.length; i++) {
-                const column = tableEntity.columns[i];
-
-                // For each column, see if the row has tripped any thresholds
-                if (
-                  !params.data ||
-                  !(column.layerId in params.data) ||
-                  !(column.field in params.data[column.layerId]) ||
-                  !params.data[column.layerId][column.field] ||
-                  !params.data[column.layerId][column.field]._thresholds
-                ) {
-                  continue;
-                }
-                const { limits, warnings }: ComputedThresholds =
-                  params.data[column.layerId][column.field]._thresholds;
-
-                if (
-                  !limits.lower &&
-                  !limits.upper &&
-                  !warnings.lower &&
-                  !warnings.upper
-                ) {
-                  continue;
-                }
-
-                if (limits.lower || limits.upper) {
-                  rowClass = "limit-row";
-                  break;
-                }
-
-                if (warnings.lower || warnings.upper) {
-                  rowClass = "warning-row";
-                  break;
-                }
-              }
-              return rowClass;
-            },
+            getRowClass: (params) =>
+              getRowThresholdClass(
+                deriveRowTrippedStatus(params.data, tableEntity.columns),
+              ),
           }}
         />
       }

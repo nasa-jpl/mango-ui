@@ -19,7 +19,7 @@ export async function loader() {
   let view = {};
   try {
     view = await getView();
-  } catch (err) {
+  } catch {
     return { view: createView() };
   }
   return { view };

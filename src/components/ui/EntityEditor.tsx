@@ -45,6 +45,12 @@ import {
   isTableEntity,
 } from "../../utilities/view";
 import Entity from "../page/Entity";
+import {
+  extractEntitySelectedProducts,
+  getLabelForSelectedProductOrLayer,
+  getMatchingSelectedProductForLayer,
+  splitSelectedProductsByField,
+} from "./entity-editor-utils";
 import { InputForm } from "./InputForm";
 import ProductsSelector from "./ProductsSelector";
 import { Tooltip } from "./Tooltip";
@@ -74,52 +80,6 @@ export type SelectedProduct = Pick<
 };
 
 const separator = "----";
-
-const getLabelForSelectedProductOrLayer = (
-  thing: SelectedProduct | DataLayer,
-  fields?: string[],
-) => {
-  return `${thing.mission} ${thing.instrument} ${thing.dataset} ${(
-    fields || thing.fields
-  ).join(", ")} ${(thing.channels || [])
-    ?.map((c) => `(${c.id}: ${c.value})`)
-    .join(" ")} (v${thing.version}) ${
-    Array.isArray(thing.filter) && thing.filter.length > 0
-      ? `filter: ${thing.filter.join(", ")}`
-      : ""
-  }`;
-};
-
-// Returns the layer containing the selected product
-const getMatchingSelectedProductForLayer = (
-  layer: DataLayer,
-  selectedProducts: SelectedProduct[],
-  fields?: string[],
-): SelectedProduct | undefined => {
-  return selectedProducts.find(
-    (p) =>
-      getLabelForSelectedProductOrLayer(p, fields || p.fields) ===
-      getLabelForSelectedProductOrLayer(layer, fields || layer.fields),
-  );
-};
-
-const extractEntitySelectedProducts = (
-  entity: EntityType,
-): SelectedProduct[] => {
-  const layers = (entity as ChartEntity | TableEntity).layers || [];
-  return layers.map((layer) => {
-    return {
-      id: generateUUID(),
-      channels: layer.channels,
-      fields: layer.fields,
-      dataset: layer.dataset,
-      mission: layer.mission,
-      version: layer.version,
-      instrument: layer.instrument,
-      ...(Array.isArray(layer.filter) ? { filter: layer.filter } : null),
-    } as SelectedProduct;
-  });
-};
 
 export const EntityEditor = ({
   entity,
@@ -265,17 +225,7 @@ export const EntityEditor = ({
     // If switching from table to anything else, split up the selected products with multiple fields
     // into selected products with single fields
     if (newEntity.type === "table" && type !== "table") {
-      const newSelectedProducts: SelectedProduct[] = [];
-      selectedProducts.forEach((selectedProduct) => {
-        selectedProduct.fields.forEach((field) => {
-          newSelectedProducts.push({
-            ...selectedProduct,
-            fields: [field],
-            id: generateUUID(),
-          });
-        });
-      });
-      setSelectedProducts(newSelectedProducts);
+      setSelectedProducts(splitSelectedProductsByField(selectedProducts));
     }
     setNewEntity(
       createEntity({
