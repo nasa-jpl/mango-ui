@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@nasa-jpl/stellar-react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
 import { DataResponseDataEntry, Product, ProductField } from "../../types/api";
 import { DateRange } from "../../types/time";
@@ -529,5 +528,3 @@ export const ProductSelector = ({
     </div>
   );
 };
-
-export const Content = TabsPrimitive.Content;
