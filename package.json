@@ -28,15 +28,15 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vite-plugin-cesium": "1.2.23",
-    "vite-plugin-static-copy": "^3.1.1"
+    "vite-plugin-static-copy": "^3.4.0"
   },
   "devDependencies": {
     "@ag-grid-community/core": "^32.1.0",
     "@nasa-jpl/stellar-react": "2.0.0-alpha.71",
     "@playwright/test": "^1.53.0",
     "@radix-ui/react-tabs": "^1.1.1",
-    "@stryker-mutator/core": "^8.7.1",
-    "@stryker-mutator/vitest-runner": "^8.7.1",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@tanstack/react-table": "^8.9.8",
     "@tanstack/react-virtual": "^3.0.0-alpha.0",
     "@testing-library/jest-dom": "^7.0.1",
@@ -53,8 +53,8 @@
     "@types/stats.js": "^0.17.3",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^1.6.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
     "ag-grid-react": "^32.2.2",
     "autoprefixer": "^10.4.21",
     "chart.js": "^4.4.1",
@@ -79,8 +79,8 @@
     "typescript": "^5.3.3",
     "unique-names-generator": "^4.7.1",
     "uuid": "^11.1.0",
-    "vite": "^5.0.9",
-    "vitest": "^1.0.4"
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.17.2"

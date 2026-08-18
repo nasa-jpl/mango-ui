@@ -10,8 +10,8 @@ test("downloadJSON creates, clicks, and revokes an object-URL anchor", () => {
   // jsdom does not implement object URLs, so install assertable stubs.
   const originalCreate = URL.createObjectURL;
   const originalRevoke = URL.revokeObjectURL;
-  const createObjectURL = vi.fn<[Blob], string>(() => "blob:mock-url");
-  const revokeObjectURL = vi.fn<[string], void>();
+  const createObjectURL = vi.fn<(blob: Blob) => string>(() => "blob:mock-url");
+  const revokeObjectURL = vi.fn<(url: string) => void>();
   URL.createObjectURL =
     createObjectURL as unknown as typeof URL.createObjectURL;
   URL.revokeObjectURL =
