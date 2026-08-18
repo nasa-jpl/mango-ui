@@ -97,14 +97,23 @@ export default defineConfig(({ mode }) => {
         // number"). Only scopes we have deliberately invested in are gated here; raise
         // these as later work lands. Baselines captured from
         // test-metrics/coverage/coverage-summary.json.
+        //
+        // Re-baselined for Vitest 4: @vitest/coverage-v8 v4 replaced v8-to-istanbul
+        // with ast-v8-to-istanbul (AST-aware remapping), so counters now map to the
+        // original source instead of the transpiled output. Denominators shrank
+        // repo-wide (11024 -> 2174 lines) and the floors below were recalibrated to
+        // that basis -- a change of measurement, not a coverage regression; the suite
+        // was green throughout. The remap also exposed real gaps the old mapping hid
+        // (e.g. hooks/resizeObserver.tsx:12, ProductsSelector.tsx:40-45,69); those
+        // floors are deliberately low and should be ratcheted back up as tests land.
         thresholds: {
-          // Pure core — must stay saturated (§4). Aggregate: L/S/F 100, B 95.73
-          // (product.ts drags branches to 87.75 per-file).
+          // Pure core — must stay saturated (§4). Aggregate: L/S/F 100, B 96.05
+          // (product.ts drags branches to 88.88 per-file).
           "src/utilities/**": {
             lines: 99,
             statements: 99,
             functions: 99,
-            branches: 87,
+            branches: 96,
           },
           // Extracted pure-logic modules (also under the Stryker scope). Fully
           // covered today — keep them there.
@@ -142,39 +151,39 @@ export default defineConfig(({ mode }) => {
           "src/components/app/SaveViewModal.tsx": {
             lines: 98,
             statements: 98,
-            functions: 70,
-            branches: 98,
+            functions: 71,
+            branches: 78,
           },
           "src/components/ui/AlertDialogProvider.tsx": {
-            lines: 96,
-            statements: 96,
-            functions: 85,
-            branches: 85,
+            lines: 89,
+            statements: 87,
+            functions: 86,
+            branches: 84,
           },
           "src/components/ui/ProductsSelector.tsx": {
-            lines: 90,
-            statements: 90,
+            lines: 76,
+            statements: 77,
             functions: 80,
-            branches: 92,
+            branches: 72,
           },
           "src/components/ui/ProductSelector.tsx": {
-            lines: 82,
-            statements: 82,
-            functions: 44,
-            branches: 90,
+            lines: 73,
+            statements: 73,
+            functions: 68,
+            branches: 72,
           },
           // Directory ratchets for scopes that are broadly covered.
           "src/components/app/Sidebar/**": {
-            lines: 98,
-            statements: 98,
-            functions: 74,
-            branches: 93,
+            lines: 92,
+            statements: 92,
+            functions: 81,
+            branches: 92,
           },
           "src/hooks/**": {
-            lines: 87,
-            statements: 87,
-            functions: 95,
-            branches: 72,
+            lines: 81,
+            statements: 81,
+            functions: 75,
+            branches: 50,
           },
         },
       },
