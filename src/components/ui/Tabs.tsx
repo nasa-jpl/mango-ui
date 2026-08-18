@@ -24,4 +24,7 @@ export const Trigger = (props: TabsPrimitive.TabsTriggerProps) => (
   />
 );
 
+// Re-exporting a Radix component: the rule cannot statically tell a member
+// expression is a component, so it reads as a non-component export.
+// eslint-disable-next-line react-refresh/only-export-components
 export const Content = TabsPrimitive.Content;
