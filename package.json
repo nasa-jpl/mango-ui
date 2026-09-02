@@ -75,7 +75,7 @@
     "react-grid-layout": "^1.4.4",
     "react-router-dom": "^6.21.0",
     "stats.js": "^0.17.0",
-    "stylelint": "^16.2.1",
+    "stylelint": "^17.14.1",
     "stylelint-config-standard": "^36.0.0",
     "stylelint-order": "^8.1.1",
     "tailwindcss": "^4.3.3",
