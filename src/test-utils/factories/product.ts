@@ -1,4 +1,4 @@
-import { Dataset, Product } from "../../src/types/api";
+import { Dataset, Product } from "../../types/api";
 import { generateUniqueName } from "./generic";
 
 export const generateTestDataset = (): Dataset => {

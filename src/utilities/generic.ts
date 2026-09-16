@@ -149,7 +149,7 @@ export function convertHexToRGBA(hexCode: string, opacity: number = 1) {
     }
 
     return `rgba(${r},${g},${b},${opacity})`;
-  } catch (err) {
+  } catch {
     return "#000000";
   }
 }

@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Development**: `npm run dev` — Start dev server on https://localhost:5173/mango
 - **Build**: `npm run build` — TypeScript check + Vite build (outputs to `build/`)
 - **Unit tests**: `npm run test` (watch mode) or `npm run test:unit` (single run)
+- **Mutation tests**: `npm run test:mutation` (Stryker; scope in `stryker.config.json`)
 - **E2E tests**: `npm run test:e2e` or `npm run test:e2e:ui` (with UI) or `npm run test:e2e:debug` (debug mode)
 - **Lint**: `npm run lint` (JavaScript/TypeScript), `npm run lint:css` (CSS), `npm run lint:css:fix` (auto-fix CSS)
 
@@ -62,6 +63,9 @@ src/
 │   ├── product.ts    # Product data transformations
 │   ├── generic.ts    # General-purpose utilities
 │   ├── dataset.ts    # Dataset-specific helpers
+├── test-utils/
+│   ├── setup.ts      # Global Vitest setup (jest-dom matchers)
+│   └── factories/    # Shared test fixtures (generic, product, view)
 ├── types/            # TypeScript types (api, view, app, data-grid, time, status, page)
 ├── main.tsx          # React Router setup, global providers (TooltipProvider, AlertDialogProvider, Toaster)
 ├── config.ts         # App configuration
@@ -80,8 +84,24 @@ src/
 
 ### Testing
 
-- **Unit tests**: Collocated with source files (`*.test.ts`). Run via Vitest. Output to `unit-test-results/`.
+- **Unit tests**: Collocated with source files (`*.test.ts` / `*.test.tsx`). Run via Vitest. Output to `unit-test-results/`.
 - **E2E tests**: In `playwright.config.ts`. Playwright codegen available: `npm run test:e2e:codegen` (opens recording UI at https://localhost:5173).
+
+**Run `nvm use` first.** `.nvmrc` pins Node 24; on Node 18 `CustomEvent` is not a global, so `fetchWithProgress` tests in `src/utilities/generic.test.ts` fail with a confusing `ReferenceError` surfaced as an assertion mismatch rather than an environment error.
+
+**Always run tests through the npm scripts**, never bare `npx vitest`. `test`, `test:unit`, and `test:mutation` all pin `TZ=UTC`; without it, date-formatting tests fail against the local timezone.
+
+**Vitest does not typecheck.** It transpiles without running `tsc`, so type errors — including argument-count and unknown-property errors in test files — pass a green test run and only surface in `npm run build`. Run `npx tsc --noEmit` before considering a change done.
+
+**Test environment is `node` by default** (see `vite.config.ts`). Component tests opt into jsdom per-file with a `// @vitest-environment jsdom` docblock on line 1. Don't force jsdom globally — pure-logic tests are meant to stay on the fast node environment. If a test needs a DOM or browser global, it needs the opt-in; `src/utilities/generic.dom.test.ts` exists solely to hold the DOM-requiring half of `generic.ts`'s tests.
+
+**Testing components built on Stellar/Radix**: primitives like `Select` need pointer APIs jsdom lacks. Mock the primitive family via `importOriginal` and keep the rest of the design system real, or stub heavy child components outright — see `ProductSelector.test.tsx` and `ProductsSelector.test.tsx`.
+
+**Pure-extraction pattern**: the established way to test logic that lives inside a component is to extract it into a sibling pure module and test that directly, rather than driving it through the DOM. Existing extractions: `chart-data.ts`, `map-utils.ts`, `table-utils.ts`, `data-grid-utils.ts`, `date-range-utils.ts`, `entity-editor-utils.ts`. These, plus all of `src/utilities/`, make up Stryker's mutation scope, and are expected to stay at or near 100% mutation score. Prefer extending an existing module over adding a new one; a new one must be added to `mutate` in `stryker.config.json`.
+
+**Coverage thresholds are ratchets, not targets.** `vite.config.ts` sets per-scope floors slightly below current reality so coverage can only go up. When work raises coverage, raise the floor to match. Do not lower a threshold to make a run pass — if a merge drops coverage, add the missing tests instead.
+
+**Committed metrics**: `test-metrics/` is gitignored except `coverage/coverage-summary.json`, which is kept as a small, diffable baseline trail. Do not commit the Stryker JSON or the HTML/lcov reports — they are bulky and non-diffable, and CI publishes them as build artifacts. Stryker's incremental cache lives in `.stryker-tmp/` and is also ignored.
 
 ### Building & Deployment
 

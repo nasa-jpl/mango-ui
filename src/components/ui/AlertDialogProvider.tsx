@@ -156,8 +156,12 @@ export function AlertDialogProvider({
           return;
         }}
       >
-        <AlertDialogContent asChild>
+        <AlertDialogContent>
+          {/* `display: contents` keeps the dialog's own grid layout applying to
+              the form's children. Stellar 2.1.10's Radix renders a sibling next
+              to its Slottable, so `asChild` here throws React.Children.only. */}
           <form
+            className="contents"
             onSubmit={(event) => {
               event.preventDefault();
               confirm(event.currentTarget.prompt?.value);

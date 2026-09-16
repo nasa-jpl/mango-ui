@@ -4,6 +4,7 @@ import { DataLayer } from "../../../types/view";
 import { formatDateGPS } from "../../../utilities/time";
 import { formatYValue } from "../../../utilities/view";
 import { CustomChartData } from "./Chart";
+import { computeTooltipLeft, computeTooltipTop } from "./chart-data";
 import "./ChartTooltip.css";
 
 export declare type ChartTooltipPoint = TooltipItem<"line"> & {
@@ -82,11 +83,19 @@ export const ChartTooltip = ({
       style={{
         visibility: dimensions.width < 1 ? "hidden" : "visible",
         left:
-          Math.min(
-            window.innerWidth - dimensions.width - 20,
-            left + window.scrollX - dimensions.width / 2 + tooltip.caretX,
+          computeTooltipLeft(
+            left,
+            tooltip.caretX,
+            dimensions.width,
+            window.innerWidth,
+            window.scrollX,
           ) + "px",
-        top: top + window.scrollY - dimensions.height - -tooltip.caretY - 12,
+        top: computeTooltipTop(
+          top,
+          tooltip.caretY,
+          dimensions.height,
+          window.scrollY,
+        ),
       }}
     >
       <div className="chart-tooltip-content bg-foreground">

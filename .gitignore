@@ -35,3 +35,19 @@ e2e-test-results/
 
 # env
 .env
+
+# test coverage & mutation testing
+coverage
+.stryker-tmp
+test-metrics/
+# ...but keep the small, diffable coverage summary committed as an additive baseline
+# trail, so coverage movement is reviewable in a PR diff. Everything bulky or
+# regenerated stays ignored above and is published by CI as a build artifact instead:
+# HTML reports, lcov, and the Stryker JSON (~700KB on a single line, so it neither
+# diffs nor deltas). Note the Stryker incremental cache lives in .stryker-tmp/, not
+# here. Enforcement is the vite.config.ts coverage thresholds and Stryker's `break`.
+!test-metrics/
+!test-metrics/coverage/
+test-metrics/coverage/*
+!test-metrics/coverage/coverage-summary.json
+test-metrics/mutation/

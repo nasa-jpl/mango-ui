@@ -86,10 +86,14 @@ export default defineConfig({
     // },
   ],
 
-  /* Run server before starting the tests */
+  /* Run server before starting the tests.
+   * `preview` serves the production build, so the build must exist first. Build in
+   * the command (idempotent) and give it a generous timeout. Reuse a server that is
+   * already up locally to avoid rebuilding on every run. */
   webServer: {
-    command: "npm run preview",
-    timeout: 10 * 1000,
+    command: "npm run build && npm run preview",
+    timeout: 180 * 1000,
     port: 5174,
+    reuseExistingServer: !process.env.CI,
   },
 });
