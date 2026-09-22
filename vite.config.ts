@@ -107,13 +107,14 @@ export default defineConfig(({ mode }) => {
         // (e.g. hooks/resizeObserver.tsx:12, ProductsSelector.tsx:40-45,69); those
         // floors are deliberately low and should be ratcheted back up as tests land.
         thresholds: {
-          // Pure core — must stay saturated (§4). Aggregate: L/S/F 100, B 96.05
-          // (product.ts drags branches to 88.88 per-file).
+          // Pure core — must stay saturated (§4). Aggregate: L/S/F 100, B 96.63
+          // (product.ts still drags branches, now at 92.94 per-file after the
+          // per-row-unit tests).
           "src/utilities/**": {
             lines: 99,
             statements: 99,
             functions: 99,
-            branches: 96,
+            branches: 96.5,
           },
           // Extracted pure-logic modules (also under the Stryker scope). Fully
           // covered today — keep them there.

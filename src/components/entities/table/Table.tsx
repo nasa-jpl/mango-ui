@@ -28,11 +28,11 @@ import { getData, HttpError } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
   applyFieldThresholds,
+  fieldsWithPerRowUnit,
   fieldUsesPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
-  productHasPerRowUnitField,
   readPerRowUnit,
 } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
@@ -430,25 +430,10 @@ const Table = memo(function Table({
         },
         products,
       );
-      let fieldsToFetch = layer.fields;
-      let fetchingPerRowUnit = false;
-      if (
-        productHasPerRowUnitField(product) &&
-        !fieldsToFetch.includes("unit") &&
-        layer.fields.some((f) =>
-          fieldUsesPerRowUnit(
-            getFieldMetadataForLayer(
-              f,
-              { ...layer, mission: mission ?? layer.mission },
-              products,
-            ),
-            product,
-          ),
-        )
-      ) {
-        fieldsToFetch = [...fieldsToFetch, "unit"];
-        fetchingPerRowUnit = true;
-      }
+      const { fields: fieldsToFetch, fetchesPerRowUnit } = fieldsWithPerRowUnit(
+        layer.fields,
+        product,
+      );
 
       const { json, cancel } = getData(
         mission ?? layer.mission,
@@ -462,7 +447,7 @@ const Table = memo(function Table({
         // The `unit` column is a non-aggregable string. Force
         // downsampling_factor=1 so the server does not auto-pick a factor >1
         // (for wide ranges) and then reject the request.
-        fetchingPerRowUnit ? 1 : undefined,
+        fetchesPerRowUnit ? 1 : undefined,
         layer.filter,
       );
       cancelHandles[layerFullId] = cancel;

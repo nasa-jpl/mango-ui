@@ -71,11 +71,10 @@ import {
   pluralize,
 } from "../../../utilities/generic";
 import {
-  fieldUsesPerRowUnit,
+  fieldsWithPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
-  productHasPerRowUnitField,
   resolveFieldUnit,
 } from "../../../utilities/product";
 import {
@@ -931,23 +930,9 @@ export const Chart = ({
       let fieldsToFetch = layer.fields;
       let forceDownsamplingFactorOne = false;
       if (isChartLayerLine(layer)) {
-        if (
-          productHasPerRowUnitField(product) &&
-          !fieldsToFetch.includes("unit") &&
-          layer.fields.some((f) =>
-            fieldUsesPerRowUnit(
-              getFieldMetadataForLayer(
-                f,
-                { ...layer, mission: mission ?? layer.mission },
-                products
-              ),
-              product
-            )
-          )
-        ) {
-          fieldsToFetch = [...fieldsToFetch, "unit"];
-          forceDownsamplingFactorOne = true;
-        }
+        const perRowUnit = fieldsWithPerRowUnit(layer.fields, product);
+        fieldsToFetch = perRowUnit.fields;
+        forceDownsamplingFactorOne = perRowUnit.fetchesPerRowUnit;
       }
 
       const { json, cancel } = getData(

@@ -105,6 +105,38 @@ export function fieldUsesPerRowUnit(
 }
 
 /**
+ * Decides whether the per-row `unit` column must be fetched alongside a
+ * layer's requested `fields`. For a case-2 product whose requested fields
+ * include a measurement-value field with no static unit, `unit` is appended so
+ * the axis/tooltip/header can resolve the unit from the returned rows.
+ *
+ * Returns the (possibly extended) field list and whether `unit` was added.
+ * When it was added the caller must force downsampling_factor=1: the `unit`
+ * column is a non-aggregable string, and an omitted factor lets the server
+ * auto-pick a factor >1 for wide ranges and reject the request. `unit` is not
+ * appended if it was already requested, so an explicit `unit` field leaves the
+ * factor untouched.
+ */
+export function fieldsWithPerRowUnit(
+  fields: string[],
+  product: Product | undefined | null
+): { fetchesPerRowUnit: boolean; fields: string[] } {
+  if (
+    productHasPerRowUnitField(product) &&
+    !fields.includes(PER_ROW_UNIT_FIELD) &&
+    fields.some((name) =>
+      fieldUsesPerRowUnit(
+        product?.available_fields.find((f) => f.name === name),
+        product
+      )
+    )
+  ) {
+    return { fields: [...fields, PER_ROW_UNIT_FIELD], fetchesPerRowUnit: true };
+  }
+  return { fields, fetchesPerRowUnit: false };
+}
+
+/**
  * Reads the per-row unit value out of fetched data. Because the unit is
  * constant across a query, the first row that carries one wins. Returns "" if
  * no row carries a unit (e.g. empty result, or the column was not fetched).
