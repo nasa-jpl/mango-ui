@@ -46,7 +46,10 @@ export type Section = {
   title: string;
 };
 
-export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y">;
+export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y"> & {
+  /** Set once the user resizes the item's width; disables compact auto-fit. */
+  manualWidth?: boolean;
+};
 
 export type EntityType =
   | "chart"

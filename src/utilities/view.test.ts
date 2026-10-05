@@ -8,9 +8,11 @@ import {
   DataTransform,
   Entity,
   Section,
+  SectionLayout,
   TimeSeriesPoint,
 } from "../types/view";
 import {
+  applyCompactWidths,
   applyLayerTransform,
   applyLayerTransforms,
   createDataLayer,
@@ -30,6 +32,7 @@ import {
   isTableEntity,
   isTextEntity,
   isTimelineRowEntity,
+  mergeLayoutChange,
   removeEntityFromSection,
   replaceEntityInSection,
 } from "./view";
@@ -746,4 +749,52 @@ test("duplicateSection deep-clones with fresh ids and remaps layout entries", ()
   expect(section.id).toBe("section-1");
   expect(section.entities[0].id).toBe(entityA.id);
   expect(section.layout[0].i).toBe(entityA.id);
+});
+
+test("applyCompactWidths overrides widths only for auto-fit items", () => {
+  const layout: SectionLayout[] = [
+    { i: "a", x: 0, y: 0, w: 8, h: 4 },
+    { i: "b", x: 8, y: 0, w: 8, h: 4, manualWidth: true },
+    { i: "c", x: 0, y: 4, w: 6, h: 4 },
+  ];
+  const result = applyCompactWidths(layout, { a: 3, b: 3 });
+  expect(result).toEqual([
+    { i: "a", x: 0, y: 0, w: 3, h: 4 },
+    { i: "b", x: 8, y: 0, w: 8, h: 4, manualWidth: true },
+    { i: "c", x: 0, y: 4, w: 6, h: 4 },
+  ]);
+  // Untouched items keep identity; source layout is not mutated.
+  expect(result[1]).toBe(layout[1]);
+  expect(result[2]).toBe(layout[2]);
+  expect(layout[0].w).toBe(8);
+});
+
+test("mergeLayoutChange marks resized items and preserves existing flags", () => {
+  const previous: SectionLayout[] = [
+    { i: "a", x: 0, y: 0, w: 3, h: 4 },
+    { i: "b", x: 3, y: 0, w: 5, h: 4, manualWidth: true },
+    { i: "c", x: 8, y: 0, w: 4, h: 4 },
+  ];
+  // react-grid-layout output carries extra keys and drops custom ones.
+  const layouts = [
+    { i: "a", x: 0, y: 0, w: 6, h: 4, moved: false, static: false },
+    { i: "b", x: 6, y: 0, w: 5, h: 4, moved: false, static: false },
+    { i: "c", x: 11, y: 0, w: 4, h: 4, moved: false, static: false },
+    { i: "d", x: 0, y: 4, w: 2, h: 2, moved: false, static: false },
+  ];
+  expect(mergeLayoutChange(previous, layouts, new Set(["a"]))).toEqual([
+    { i: "a", x: 0, y: 0, w: 6, h: 4, manualWidth: true },
+    { i: "b", x: 6, y: 0, w: 5, h: 4, manualWidth: true },
+    { i: "c", x: 11, y: 0, w: 4, h: 4 },
+    { i: "d", x: 0, y: 4, w: 2, h: 2 },
+  ]);
+});
+
+test("mergeLayoutChange omits manualWidth when nothing was resized", () => {
+  const result = mergeLayoutChange(
+    [],
+    [{ i: "a", x: 0, y: 0, w: 3, h: 4 }],
+    new Set(),
+  );
+  expect(result[0]).not.toHaveProperty("manualWidth");
 });

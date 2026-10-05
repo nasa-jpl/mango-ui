@@ -15,13 +15,14 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, Section as SectionType } from "../../types/view";
+import { applyCompactWidths, mergeLayoutChange } from "../../utilities/view";
 import { usePrompt } from "../ui/AlertDialogProvider";
 import { Tooltip } from "../ui/Tooltip";
 import CustomGridItemComponent from "./CustomGridItem";
@@ -79,9 +80,12 @@ export const Section = ({
   const [open, setOpen] = useState(defaultOpen || !enableHeader);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
-  const [compactSizes, setCompactSizes] = useState<
-    Record<string, { w: number }>
-  >({});
+  const [compactWidths, setCompactWidths] = useState<Record<string, number>>(
+    {},
+  );
+  // IDs whose width the user changed in the current resize gesture. react-grid-layout
+  // fires onResizeStop synchronously before onLayoutChange, so a ref bridges the two.
+  const resizedIdsRef = useRef(new Set<string>());
   const MemoizedReactGridLayout = useMemo(
     () => WidthProvider(ReactGridLayout),
     [],
@@ -89,24 +93,23 @@ export const Section = ({
   const resizable =
     typeof section.resizable === "boolean" ? section.resizable : true;
   const adjustedLayout = useMemo(
-    () =>
-      layout.map((item) =>
-        item.i in compactSizes ? { ...item, w: compactSizes[item.i].w } : item,
-      ),
-    [layout, compactSizes],
+    () => applyCompactWidths(layout, compactWidths),
+    [layout, compactWidths],
   );
   const onLayoutChange = (layouts: Layout[]) => {
-    const newSection = { ...section };
-    newSection.layout = layouts.map((layout) => {
-      const { i, x, y, w, h } = layout;
-      return { i, x, y, w, h };
-    });
-    onSectionChange(newSection);
+    const newLayout = mergeLayoutChange(layout, layouts, resizedIdsRef.current);
+    resizedIdsRef.current.clear();
+    onSectionChange({ ...section, layout: newLayout });
   };
   const onDragStart = () => setDragging(true);
   const onDragStop = () => setDragging(false);
   const onResizeStart = () => setResizing(true);
-  const onResizeStop = () => setResizing(false);
+  const onResizeStop = (_: Layout[], oldItem: Layout, newItem: Layout) => {
+    setResizing(false);
+    if (oldItem.w !== newItem.w) {
+      resizedIdsRef.current.add(newItem.i);
+    }
+  };
   const entityClass = classNames({
     "select-none": dragging || resizing,
   });
@@ -166,7 +169,7 @@ export const Section = ({
     );
     // Pad by one grid column so the rightmost data column isn't clipped by borders/scrollbar.
     const w = Math.min(fitted + 1, cols);
-    setCompactSizes((prev) => ({ ...prev, [entityId]: { w } }));
+    setCompactWidths((prev) => ({ ...prev, [entityId]: w }));
   };
 
   const renderEntity = (e: EntityType) => (
