@@ -1,16 +1,57 @@
-import { expect, test } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import {
   generateTestDataset,
   generateTestProduct,
 } from "../test-utils/factories/product";
 import { generateTestChartLayer } from "../test-utils/factories/view";
-import { DataResponseDataEntry, ProductField } from "../types/api";
+import { DataResponseDataEntry, Product, ProductField } from "../types/api";
 import {
   applyFieldThresholds,
+  fieldsWithPerRowUnit,
+  fieldUsesPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
+  productHasPerRowUnitField,
+  readPerRowUnit,
+  resolveFieldUnit,
 } from "./product";
+
+function makeField(overrides: Partial<ProductField> = {}): ProductField {
+  return {
+    is_channel_id: false,
+    name: "sensorvalue",
+    supported_aggregations: [],
+    type: "float",
+    unit: null,
+    ...overrides,
+  };
+}
+
+function makeProduct(fields: ProductField[]): Product {
+  return {
+    available_fields: fields,
+    available_resolutions: [],
+    available_versions: [],
+    datasets: [],
+    description: "",
+    full_id: "GRACEFO_IHK1A",
+    id: "IHK1A",
+    instruments: [],
+    mission: { id: "GRACEFO", label: "GRACE-FO" },
+    processing_level: "1A",
+    query_result_limit: 100000,
+    timestamp_field: "timestamp",
+  };
+}
+
+function row(fields: Record<string, string | number>): DataResponseDataEntry {
+  const entry: Record<string, unknown> = { timestamp: "2026-01-01T00:00:00Z" };
+  for (const [key, value] of Object.entries(fields)) {
+    entry[key] = { value };
+  }
+  return entry as DataResponseDataEntry;
+}
 
 test("getProductForLayer matches on BOTH mission and dataset", () => {
   const layer = generateTestChartLayer();
@@ -114,16 +155,273 @@ test("getDatasetForLayer matches on version and instrument", () => {
   expect(getDatasetForLayer(noProductLayer, [product])).toBeUndefined();
 });
 
-const makeField = (
-  qc_thresholds?: ProductField["qc_thresholds"],
-): ProductField => ({
-  name: "temp",
-  supported_aggregations: [],
-  type: "float",
-  unit: null,
-  is_channel_id: false,
-  qc_thresholds,
+// A case-2 product (IHK-like): unit lives in a per-row `unit` column.
+const perRowUnitProduct = makeProduct([
+  makeField({ name: "sensorname", is_channel_id: true, type: "str" }),
+  makeField({ name: "sensorvalue", unit: null }),
+  makeField({ name: "unit", type: "str", unit: null }),
+]);
+
+// A case-1 product: unit is static on the field.
+const staticUnitProduct = makeProduct([
+  makeField({ name: "sensor1value", unit: "V" }),
+  makeField({ name: "sensor2value", unit: "degK" }),
+]);
+
+describe("productHasPerRowUnitField", () => {
+  it("is true when a `unit` field exists", () => {
+    expect(productHasPerRowUnitField(perRowUnitProduct)).toBe(true);
+  });
+
+  it("is false for a product without a `unit` field", () => {
+    expect(productHasPerRowUnitField(staticUnitProduct)).toBe(false);
+  });
+
+  it("is false for null/undefined", () => {
+    expect(productHasPerRowUnitField(null)).toBe(false);
+    expect(productHasPerRowUnitField(undefined)).toBe(false);
+  });
 });
+
+describe("fieldUsesPerRowUnit", () => {
+  const sensorvalue = perRowUnitProduct.available_fields.find(
+    (f) => f.name === "sensorvalue",
+  );
+  const sensorname = perRowUnitProduct.available_fields.find(
+    (f) => f.name === "sensorname",
+  );
+  const unitField = perRowUnitProduct.available_fields.find(
+    (f) => f.name === "unit",
+  );
+
+  it("is true for the measurement field with a null static unit", () => {
+    expect(fieldUsesPerRowUnit(sensorvalue, perRowUnitProduct)).toBe(true);
+  });
+
+  it("is false for the channel_id field", () => {
+    expect(fieldUsesPerRowUnit(sensorname, perRowUnitProduct)).toBe(false);
+  });
+
+  it("is false for the `unit` column itself", () => {
+    expect(fieldUsesPerRowUnit(unitField, perRowUnitProduct)).toBe(false);
+  });
+
+  it("is false when the field has a static unit", () => {
+    const withUnit = makeField({ name: "sensorvalue", unit: "V" });
+    expect(fieldUsesPerRowUnit(withUnit, perRowUnitProduct)).toBe(false);
+  });
+
+  it("is false for null-unit sibling fields that are not the measurement", () => {
+    // These are null-unit and non-channel, but must NOT resolve a per-row unit.
+    for (const name of ["sensortype", "qualflg", "gracefo_id", "time_ref"]) {
+      const f = makeField({ name, unit: null, type: "str" });
+      expect(fieldUsesPerRowUnit(f, perRowUnitProduct)).toBe(false);
+    }
+  });
+
+  it("is true for OFFRED-style value_* measurement fields", () => {
+    const offred = makeProduct([
+      makeField({ name: "pcf_name", is_channel_id: true, type: "str" }),
+      makeField({ name: "value_float", unit: null, type: "float" }),
+      makeField({ name: "value_int", unit: null, type: "int" }),
+      makeField({ name: "value_str", unit: null, type: "str" }),
+      makeField({ name: "obt_type", unit: null, type: "str" }),
+      makeField({ name: "unit", unit: null, type: "str" }),
+    ]);
+    const byName = (n: string) =>
+      offred.available_fields.find((f) => f.name === n);
+    expect(fieldUsesPerRowUnit(byName("value_float"), offred)).toBe(true);
+    expect(fieldUsesPerRowUnit(byName("value_int"), offred)).toBe(true);
+    expect(fieldUsesPerRowUnit(byName("value_str"), offred)).toBe(true);
+    // Non-measurement null-unit sibling stays excluded.
+    expect(fieldUsesPerRowUnit(byName("obt_type"), offred)).toBe(false);
+  });
+
+  it("is false when the product has no `unit` column", () => {
+    const field = staticUnitProduct.available_fields[0];
+    expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
+  });
+
+  it("is false for null field/product", () => {
+    expect(fieldUsesPerRowUnit(null, perRowUnitProduct)).toBe(false);
+    expect(fieldUsesPerRowUnit(sensorvalue, null)).toBe(false);
+  });
+
+  it("is false for a measurement-named field when the product has no `unit` column", () => {
+    // A null-unit `sensorvalue` in a product without a `unit` column must not
+    // resolve a per-row unit — the product-level guard, not just the field.
+    const field = makeField({ name: "sensorvalue", unit: null });
+    expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
+  });
+
+  it("is false for a channel_id field even when named like a measurement", () => {
+    const field = makeField({
+      name: "sensorvalue",
+      is_channel_id: true,
+      unit: null,
+    });
+    expect(fieldUsesPerRowUnit(field, perRowUnitProduct)).toBe(false);
+  });
+
+  it("matches only exact measurement-value field names", () => {
+    const check = (name: string) =>
+      fieldUsesPerRowUnit(makeField({ name, unit: null }), perRowUnitProduct);
+    // Matches: sensorvalue, value, value_<suffix>
+    expect(check("sensorvalue")).toBe(true);
+    expect(check("value")).toBe(true);
+    expect(check("value_float")).toBe(true);
+    // Non-matches exercise the ^…$ anchors and the `_[a-z0-9]+` quantifier.
+    expect(check("value_")).toBe(false); // trailing underscore, no chars
+    expect(check("valuex")).toBe(false); // suffix without underscore
+    expect(check("sensorvalue1")).toBe(false); // trailing char ($ anchor)
+    expect(check("xsensorvalue")).toBe(false); // leading char (^ anchor)
+  });
+});
+
+describe("readPerRowUnit", () => {
+  it("returns the unit from the first row that carries one", () => {
+    const data = [
+      row({ sensorvalue: 12.5, unit: "V" }),
+      row({ sensorvalue: 13.0, unit: "V" }),
+    ];
+    expect(readPerRowUnit(data)).toBe("V");
+  });
+
+  it("skips leading rows with no unit", () => {
+    const data = [
+      row({ sensorvalue: 12.5 }),
+      row({ sensorvalue: 13, unit: "degK" }),
+    ];
+    expect(readPerRowUnit(data)).toBe("degK");
+  });
+
+  it("coerces numeric unit values to string", () => {
+    expect(readPerRowUnit([row({ unit: 5 })])).toBe("5");
+  });
+
+  it("returns empty string for empty/nullish data", () => {
+    expect(readPerRowUnit([])).toBe("");
+    expect(readPerRowUnit(null)).toBe("");
+    expect(readPerRowUnit(undefined)).toBe("");
+  });
+
+  it("returns empty string when no row carries a unit", () => {
+    expect(readPerRowUnit([row({ sensorvalue: 1 })])).toBe("");
+  });
+
+  it("skips rows whose unit is an empty string", () => {
+    const data = [row({ unit: "" }), row({ unit: "V" })];
+    expect(readPerRowUnit(data)).toBe("V");
+  });
+});
+
+describe("resolveFieldUnit", () => {
+  const sensorvalue = perRowUnitProduct.available_fields.find(
+    (f) => f.name === "sensorvalue",
+  );
+
+  it("passes a static unit through unchanged (ignores row data)", () => {
+    const field = makeField({ name: "sensor1value", unit: "V" });
+    expect(
+      resolveFieldUnit(field, staticUnitProduct, [row({ unit: "A" })]),
+    ).toBe("V");
+  });
+
+  it("resolves the per-row unit for a case-2 measurement field", () => {
+    const data = [row({ sensorvalue: 12.5, unit: "degK" })];
+    expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, data)).toBe("degK");
+  });
+
+  it("returns empty string when a per-row unit is not present in the data", () => {
+    expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, [])).toBe("");
+  });
+
+  it("returns empty string for a unitless field", () => {
+    const field = makeField({ name: "flag", unit: null, type: "int" });
+    expect(resolveFieldUnit(field, staticUnitProduct, [])).toBe("");
+  });
+
+  it("returns empty string for a null field (does not read `.unit`)", () => {
+    expect(
+      resolveFieldUnit(null, perRowUnitProduct, [row({ unit: "V" })]),
+    ).toBe("");
+  });
+
+  it("does not read a per-row unit for a non-measurement field even when the data carries one", () => {
+    const flag = makeField({ name: "flag", unit: null, type: "int" });
+    expect(resolveFieldUnit(flag, staticUnitProduct, [row({ unit: "Z" })])).toBe(
+      "",
+    );
+  });
+});
+
+describe("fieldsWithPerRowUnit", () => {
+  const offred = makeProduct([
+    makeField({ name: "pcf_name", is_channel_id: true, type: "str" }),
+    makeField({ name: "value_float", unit: null, type: "float" }),
+    makeField({ name: "obt_type", unit: null, type: "str" }),
+    makeField({ name: "unit", unit: null, type: "str" }),
+  ]);
+
+  it("appends `unit` and flags the fetch for a case-2 measurement field", () => {
+    const result = fieldsWithPerRowUnit(
+      ["timestamp", "sensorvalue"],
+      perRowUnitProduct,
+    );
+    expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
+    expect(result.fetchesPerRowUnit).toBe(true);
+  });
+
+  it("appends `unit` for OFFRED-style value_* fields", () => {
+    const result = fieldsWithPerRowUnit(
+      ["timestamp", "value_float"],
+      offred,
+    );
+    expect(result.fields).toEqual(["timestamp", "value_float", "unit"]);
+    expect(result.fetchesPerRowUnit).toBe(true);
+  });
+
+  it("does not touch fields when no requested field uses a per-row unit", () => {
+    // `sensortype` is null-unit but not a measurement field, so no `unit`.
+    const fields = ["timestamp", "sensortype"];
+    const result = fieldsWithPerRowUnit(fields, perRowUnitProduct);
+    expect(result.fields).toBe(fields);
+    expect(result.fetchesPerRowUnit).toBe(false);
+  });
+
+  it("does not append when the product has no `unit` column", () => {
+    const result = fieldsWithPerRowUnit(
+      ["timestamp", "sensor1value"],
+      staticUnitProduct,
+    );
+    expect(result.fields).toEqual(["timestamp", "sensor1value"]);
+    expect(result.fetchesPerRowUnit).toBe(false);
+  });
+
+  it("does not double-add `unit` (and leaves the factor untouched) when already requested", () => {
+    const result = fieldsWithPerRowUnit(
+      ["timestamp", "sensorvalue", "unit"],
+      perRowUnitProduct,
+    );
+    expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
+    expect(result.fetchesPerRowUnit).toBe(false);
+  });
+
+  it("returns false for an undefined product", () => {
+    const result = fieldsWithPerRowUnit(["sensorvalue"], undefined);
+    expect(result.fetchesPerRowUnit).toBe(false);
+  });
+
+  it("does not mutate the input array", () => {
+    const fields = ["timestamp", "sensorvalue"];
+    fieldsWithPerRowUnit(fields, perRowUnitProduct);
+    expect(fields).toEqual(["timestamp", "sensorvalue"]);
+  });
+});
+
+const makeThresholdField = (
+  qc_thresholds?: ProductField["qc_thresholds"],
+): ProductField => makeField({ name: "temp", qc_thresholds });
 
 // The DataResponseDataEntry index signature and its `timestamp: string` member are a
 // declared intersection that object literals can't satisfy directly, so cast through unknown.
@@ -144,15 +442,15 @@ const NO_VIOLATIONS = {
 };
 
 test("applyFieldThresholds returns an all-clear result when the field has no thresholds", () => {
-  expect(applyFieldThresholds(makeField(undefined), makeEntry(5))).toEqual(
-    NO_VIOLATIONS,
-  );
+  expect(
+    applyFieldThresholds(makeThresholdField(undefined), makeEntry(5)),
+  ).toEqual(NO_VIOLATIONS);
 });
 
 // Non-zero bounds are important: they distinguish `x ?? y` from `x && y` (a zero
 // lower bound would collapse both) and let exact-boundary values probe `<` vs `<=`.
 const boundedField = () =>
-  makeField([
+  makeThresholdField([
     { limits: { lower: 10, upper: 100 }, warnings: { lower: 20, upper: 90 } },
   ]);
 
@@ -189,7 +487,7 @@ test("applyFieldThresholds boundary values are inclusive-safe (violation is stri
 
 test("applyFieldThresholds treats a missing warnings block as no-op", () => {
   // limits present, warnings absent → warnings default to false/null.
-  const field = makeField([{ limits: { lower: 10, upper: 100 } }]);
+  const field = makeThresholdField([{ limits: { lower: 10, upper: 100 } }]);
   expect(applyFieldThresholds(field, makeEntry(5))).toEqual({
     limits: { lower: true, lower_value: 10, upper: false, upper_value: 100 },
     warnings: {
@@ -203,7 +501,7 @@ test("applyFieldThresholds treats a missing warnings block as no-op", () => {
 
 test("applyFieldThresholds treats a missing limits block as no-op", () => {
   // warnings present, limits absent → limits default to false/null.
-  const field = makeField([{ warnings: { lower: 20, upper: 90 } }]);
+  const field = makeThresholdField([{ warnings: { lower: 20, upper: 90 } }]);
   expect(applyFieldThresholds(field, makeEntry(5))).toEqual({
     limits: {
       lower: false,
@@ -217,7 +515,7 @@ test("applyFieldThresholds treats a missing limits block as no-op", () => {
 
 test("applyFieldThresholds honors effective_since / effective_until windows", () => {
   // entry timestamp is 2021-06-01.
-  const sinceMatch = makeField([
+  const sinceMatch = makeThresholdField([
     {
       effective_since: "2020-01-01",
       limits: { lower: 100 },
@@ -228,7 +526,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
     true,
   );
 
-  const sinceMiss = makeField([
+  const sinceMiss = makeThresholdField([
     {
       effective_since: "2099-01-01",
       limits: { lower: 100 },
@@ -237,7 +535,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
   // since > timestamp → out of range → no matching config → all-clear.
   expect(applyFieldThresholds(sinceMiss, makeEntry(0))).toEqual(NO_VIOLATIONS);
 
-  const untilMatch = makeField([
+  const untilMatch = makeThresholdField([
     {
       effective_until: "2099-01-01",
       limits: { lower: 100 },
@@ -250,7 +548,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
 
   // Exact-boundary dates: since === timestamp and until === timestamp must both
   // still match (inclusive), distinguishing `<=`/`>=` from strict `<`/`>`.
-  const sinceEqual = makeField([
+  const sinceEqual = makeThresholdField([
     {
       effective_since: "2021-06-01T00:00:00Z",
       limits: { lower: 100 },
@@ -260,7 +558,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
     true,
   );
 
-  const untilEqual = makeField([
+  const untilEqual = makeThresholdField([
     {
       effective_until: "2021-06-01T00:00:00Z",
       limits: { lower: 100 },
@@ -271,7 +569,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
   );
 
   // until < timestamp → out of range → all-clear.
-  const untilMiss = makeField([
+  const untilMiss = makeThresholdField([
     {
       effective_until: "2000-01-01",
       limits: { lower: 100 },
@@ -285,7 +583,7 @@ test("applyFieldThresholds honors effective_since / effective_until windows", ()
 // `effective_since` result, so `effective_since` is effectively ignored. This test pins
 // that current (suspect) behavior; it is NOT an endorsement.
 test("applyFieldThresholds: with both dates set, effective_until alone decides the match (current behavior)", () => {
-  const field = makeField([
+  const field = makeThresholdField([
     {
       effective_since: "2099-01-01", // would exclude 2021-06-01 if it were honored
       effective_until: "2099-12-31", // >= timestamp → true, overwrites the since result
