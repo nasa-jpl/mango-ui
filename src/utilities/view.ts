@@ -331,6 +331,38 @@ export function replaceEntityInSection(
   };
 }
 
+/**
+ * Overrides layout widths with auto-fit widths for compact entities, unless the
+ * user has manually resized that item.
+ */
+export function applyCompactWidths(
+  layout: SectionLayout[],
+  compactWidths: Record<string, number>,
+): SectionLayout[] {
+  return layout.map((item) =>
+    item.i in compactWidths && !item.manualWidth
+      ? { ...item, w: compactWidths[item.i] }
+      : item,
+  );
+}
+
+/**
+ * Builds the persisted layout from react-grid-layout's output, which drops
+ * custom keys. Carries `manualWidth` over from the previous layout and sets it
+ * for items the user just resized.
+ */
+export function mergeLayoutChange(
+  previous: SectionLayout[],
+  layouts: SectionLayout[],
+  resizedIds: ReadonlySet<string>,
+): SectionLayout[] {
+  return layouts.map(({ i, x, y, w, h }) => {
+    const manualWidth =
+      resizedIds.has(i) || !!previous.find((l) => l.i === i)?.manualWidth;
+    return manualWidth ? { i, x, y, w, h, manualWidth } : { i, x, y, w, h };
+  });
+}
+
 export function duplicateSection(section: Section): Section {
   const newSection = structuredClone(section);
   newSection.id = generateUUID();

@@ -19,6 +19,11 @@ type ReleaseHighlight = {
 
 const recentHighlights: ReleaseHighlight[] = [
   {
+    title: "Compact table widths stick",
+    description:
+      "Manually resizing a compact table now persists instead of snapping back to the auto-fit width.",
+  },
+  {
     title: "Spacecraft Events & Problem Files tables",
     pr: "182",
     description:
@@ -35,11 +40,6 @@ const recentHighlights: ReleaseHighlight[] = [
     pr: "188",
     description:
       "Added 3-day, 7-day, and latest-24hr presets for the time range selector.",
-  },
-  {
-    title: '"No data ingested" handling on plots and tables',
-    description:
-      "4xx API responses are now surfaced as a distinct no-data state in charts and tables.",
   },
 ];
 
