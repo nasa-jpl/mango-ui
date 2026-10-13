@@ -38,7 +38,7 @@
     "@radix-ui/react-tabs": "^1.1.22",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-table": "^9.2.8",
     "@tanstack/react-virtual": "^3.14.14",
     "@testing-library/jest-dom": "^7.0.1",
