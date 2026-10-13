@@ -49,6 +49,19 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+
+  /*
+    Tailwind v4's preflight resets `border: 0 solid`, which defaults border-color to
+    currentColor and overrides Stellar's `* { @apply border-border }` (imported earlier
+    in the same layer). Restore the themed default border color.
+  */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
 }
 
 html,
