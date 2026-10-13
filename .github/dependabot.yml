@@ -17,3 +17,16 @@ updates:
         update-types:
           - "patch"
           - "minor"
+
+    # @nasa-jpl/stellar-react (latest 2.1.10) reads React 18 internals and
+    # crashes on import under React 19. Hold the React family on 18 until
+    # Stellar publishes React 19 support.
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
