@@ -78,6 +78,48 @@ div[data-radix-popper-content-wrapper] {
   z-index: 99999 !important;
 }
 
+/*
+  Stellar's components use Tailwind v3 arbitrary-value shorthand for CSS variables
+  (e.g. `max-h-[--var]`). Tailwind v4 no longer wraps these in `var()`, so they compile
+  to invalid declarations — which left long Select/ContextMenu lists with no max-height
+  and therefore unscrollable. Redefine them until Stellar ships v4 syntax.
+*/
+.max-h-\[--radix-select-content-available-height\] {
+  max-height: var(--radix-select-content-available-height);
+}
+
+.max-h-\[--radix-context-menu-content-available-height\] {
+  max-height: var(--radix-context-menu-content-available-height);
+}
+
+.origin-\[--radix-context-menu-content-transform-origin\] {
+  transform-origin: var(--radix-context-menu-content-transform-origin);
+}
+
+.origin-\[--radix-dropdown-menu-content-transform-origin\] {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+.origin-\[--radix-hover-card-content-transform-origin\] {
+  transform-origin: var(--radix-hover-card-content-transform-origin);
+}
+
+.origin-\[--radix-menubar-content-transform-origin\] {
+  transform-origin: var(--radix-menubar-content-transform-origin);
+}
+
+.origin-\[--radix-popover-content-transform-origin\] {
+  transform-origin: var(--radix-popover-content-transform-origin);
+}
+
+.origin-\[--radix-select-content-transform-origin\] {
+  transform-origin: var(--radix-select-content-transform-origin);
+}
+
+.origin-\[--radix-tooltip-content-transform-origin\] {
+  transform-origin: var(--radix-tooltip-content-transform-origin);
+}
+
 /* TODO move to stellar styles? */
 
 /* Fixes transform issue causing blurriness with dropdowns */
