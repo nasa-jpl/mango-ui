@@ -16,7 +16,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
+import ReactGridLayout, {
+  type Layout,
+  WidthProvider,
+} from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
@@ -95,7 +98,7 @@ export const Section = ({
       ),
     [layout, compactSizes],
   );
-  const onLayoutChange = (layouts: Layout[]) => {
+  const onLayoutChange = (layouts: Layout) => {
     const newSection = { ...section };
     newSection.layout = layouts.map((layout) => {
       const { i, x, y, w, h } = layout;
