@@ -353,7 +353,7 @@ export function applyCompactWidths(
  */
 export function mergeLayoutChange(
   previous: SectionLayout[],
-  layouts: SectionLayout[],
+  layouts: readonly SectionLayout[],
   resizedIds: ReadonlySet<string>,
 ): SectionLayout[] {
   return layouts.map(({ i, x, y, w, h }) => {

@@ -3,7 +3,7 @@ import {
   ChartTypeRegistry,
   TooltipOptions,
 } from "chart.js";
-import { Layout } from "react-grid-layout";
+import { LayoutItem } from "react-grid-layout";
 import { DataResponse, DataResponseDataEntry } from "./api";
 import { DateRange } from "./time";
 
@@ -46,7 +46,7 @@ export type Section = {
   title: string;
 };
 
-export type SectionLayout = Pick<Layout, "i" | "w" | "h" | "x" | "y"> & {
+export type SectionLayout = Pick<LayoutItem, "i" | "w" | "h" | "x" | "y"> & {
   /** Set once the user resizes the item's width; disables compact auto-fit. */
   manualWidth?: boolean;
 };

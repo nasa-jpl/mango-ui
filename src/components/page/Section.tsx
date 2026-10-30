@@ -16,7 +16,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import ReactGridLayout, { Layout, WidthProvider } from "react-grid-layout";
+import ReactGridLayout, {
+  type Layout,
+  type LayoutItem,
+  WidthProvider,
+} from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
@@ -96,7 +100,7 @@ export const Section = ({
     () => applyCompactWidths(layout, compactWidths),
     [layout, compactWidths],
   );
-  const onLayoutChange = (layouts: Layout[]) => {
+  const onLayoutChange = (layouts: Layout) => {
     const newLayout = mergeLayoutChange(layout, layouts, resizedIdsRef.current);
     resizedIdsRef.current.clear();
     onSectionChange({ ...section, layout: newLayout });
@@ -104,9 +108,13 @@ export const Section = ({
   const onDragStart = () => setDragging(true);
   const onDragStop = () => setDragging(false);
   const onResizeStart = () => setResizing(true);
-  const onResizeStop = (_: Layout[], oldItem: Layout, newItem: Layout) => {
+  const onResizeStop = (
+    _: Layout,
+    oldItem: LayoutItem | null,
+    newItem: LayoutItem | null,
+  ) => {
     setResizing(false);
-    if (oldItem.w !== newItem.w) {
+    if (oldItem && newItem && oldItem.w !== newItem.w) {
       resizedIdsRef.current.add(newItem.i);
     }
   };
