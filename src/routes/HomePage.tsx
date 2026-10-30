@@ -19,27 +19,26 @@ type ReleaseHighlight = {
 
 const recentHighlights: ReleaseHighlight[] = [
   {
-    title: "Compact table widths stick",
-    description:
-      "Manually resizing a compact table now persists instead of snapping back to the auto-fit width.",
-  },
-  {
-    title: "Spacecraft Events & Problem Files tables",
-    pr: "182",
-    description:
-      "Browse mission-level events and problem files in dedicated tables.",
-  },
-  {
-    title: "Union filters on data layers",
-    pr: "186",
-    description:
-      "DataLayer filter fields now support a union of filters for more flexible queries.",
-  },
-  {
     title: "More quick time-range presets",
     pr: "188",
     description:
       "Added 3-day, 7-day, and latest-24hr presets for the time range selector.",
+  },
+  {
+    title: '"No data ingested" handling on plots and tables',
+    description:
+      "4xx API responses are now surfaced as a distinct no-data state in charts and tables.",
+  },
+  {
+    title: "Consistent product ordering",
+    description:
+      "The Products table now orders rows by name, mission, spacecraft, then version.",
+  },
+  {
+    title: "Compact table widths stick",
+    pr: "234",
+    description:
+      "Manually resizing a compact table now persists instead of snapping back to the auto-fit width.",
   },
 ];
 
