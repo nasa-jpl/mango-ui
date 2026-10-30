@@ -20,7 +20,7 @@ type ReleaseHighlight = {
 const recentHighlights: ReleaseHighlight[] = [
   {
     title: "Toggle time sync per entity",
-    pr: "88",
+    pr: "242",
     description:
       "Charts and tables can be synced or unsynced from the page time range via the entity's ⋮ menu or the entity editor.",
   },
