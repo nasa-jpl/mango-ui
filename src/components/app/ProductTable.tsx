@@ -3,6 +3,7 @@ import { ChartLine } from "lucide-react";
 import { Product, ProductField, ProductResolution } from "../../types/api";
 import { DataGridColumnDef } from "../../types/data-grid";
 import { ProductPreview } from "../../types/page";
+import { getProductDatasetRows } from "../../utilities/product";
 import { formatDateGPS } from "../../utilities/time";
 import DataGrid from "../ui/DataGrid/DataGrid";
 import { Tooltip } from "../ui/Tooltip";
@@ -18,22 +19,9 @@ export const ProductTable = ({
   loading,
   onSetProductPreview,
 }: ProductTableProps) => {
-  console.log("products :>> ", products);
+  // One row per product dataset, ordered by name, mission, spacecraft, version
+  const productEntries = getProductDatasetRows(products);
 
-  // Create a row per product dataset
-  const productEntries: Product[] = products
-    .map((product) => {
-      return product.datasets
-        .map((dataset) => {
-          return {
-            ...product,
-            datasets: [dataset],
-            instruments: [dataset.instrument_id],
-          };
-        })
-        .flat();
-    })
-    .flat();
   const columnDefs: DataGridColumnDef<Product>[] = [
     {
       field: "id",
