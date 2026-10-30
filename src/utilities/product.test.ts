@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from "vitest";
+import { expect, test } from "vitest";
 import {
   generateTestDataset,
   generateTestProduct,
@@ -168,255 +168,241 @@ const staticUnitProduct = makeProduct([
   makeField({ name: "sensor2value", unit: "degK" }),
 ]);
 
-describe("productHasPerRowUnitField", () => {
-  it("is true when a `unit` field exists", () => {
-    expect(productHasPerRowUnitField(perRowUnitProduct)).toBe(true);
-  });
-
-  it("is false for a product without a `unit` field", () => {
-    expect(productHasPerRowUnitField(staticUnitProduct)).toBe(false);
-  });
-
-  it("is false for null/undefined", () => {
-    expect(productHasPerRowUnitField(null)).toBe(false);
-    expect(productHasPerRowUnitField(undefined)).toBe(false);
-  });
+test("productHasPerRowUnitField is true when a `unit` field exists", () => {
+  expect(productHasPerRowUnitField(perRowUnitProduct)).toBe(true);
 });
 
-describe("fieldUsesPerRowUnit", () => {
-  const sensorvalue = perRowUnitProduct.available_fields.find(
-    (f) => f.name === "sensorvalue",
-  );
-  const sensorname = perRowUnitProduct.available_fields.find(
-    (f) => f.name === "sensorname",
-  );
-  const unitField = perRowUnitProduct.available_fields.find(
-    (f) => f.name === "unit",
-  );
-
-  it("is true for the measurement field with a null static unit", () => {
-    expect(fieldUsesPerRowUnit(sensorvalue, perRowUnitProduct)).toBe(true);
-  });
-
-  it("is false for the channel_id field", () => {
-    expect(fieldUsesPerRowUnit(sensorname, perRowUnitProduct)).toBe(false);
-  });
-
-  it("is false for the `unit` column itself", () => {
-    expect(fieldUsesPerRowUnit(unitField, perRowUnitProduct)).toBe(false);
-  });
-
-  it("is false when the field has a static unit", () => {
-    const withUnit = makeField({ name: "sensorvalue", unit: "V" });
-    expect(fieldUsesPerRowUnit(withUnit, perRowUnitProduct)).toBe(false);
-  });
-
-  it("is false for null-unit sibling fields that are not the measurement", () => {
-    // These are null-unit and non-channel, but must NOT resolve a per-row unit.
-    for (const name of ["sensortype", "qualflg", "gracefo_id", "time_ref"]) {
-      const f = makeField({ name, unit: null, type: "str" });
-      expect(fieldUsesPerRowUnit(f, perRowUnitProduct)).toBe(false);
-    }
-  });
-
-  it("is true for OFFRED-style value_* measurement fields", () => {
-    const offred = makeProduct([
-      makeField({ name: "pcf_name", is_channel_id: true, type: "str" }),
-      makeField({ name: "value_float", unit: null, type: "float" }),
-      makeField({ name: "value_int", unit: null, type: "int" }),
-      makeField({ name: "value_str", unit: null, type: "str" }),
-      makeField({ name: "obt_type", unit: null, type: "str" }),
-      makeField({ name: "unit", unit: null, type: "str" }),
-    ]);
-    const byName = (n: string) =>
-      offred.available_fields.find((f) => f.name === n);
-    expect(fieldUsesPerRowUnit(byName("value_float"), offred)).toBe(true);
-    expect(fieldUsesPerRowUnit(byName("value_int"), offred)).toBe(true);
-    expect(fieldUsesPerRowUnit(byName("value_str"), offred)).toBe(true);
-    // Non-measurement null-unit sibling stays excluded.
-    expect(fieldUsesPerRowUnit(byName("obt_type"), offred)).toBe(false);
-  });
-
-  it("is false when the product has no `unit` column", () => {
-    const field = staticUnitProduct.available_fields[0];
-    expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
-  });
-
-  it("is false for null field/product", () => {
-    expect(fieldUsesPerRowUnit(null, perRowUnitProduct)).toBe(false);
-    expect(fieldUsesPerRowUnit(sensorvalue, null)).toBe(false);
-  });
-
-  it("is false for a measurement-named field when the product has no `unit` column", () => {
-    // A null-unit `sensorvalue` in a product without a `unit` column must not
-    // resolve a per-row unit — the product-level guard, not just the field.
-    const field = makeField({ name: "sensorvalue", unit: null });
-    expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
-  });
-
-  it("is false for a channel_id field even when named like a measurement", () => {
-    const field = makeField({
-      name: "sensorvalue",
-      is_channel_id: true,
-      unit: null,
-    });
-    expect(fieldUsesPerRowUnit(field, perRowUnitProduct)).toBe(false);
-  });
-
-  it("matches only exact measurement-value field names", () => {
-    const check = (name: string) =>
-      fieldUsesPerRowUnit(makeField({ name, unit: null }), perRowUnitProduct);
-    // Matches: sensorvalue, value, value_<suffix>
-    expect(check("sensorvalue")).toBe(true);
-    expect(check("value")).toBe(true);
-    expect(check("value_float")).toBe(true);
-    // Non-matches exercise the ^…$ anchors and the `_[a-z0-9]+` quantifier.
-    expect(check("value_")).toBe(false); // trailing underscore, no chars
-    expect(check("valuex")).toBe(false); // suffix without underscore
-    expect(check("sensorvalue1")).toBe(false); // trailing char ($ anchor)
-    expect(check("xsensorvalue")).toBe(false); // leading char (^ anchor)
-  });
+test("productHasPerRowUnitField is false for a product without a `unit` field", () => {
+  expect(productHasPerRowUnitField(staticUnitProduct)).toBe(false);
 });
 
-describe("readPerRowUnit", () => {
-  it("returns the unit from the first row that carries one", () => {
-    const data = [
-      row({ sensorvalue: 12.5, unit: "V" }),
-      row({ sensorvalue: 13.0, unit: "V" }),
-    ];
-    expect(readPerRowUnit(data)).toBe("V");
-  });
-
-  it("skips leading rows with no unit", () => {
-    const data = [
-      row({ sensorvalue: 12.5 }),
-      row({ sensorvalue: 13, unit: "degK" }),
-    ];
-    expect(readPerRowUnit(data)).toBe("degK");
-  });
-
-  it("coerces numeric unit values to string", () => {
-    expect(readPerRowUnit([row({ unit: 5 })])).toBe("5");
-  });
-
-  it("returns empty string for empty/nullish data", () => {
-    expect(readPerRowUnit([])).toBe("");
-    expect(readPerRowUnit(null)).toBe("");
-    expect(readPerRowUnit(undefined)).toBe("");
-  });
-
-  it("returns empty string when no row carries a unit", () => {
-    expect(readPerRowUnit([row({ sensorvalue: 1 })])).toBe("");
-  });
-
-  it("skips rows whose unit is an empty string", () => {
-    const data = [row({ unit: "" }), row({ unit: "V" })];
-    expect(readPerRowUnit(data)).toBe("V");
-  });
+test("productHasPerRowUnitField is false for null/undefined", () => {
+  expect(productHasPerRowUnitField(null)).toBe(false);
+  expect(productHasPerRowUnitField(undefined)).toBe(false);
 });
 
-describe("resolveFieldUnit", () => {
-  const sensorvalue = perRowUnitProduct.available_fields.find(
-    (f) => f.name === "sensorvalue",
-  );
+const sensorvalue = perRowUnitProduct.available_fields.find(
+  (f) => f.name === "sensorvalue",
+);
+const sensorname = perRowUnitProduct.available_fields.find(
+  (f) => f.name === "sensorname",
+);
+const unitField = perRowUnitProduct.available_fields.find(
+  (f) => f.name === "unit",
+);
 
-  it("passes a static unit through unchanged (ignores row data)", () => {
-    const field = makeField({ name: "sensor1value", unit: "V" });
-    expect(
-      resolveFieldUnit(field, staticUnitProduct, [row({ unit: "A" })]),
-    ).toBe("V");
-  });
-
-  it("resolves the per-row unit for a case-2 measurement field", () => {
-    const data = [row({ sensorvalue: 12.5, unit: "degK" })];
-    expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, data)).toBe("degK");
-  });
-
-  it("returns empty string when a per-row unit is not present in the data", () => {
-    expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, [])).toBe("");
-  });
-
-  it("returns empty string for a unitless field", () => {
-    const field = makeField({ name: "flag", unit: null, type: "int" });
-    expect(resolveFieldUnit(field, staticUnitProduct, [])).toBe("");
-  });
-
-  it("returns empty string for a null field (does not read `.unit`)", () => {
-    expect(
-      resolveFieldUnit(null, perRowUnitProduct, [row({ unit: "V" })]),
-    ).toBe("");
-  });
-
-  it("does not read a per-row unit for a non-measurement field even when the data carries one", () => {
-    const flag = makeField({ name: "flag", unit: null, type: "int" });
-    expect(resolveFieldUnit(flag, staticUnitProduct, [row({ unit: "Z" })])).toBe(
-      "",
-    );
-  });
+test("fieldUsesPerRowUnit is true for the measurement field with a null static unit", () => {
+  expect(fieldUsesPerRowUnit(sensorvalue, perRowUnitProduct)).toBe(true);
 });
 
-describe("fieldsWithPerRowUnit", () => {
+test("fieldUsesPerRowUnit is false for the channel_id field", () => {
+  expect(fieldUsesPerRowUnit(sensorname, perRowUnitProduct)).toBe(false);
+});
+
+test("fieldUsesPerRowUnit is false for the `unit` column itself", () => {
+  expect(fieldUsesPerRowUnit(unitField, perRowUnitProduct)).toBe(false);
+});
+
+test("fieldUsesPerRowUnit is false when the field has a static unit", () => {
+  const withUnit = makeField({ name: "sensorvalue", unit: "V" });
+  expect(fieldUsesPerRowUnit(withUnit, perRowUnitProduct)).toBe(false);
+});
+
+test("fieldUsesPerRowUnit is false for null-unit sibling fields that are not the measurement", () => {
+  // These are null-unit and non-channel, but must NOT resolve a per-row unit.
+  for (const name of ["sensortype", "qualflg", "gracefo_id", "time_ref"]) {
+    const f = makeField({ name, unit: null, type: "str" });
+    expect(fieldUsesPerRowUnit(f, perRowUnitProduct)).toBe(false);
+  }
+});
+
+test("fieldUsesPerRowUnit is true for OFFRED-style value_* measurement fields", () => {
   const offred = makeProduct([
     makeField({ name: "pcf_name", is_channel_id: true, type: "str" }),
     makeField({ name: "value_float", unit: null, type: "float" }),
+    makeField({ name: "value_int", unit: null, type: "int" }),
+    makeField({ name: "value_str", unit: null, type: "str" }),
     makeField({ name: "obt_type", unit: null, type: "str" }),
     makeField({ name: "unit", unit: null, type: "str" }),
   ]);
+  const byName = (n: string) =>
+    offred.available_fields.find((f) => f.name === n);
+  expect(fieldUsesPerRowUnit(byName("value_float"), offred)).toBe(true);
+  expect(fieldUsesPerRowUnit(byName("value_int"), offred)).toBe(true);
+  expect(fieldUsesPerRowUnit(byName("value_str"), offred)).toBe(true);
+  // Non-measurement null-unit sibling stays excluded.
+  expect(fieldUsesPerRowUnit(byName("obt_type"), offred)).toBe(false);
+});
 
-  it("appends `unit` and flags the fetch for a case-2 measurement field", () => {
-    const result = fieldsWithPerRowUnit(
-      ["timestamp", "sensorvalue"],
-      perRowUnitProduct,
-    );
-    expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
-    expect(result.fetchesPerRowUnit).toBe(true);
-  });
+test("fieldUsesPerRowUnit is false when the product has no `unit` column", () => {
+  const field = staticUnitProduct.available_fields[0];
+  expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
+});
 
-  it("appends `unit` for OFFRED-style value_* fields", () => {
-    const result = fieldsWithPerRowUnit(
-      ["timestamp", "value_float"],
-      offred,
-    );
-    expect(result.fields).toEqual(["timestamp", "value_float", "unit"]);
-    expect(result.fetchesPerRowUnit).toBe(true);
-  });
+test("fieldUsesPerRowUnit is false for null field/product", () => {
+  expect(fieldUsesPerRowUnit(null, perRowUnitProduct)).toBe(false);
+  expect(fieldUsesPerRowUnit(sensorvalue, null)).toBe(false);
+});
 
-  it("does not touch fields when no requested field uses a per-row unit", () => {
-    // `sensortype` is null-unit but not a measurement field, so no `unit`.
-    const fields = ["timestamp", "sensortype"];
-    const result = fieldsWithPerRowUnit(fields, perRowUnitProduct);
-    expect(result.fields).toBe(fields);
-    expect(result.fetchesPerRowUnit).toBe(false);
-  });
+test("fieldUsesPerRowUnit is false for a measurement-named field when the product has no `unit` column", () => {
+  // A null-unit `sensorvalue` in a product without a `unit` column must not
+  // resolve a per-row unit — the product-level guard, not just the field.
+  const field = makeField({ name: "sensorvalue", unit: null });
+  expect(fieldUsesPerRowUnit(field, staticUnitProduct)).toBe(false);
+});
 
-  it("does not append when the product has no `unit` column", () => {
-    const result = fieldsWithPerRowUnit(
-      ["timestamp", "sensor1value"],
-      staticUnitProduct,
-    );
-    expect(result.fields).toEqual(["timestamp", "sensor1value"]);
-    expect(result.fetchesPerRowUnit).toBe(false);
+test("fieldUsesPerRowUnit is false for a channel_id field even when named like a measurement", () => {
+  const field = makeField({
+    name: "sensorvalue",
+    is_channel_id: true,
+    unit: null,
   });
+  expect(fieldUsesPerRowUnit(field, perRowUnitProduct)).toBe(false);
+});
 
-  it("does not double-add `unit` (and leaves the factor untouched) when already requested", () => {
-    const result = fieldsWithPerRowUnit(
-      ["timestamp", "sensorvalue", "unit"],
-      perRowUnitProduct,
-    );
-    expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
-    expect(result.fetchesPerRowUnit).toBe(false);
-  });
+test("fieldUsesPerRowUnit matches only exact measurement-value field names", () => {
+  const check = (name: string) =>
+    fieldUsesPerRowUnit(makeField({ name, unit: null }), perRowUnitProduct);
+  // Matches: sensorvalue, value, value_<suffix>
+  expect(check("sensorvalue")).toBe(true);
+  expect(check("value")).toBe(true);
+  expect(check("value_float")).toBe(true);
+  // Non-matches exercise the ^…$ anchors and the `_[a-z0-9]+` quantifier.
+  expect(check("value_")).toBe(false); // trailing underscore, no chars
+  expect(check("valuex")).toBe(false); // suffix without underscore
+  expect(check("sensorvalue1")).toBe(false); // trailing char ($ anchor)
+  expect(check("xsensorvalue")).toBe(false); // leading char (^ anchor)
+});
 
-  it("returns false for an undefined product", () => {
-    const result = fieldsWithPerRowUnit(["sensorvalue"], undefined);
-    expect(result.fetchesPerRowUnit).toBe(false);
-  });
+test("readPerRowUnit returns the unit from the first row that carries one", () => {
+  const data = [
+    row({ sensorvalue: 12.5, unit: "V" }),
+    row({ sensorvalue: 13.0, unit: "V" }),
+  ];
+  expect(readPerRowUnit(data)).toBe("V");
+});
 
-  it("does not mutate the input array", () => {
-    const fields = ["timestamp", "sensorvalue"];
-    fieldsWithPerRowUnit(fields, perRowUnitProduct);
-    expect(fields).toEqual(["timestamp", "sensorvalue"]);
-  });
+test("readPerRowUnit skips leading rows with no unit", () => {
+  const data = [
+    row({ sensorvalue: 12.5 }),
+    row({ sensorvalue: 13, unit: "degK" }),
+  ];
+  expect(readPerRowUnit(data)).toBe("degK");
+});
+
+test("readPerRowUnit coerces numeric unit values to string", () => {
+  expect(readPerRowUnit([row({ unit: 5 })])).toBe("5");
+});
+
+test("readPerRowUnit returns empty string for empty/nullish data", () => {
+  expect(readPerRowUnit([])).toBe("");
+  expect(readPerRowUnit(null)).toBe("");
+  expect(readPerRowUnit(undefined)).toBe("");
+});
+
+test("readPerRowUnit returns empty string when no row carries a unit", () => {
+  expect(readPerRowUnit([row({ sensorvalue: 1 })])).toBe("");
+});
+
+test("readPerRowUnit skips rows whose unit is an empty string", () => {
+  const data = [row({ unit: "" }), row({ unit: "V" })];
+  expect(readPerRowUnit(data)).toBe("V");
+});
+
+test("resolveFieldUnit passes a static unit through unchanged (ignores row data)", () => {
+  const field = makeField({ name: "sensor1value", unit: "V" });
+  expect(resolveFieldUnit(field, staticUnitProduct, [row({ unit: "A" })])).toBe(
+    "V",
+  );
+});
+
+test("resolveFieldUnit resolves the per-row unit for a case-2 measurement field", () => {
+  const data = [row({ sensorvalue: 12.5, unit: "degK" })];
+  expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, data)).toBe("degK");
+});
+
+test("resolveFieldUnit returns empty string when a per-row unit is not present in the data", () => {
+  expect(resolveFieldUnit(sensorvalue, perRowUnitProduct, [])).toBe("");
+});
+
+test("resolveFieldUnit returns empty string for a unitless field", () => {
+  const field = makeField({ name: "flag", unit: null, type: "int" });
+  expect(resolveFieldUnit(field, staticUnitProduct, [])).toBe("");
+});
+
+test("resolveFieldUnit returns empty string for a null field (does not read `.unit`)", () => {
+  expect(resolveFieldUnit(null, perRowUnitProduct, [row({ unit: "V" })])).toBe(
+    "",
+  );
+});
+
+test("resolveFieldUnit does not read a per-row unit for a non-measurement field even when the data carries one", () => {
+  const flag = makeField({ name: "flag", unit: null, type: "int" });
+  expect(resolveFieldUnit(flag, staticUnitProduct, [row({ unit: "Z" })])).toBe(
+    "",
+  );
+});
+
+const offredProduct = makeProduct([
+  makeField({ name: "pcf_name", is_channel_id: true, type: "str" }),
+  makeField({ name: "value_float", unit: null, type: "float" }),
+  makeField({ name: "obt_type", unit: null, type: "str" }),
+  makeField({ name: "unit", unit: null, type: "str" }),
+]);
+
+test("fieldsWithPerRowUnit appends `unit` and flags the fetch for a case-2 measurement field", () => {
+  const result = fieldsWithPerRowUnit(
+    ["timestamp", "sensorvalue"],
+    perRowUnitProduct,
+  );
+  expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
+  expect(result.fetchesPerRowUnit).toBe(true);
+});
+
+test("fieldsWithPerRowUnit appends `unit` for OFFRED-style value_* fields", () => {
+  const result = fieldsWithPerRowUnit(
+    ["timestamp", "value_float"],
+    offredProduct,
+  );
+  expect(result.fields).toEqual(["timestamp", "value_float", "unit"]);
+  expect(result.fetchesPerRowUnit).toBe(true);
+});
+
+test("fieldsWithPerRowUnit does not touch fields when no requested field uses a per-row unit", () => {
+  // `sensortype` is null-unit but not a measurement field, so no `unit`.
+  const fields = ["timestamp", "sensortype"];
+  const result = fieldsWithPerRowUnit(fields, perRowUnitProduct);
+  expect(result.fields).toBe(fields);
+  expect(result.fetchesPerRowUnit).toBe(false);
+});
+
+test("fieldsWithPerRowUnit does not append when the product has no `unit` column", () => {
+  const result = fieldsWithPerRowUnit(
+    ["timestamp", "sensor1value"],
+    staticUnitProduct,
+  );
+  expect(result.fields).toEqual(["timestamp", "sensor1value"]);
+  expect(result.fetchesPerRowUnit).toBe(false);
+});
+
+test("fieldsWithPerRowUnit does not double-add `unit` (and leaves the factor untouched) when already requested", () => {
+  const result = fieldsWithPerRowUnit(
+    ["timestamp", "sensorvalue", "unit"],
+    perRowUnitProduct,
+  );
+  expect(result.fields).toEqual(["timestamp", "sensorvalue", "unit"]);
+  expect(result.fetchesPerRowUnit).toBe(false);
+});
+
+test("fieldsWithPerRowUnit returns false for an undefined product", () => {
+  const result = fieldsWithPerRowUnit(["sensorvalue"], undefined);
+  expect(result.fetchesPerRowUnit).toBe(false);
+});
+
+test("fieldsWithPerRowUnit does not mutate the input array", () => {
+  const fields = ["timestamp", "sensorvalue"];
+  fieldsWithPerRowUnit(fields, perRowUnitProduct);
+  expect(fields).toEqual(["timestamp", "sensorvalue"]);
 });
 
 const makeThresholdField = (
