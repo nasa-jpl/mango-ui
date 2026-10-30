@@ -98,6 +98,7 @@ import {
   createNotIngestedDataResponse,
   deriveFieldPoints,
   isNotIngestedError,
+  resolveAxisLabel,
   toDimension,
 } from "./chart-data";
 
@@ -377,7 +378,14 @@ export const Chart = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedPoint)]);
 
-  const configureChartAxes = (yAxes: YAxis[]) => {
+  // Layers/products are passed explicitly rather than read from props: the debounced
+  // visualizeChartLayers closure is created once, so its props are stale after the
+  // entity's layers change (e.g. picking a product in the entity editor).
+  const configureChartAxes = (
+    yAxes: YAxis[],
+    layers: ChartLayer[] = chartEntity.layers || [],
+    axisProducts: Product[] = products,
+  ) => {
     if (
       !chartRef.current ||
       !chartRef.current.config.options ||
@@ -403,30 +411,12 @@ export const Chart = ({
     const newAxes: typeof chartRef.current.config.options.scales = { x };
 
     yAxes.forEach((axis, i) => {
-      let axisLabel = axis.label;
-      if (!axisLabel) {
-        // Find layers associated with this axis
-        const associatedLayers = chartEntity.layers?.filter(
-          (layer) => layer.yAxisId === axis.id,
-        );
-
-        if (associatedLayers?.length) {
-          // Derive label from first layer
-          const metadata = getFieldMetadataForLayer(
-            associatedLayers[0].fields[0],
-            associatedLayers[0],
-            products,
-          );
-          // Fall back to the per-row unit resolved from fetched data when the
-          // field carries no static unit (case-2 products like IHK/LHK).
-          axisLabel =
-            metadata?.unit ||
-            resolvedUnitByLayerRef.current[
-              getDataLayerId(associatedLayers[0])
-            ] ||
-            "";
-        }
-      }
+      const axisLabel = resolveAxisLabel(
+        axis,
+        layers,
+        axisProducts,
+        resolvedUnitByLayerRef.current,
+      );
       const position = axis.position || "left";
 
       newAxes[axis.id] = {
@@ -560,7 +550,7 @@ export const Chart = ({
       const unit = resolveFieldUnit(
         firstFieldMetadata,
         getProductForLayer(layer, products),
-        result.data
+        result.data,
       );
       resolvedUnitByLayerRef.current[getDataLayerId(layer)] = unit;
       return {
@@ -837,7 +827,7 @@ export const Chart = ({
     // Re-apply axis configuration now that per-row units have been resolved
     // from the freshly fetched data (the axis effect is keyed on layers, not
     // data, so it won't otherwise pick up a resolved per-row unit).
-    configureChartAxes(chartEntity.yAxes || []);
+    configureChartAxes(chartEntity.yAxes || [], layers, products);
 
     // Trigger a chartJS update
     chartRef.current.update();
