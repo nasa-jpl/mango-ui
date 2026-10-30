@@ -28,9 +28,12 @@ import { getData, HttpError } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import {
   applyFieldThresholds,
+  fieldsWithPerRowUnit,
+  fieldUsesPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
+  readPerRowUnit,
 } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import DataGrid from "../../ui/DataGrid/DataGrid";
@@ -178,6 +181,16 @@ const Table = memo(function Table({
       const product = getProductForLayer(pseudoLayer, products);
       const fieldId = `${column.layerId}.${column.field}`;
       const isTextChunk = column.displayType === "text-chunk";
+      // For case-2 products (IHK/LHK/OFFRED) the unit lives in a per-row `unit`
+      // column rather than on the field metadata. The unit is constant across
+      // the query, so we resolve it once from the fetched rows and show it in
+      // the header (cells stay numeric, matching static-unit columns).
+      const perRowUnit = fieldUsesPerRowUnit(metadata, product)
+        ? readPerRowUnit(
+            rowData.map((r) => r[column.layerId]).filter(Boolean),
+          )
+        : "";
+      const headerUnit = metadata?.unit || perRowUnit;
       const col: DataGridColumnDef = {
         field: fieldId,
         flex: tableEntity.compact
@@ -191,7 +204,7 @@ const Table = memo(function Table({
         floatingFilterComponent: CustomFilter,
         headerName:
           column.label ||
-          `${column.field}${metadata?.unit ? ` (${metadata?.unit})` : ""}`,
+          `${column.field}${headerUnit ? ` (${headerUnit})` : ""}`,
         resizable: true,
         sortable: true,
         wrapText: isTextChunk,
@@ -406,16 +419,35 @@ const Table = memo(function Table({
       const computedStartTime = startTime || layer.startTime;
       const computedEndTime = endTime || layer.endTime;
 
+      // Case-2 products (IHK/LHK/OFFRED) carry the measurement unit in a
+      // per-row `unit` column. Auto-include it so the header can resolve the
+      // unit without the user adding `unit` as a column.
+      const product = getProductForLayer(
+        {
+          ...layer,
+          mission: mission ?? layer.mission,
+          instrument: instrument ?? layer.instrument,
+        },
+        products,
+      );
+      const { fields: fieldsToFetch, fetchesPerRowUnit } = fieldsWithPerRowUnit(
+        layer.fields,
+        product,
+      );
+
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        layer.fields,
+        fieldsToFetch,
         layer.channels ?? [],
         computedStartTime,
         computedEndTime,
-        undefined,
+        // The `unit` column is a non-aggregable string. Force
+        // downsampling_factor=1 so the server does not auto-pick a factor >1
+        // (for wide ranges) and then reject the request.
+        fetchesPerRowUnit ? 1 : undefined,
         layer.filter,
       );
       cancelHandles[layerFullId] = cancel;

@@ -18,9 +18,13 @@ import {
   expandLayerBySubsetVersion,
   isNotIngestedError,
   ProcessedLayerData,
+  resolveAxisLabel,
   resolveFetchFields,
   toDimension,
 } from "./chart-data";
+import { generateTestProduct } from "../../../test-utils/factories/product";
+import { generateTestChartLayer } from "../../../test-utils/factories/view";
+import { getDataLayerId } from "../../../utilities/generic";
 
 function lineLayer(overrides: Partial<ChartLayer> = {}): ChartLayer {
   return {
@@ -536,4 +540,75 @@ test("computeTooltipTop positions the tooltip above the caret", () => {
   expect(computeTooltipTop(200, 10, 40, 5)).toBe(163);
   // 0 + 0 - 30 + 4 - 12 = -38
   expect(computeTooltipTop(0, 4, 30, 0)).toBe(-38);
+});
+
+// resolveAxisLabel: a product whose first field has no static unit (per-row) and whose
+// second field has a static "m/s" unit, plus a layer plotting it on axis "y1".
+const axisLabelFixture = () => {
+  const product = generateTestProduct();
+  const layer: ChartLayer = {
+    ...generateTestChartLayer(),
+    mission: product.mission.id,
+    dataset: product.id,
+    fields: [product.available_fields[0].name],
+    yAxisId: "y1",
+  };
+  return { product, layer };
+};
+
+test("resolveAxisLabel prefers the user-provided axis label", () => {
+  const { product, layer } = axisLabelFixture();
+  expect(
+    resolveAxisLabel({ id: "y1", label: "Custom" }, [layer], [product], {
+      [getDataLayerId(layer)]: "V",
+    }),
+  ).toBe("Custom");
+});
+
+test("resolveAxisLabel uses the static field unit of the axis's first layer", () => {
+  const { product, layer } = axisLabelFixture();
+  const staticLayer = { ...layer, fields: [product.available_fields[1].name] };
+  expect(
+    resolveAxisLabel({ id: "y1" }, [staticLayer], [product], {
+      [getDataLayerId(staticLayer)]: "V",
+    }),
+  ).toBe("m/s");
+});
+
+test("resolveAxisLabel falls back to the per-row unit resolved for the layer", () => {
+  const { product, layer } = axisLabelFixture();
+  expect(
+    resolveAxisLabel({ id: "y1" }, [layer], [product], {
+      [getDataLayerId(layer)]: "V",
+    }),
+  ).toBe("V");
+});
+
+test("resolveAxisLabel follows the layer's current channel, not a stale one", () => {
+  const { product, layer } = axisLabelFixture();
+  const before = { ...layer, channels: [{ id: "sensorname", value: "01" }] };
+  const after = { ...layer, channels: [{ id: "sensorname", value: "07" }] };
+  const resolved = {
+    [getDataLayerId(before)]: "V",
+    [getDataLayerId(after)]: "degC",
+  };
+  expect(resolveAxisLabel({ id: "y1" }, [after], [product], resolved)).toBe(
+    "degC",
+  );
+});
+
+test("resolveAxisLabel only considers layers on the given axis", () => {
+  const { product, layer } = axisLabelFixture();
+  const other = { ...layer, yAxisId: "y2" };
+  expect(
+    resolveAxisLabel({ id: "y1" }, [other], [product], {
+      [getDataLayerId(other)]: "V",
+    }),
+  ).toBe("");
+});
+
+test("resolveAxisLabel is empty when no unit is known yet", () => {
+  const { product, layer } = axisLabelFixture();
+  expect(resolveAxisLabel({ id: "y1" }, [layer], [product], {})).toBe("");
+  expect(resolveAxisLabel({ id: "y1" }, [layer], [], {})).toBe("");
 });
