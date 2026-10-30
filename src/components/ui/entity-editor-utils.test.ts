@@ -4,12 +4,15 @@ import { DateRange } from "../../types/time";
 import { ChartEntity, DataLayer, Entity as EntityType } from "../../types/view";
 import type { SelectedProduct } from "./EntityEditor";
 import {
+  CHANNEL_VALUE_RESULT_LIMIT,
   countSubsetVersionsInDataResponse,
   extractEntitySelectedProducts,
+  filterChannelValues,
   getLabelForSelectedProductOrLayer,
   getMatchingSelectedProductForLayer,
   isSelectedProductComplete,
   shouldFetchSubsetVersionCount,
+  sortChannelValues,
   splitSelectedProductsByField,
 } from "./entity-editor-utils";
 
@@ -360,4 +363,59 @@ test("splitSelectedProductsByField returns [] for no products and drops products
   expect(
     splitSelectedProductsByField([selectedProduct({ fields: [] })]),
   ).toEqual([]);
+});
+
+test("sortChannelValues sorts in natural numeric order without mutating its input", () => {
+  const values = ["10", "2", "b", "A", "1"];
+  expect(sortChannelValues(values)).toEqual(["1", "2", "10", "A", "b"]);
+  expect(values).toEqual(["10", "2", "b", "A", "1"]);
+});
+
+test("filterChannelValues returns every value for an empty or blank query", () => {
+  expect(filterChannelValues(["a", "b"], "")).toEqual({
+    matches: ["a", "b"],
+    total: 2,
+  });
+  expect(filterChannelValues(["a", "b"], "  ")).toEqual({
+    matches: ["a", "b"],
+    total: 2,
+  });
+});
+
+test("filterChannelValues matches case-insensitively and trims the query", () => {
+  expect(filterChannelValues(["ABC", "xyz", "zabc"], " aB ")).toEqual({
+    matches: ["ABC", "zabc"],
+    total: 2,
+  });
+});
+
+test("filterChannelValues ranks prefix matches ahead of substring matches", () => {
+  expect(filterChannelValues(["112", "12", "312", "120", "7"], "12")).toEqual({
+    matches: ["12", "120", "112", "312"],
+    total: 4,
+  });
+});
+
+test("filterChannelValues returns no matches when nothing contains the query", () => {
+  expect(filterChannelValues(["a", "b"], "c")).toEqual({
+    matches: [],
+    total: 0,
+  });
+});
+
+test("filterChannelValues caps matches at the limit but reports the full total", () => {
+  expect(filterChannelValues(["a1", "a2", "a3"], "a", 2)).toEqual({
+    matches: ["a1", "a2"],
+    total: 3,
+  });
+});
+
+test("filterChannelValues defaults to CHANNEL_VALUE_RESULT_LIMIT", () => {
+  const values = Array.from(
+    { length: CHANNEL_VALUE_RESULT_LIMIT + 5 },
+    (_, i) => String(i),
+  );
+  const { matches, total } = filterChannelValues(values, "");
+  expect(matches).toHaveLength(CHANNEL_VALUE_RESULT_LIMIT);
+  expect(total).toBe(CHANNEL_VALUE_RESULT_LIMIT + 5);
 });
