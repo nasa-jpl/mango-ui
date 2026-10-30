@@ -19,12 +19,6 @@ type ReleaseHighlight = {
 
 const recentHighlights: ReleaseHighlight[] = [
   {
-    title: "Spacecraft Events & Problem Files tables",
-    pr: "182",
-    description:
-      "Browse mission-level events and problem files in dedicated tables.",
-  },
-  {
     title: "Union filters on data layers",
     pr: "186",
     description:
@@ -40,6 +34,11 @@ const recentHighlights: ReleaseHighlight[] = [
     title: '"No data ingested" handling on plots and tables',
     description:
       "4xx API responses are now surfaced as a distinct no-data state in charts and tables.",
+  },
+  {
+    title: "Consistent product ordering",
+    description:
+      "The Products table now orders rows by name, mission, spacecraft, then version.",
   },
 ];
 

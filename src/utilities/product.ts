@@ -120,3 +120,29 @@ export function applyFieldThresholds(
   };
   return result;
 }
+
+const compareNatural = (a: string, b: string): number =>
+  a.localeCompare(b, undefined, { numeric: true });
+
+/**
+ * Flattens products into one row per dataset, sorted by product name, then
+ * mission, spacecraft (instrument), and version so rows sharing a name have a
+ * stable, predictable order.
+ */
+export function getProductDatasetRows(products: Product[]): Product[] {
+  return products
+    .flatMap((product) =>
+      product.datasets.map((dataset) => ({
+        ...product,
+        datasets: [dataset],
+        instruments: [dataset.instrument_id],
+      })),
+    )
+    .sort(
+      (a, b) =>
+        compareNatural(a.id, b.id) ||
+        compareNatural(a.mission.label, b.mission.label) ||
+        compareNatural(a.datasets[0].instrument_id, b.datasets[0].instrument_id) ||
+        compareNatural(a.datasets[0].version_id, b.datasets[0].version_id),
+    );
+}

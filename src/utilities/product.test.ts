@@ -9,6 +9,7 @@ import {
   applyFieldThresholds,
   getDatasetForLayer,
   getFieldMetadataForLayer,
+  getProductDatasetRows,
   getProductForLayer,
 } from "./product";
 
@@ -294,4 +295,80 @@ test("applyFieldThresholds: with both dates set, effective_until alone decides t
   ]);
   // Despite effective_since being in the future, the threshold still matches.
   expect(applyFieldThresholds(field, makeEntry(0)).limits.lower).toBe(true);
+});
+
+const makeRowProduct = (
+  id: string,
+  missionLabel: string,
+  datasets: [instrument: string, version: string][],
+) => {
+  const product = generateTestProduct();
+  product.id = id;
+  product.mission = { id: missionLabel, label: missionLabel };
+  product.datasets = datasets.map(([instrument, version]) => ({
+    ...generateTestDataset(),
+    instrument_id: instrument,
+    version_id: version,
+  }));
+  return product;
+};
+
+const rowKeys = (rows: ReturnType<typeof getProductDatasetRows>) =>
+  rows.map(
+    (r) =>
+      `${r.id}/${r.mission.label}/${r.datasets[0].instrument_id}/${r.datasets[0].version_id}`,
+  );
+
+test("getProductDatasetRows emits one row per dataset with a single dataset and instrument", () => {
+  const product = makeRowProduct("ACC1A", "GRACE-FO", [
+    ["C", "04"],
+    ["D", "04"],
+  ]);
+  const rows = getProductDatasetRows([product]);
+  expect(rows).toHaveLength(2);
+  rows.forEach((row, i) => {
+    expect(row.datasets).toEqual([product.datasets[i]]);
+    expect(row.instruments).toEqual([product.datasets[i].instrument_id]);
+    expect(row.available_fields).toBe(product.available_fields);
+  });
+  // Input product is not mutated.
+  expect(product.datasets).toHaveLength(2);
+});
+
+test("getProductDatasetRows returns no rows for products without datasets", () => {
+  expect(getProductDatasetRows([makeRowProduct("ACC1A", "M", [])])).toEqual([]);
+});
+
+test("getProductDatasetRows sorts by name, then mission, then spacecraft, then version", () => {
+  const rows = getProductDatasetRows([
+    makeRowProduct("KBR1B", "GRACE", [["C", "04"]]),
+    makeRowProduct("ACC1A", "GRACE-FO", [
+      ["D", "04"],
+      ["C", "05"],
+      ["C", "04"],
+    ]),
+    makeRowProduct("ACC1A", "GRACE", [
+      ["D", "04"],
+      ["C", "04"],
+    ]),
+  ]);
+  expect(rowKeys(rows)).toEqual([
+    "ACC1A/GRACE/C/04",
+    "ACC1A/GRACE/D/04",
+    "ACC1A/GRACE-FO/C/04",
+    "ACC1A/GRACE-FO/C/05",
+    "ACC1A/GRACE-FO/D/04",
+    "KBR1B/GRACE/C/04",
+  ]);
+});
+
+test("getProductDatasetRows compares numerically, not lexically", () => {
+  const rows = getProductDatasetRows([
+    makeRowProduct("P", "M", [
+      ["10", "1"],
+      ["2", "10"],
+      ["2", "9"],
+    ]),
+  ]);
+  expect(rowKeys(rows)).toEqual(["P/M/2/9", "P/M/2/10", "P/M/10/1"]);
 });
