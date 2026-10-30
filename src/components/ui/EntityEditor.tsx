@@ -367,6 +367,30 @@ export const EntityEditor = ({
                   }
                 />
               </div>
+              {(isChartEntity(newEntity) || isTableEntity(newEntity)) && (
+                <div className="flex flex-col gap-1">
+                  <div className="flex gap-2 items-center">
+                    <Checkbox
+                      id="sync-with-page-date-range"
+                      checked={!!newEntity.syncWithPageDateRange}
+                      onCheckedChange={(checked) =>
+                        setNewEntity({
+                          ...newEntity,
+                          syncWithPageDateRange: checked as boolean,
+                        })
+                      }
+                    />
+                    <Label size="sm" htmlFor="sync-with-page-date-range">
+                      Sync with page time range
+                    </Label>
+                  </div>
+                  {!newEntity.syncWithPageDateRange && (
+                    <div className="text-sm text-muted-foreground">
+                      Uses each product's own saved time range.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div>
               {isChartEntity(newEntity) && (
