@@ -15,6 +15,7 @@ import { Product } from "../../types/api";
 import { DateRange } from "../../types/time";
 import { Channel, ChartEntity } from "../../types/view";
 import Chart from "../entities/chart/Chart";
+import { ChannelValueCombobox } from "../ui/ChannelValueCombobox";
 import { DateRangePicker } from "../ui/DateRangePicker";
 
 const getProductDisplayName = (product: Product, instrument?: string) => {
@@ -187,28 +188,11 @@ export const ProductPreviewModal = ({
               return (
                 <div className="flex gap-2 items-center">
                   <Label size="sm">{channel.id}</Label>
-                  <Select
-                    onValueChange={(value) => onChannelChange(value, channel)}
+                  <ChannelValueCombobox
+                    onChange={(value) => onChannelChange(value, channel)}
                     value={channel.value}
-                  >
-                    <SelectTrigger
-                      size="xs"
-                      className="flex-1 max-w-96 min-w-24"
-                    >
-                      <SelectValue placeholder="Select value" />
-                    </SelectTrigger>
-                    <SelectContent size="xs">
-                      {(matchingChannel?.enum_values || [])
-                        .sort((a, b) =>
-                          a.localeCompare(b, "en", { numeric: true })
-                        )
-                        .map((v) => (
-                          <SelectItem size="xs" value={v}>
-                            {v}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                    values={matchingChannel?.enum_values || []}
+                  />
                 </div>
               );
             })}
