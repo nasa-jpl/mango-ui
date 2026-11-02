@@ -8,7 +8,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
+      # No built-in bimonthly interval; run on the 1st of every other month.
+      interval: "cron"
+      cronjob: "0 9 1 */2 *"
 
     # Patch and minor bumps land together in one PR. Majors match no group, so
     # Dependabot raises them as individual PRs — one per dependency.
