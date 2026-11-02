@@ -1,8 +1,10 @@
 import {
   Button,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@nasa-jpl/stellar-react";
 import type { ColGroupDef, ValueGetterParams } from "ag-grid-community";
@@ -60,6 +62,7 @@ export declare type TableProps = {
   onEdit?: () => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
+  onSyncWithPageDateRangeChange?: (sync: boolean) => void;
   products: Product[];
   selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
@@ -80,6 +83,7 @@ const Table = memo(function Table({
   onDelete = () => {},
   onDuplicate = () => {},
   onEdit = () => {},
+  onSyncWithPageDateRangeChange = () => {},
   onCompactResize,
   compact = false,
 }: TableProps) {
@@ -662,6 +666,14 @@ const Table = memo(function Table({
                     >
                       <Trash2 /> Delete
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={!!tableEntity.syncWithPageDateRange}
+                      onCheckedChange={onSyncWithPageDateRangeChange}
+                      disabled={!enableEditing}
+                    >
+                      Sync with page time range
+                    </DropdownMenuCheckboxItem>
                     {/* <DropdownMenuItem>
                       <Download /> Download Data
                     </DropdownMenuItem>

@@ -32,21 +32,22 @@ afterEach(() => cleanup());
 
 const dateRange: DateRange = { start: "2020-01-01", end: "2020-01-02" };
 
-function makeEntity(): EntityType {
+function makeEntity(overrides: Partial<EntityType> = {}): EntityType {
   return {
     id: "e1",
     type: "chart",
     title: "My Chart",
+    ...overrides,
   } as unknown as EntityType;
 }
 
-function renderEditor() {
+function renderEditor(entity: EntityType = makeEntity()) {
   const onSave = vi.fn();
   const onCancel = vi.fn();
   const onDateRangeChange = vi.fn();
   render(
     <EntityEditor
-      entity={makeEntity()}
+      entity={entity}
       dateRange={dateRange}
       dateBounds={dateRange}
       products={[] as Product[]}
@@ -101,4 +102,45 @@ test("only the Products tab is enabled; Events and Transformations are disabled"
   expect(screen.getByRole("tab", { name: "Products" })).toBeEnabled();
   expect(screen.getByRole("tab", { name: "Events" })).toBeDisabled();
   expect(screen.getByRole("tab", { name: "Transformations" })).toBeDisabled();
+});
+
+test("toggling page time range sync is reflected in the saved entity", async () => {
+  const user = userEvent.setup();
+  const { onSave } = renderEditor(makeEntity({ syncWithPageDateRange: true }));
+  const checkbox = screen.getByRole("checkbox", {
+    name: "Sync with page time range",
+  });
+  expect(checkbox).toBeChecked();
+  expect(
+    screen.queryByText("Uses each product's own saved time range."),
+  ).not.toBeInTheDocument();
+
+  await user.click(checkbox);
+  expect(checkbox).not.toBeChecked();
+  expect(
+    screen.getByText("Uses each product's own saved time range."),
+  ).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "Done" }));
+  expect(onSave.mock.calls[0][0].syncWithPageDateRange).toBe(false);
+});
+
+test("page time range sync shows as off when the flag is absent", () => {
+  renderEditor(
+    makeEntity({
+      type: "table",
+      columns: [],
+      layers: [],
+    } as Partial<EntityType>),
+  );
+  expect(
+    screen.getByRole("checkbox", { name: "Sync with page time range" }),
+  ).not.toBeChecked();
+});
+
+test("page time range sync is hidden for entity types that ignore it", () => {
+  renderEditor(makeEntity({ type: "text" }));
+  expect(
+    screen.queryByRole("checkbox", { name: "Sync with page time range" }),
+  ).not.toBeInTheDocument();
 });

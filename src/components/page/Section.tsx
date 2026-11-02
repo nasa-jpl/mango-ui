@@ -26,7 +26,11 @@ import { DataResponseDataEntry, Product } from "../../types/api";
 import { ProductPreview } from "../../types/page";
 import { DateRange } from "../../types/time";
 import { Entity as EntityType, Section as SectionType } from "../../types/view";
-import { applyCompactWidths, mergeLayoutChange } from "../../utilities/view";
+import {
+  applyCompactWidths,
+  mergeLayoutChange,
+  replaceEntityInSection,
+} from "../../utilities/view";
 import { usePrompt } from "../ui/AlertDialogProvider";
 import { Tooltip } from "../ui/Tooltip";
 import CustomGridItemComponent from "./CustomGridItem";
@@ -186,6 +190,9 @@ export const Section = ({
       entity={e}
       onDateRangeChange={onDateRangeChange}
       dateBounds={dateBounds}
+      onChange={(entity) =>
+        onSectionChange(replaceEntityInSection(section, entity))
+      }
       onDelete={() => onEntityDelete(e, section)}
       onDuplicate={() => onEntityDuplicate(e, section)}
       onEdit={() => onEntityEdit(e, section)}

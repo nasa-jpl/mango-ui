@@ -5,6 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -119,6 +120,7 @@ export declare type ChartProps = {
   onEdit?: () => void;
   onHoverDateChange?: (date: Date | null) => void;
   onSelectPoint?: (point: DataResponseDataEntry | null) => void;
+  onSyncWithPageDateRangeChange?: (sync: boolean) => void;
   // TODO could pass in only the list of products that this Chart cares about?
   products: Product[];
   selectedPoint: DataResponseDataEntry | null;
@@ -155,6 +157,7 @@ export const Chart = ({
   onDelete = () => {},
   onDuplicate = () => {},
   onEdit = () => {},
+  onSyncWithPageDateRangeChange = () => {},
   hoverDate,
   selectedPoint,
   loading: loadingProp,
@@ -1501,6 +1504,13 @@ export const Chart = ({
                   >
                     <Trash2 /> Delete
                   </DropdownMenuItem>
+                  <DropdownMenuCheckboxItem
+                    checked={!!chartEntity.syncWithPageDateRange}
+                    onCheckedChange={onSyncWithPageDateRangeChange}
+                    disabled={!enableEditing}
+                  >
+                    Sync with page time range
+                  </DropdownMenuCheckboxItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={resetPan}>
                     <RotateCcw /> Reset Y Axis

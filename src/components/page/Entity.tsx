@@ -33,6 +33,7 @@ export declare type EntityProps = {
   instrument?: string | null;
   loading?: boolean;
   mission?: string | null;
+  onChange?: (entity: EntityType) => void;
   onCompactResize?: (width: number) => void;
   onDateRangeChange?: (dateRange: DateRange) => void;
   onDelete?: (entity: EntityType) => void;
@@ -67,6 +68,7 @@ export const Entity = (props: EntityProps) => {
     onDateRangeChange = () => {},
     onHoverDateChange = () => {},
     onSelectPoint = () => {},
+    onChange = () => {},
     onDelete = () => {},
     onDuplicate = () => {},
     onEdit = () => {},
@@ -74,6 +76,8 @@ export const Entity = (props: EntityProps) => {
     loading,
     selectedPoint,
   } = props;
+  const onSyncWithPageDateRangeChange = (sync: boolean) =>
+    onChange({ ...entity, syncWithPageDateRange: sync });
   const entityClass = classNames({
     "bg-background border rounded flex flex-1 flex-col overflow-hidden": true,
     [className]: !!className,
@@ -97,6 +101,7 @@ export const Entity = (props: EntityProps) => {
           onEdit={() => onEdit(entity)}
           onHoverDateChange={onHoverDateChange}
           onSelectPoint={onSelectPoint}
+          onSyncWithPageDateRangeChange={onSyncWithPageDateRangeChange}
           selectedPoint={selectedPoint}
           showHeader={showHeader}
           compact={compact}
@@ -120,6 +125,7 @@ export const Entity = (props: EntityProps) => {
           onDuplicate={() => onDuplicate(entity)}
           onEdit={() => onEdit(entity)}
           onCompactResize={onCompactResize}
+          onSyncWithPageDateRangeChange={onSyncWithPageDateRangeChange}
           selectedPoint={selectedPoint}
           compact={compact}
         />
