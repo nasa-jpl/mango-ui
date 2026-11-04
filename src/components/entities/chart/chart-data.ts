@@ -7,11 +7,14 @@
 import {
   DataResponse,
   DataResponseDataEntry,
+  Product,
   ProductField,
   ProductResolution,
 } from "../../../types/api";
-import { ChartLayer, DataLayer } from "../../../types/view";
+import { ChartLayer, DataLayer, YAxis } from "../../../types/view";
 import { HttpError } from "../../../utilities/api";
+import { getDataLayerId } from "../../../utilities/generic";
+import { getFieldMetadataForLayer } from "../../../utilities/product";
 import { isChartLayerLine } from "../../../utilities/view";
 import type { CustomChartData } from "./Chart";
 
@@ -363,4 +366,25 @@ export function computeTooltipTop(
   scrollY: number,
 ): number {
   return triggerTop + scrollY - tooltipHeight + caretY - 12;
+}
+
+/**
+ * Title for a y-axis: the user-provided label, otherwise the unit of the first layer
+ * plotted on the axis — its static field unit, falling back to the per-row unit resolved
+ * from fetched data (case-2 products like IHK/LHK), keyed by data-layer id.
+ */
+export function resolveAxisLabel(
+  axis: YAxis,
+  layers: ChartLayer[],
+  products: Product[],
+  resolvedUnitByLayer: Record<string, string>,
+): string {
+  if (axis.label) return axis.label;
+  const layer = layers.find((l) => l.yAxisId === axis.id);
+  if (!layer) return "";
+  return (
+    getFieldMetadataForLayer(layer.fields[0], layer, products)?.unit ||
+    resolvedUnitByLayer[getDataLayerId(layer)] ||
+    ""
+  );
 }

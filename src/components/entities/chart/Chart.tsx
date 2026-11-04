@@ -71,9 +71,11 @@ import {
   pluralize,
 } from "../../../utilities/generic";
 import {
+  fieldsWithPerRowUnit,
   getDatasetForLayer,
   getFieldMetadataForLayer,
   getProductForLayer,
+  resolveFieldUnit,
 } from "../../../utilities/product";
 import {
   formatDateGPS,
@@ -96,6 +98,7 @@ import {
   createNotIngestedDataResponse,
   deriveFieldPoints,
   isNotIngestedError,
+  resolveAxisLabel,
   toDimension,
 } from "./chart-data";
 
@@ -161,6 +164,10 @@ export const Chart = ({
 }: ChartProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<CustomChartType | null>();
+  // Units resolved from fetched data (keyed by data-layer id), used to label
+  // axes for products whose unit lives in a per-row `unit` column rather than
+  // on the field metadata. Populated during visualizeChartLayers.
+  const resolvedUnitByLayerRef = useRef<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [interactionAxes, setInteractionAxes] = useState<Mode>("x");
   const [error, setError] = useState<Error | null>();
@@ -371,7 +378,14 @@ export const Chart = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedPoint)]);
 
-  const configureChartAxes = (yAxes: YAxis[]) => {
+  // Layers/products are passed explicitly rather than read from props: the debounced
+  // visualizeChartLayers closure is created once, so its props are stale after the
+  // entity's layers change (e.g. picking a product in the entity editor).
+  const configureChartAxes = (
+    yAxes: YAxis[],
+    layers: ChartLayer[] = chartEntity.layers || [],
+    axisProducts: Product[] = products,
+  ) => {
     if (
       !chartRef.current ||
       !chartRef.current.config.options ||
@@ -397,23 +411,12 @@ export const Chart = ({
     const newAxes: typeof chartRef.current.config.options.scales = { x };
 
     yAxes.forEach((axis, i) => {
-      let axisLabel = axis.label;
-      if (!axisLabel) {
-        // Find layers associated with this axis
-        const associatedLayers = chartEntity.layers?.filter(
-          (layer) => layer.yAxisId === axis.id,
-        );
-
-        if (associatedLayers?.length) {
-          // Derive label from first layer
-          const metadata = getFieldMetadataForLayer(
-            associatedLayers[0].fields[0],
-            associatedLayers[0],
-            products,
-          );
-          axisLabel = metadata?.unit || "";
-        }
-      }
+      const axisLabel = resolveAxisLabel(
+        axis,
+        layers,
+        axisProducts,
+        resolvedUnitByLayerRef.current,
+      );
       const position = axis.position || "left";
 
       newAxes[axis.id] = {
@@ -541,9 +544,18 @@ export const Chart = ({
         layer,
         products,
       );
+      // Resolves to the static unit when defined, otherwise reads the per-row
+      // `unit` column for case-2 products (IHK/LHK/OFFRED). The unit is
+      // constant across the query, so one resolved value labels the series.
+      const unit = resolveFieldUnit(
+        firstFieldMetadata,
+        getProductForLayer(layer, products),
+        result.data,
+      );
+      resolvedUnitByLayerRef.current[getDataLayerId(layer)] = unit;
       return {
         layer,
-        unit: firstFieldMetadata?.unit || "",
+        unit,
         pointsByField,
         data_count: result.data_count,
         downsampling_factor: result.downsampling_factor,
@@ -812,6 +824,11 @@ export const Chart = ({
       };
     }
 
+    // Re-apply axis configuration now that per-row units have been resolved
+    // from the freshly fetched data (the axis effect is keyed on layers, not
+    // data, so it won't otherwise pick up a resolved per-row unit).
+    configureChartAxes(chartEntity.yAxes || [], layers, products);
+
     // Trigger a chartJS update
     chartRef.current.update();
   };
@@ -892,17 +909,33 @@ export const Chart = ({
         }
       }
 
+      // Products in the IHK/LHK/OFFRED family carry the measurement unit in a
+      // per-row `unit` column rather than on the field metadata (see
+      // product.ts). Fetch it so the axis/tooltip can display the resolved
+      // unit. The `unit` column is a non-aggregable string, so we must force
+      // downsampling_factor=1 (not merely omit it — an omitted factor lets
+      // the server auto-pick a factor >1 for wide ranges and then reject the
+      // request). The unit is constant across the query, so one fetched value
+      // labels the whole series.
+      let fieldsToFetch = layer.fields;
+      let forceDownsamplingFactorOne = false;
+      if (isChartLayerLine(layer)) {
+        const perRowUnit = fieldsWithPerRowUnit(layer.fields, product);
+        fieldsToFetch = perRowUnit.fields;
+        forceDownsamplingFactorOne = perRowUnit.fetchesPerRowUnit;
+      }
+
       const { json, cancel } = getData(
         mission ?? layer.mission,
         layer.dataset,
         instrument ?? layer.instrument,
         layer.version,
-        layer.fields,
+        fieldsToFetch,
         layer.channels ?? [],
         // TODO: check whether or not to sync with page date range
         computedStartTime,
         computedEndTime,
-        downsamplingFactor,
+        forceDownsamplingFactorOne ? 1 : downsamplingFactor,
         layerFilter,
       );
       cancelHandles[layerFullId] = cancel;
