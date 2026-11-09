@@ -43,6 +43,7 @@ import {
   createEntity,
   isChartEntity,
   isTableEntity,
+  setEntityPageDateRangeSync,
 } from "../../utilities/view";
 import Entity from "../page/Entity";
 import {
@@ -374,10 +375,13 @@ export const EntityEditor = ({
                       id="sync-with-page-date-range"
                       checked={!!newEntity.syncWithPageDateRange}
                       onCheckedChange={(checked) =>
-                        setNewEntity({
-                          ...newEntity,
-                          syncWithPageDateRange: checked as boolean,
-                        })
+                        setNewEntity(
+                          setEntityPageDateRangeSync(
+                            newEntity,
+                            checked as boolean,
+                            dateRange,
+                          ),
+                        )
                       }
                     />
                     <Label size="sm" htmlFor="sync-with-page-date-range">
@@ -386,7 +390,8 @@ export const EntityEditor = ({
                   </div>
                   {!newEntity.syncWithPageDateRange && (
                     <div className="text-sm text-muted-foreground">
-                      Uses each product's own saved time range.
+                      Keeps its current time range when the page time range
+                      changes.
                     </div>
                   )}
                 </div>

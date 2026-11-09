@@ -112,17 +112,23 @@ test("toggling page time range sync is reflected in the saved entity", async () 
   });
   expect(checkbox).toBeChecked();
   expect(
-    screen.queryByText("Uses each product's own saved time range."),
+    screen.queryByText(
+      "Keeps its current time range when the page time range changes.",
+    ),
   ).not.toBeInTheDocument();
 
   await user.click(checkbox);
   expect(checkbox).not.toBeChecked();
   expect(
-    screen.getByText("Uses each product's own saved time range."),
+    screen.getByText(
+      "Keeps its current time range when the page time range changes.",
+    ),
   ).toBeInTheDocument();
 
   await user.click(screen.getByRole("button", { name: "Done" }));
   expect(onSave.mock.calls[0][0].syncWithPageDateRange).toBe(false);
+  // Unsyncing keeps the page range the entity was showing.
+  expect(onSave.mock.calls[0][0].dateRange).toEqual(dateRange);
 });
 
 test("page time range sync shows as off when the flag is absent", () => {

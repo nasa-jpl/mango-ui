@@ -44,7 +44,7 @@ function renderEntity(entity: EntityType) {
 }
 
 test.each(["chart", "table"])(
-  "toggling sync on a %s emits the entity with the updated flag",
+  "unsyncing a %s emits the entity with the page range captured",
   async (type) => {
     const entity = {
       id: "e1",
@@ -62,6 +62,7 @@ test.each(["chart", "table"])(
     expect(onChange).toHaveBeenCalledWith({
       ...entity,
       syncWithPageDateRange: false,
+      dateRange,
     });
   },
 );

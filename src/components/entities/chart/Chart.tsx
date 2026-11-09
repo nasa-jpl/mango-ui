@@ -84,6 +84,7 @@ import {
 import {
   applyLayerTransforms,
   formatYValue,
+  getEntityDateRange,
   isChartLayerEvent,
   isChartLayerLine,
 } from "../../../utilities/view";
@@ -235,10 +236,14 @@ export const Chart = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [compact]);
 
+  const { syncWithPageDateRange, dateRange: entityDateRange } = chartEntity;
   const computedDateRange = useMemo(
     () =>
-      chartEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
-    [chartEntity.syncWithPageDateRange, dateRange],
+      getEntityDateRange(
+        { syncWithPageDateRange, dateRange: entityDateRange },
+        dateRange,
+      ),
+    [syncWithPageDateRange, entityDateRange, dateRange],
   );
 
   useEffect(() => {

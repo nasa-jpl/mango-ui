@@ -6,11 +6,6 @@ import {
   setupApiMocks,
 } from "../utilities/mockApi";
 
-// The chart's layer carries its own saved time window, used when the chart is
-// not synced with the page time range.
-const LAYER_START = "2022-03-01T00:00:00.000Z";
-const LAYER_END = "2022-03-02T00:00:00.000Z";
-
 function makeSyncView() {
   const view = makeView();
   const chart = view.pageGroups[0].pages[0].sections[0].entities[0];
@@ -24,8 +19,9 @@ function makeSyncView() {
         dataset: PRODUCT.id,
         version: "04",
         fields: ["temperature"],
-        startTime: LAYER_START,
-        endTime: LAYER_END,
+        // Layers built in the editor carry no time window of their own.
+        startTime: "",
+        endTime: "",
         yAxisId: "y1",
       },
     ],
@@ -83,16 +79,22 @@ test("a chart's page time range sync can be toggled from its ⋮ menu", async ({
   await setPageRange(page, "2023-06-05T00:00:00", "2023-06-06T00:00:00");
   await expect.poll(lastFrom).toBe("2023-06-05");
 
-  // Unsync from the ⋮ menu: the chart switches to its layer's own window...
+  // Unsync from the ⋮ menu: the chart keeps showing the same window...
+  const requestsBeforeUnsync = ranges.length;
   await toggleSyncFromMenu(page);
-  await expect.poll(lastFrom).toBe(LAYER_START.slice(0, 10));
+  await page.waitForTimeout(1000);
+  expect(
+    ranges
+      .slice(requestsBeforeUnsync)
+      .every((r) => r.from.startsWith("2023-06-05")),
+  ).toBe(true);
 
   // ...and no longer follows page range changes.
   const requestsBefore = ranges.length;
   await setPageRange(page, "2023-07-01T00:00:00", "2023-07-02T00:00:00");
   await page.waitForTimeout(1000);
   expect(
-    ranges.slice(requestsBefore).every((r) => r.from.startsWith("2022-03-01")),
+    ranges.slice(requestsBefore).every((r) => r.from.startsWith("2023-06-05")),
   ).toBe(true);
 
   // The editor reflects the menu toggle.
@@ -104,7 +106,9 @@ test("a chart's page time range sync can be toggled from its ⋮ menu", async ({
     page.getByRole("checkbox", { name: "Sync with page time range" }),
   ).not.toBeChecked();
   await expect(
-    page.getByText("Uses each product's own saved time range."),
+    page.getByText(
+      "Keeps its current time range when the page time range changes.",
+    ),
   ).toBeVisible();
   await page.getByRole("button", { name: "Done" }).click();
 
@@ -112,7 +116,8 @@ test("a chart's page time range sync can be toggled from its ⋮ menu", async ({
   await toggleSyncFromMenu(page);
   await expect.poll(lastFrom).toBe("2023-07-01");
 
-  // Unsync once more and save: the flag reaches the stored view.
+  // Unsync once more and save: the flag and the captured range reach the
+  // stored view.
   await toggleSyncFromMenu(page);
   await page.getByRole("button", { name: /Save View Changes/ }).click();
   await page
@@ -123,8 +128,11 @@ test("a chart's page time range sync can be toggled from its ⋮ menu", async ({
   const body = mocks.savedViewBodies.at(-1) as {
     data: ReturnType<typeof makeView>;
   };
-  expect(
-    body.data.pageGroups[0].pages[0].sections[0].entities[0]
-      .syncWithPageDateRange,
-  ).toBe(false);
+  const savedChart = body.data.pageGroups[0].pages[0].sections[0]
+    .entities[0] as {
+    syncWithPageDateRange: boolean;
+    dateRange?: { start: string };
+  };
+  expect(savedChart.syncWithPageDateRange).toBe(false);
+  expect(savedChart.dateRange?.start.slice(0, 10)).toBe("2023-07-01");
 });

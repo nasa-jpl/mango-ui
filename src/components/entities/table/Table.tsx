@@ -28,6 +28,7 @@ import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
 import { getData, HttpError } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
+import { getEntityDateRange } from "../../../utilities/view";
 import {
   applyFieldThresholds,
   getDatasetForLayer,
@@ -100,10 +101,14 @@ const Table = memo(function Table({
 
   const cancelHandles: Record<string, () => void> = {};
 
+  const { syncWithPageDateRange, dateRange: entityDateRange } = tableEntity;
   const computedDateRange = useMemo(
     () =>
-      tableEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
-    [tableEntity.syncWithPageDateRange, dateRange],
+      getEntityDateRange(
+        { syncWithPageDateRange, dateRange: entityDateRange },
+        dateRange,
+      ),
+    [syncWithPageDateRange, entityDateRange, dateRange],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

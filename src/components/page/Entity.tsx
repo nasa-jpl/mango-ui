@@ -15,6 +15,7 @@ import {
   isMapEntity,
   isTableEntity,
   isTextEntity,
+  setEntityPageDateRangeSync,
 } from "../../utilities/view";
 import Chart from "../entities/chart/Chart";
 import Map from "../entities/map/Map";
@@ -77,7 +78,7 @@ export const Entity = (props: EntityProps) => {
     selectedPoint,
   } = props;
   const onSyncWithPageDateRangeChange = (sync: boolean) =>
-    onChange({ ...entity, syncWithPageDateRange: sync });
+    onChange(setEntityPageDateRangeSync(entity, sync, dateRange));
   const entityClass = classNames({
     "bg-background border rounded flex flex-1 flex-col overflow-hidden": true,
     [className]: !!className,
