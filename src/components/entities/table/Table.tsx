@@ -1,8 +1,10 @@
 import {
   Button,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@nasa-jpl/stellar-react";
 import type { ColGroupDef, ValueGetterParams } from "ag-grid-community";
@@ -26,6 +28,7 @@ import { DateRange } from "../../../types/time";
 import { DataLayer, TableEntity } from "../../../types/view";
 import { getData, HttpError } from "../../../utilities/api";
 import { getDataLayerId, isAbortError } from "../../../utilities/generic";
+import { getEntityDateRange } from "../../../utilities/view";
 import {
   applyFieldThresholds,
   getDatasetForLayer,
@@ -60,6 +63,7 @@ export declare type TableProps = {
   onEdit?: () => void;
   onSelectPoint: (point: DataResponseDataEntry | null) => void;
   onSetProductPreview: (previewProduct: ProductPreview) => void;
+  onSyncWithPageDateRangeChange?: (sync: boolean) => void;
   products: Product[];
   selectedPoint: DataResponseDataEntry | null;
   showHeader?: boolean;
@@ -80,6 +84,7 @@ const Table = memo(function Table({
   onDelete = () => {},
   onDuplicate = () => {},
   onEdit = () => {},
+  onSyncWithPageDateRangeChange = () => {},
   onCompactResize,
   compact = false,
 }: TableProps) {
@@ -96,10 +101,14 @@ const Table = memo(function Table({
 
   const cancelHandles: Record<string, () => void> = {};
 
+  const { syncWithPageDateRange, dateRange: entityDateRange } = tableEntity;
   const computedDateRange = useMemo(
     () =>
-      tableEntity.syncWithPageDateRange ? dateRange : { start: "", end: "" },
-    [tableEntity.syncWithPageDateRange, dateRange],
+      getEntityDateRange(
+        { syncWithPageDateRange, dateRange: entityDateRange },
+        dateRange,
+      ),
+    [syncWithPageDateRange, entityDateRange, dateRange],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -662,6 +671,14 @@ const Table = memo(function Table({
                     >
                       <Trash2 /> Delete
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={!!tableEntity.syncWithPageDateRange}
+                      onCheckedChange={onSyncWithPageDateRangeChange}
+                      disabled={!enableEditing}
+                    >
+                      Sync with page time range
+                    </DropdownMenuCheckboxItem>
                     {/* <DropdownMenuItem>
                       <Download /> Download Data
                     </DropdownMenuItem>

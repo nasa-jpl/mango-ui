@@ -22,6 +22,7 @@ import {
   TimelineRowEntity,
   View,
 } from "../types/view";
+import { DateRange } from "../types/time";
 import { generateUUID } from "./generic";
 
 const VIEW_VERSION: number = 1;
@@ -328,6 +329,40 @@ export function replaceEntityInSection(
   return {
     ...section,
     entities: section.entities.map((e) => (e.id === entity.id ? entity : e)),
+  };
+}
+
+/**
+ * The time range an entity fetches data for. Synced entities follow the page; unsynced ones keep
+ * the range captured when they were unsynced. Entities unsynced without a captured range get an
+ * empty range, so each layer falls back to its own saved times.
+ */
+export function getEntityDateRange(
+  entity: Pick<Entity, "dateRange" | "syncWithPageDateRange">,
+  pageDateRange: DateRange,
+): DateRange {
+  if (entity.syncWithPageDateRange) {
+    return pageDateRange;
+  }
+  return entity.dateRange ?? { start: "", end: "" };
+}
+
+/**
+ * Turn an entity's page time range sync on or off. Unsyncing captures the current page range so
+ * the entity keeps showing the same window until the user changes it.
+ */
+export function setEntityPageDateRangeSync<T extends Entity>(
+  entity: T,
+  sync: boolean,
+  pageDateRange: DateRange,
+): T {
+  if (sync) {
+    return { ...entity, syncWithPageDateRange: true };
+  }
+  return {
+    ...entity,
+    syncWithPageDateRange: false,
+    dateRange: { ...pageDateRange },
   };
 }
 

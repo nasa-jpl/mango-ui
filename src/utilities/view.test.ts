@@ -34,7 +34,9 @@ import {
   isTimelineRowEntity,
   mergeLayoutChange,
   removeEntityFromSection,
+  getEntityDateRange,
   replaceEntityInSection,
+  setEntityPageDateRangeSync,
 } from "./view";
 
 const chartLayer1 = generateTestChartLayer();
@@ -797,4 +799,72 @@ test("mergeLayoutChange omits manualWidth when nothing was resized", () => {
     new Set(),
   );
   expect(result[0]).not.toHaveProperty("manualWidth");
+});
+
+const pageRange = {
+  start: "2023-06-05T00:00:00.000Z",
+  end: "2023-06-06T00:00:00.000Z",
+};
+const capturedRange = {
+  start: "2022-03-01T00:00:00.000Z",
+  end: "2022-03-02T00:00:00.000Z",
+};
+
+test("getEntityDateRange follows the page range when synced", () => {
+  const entity = createEntity({
+    syncWithPageDateRange: true,
+    dateRange: capturedRange,
+  });
+  expect(getEntityDateRange(entity, pageRange)).toBe(pageRange);
+});
+
+test("getEntityDateRange uses the captured range when unsynced", () => {
+  const entity = createEntity({
+    syncWithPageDateRange: false,
+    dateRange: capturedRange,
+  });
+  expect(getEntityDateRange(entity, pageRange)).toBe(capturedRange);
+});
+
+test("getEntityDateRange is empty when unsynced without a captured range", () => {
+  const entity = createEntity({ syncWithPageDateRange: false });
+  expect(getEntityDateRange(entity, pageRange)).toEqual({ start: "", end: "" });
+});
+
+test("getEntityDateRange treats a missing sync flag as unsynced", () => {
+  const entity = { ...createEntity({}), syncWithPageDateRange: undefined };
+  expect(getEntityDateRange(entity, pageRange)).toEqual({ start: "", end: "" });
+});
+
+test("setEntityPageDateRangeSync captures a copy of the page range when unsyncing", () => {
+  const entity = createEntity({ syncWithPageDateRange: true });
+  const result = setEntityPageDateRangeSync(entity, false, pageRange);
+  expect(result).toEqual({
+    ...entity,
+    syncWithPageDateRange: false,
+    dateRange: pageRange,
+  });
+  expect(result.dateRange).not.toBe(pageRange);
+  expect(entity.syncWithPageDateRange).toBe(true);
+});
+
+test("setEntityPageDateRangeSync replaces an earlier captured range when unsyncing", () => {
+  const entity = createEntity({
+    syncWithPageDateRange: true,
+    dateRange: capturedRange,
+  });
+  expect(
+    setEntityPageDateRangeSync(entity, false, pageRange).dateRange,
+  ).toEqual(pageRange);
+});
+
+test("setEntityPageDateRangeSync only sets the flag when re-syncing", () => {
+  const entity = createEntity({
+    syncWithPageDateRange: false,
+    dateRange: capturedRange,
+  });
+  expect(setEntityPageDateRangeSync(entity, true, pageRange)).toEqual({
+    ...entity,
+    syncWithPageDateRange: true,
+  });
 });

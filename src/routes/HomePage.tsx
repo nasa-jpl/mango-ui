@@ -19,10 +19,10 @@ type ReleaseHighlight = {
 
 const recentHighlights: ReleaseHighlight[] = [
   {
-    title: "More quick time-range presets",
-    pr: "188",
+    title: "Toggle time sync per entity",
+    pr: "242",
     description:
-      "Added 3-day, 7-day, and latest-24hr presets for the time range selector.",
+      "Charts and tables can be synced or unsynced from the page time range via the entity's ⋮ menu or the entity editor.",
   },
   {
     title: '"No data ingested" handling on plots and tables',
