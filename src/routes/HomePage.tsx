@@ -36,6 +36,7 @@ const recentHighlights: ReleaseHighlight[] = [
   },
   {
     title: "Map zoom fits the map",
+    pr: "254",
     description:
       "Map zoom limits now adapt to the map's size, view mode and basemap, so you can't zoom far past the imagery or lose the globe in empty space.",
   },
