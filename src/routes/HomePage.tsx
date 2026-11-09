@@ -19,12 +19,6 @@ type ReleaseHighlight = {
 
 const recentHighlights: ReleaseHighlight[] = [
   {
-    title: "More quick time-range presets",
-    pr: "188",
-    description:
-      "Added 3-day, 7-day, and latest-24hr presets for the time range selector.",
-  },
-  {
     title: '"No data ingested" handling on plots and tables',
     description:
       "4xx API responses are now surfaced as a distinct no-data state in charts and tables.",
@@ -39,6 +33,12 @@ const recentHighlights: ReleaseHighlight[] = [
     pr: "234",
     description:
       "Manually resizing a compact table now persists instead of snapping back to the auto-fit width.",
+  },
+  {
+    title: "Map zoom fits the map",
+    pr: "254",
+    description:
+      "Map zoom limits now adapt to the map's size, view mode and basemap, so you can't zoom far past the imagery or lose the globe in empty space.",
   },
 ];
 

@@ -1,9 +1,13 @@
 import { expect, test } from "vitest";
 import type { DataResponse, ProductResolution } from "../../../types/api";
 import {
+  computeCameraZoomLimits,
+  CameraZoomLimitsInput,
   computeDownsamplingFactor,
   extractMapPoints,
   getDurationSeconds,
+  ZOOM_IN_SLACK,
+  ZOOM_OUT_SLACK,
 } from "./map-utils";
 
 function res(
@@ -120,4 +124,157 @@ test("extractMapPoints accumulates points across results and keeps the last down
       { latitude: 3, longitude: 4 },
     ],
   });
+});
+
+// Round numbers so expected limits are easy to derive by hand: a 90° field of view makes
+// tan(fov / 2) = 1, so a camera at height h sees 2h meters across the larger dimension.
+function limitsInput(
+  overrides: Partial<CameraZoomLimitsInput> = {},
+): CameraZoomLimitsInput {
+  return {
+    globeRadius: 1000,
+    metersPerPixel: 10,
+    mode: "3D",
+    fov: Math.PI / 2,
+    widthPx: 400,
+    heightPx: 200,
+    ...overrides,
+  };
+}
+
+test("the slack factors loosen both limits", () => {
+  expect(ZOOM_IN_SLACK).toBe(2);
+  expect(ZOOM_OUT_SLACK).toBe(1.5);
+});
+
+test("3D zoom-in limit stops where image pixels cover ZOOM_IN_SLACK screen pixels", () => {
+  // 400px across at 10 m/px is 4000 m natively; 2× over-zoom allows 2000 m, i.e. h = 1000.
+  expect(
+    computeCameraZoomLimits(limitsInput()).minimumZoomDistance,
+  ).toBeCloseTo(1000);
+});
+
+test("the zoom-in limit scales with the field of view", () => {
+  // 60°: tan(30°) = 1/√3, so 4000 m natively over-zoomed 2× needs h = 1000·√3.
+  expect(
+    computeCameraZoomLimits(limitsInput({ fov: Math.PI / 3 }))
+      .minimumZoomDistance,
+  ).toBeCloseTo(1000 * Math.sqrt(3));
+});
+
+test("the zoom-in limit follows the larger dimension for tall maps too", () => {
+  const wide = computeCameraZoomLimits(limitsInput());
+  const tall = computeCameraZoomLimits(
+    limitsInput({ widthPx: 200, heightPx: 400 }),
+  );
+  expect(tall.minimumZoomDistance).toBeCloseTo(wide.minimumZoomDistance);
+});
+
+test("a bigger map or a coarser basemap allows less zooming in", () => {
+  const base = computeCameraZoomLimits(limitsInput()).minimumZoomDistance;
+  expect(
+    computeCameraZoomLimits(limitsInput({ widthPx: 800, heightPx: 400 }))
+      .minimumZoomDistance,
+  ).toBeCloseTo(base * 2);
+  expect(
+    computeCameraZoomLimits(limitsInput({ metersPerPixel: 20 }))
+      .minimumZoomDistance,
+  ).toBeCloseTo(base * 2);
+});
+
+test("3D zoom-out limit fits the globe in the narrower field of view, with slack", () => {
+  // Square map: 90° both ways, so the globe fills the view at R / sin(45°) from its center.
+  const { maximumZoomDistance } = computeCameraZoomLimits(
+    limitsInput({ widthPx: 300, heightPx: 300 }),
+  );
+  expect(maximumZoomDistance).toBeCloseTo((1000 / Math.SQRT1_2) * 1.5 - 1000);
+});
+
+test("3D zoom-out limit uses the vertical field of view on a wide map", () => {
+  // 2:1 wide: tan(fovY / 2) = 0.5.
+  const halfFovY = Math.atan(0.5);
+  expect(
+    computeCameraZoomLimits(limitsInput()).maximumZoomDistance,
+  ).toBeCloseTo((1000 / Math.sin(halfFovY)) * 1.5 - 1000);
+});
+
+test("3D zoom-out limit uses the horizontal field of view on a tall map", () => {
+  const halfFovX = Math.atan(0.5);
+  expect(
+    computeCameraZoomLimits(limitsInput({ widthPx: 200, heightPx: 400 }))
+      .maximumZoomDistance,
+  ).toBeCloseTo((1000 / Math.sin(halfFovX)) * 1.5 - 1000);
+});
+
+test("Columbus view zooms in like 3D", () => {
+  expect(
+    computeCameraZoomLimits(limitsInput({ mode: "columbus" }))
+      .minimumZoomDistance,
+  ).toBeCloseTo(1000);
+});
+
+test("Columbus view zooms out until the flat map fits, with slack", () => {
+  // 2:1 wide view (tan halves 1 and 0.5) over a 2πR × πR map: both dimensions need h = πR.
+  expect(
+    computeCameraZoomLimits(limitsInput({ mode: "columbus" }))
+      .maximumZoomDistance,
+  ).toBeCloseTo(Math.PI * 1000 * 1.5);
+  // Square view (tan halves 1 and 1): width needs πR, height only πR / 2.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "columbus", widthPx: 300, heightPx: 300 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(Math.PI * 1000 * 1.5);
+  // Tall 1:2 view (tan halves 0.5 and 1): width needs 2πR.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "columbus", widthPx: 200, heightPx: 400 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(2 * Math.PI * 1000 * 1.5);
+  // 3:2 view (tan halves 1 and 2/3): width needs πR, height only 0.75πR.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "columbus", widthPx: 300, heightPx: 200 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(Math.PI * 1000 * 1.5);
+  // Very wide 4:1 view (tan halves 1 and 0.25): height needs 2πR.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "columbus", widthPx: 800, heightPx: 200 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(2 * Math.PI * 1000 * 1.5);
+});
+
+test("2D limits are visible spans: native resolution in, whole map out", () => {
+  const { minimumZoomDistance, maximumZoomDistance } = computeCameraZoomLimits(
+    limitsInput({ mode: "2D" }),
+  );
+  // 400px at 10 m/px over-zoomed 2× spans 2000 m.
+  expect(minimumZoomDistance).toBeCloseTo(2000);
+  // A 2:1 view fits the 2πR × πR map exactly across its width.
+  expect(maximumZoomDistance).toBeCloseTo(2 * Math.PI * 1000 * 1.5);
+});
+
+test("2D zoom-out span grows to fit the map's height in very wide views", () => {
+  // 4:1 view: showing all πR of height needs a 4πR span.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "2D", widthPx: 800, heightPx: 200 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(4 * Math.PI * 1000 * 1.5);
+});
+
+test("2D zoom-out span in tall views is the larger of map height and scaled width", () => {
+  // 1:2 view: fitting 2πR across the width needs a 4πR vertical span.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "2D", widthPx: 200, heightPx: 400 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(4 * Math.PI * 1000 * 1.5);
+  // 1:1.1 view barely taller than wide: 2πR / (1/1.1) beats πR.
+  expect(
+    computeCameraZoomLimits(
+      limitsInput({ mode: "2D", widthPx: 1000, heightPx: 1100 }),
+    ).maximumZoomDistance,
+  ).toBeCloseTo(2 * Math.PI * 1000 * 1.1 * 1.5);
 });
