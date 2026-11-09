@@ -2,7 +2,11 @@ import {
   Cartesian3,
   Viewer as CesiumViewer,
   Color,
+  ImageryLayer,
+  Math as CesiumMath,
+  PerspectiveFrustum,
   ProviderViewModel,
+  SceneMode,
   WebMapTileServiceImageryProvider,
 } from "cesium";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -14,12 +18,10 @@ import { getDataLayerId, isAbortError } from "../../../utilities/generic";
 import { getProductForLayer } from "../../../utilities/product";
 import EntityHeader from "../../page/EntityHeader";
 import "./Map.css";
+import { gibsTilingScheme } from "./lib/gibs";
 import {
-  MAX_ZOOM_DISTANCE,
-  MIN_ZOOM_DISTANCE,
-  gibsTilingScheme,
-} from "./lib/gibs";
-import {
+  CameraSceneMode,
+  computeCameraZoomLimits,
   computeDownsamplingFactor,
   extractMapPoints,
   getDurationSeconds,
@@ -206,9 +208,10 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
             style: "default",
             format: "image/jpeg",
             tileMatrixSetID: "500m",
-            maximumLevel: 8,
-            tileWidth: 256,
-            tileHeight: 256,
+            // The 500m tile matrix set has levels 0–7 of 512px tiles
+            maximumLevel: 7,
+            tileWidth: 512,
+            tileHeight: 512,
             tilingScheme: gibsTilingScheme(),
           });
         },
@@ -230,13 +233,74 @@ export const Map = ({ mapEntity, products, dateRange }: MapProps) => {
         fullscreenButton: false,
         msaaSamples: 4,
       });
-
-      // Set max/min zoom to limits of basemap imagery available (camera height in meters)
-      viewerRef.current.scene.screenSpaceCameraController.minimumZoomDistance =
-        MIN_ZOOM_DISTANCE;
-      viewerRef.current.scene.screenSpaceCameraController.maximumZoomDistance =
-        MAX_ZOOM_DISTANCE;
     }
+
+    const viewer = viewerRef.current;
+    if (!viewer || !mapRef.current) {
+      return;
+    }
+
+    // Keep zoom between "the basemap is about to pixelate" and "the whole map fills the view".
+    // Both depend on the map's size, the scene mode and the basemap, so recompute when any changes.
+    const updateZoomLimits = () => {
+      const { scene } = viewer;
+      const { clientWidth: widthPx, clientHeight: heightPx } = scene.canvas;
+      const baseLayer = viewer.imageryLayers.get(0);
+      // The basemap's provider loads asynchronously; updateWhenReady covers it
+      if (!widthPx || !heightPx || !baseLayer?.ready) {
+        return;
+      }
+      const provider = baseLayer.imageryProvider;
+      const globeRadius = scene.globe.ellipsoid.maximumRadius;
+      const finestTile = provider.tilingScheme.tileXYToRectangle(
+        0,
+        0,
+        provider.maximumLevel ?? 0,
+      );
+      const modes: Partial<Record<SceneMode, CameraSceneMode>> = {
+        [SceneMode.SCENE2D]: "2D",
+        [SceneMode.COLUMBUS_VIEW]: "columbus",
+      };
+      const frustum = scene.camera.frustum;
+      const limits = computeCameraZoomLimits({
+        globeRadius,
+        metersPerPixel: (finestTile.width / provider.tileWidth) * globeRadius,
+        mode: modes[scene.mode] ?? "3D",
+        fov:
+          frustum instanceof PerspectiveFrustum && frustum.fov
+            ? frustum.fov
+            : CesiumMath.toRadians(60),
+        widthPx,
+        heightPx,
+      });
+      scene.screenSpaceCameraController.minimumZoomDistance =
+        limits.minimumZoomDistance;
+      scene.screenSpaceCameraController.maximumZoomDistance =
+        limits.maximumZoomDistance;
+    };
+
+    const removeListeners: (() => void)[] = [];
+    const updateWhenReady = (layer?: ImageryLayer) => {
+      if (layer && !layer.ready) {
+        removeListeners.push(
+          layer.readyEvent.addEventListener(updateZoomLimits),
+        );
+      } else {
+        updateZoomLimits();
+      }
+    };
+
+    updateWhenReady(viewer.imageryLayers.get(0));
+    const resizeObserver = new ResizeObserver(() => updateZoomLimits());
+    resizeObserver.observe(mapRef.current);
+    removeListeners.push(
+      viewer.scene.morphComplete.addEventListener(updateZoomLimits),
+      viewer.imageryLayers.layerAdded.addEventListener(updateWhenReady),
+    );
+    return () => {
+      resizeObserver.disconnect();
+      removeListeners.forEach((remove) => remove());
+    };
   }, []);
 
   const renderMapOverlays = () => {
