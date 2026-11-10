@@ -28,6 +28,7 @@ import {
   isWithinSubsetVersionMaxRange,
   SUBSET_VERSION_MAX_RANGE_DAYS,
 } from "../../utilities/time";
+import { ChannelValueCombobox } from "./ChannelValueCombobox";
 import { SelectedProduct } from "./EntityEditor";
 import {
   isSelectedProductComplete,
@@ -380,14 +381,14 @@ export const ProductSelector = ({
           </Popover>
         </div>
         {(channels || []).map((channel) => {
-          const matchingChannel = (selectedProduct.channels || []).find(
+          const matchingChannel = (newSelectedProduct.channels || []).find(
             (c) => c.id === channel.id,
           );
           return (
             <div className="flex flex-col gap-1">
               <Label size="sm">{channel.id}</Label>
-              <Select
-                onValueChange={(value) =>
+              <ChannelValueCombobox
+                onChange={(value) =>
                   updateSelectedProduct({
                     ...newSelectedProduct,
                     channels: (channels || []).map((c) => {
@@ -408,20 +409,8 @@ export const ProductSelector = ({
                   })
                 }
                 value={matchingChannel?.value}
-              >
-                <SelectTrigger size="xs" className="flex-1 max-w-96 min-w-24">
-                  <SelectValue id="entity-type" placeholder="Select value" />
-                </SelectTrigger>
-                <SelectContent size="xs">
-                  {channel.values
-                    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
-                    .map((c) => (
-                      <SelectItem size="xs" value={c} key={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+                values={channel.values}
+              />
             </div>
           );
         })}

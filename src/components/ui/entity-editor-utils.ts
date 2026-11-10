@@ -134,3 +134,41 @@ export const extractEntitySelectedProducts = (
     } as SelectedProduct;
   });
 };
+
+/* Maximum number of channel values rendered in the value picker at once */
+export const CHANNEL_VALUE_RESULT_LIMIT = 100;
+
+/**
+ * Sort channel values in natural order (so "2" precedes "10") without mutating the input, which
+ * is usually a product's own `enum_values` array.
+ */
+export const sortChannelValues = (values: string[]): string[] => {
+  return [...values].sort((a, b) =>
+    a.localeCompare(b, "en", { numeric: true }),
+  );
+};
+
+/**
+ * Case-insensitively match channel values against a search query, returning at most `limit`
+ * matches alongside the total match count. Values starting with the query rank ahead of values
+ * that merely contain it; each group keeps the input order. Some products (e.g. OFFRED) have tens
+ * of thousands of channel values, so only the capped subset should ever be rendered.
+ */
+export const filterChannelValues = (
+  values: string[],
+  query: string,
+  limit: number = CHANNEL_VALUE_RESULT_LIMIT,
+): { matches: string[]; total: number } => {
+  const needle = query.trim().toLowerCase();
+  const prefixMatches: string[] = [];
+  const otherMatches: string[] = [];
+  values.forEach((value) => {
+    const index = value.toLowerCase().indexOf(needle);
+    if (index === -1) {
+      return;
+    }
+    (index === 0 ? prefixMatches : otherMatches).push(value);
+  });
+  const allMatches = prefixMatches.concat(otherMatches);
+  return { matches: allMatches.slice(0, limit), total: allMatches.length };
+};
